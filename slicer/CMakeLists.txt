@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 2.8.9)
+project(surface)
+find_package(VTK REQUIRED)
+include(${VTK_USE_FILE})
+file(GLOB_RECURSE _HDRS "*.h")
+file(GLOB_RECURSE _SRCS "*.cpp")
+add_library(surface ${_HDRS} ${_SRCS})
+target_link_libraries(surface ${VTK_LIBRARIES})
