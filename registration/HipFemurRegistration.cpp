@@ -19,6 +19,10 @@ HipRegistrationFemur::HipRegistrationFemur(const vtkSmartPointer<vtkPolyData> pI
         throw RegistrationException("Check your CT landmarks. Distance from the bone model is too large.");
     }*/
 
+	mAnteriorFemoralNeck = pAnteriorFemoralNeckCT;
+	mAnteriorDistalTrochanter = pAnteriorDistalTrochanterCT;
+	mLateralTrochanter = pLateralTrochanterCT;
+
     mSide = pSide;
 
     auto minCircle = m_data->getMinCircle(mAnteriorFemoralNeck, mAnteriorDistalTrochanter, mLateralTrochanter);

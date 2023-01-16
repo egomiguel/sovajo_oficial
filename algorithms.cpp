@@ -3638,9 +3638,9 @@ int main()
 
     RegistrationImageType::Pointer imageCT, imageMRI, imageOut;*/
 
-	//PelvisImplantMatch();
+	PelvisImplantMatch();
 
-	getPelvisPoint();
+	//getPelvisPoint();
 
 	/*auto pelvis = TestVTK::itkImageToSurface3D("D:\\Mega_Trabajo\\Pelvis\\Segmentation_Left.nrrd");
 	TestVTK::SavePolyData(pelvis, "D:\\Mega_Trabajo\\Pelvis\\Segmentation_Left.vtk");*/
