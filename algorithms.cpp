@@ -2403,24 +2403,24 @@ void getPelvisPoint()
     PointTypeITK anteriorAcetabulum, posteriorAcetabulum, superiorAcetabulum;
 
     ////////////////////////////////Left
-    /*anteriorAcetabulum = Registration::makeItkPoint(77.27, -7.34, 309.29);
+    anteriorAcetabulum = Registration::makeItkPoint(77.27, -7.34, 309.29);
     posteriorAcetabulum = Registration::makeItkPoint(77.27, 20.66, 303.29);
-    superiorAcetabulum = Registration::makeItkPoint(105.27, 10.66, 329.29);*/
+    superiorAcetabulum = Registration::makeItkPoint(105.27, 10.66, 329.29);
 
-    anteriorAcetabulum = Registration::makeItkPoint(-42.48, -3.12, 298.29);
+    /*anteriorAcetabulum = Registration::makeItkPoint(-42.48, -3.12, 298.29);
     posteriorAcetabulum = Registration::makeItkPoint(-50.48, 19.88, 299.29);
-    superiorAcetabulum = Registration::makeItkPoint(-73.48, -1.12, 334.29);
+    superiorAcetabulum = Registration::makeItkPoint(-73.48, -1.12, 334.29);*/
 
-    std::vector<cv::Point3d> landMark = { Point(-42.48, -3.12, 298.29), Point(-50.48, 19.88, 299.29), Point(-73.48, -1.12, 334.29) };
+    /*std::vector<cv::Point3d> landMark = { Point(-42.48, -3.12, 298.29), Point(-50.48, 19.88, 299.29), Point(-73.48, -1.12, 334.29) };
 
-	TestVTK::show(BoneVTK, landMark);
+	TestVTK::show(BoneVTK, landMark);*/
 
 
     PelvisRegistration* regis;
 
     try
     {
-        regis = new PelvisRegistration(BoneVTK, anteriorAcetabulum, posteriorAcetabulum, superiorAcetabulum, RegisterSide::RIGHT);
+        regis = new PelvisRegistration(BoneVTK, anteriorAcetabulum, posteriorAcetabulum, superiorAcetabulum, RegisterSide::LEFT);
     }
     catch (const std::exception& e)
     {
@@ -2430,8 +2430,9 @@ void getPelvisPoint()
 
     double error;
 
-    std::vector<RegistrationPointsHip> points = regis->getRegistrationPointPelvis(error);
-    std::vector < cv::Point3d > pointsList;
+	std::vector<PointTypeITK> verificationPointsITK;
+    std::vector<RegistrationPointsHip> points = regis->getRegistrationPointPelvis(verificationPointsITK, error);
+    std::vector <cv::Point3d > pointsList, verificationPoints;
 
     for (int i = 0; i < points.size(); i++)
     {
@@ -2449,8 +2450,14 @@ void getPelvisPoint()
 
     //writeListPoints(finalPoint, "Template_Pelvis_Left.json");
 
+	auto verificationPointTemp = ITKVectorToCV(verificationPointsITK);
+	for (int j = 0; j < verificationPointTemp.size(); j++)
+	{
+		verificationPoints.push_back(verificationPointTemp[j]);
+	}
 
     TestVTK::show(BoneVTK, pointsList);
+	TestVTK::show(BoneVTK, verificationPoints);
 }
 
 void RegistrationScale()
@@ -3640,7 +3647,7 @@ int main()
 
 	PelvisImplantMatch();
 
-	//getPelvisPoint();
+	getPelvisPoint();
 
 	/*auto pelvis = TestVTK::itkImageToSurface3D("D:\\Mega_Trabajo\\Pelvis\\Segmentation_Left.nrrd");
 	TestVTK::SavePolyData(pelvis, "D:\\Mega_Trabajo\\Pelvis\\Segmentation_Left.vtk");*/

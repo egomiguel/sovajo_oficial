@@ -9,7 +9,7 @@ class REGISTRATION_EXPORT PelvisRegistration: public Registration
 public:
     PelvisRegistration(const vtkSmartPointer<vtkPolyData> pImage, const PointTypeITK& pAnteriorAcetabulum, const PointTypeITK& pPosteriorAcetabulum, const PointTypeITK& pSuperiorAcetabulum, RegisterSide pSide);
     
-    std::vector<RegistrationPointsHip> getRegistrationPointPelvis(double& pError) const;
+    std::vector<RegistrationPointsHip> getRegistrationPointPelvis(std::vector<PointTypeITK>& pVerificationPoints, double& pError) const;
 
     bool RegistrationLandmarks(const PointTypeITK& pAnteriorAcetabulumCamera, const PointTypeITK& pPosteriorAcetabulumCamera, const PointTypeITK& pSuperiorAcetabulumCamera, double& error);
 

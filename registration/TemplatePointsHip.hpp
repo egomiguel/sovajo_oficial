@@ -14,6 +14,24 @@ public:
     cv::Point3d vectorSuperiorRight = cv::Point3d(-0.599889, -0.183797, 0.778686);
     cv::Point3d centerRight = cv::Point3d(-58.8204, 3.37146, 315.261);
 
+	std::vector<cv::Point3d> mTemplateVerificationPointsRight = {cv::Point3d(-48.6123, 18.6941, 300.283), 
+																cv::Point3d(-58.3135, 24.5931, 312.575), 
+																cv::Point3d(-67.9399, 15.4429, 330.74),
+																cv::Point3d(-73.2247, -10.8522, 329.656),
+																cv::Point3d(-72.1519, 4.02603, 328.316),
+																cv::Point3d(-53.6864, 4.47127, 326.665),
+																cv::Point3d(-54.885, -17.6214, 307.605),
+																cv::Point3d(-39.8734, -0.721529, 299.817)};
+
+	std::vector<cv::Point3d> mTemplateVerificationPointsLeft = {cv::Point3d(78.1907, 21.2905, 304.254),
+																cv::Point3d(88.1208, 28.1188, 314.642),
+																cv::Point3d(99.5846, 19.1861, 332.313),
+																cv::Point3d(106.841, -9.88206, 326.167),
+																cv::Point3d(104.863, 7.53005, 328.302),
+																cv::Point3d(85.5592, 5.35032, 329.122),
+																cv::Point3d(85.2404, -11.7619, 308.17),
+																cv::Point3d(72.6405, 2.48541, 301.034)};
+
     std::vector<std::vector<cv::Point3d>> mTemplateOfficialPointsLeft = { {cv::Point3d(84.5445, -10.5955, 305.29),
                                                                            cv::Point3d(81.1747, -7.43536, 303.191),
                                                                            cv::Point3d(80.36, -8.28004, 307.189)},
