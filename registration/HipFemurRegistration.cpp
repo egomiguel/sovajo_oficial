@@ -111,7 +111,7 @@ bool HipRegistrationFemur::MakeRegistration(const std::vector<itk::Point<double,
     return true;
 }
 
-std::vector<RegistrationPointsHip> HipRegistrationFemur::getRegistrationPointPosterolateral(double& pError) const
+std::vector<RegistrationPointsHip> HipRegistrationFemur::getRegistrationPointPosterolateral(std::vector<PointTypeITK>& pVerificationPoints, double& pError) const
 {
     std::vector<RegistrationPointsHip> result;
 
@@ -121,14 +121,17 @@ std::vector<RegistrationPointsHip> HipRegistrationFemur::getRegistrationPointPos
     TemplateHipFemurOfficial templateOffcicial;
 
     std::vector<std::vector<cv::Point3d>> myOfficialPoints;
+	std::vector<cv::Point3d> myVerification;
 
     if (mSide == RegisterSide::LEFT)
     {
         myOfficialPoints = templateOffcicial.mPosteroLateralLeft;
+		myVerification = templateOffcicial.mVerificationPosteroLateralLeft;
     }
     else
     {
         myOfficialPoints = templateOffcicial.mPosteroLateralRight;
+		myVerification = templateOffcicial.mVerificationPosteroLateralRight;
     }
 
     cv::Mat data = getTemplateAlignment(pError);
@@ -163,10 +166,24 @@ std::vector<RegistrationPointsHip> HipRegistrationFemur::getRegistrationPointPos
         result.push_back(RegistrationPointsHip(vectorTemp));
     }
 
+	for (int j = 0; j < myVerification.size(); j++)
+	{
+		cv::Mat transformPointMat = scale * (myRotation * (m_data->cvPointToMat(myVerification[j]))) + myTranslation;
+		cv::Point3d transformPoint = cv::Point3d(transformPointMat);
+		double myClosest[3];
+		double pnt[3] = { transformPoint.x, transformPoint.y, transformPoint.z };
+		implicitPolyDataDistance->EvaluateFunctionAndGetClosestPoint(pnt, myClosest);
+		PointTypeITK tempPoint;
+		tempPoint[0] = myClosest[0];
+		tempPoint[1] = myClosest[1];
+		tempPoint[2] = myClosest[2];
+		pVerificationPoints.push_back(tempPoint);
+	}
+
     return result;
 }
 
-std::vector<RegistrationPointsHip> HipRegistrationFemur::getRegistrationPointAnterolateral(double& pError) const
+std::vector<RegistrationPointsHip> HipRegistrationFemur::getRegistrationPointAnterolateral(std::vector<PointTypeITK>& pVerificationPoints, double& pError) const
 {
     std::vector<RegistrationPointsHip> result;
 
@@ -176,14 +193,17 @@ std::vector<RegistrationPointsHip> HipRegistrationFemur::getRegistrationPointAnt
     TemplateHipFemurOfficial templateOffcicial;
 
     std::vector<std::vector<cv::Point3d>> myOfficialPoints;
+	std::vector<cv::Point3d> myVerification;
 
     if (mSide == RegisterSide::LEFT)
     {
         myOfficialPoints = templateOffcicial.mAnteroLateralLeft;
+		myVerification = templateOffcicial.mVerificationAnteroLateralLeft;
     }
     else
     {
         myOfficialPoints = templateOffcicial.mAnteroLateralRight;
+		myVerification = templateOffcicial.mVerificationAnteroLateralRight;
     }
 
     cv::Mat data = getTemplateAlignment(pError);
@@ -218,10 +238,24 @@ std::vector<RegistrationPointsHip> HipRegistrationFemur::getRegistrationPointAnt
         result.push_back(RegistrationPointsHip(vectorTemp));
     }
 
+	for (int j = 0; j < myVerification.size(); j++)
+	{
+		cv::Mat transformPointMat = scale * (myRotation * (m_data->cvPointToMat(myVerification[j]))) + myTranslation;
+		cv::Point3d transformPoint = cv::Point3d(transformPointMat);
+		double myClosest[3];
+		double pnt[3] = { transformPoint.x, transformPoint.y, transformPoint.z };
+		implicitPolyDataDistance->EvaluateFunctionAndGetClosestPoint(pnt, myClosest);
+		PointTypeITK tempPoint;
+		tempPoint[0] = myClosest[0];
+		tempPoint[1] = myClosest[1];
+		tempPoint[2] = myClosest[2];
+		pVerificationPoints.push_back(tempPoint);
+	}
+
     return result;
 }
 
-std::vector<RegistrationPointsHip> HipRegistrationFemur::getRegistrationPointAnterior(double& pError) const
+std::vector<RegistrationPointsHip> HipRegistrationFemur::getRegistrationPointAnterior(std::vector<PointTypeITK>& pVerificationPoints, double& pError) const
 {
     std::vector<RegistrationPointsHip> result;
 
@@ -231,14 +265,17 @@ std::vector<RegistrationPointsHip> HipRegistrationFemur::getRegistrationPointAnt
     TemplateHipFemurOfficial templateOffcicial;
 
     std::vector<std::vector<cv::Point3d>> myOfficialPoints;
+	std::vector<cv::Point3d> myVerification;
 
     if (mSide == RegisterSide::LEFT)
     {
         myOfficialPoints = templateOffcicial.mAnteriorLeft;
+		myVerification = templateOffcicial.mVerificationAnteriorLeft;
     }
     else
     {
         myOfficialPoints = templateOffcicial.mAnteriorRight;
+		myVerification = templateOffcicial.mVerificationAnteriorRight;
     }
 
     cv::Mat data = getTemplateAlignment(pError);
@@ -272,6 +309,20 @@ std::vector<RegistrationPointsHip> HipRegistrationFemur::getRegistrationPointAnt
         }
         result.push_back(RegistrationPointsHip(vectorTemp));
     }
+
+	for (int j = 0; j < myVerification.size(); j++)
+	{
+		cv::Mat transformPointMat = scale * (myRotation * (m_data->cvPointToMat(myVerification[j]))) + myTranslation;
+		cv::Point3d transformPoint = cv::Point3d(transformPointMat);
+		double myClosest[3];
+		double pnt[3] = { transformPoint.x, transformPoint.y, transformPoint.z };
+		implicitPolyDataDistance->EvaluateFunctionAndGetClosestPoint(pnt, myClosest);
+		PointTypeITK tempPoint;
+		tempPoint[0] = myClosest[0];
+		tempPoint[1] = myClosest[1];
+		tempPoint[2] = myClosest[2];
+		pVerificationPoints.push_back(tempPoint);
+	}
 
     return result;
 }

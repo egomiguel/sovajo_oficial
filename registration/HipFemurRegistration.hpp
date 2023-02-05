@@ -9,11 +9,11 @@ class REGISTRATION_EXPORT HipRegistrationFemur: public Registration
 public:
     HipRegistrationFemur(const vtkSmartPointer<vtkPolyData> pImage, const PointTypeITK& pAnteriorFemoralNeckCT, const PointTypeITK& pAnteriorDistalTrochanterCT, const PointTypeITK& pLateralTrochanterCT, RegisterSide pSide);
     
-    std::vector<RegistrationPointsHip> getRegistrationPointPosterolateral(double& pError) const;
+    std::vector<RegistrationPointsHip> getRegistrationPointPosterolateral(std::vector<PointTypeITK>& pVerificationPoints, double& pError) const;
 
-    std::vector<RegistrationPointsHip> getRegistrationPointAnterolateral(double& pError) const;
+    std::vector<RegistrationPointsHip> getRegistrationPointAnterolateral(std::vector<PointTypeITK>& pVerificationPoints, double& pError) const;
 
-    std::vector<RegistrationPointsHip> getRegistrationPointAnterior(double& pError) const;
+    std::vector<RegistrationPointsHip> getRegistrationPointAnterior(std::vector<PointTypeITK>& pVerificationPoints, double& pError) const;
 
     bool RegistrationLandmarks(const PointTypeITK& pAnteriorFemoralNeckCamera, const PointTypeITK& pAnteriorDistalTrochanterCamera, const PointTypeITK& pLateralTrochanterCamera, double& error);
 

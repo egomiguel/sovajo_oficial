@@ -2695,30 +2695,30 @@ void HipFemoralRegistration()
 {
     vtkSmartPointer<vtkPolyData> hipRight, hipLeft;
 
-    hipLeft = TestVTK::ReadPolyData("D:\\3D_DICOM_DATA\\Person_2\\Left\\hip_left.vtk");
-    hipRight = TestVTK::ReadPolyData("D:\\3D_DICOM_DATA\\Person_2\\Right\\hip_right.vtk");
+    hipLeft = TestVTK::ReadPolyData("D:\\Mega_Trabajo\\Modo\\Left_Modo\\hip_left.vtk");
+    hipRight = TestVTK::ReadPolyData("D:\\Mega_Trabajo\\Modo\\Right_Modo\\hip_right.vtk");
 
     PointTypeITK anteriorFemoralNeck, anteriorDistalTrochanter, lateralTrochanter;
 
     ////////////////////////////////Left
-    anteriorFemoralNeck = Registration::makeItkPoint(136.967, 24.5223, 1692.7);
-    anteriorDistalTrochanter = Registration::makeItkPoint(126.765, 24.7585, 1656.73);
-    lateralTrochanter = Registration::makeItkPoint(164.665, 40.8757, 1683.65);
+    anteriorFemoralNeck = Registration::makeItkPoint(23.72, 47.1258, 127.53);
+    anteriorDistalTrochanter = Registration::makeItkPoint(18.19, 44.49, 92.25);
+    lateralTrochanter = Registration::makeItkPoint(61.9828, 55.54, 112.63);
 
     ///////////////////////////////////Right
-    /*anteriorFemoralNeck = Registration::makeItkPoint(-100.336, 27.7308, 1683.65);
-    anteriorDistalTrochanter = Registration::makeItkPoint(-90.4439, 28.7073, 1649.86);
-    lateralTrochanter = Registration::makeItkPoint(-131.317, 53.2631, 1667.59);*/
+    /*anteriorFemoralNeck = Registration::makeItkPoint(30.7806, -60.6593, 1149.39);
+    anteriorDistalTrochanter = Registration::makeItkPoint(33.015, -53.22, 1108.26);
+    lateralTrochanter = Registration::makeItkPoint(-7.67188, -42.89, 1137.5);*/
 
     HipRegistrationFemur regis(hipLeft, anteriorFemoralNeck, anteriorDistalTrochanter, lateralTrochanter, RegisterSide::LEFT);
 
     double error;
-
-    std::vector<RegistrationPointsHip> points = regis.getRegistrationPointPosterolateral(error);
+	std::vector<PointTypeITK> verificationPointsTemp;
+    std::vector<RegistrationPointsHip> points = regis.getRegistrationPointAnterior(verificationPointsTemp, error);
 
     std::cout << "Error: " << error << std::endl;
 
-    std::vector < cv::Point3d > pointsList;
+    std::vector < cv::Point3d > pointsList, verificationPoint;
 
     for (int i = 0; i < points.size(); i++)
     {
@@ -2732,8 +2732,16 @@ void HipFemoralRegistration()
         }
     }
 
+	std::vector<Point> temp = ITKVectorToCV(verificationPointsTemp);
 
+	for (int j = 0; j < temp.size(); j++)
+	{
+		verificationPoint.push_back(temp[j]);
+	}
+
+	std::vector < cv::Point3d > pp = {cv::Point3d(23.72, 47.1258, 127.53), cv::Point3d(18.19, 44.49, 92.25) , cv::Point3d(61.9828, 55.54, 112.63) };
     TestVTK::show(hipLeft, pointsList);
+	TestVTK::show(hipLeft, verificationPoint);
 }
 
 int getPivot(std::vector<int>& data, int initPos, int endPos)
@@ -3645,9 +3653,11 @@ int main()
 
     RegistrationImageType::Pointer imageCT, imageMRI, imageOut;*/
 
-	PelvisImplantMatch();
+	//PelvisImplantMatch();
 
-	getPelvisPoint();
+	//getPelvisPoint();
+
+	HipFemoralRegistration();
 
 	/*auto pelvis = TestVTK::itkImageToSurface3D("D:\\Mega_Trabajo\\Pelvis\\Segmentation_Left.nrrd");
 	TestVTK::SavePolyData(pelvis, "D:\\Mega_Trabajo\\Pelvis\\Segmentation_Left.vtk");*/
