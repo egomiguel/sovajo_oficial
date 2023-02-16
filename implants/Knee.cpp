@@ -265,7 +265,7 @@ void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point
     this->medialEpicondylePerp = epiHelp.getProjectionPoint(medialEpicondyle);
     this->ankleCenter = ankleCenter;
     this->pclCenter = pclCenter;
-    this->femurPoly = CleanFemur->GetOutput();
+	this->femurPoly = CleanFemur->GetOutput();
     this->tibiaPoly = CleanTibia->GetOutput();
     this->femurCartilage = cartilage;
     this->tibiaCartilage = cartilage;

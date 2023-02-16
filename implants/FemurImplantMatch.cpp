@@ -578,7 +578,7 @@ void savePoints(std::vector<Point> points, cv::Mat myRotation, std::string name)
     outfilePoint.close();
 }
 
-std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, PlaneID id, double distanceSide, double distanceTop, double angleLateral, double angleMedial, int amount) const
+std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, PlaneID id, double distanceSide, double distanceTop, double angleLateral, double angleMedial, int amount, bool posteriorLongCurve) const
 {
     std::vector<Point> projectedPoints;
     Point midPointPlane;
@@ -809,7 +809,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
     }
     else if (id == kPlaneA)
     {
-        getVerticesA(projectedPoints, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, amount);
+        getVerticesA(projectedPoints, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, amount, posteriorLongCurve);
     }
     else
     {
@@ -924,7 +924,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
     return hull;
 }
 
-void FemurImplantMatch::getVerticesA(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distance, int amount) const
+void FemurImplantMatch::getVerticesA(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distance, int amount, bool longCurve) const
 {
     float maxDist = 15;
     if (abs(distance) > maxDist)
@@ -1043,19 +1043,19 @@ void FemurImplantMatch::getVerticesA(const std::vector<Point>& points, const Poi
     bool latChange, medChange;
     std::pair<int, int> posLat, posMed;
 
-    latChange = getConcaveMainPoints(concaveLat, currentPlane, sagitalPlane, downPoint, 0, 1, mainLatPoints, posLat);
-    medChange = getConcaveMainPoints(concaveMed, currentPlane, sagitalPlane, downPoint, 0, 1, mainMedPoints, posMed);
+    latChange = getConcaveMainPoints(concaveLat, currentPlane, sagitalPlane, downPoint, 0, 1, mainLatPoints, posLat, 0.5);
+    medChange = getConcaveMainPoints(concaveMed, currentPlane, sagitalPlane, downPoint, 0, 1, mainMedPoints, posMed, 0.5);
 
     Point refDown;
     Plane extremeDownPlane;
     extremeDownPlane.init(vectorAP, downPoint);
     if (extremeDownPlane.getDistanceFromPoint(medDownPoint) > extremeDownPlane.getDistanceFromPoint(latDownPoint))
     {
-        refDown = medDownPoint;
+        refDown = longCurve ? medDownPoint : (medDownPoint + medTopPoint) / 2.;
     }
     else
     {
-        refDown = latDownPoint;
+        refDown = longCurve ? latDownPoint : (latDownPoint + latTopPoint) / 2.;
     }
 
     extremeDownPlane.movePlane(refDown);

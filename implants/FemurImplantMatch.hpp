@@ -34,7 +34,7 @@ public:
 
 	std::vector<Point> GetPointsNearPlane(PlaneID id, bool translateByCondyle = true, double distance = 0) const;
 
-    std::vector<PointTypeITK> GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, PlaneID id, double distanceSide = 0, double distanceTop = 1.0, double angleLateral = 10, double angleMedial = 15, int amount = 200) const;
+    std::vector<PointTypeITK> GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, PlaneID id, double distanceSide = 0, double distanceTop = 1.0, double angleLateral = 10, double angleMedial = 15, int amount = 200, bool posteriorLongCurve = false) const;
 
 	Point TransformImplantPointToBone(const Point& pPoint, bool translateByCondyle = true) const;
 
@@ -67,7 +67,7 @@ private:
 
     void getVerticesCDE(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Point& centerP1, const Point& centerP2, double distanceSide, double distanceTop, double angleLat, double angleMed, std::vector<Point>& vertices) const;
 
-    void getVerticesA(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distance, int amount) const;
+    void getVerticesA(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distance, int amount, bool longCurve) const;
 
     void getVerticesB(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distanceSide, double distanceTop, int amount) const;
 

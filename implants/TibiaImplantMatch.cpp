@@ -401,7 +401,7 @@ vtkSmartPointer<vtkPolyData> TibiaImplantMatch::GetCuttingTibia() const
     return tibiaClipper->GetOutput();
 }
 
-std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, double distance, double distancePcl, int amount) const
+std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, double distance, double distancePcl, double closeAngle, int amount) const
 {
     std::vector<PointTypeITK> hull;
     Plane myPlane = finalTransformPlane(implant.getTibiaPlane(), pTransformIn);
@@ -450,7 +450,17 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
     vectorTrans.normalice();
 
-    Point obliquePointLat = tibiaCenter + vectorAP + 1.2 * vectorTrans;
+	if (closeAngle > 1)
+	{
+		closeAngle = 1.0;
+	}
+
+	if (closeAngle < 0.1)
+	{
+		closeAngle = 0.1;
+	}
+
+    Point obliquePointLat = tibiaCenter + vectorAP + closeAngle * vectorTrans;
     Point obliquePointMed = tibiaCenter + vectorAP - 3.0 * vectorTrans;
     obliqueLatPlaneDown = myPlane.getPerpendicularPlane(tibiaCenter, obliquePointLat);
     obliqueMedPlaneDown = myPlane.getPerpendicularPlane(tibiaCenter, obliquePointMed);

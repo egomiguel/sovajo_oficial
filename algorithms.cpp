@@ -256,6 +256,7 @@ Knee CreateKneeFromFile_Numbers(const std::string& sourcePath)
     QString jsonPath = directory.filePath(files[0]);
     QString var;
     QFile file;
+
     file.setFileName(jsonPath);
     file.open(QIODevice::ReadOnly | QIODevice::Text);
     var = file.readAll();
@@ -306,14 +307,14 @@ Knee CreateKneeFromFile_Numbers(const std::string& sourcePath)
     Point ankleCenter = Knee::getComputeAnkleCenter(lateralAnkle, medialAnkle);
 
     Patella myPatella;
-    myPatella.init(kneeCap, patellaLat, patellaMed, patellaInf, patellaPoly);
+    //myPatella.init(kneeCap, patellaLat, patellaMed, patellaInf, patellaPoly);
 
     Knee knee;
     /*knee.init(hipCenter, anteriorCortex, femurKneeCenter, lateralEpicondyle, medialEpicondyle, lateralCondyle, medialCondyle,
         lateralPlateau, medialPlateau, tibiaKneeCenter, tibiaTubercle, tibiaPCL, ankleCenter, myPatella, femurPoly, tibiaPoly);*/
 
     knee.init(hipCenter, anteriorCortex, femurKneeCenter, lateralEpicondyle, medialEpicondyle, /*lateralPlateau, 
-        medialPlateau,*/ tibiaKneeCenter, tibiaTubercle, tibiaPCL, ankleCenter, myPatella, femurPoly, tibiaPoly, KneeSideEnum::KLeft);
+        medialPlateau,*/ tibiaKneeCenter, tibiaTubercle, tibiaPCL, ankleCenter, myPatella, femurPoly, tibiaPoly, KneeSideEnum::KRight);
 
     return knee;
 }
@@ -973,28 +974,29 @@ void MatchEasy()
 
     FemurImplantMatch femurImplantMatch;*/
 
-    std::string femurImplantStr = "C:\\Users\\miguel\\Downloads\\model\\6\\femur\\right";
-    std::string tibiaImplantStr = "C:\\Users\\miguel\\Downloads\\model\\6\\tibia\\Right\\11";
-    std::string patellaImplantStr = "D:\\3D_DICOM_DATA\\patella_Implant";
+    std::string femurImplantStr = "D:\\Mega_Trabajo\\Knee_Implant\\femur\\right";
+    std::string tibiaImplantStr = "D:\\Mega_Trabajo\\Knee_Implant\\tibia";
+    //std::string patellaImplantStr = "D:\\3D_DICOM_DATA\\patella_Implant";
 
-    Knee kneeLeftModo = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Modo\\Right_Modo");
-    Knee kneeLeft = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Right");
+    /*Knee kneeLeftModo = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Modo\\Right_Modo");
+    Knee kneeLeft = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Right");*/
 
-    Knee myKnee = kneeLeftModo;
+    Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores");
 
     vtkSmartPointer<vtkPolyData> polyTibiaImplant, polyPatellaImplant;
 
     FemurImplant femurImplant = CreateFemurImplantFromFile(femurImplantStr);
     TibiaImplant tibiaImplant = CreateTibiaImplantFromFile(tibiaImplantStr, polyTibiaImplant);
-    PatellaImplant patellaImplant = CreatePatellaImplantFromFile(patellaImplantStr, polyPatellaImplant);
+    //PatellaImplant patellaImplant = CreatePatellaImplantFromFile(patellaImplantStr, polyPatellaImplant);
 
     FemurImplantMatch femurImplantMatch;
     TibiaImplantMatch tibiaImplantMatch;
-    PatellaImplantMatch patellaImplantMatch;
+    //PatellaImplantMatch patellaImplantMatch;
 
     femurImplantMatch.init(femurImplant, myKnee);
     tibiaImplantMatch.init(tibiaImplant, myKnee);
-    patellaImplantMatch.init(patellaImplant, myKnee);
+
+    //patellaImplantMatch.init(patellaImplant, myKnee);
     /*vtkSmartPointer<vtkPolyData> newImplant = TestVTK::TransformPoly(polyPatellaImplant, patellaImplantMatch.GetRotationMatrix(), patellaImplantMatch.GetTranslationMatrix());
     std::vector<vtkSmartPointer<vtkPolyData>> polyList;
     polyList.push_back(newImplant);
@@ -1005,14 +1007,19 @@ void MatchEasy()
     transformIn->SetMatrix(femurImplantMatch.GetRotationMatrix());
     transformIn->SetOffset(femurImplantMatch.GetTranslationMatrix());
 
+	/*transformIn->SetMatrix(tibiaImplantMatch.GetRotationMatrix());
+	transformIn->SetOffset(tibiaImplantMatch.GetTranslationMatrix());*/
+
     std::vector<PointTypeITK> hull1;
 
     itk::Rigid3DTransform<double>::Pointer transformOut = itk::VersorRigid3DTransform<double>::New();
 
     std::vector<cv::Point3d> tPoints;
+
     try
     {
-        hull1 = femurImplantMatch.GetHullPoints(transformIn, transformOut, FemurImplantMatch::kPlaneD);
+        hull1 = femurImplantMatch.GetHullPoints(transformIn, transformOut, FemurImplantMatch::kPlaneA);
+		//hull1 = tibiaImplantMatch.GetHullPoints(transformIn, transformOut, 1, 1, 0.1);
 
         for (int i = 0; i < hull1.size(); i++)
         {
@@ -1029,17 +1036,17 @@ void MatchEasy()
         std::cout << e.what() << std::endl;
     }
 
-    PatellaImplantMatchInfo matchInfo;
-    matchInfo.init(patellaImplant, myKnee, transformIn);
+    //PatellaImplantMatchInfo matchInfo;
+    //matchInfo.init(patellaImplant, myKnee, transformIn);
 
-    std::cout << "Thickness1: " << matchInfo.getCutThickness() << std::endl;
-    std::cout << "Thickness2: " << patellaImplant.getThickness() << std::endl;
-    std::cout << "ML Angle: " << matchInfo.getAngleML() << std::endl;
-    std::cout << "SI Angle: " << matchInfo.getAngleSI() << std::endl;
-    std::cout << "Cartilage before : " << myKnee.getFemurCartilage() << std::endl;
+    //std::cout << "Thickness1: " << matchInfo.getCutThickness() << std::endl;
+    //std::cout << "Thickness2: " << patellaImplant.getThickness() << std::endl;
+    //std::cout << "ML Angle: " << matchInfo.getAngleML() << std::endl;
+    //std::cout << "SI Angle: " << matchInfo.getAngleSI() << std::endl;
+    //std::cout << "Cartilage before : " << myKnee.getFemurCartilage() << std::endl;
 
-    vtkSmartPointer<vtkPolyData> polyNew1 = TestVTK::CreatePolyLine(hull1);
-
+    //vtkSmartPointer<vtkPolyData> polyNew1 = TestVTK::CreatePolyLine(hull1);
+	//TestVTK::show(myKnee.GetFemurPoly());
     TestVTK::show(myKnee.GetFemurPoly(), tPoints, true);
 }
 
@@ -3657,7 +3664,7 @@ int main()
 
 	//getPelvisPoint();
 
-	HipFemoralRegistration();
+	//HipFemoralRegistration();
 
 	/*auto pelvis = TestVTK::itkImageToSurface3D("D:\\Mega_Trabajo\\Pelvis\\Segmentation_Left.nrrd");
 	TestVTK::SavePolyData(pelvis, "D:\\Mega_Trabajo\\Pelvis\\Segmentation_Left.vtk");*/
@@ -3699,7 +3706,7 @@ int main()
     SegmentImageType::Pointer fillImage = Test::FillHole<SegmentImageType>(myImage);
     Test::SaveImage<SegmentImageType>(fillImage, "test_bone_willian");*/
 
-    //MatchEasy();
+    MatchEasy();
 
     //LS_Registration_Femur();
 
