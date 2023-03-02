@@ -143,7 +143,7 @@ FemurImplantMatch::FemurImplantMatch()
 {
     isInit = false;
 }
-void FemurImplantMatch::init(const FemurImplant& implant, const Knee& knee)
+void FemurImplantMatch::init(const FemurImplant& implant, const Knee& knee, bool useKneeCenterAlignment)
 {
     if (isInit == true)
     {
@@ -151,6 +151,7 @@ void FemurImplantMatch::init(const FemurImplant& implant, const Knee& knee)
     }
     this->implant = implant;
     this->knee = knee;
+	this->useKneeCenterAlignment = useKneeCenterAlignment;
     getRotationMatrix();
     bool result = getTranslationMatrix();
     if (result == false)
@@ -196,13 +197,23 @@ void FemurImplantMatch::getRotationMatrix()
 
 bool FemurImplantMatch::getTranslationMatrix()
 {
+	Point tCenter;
+	if (useKneeCenterAlignment = true)
+	{
+		tCenter = knee.getFemurKneeCenter();
+	}
+	else
+	{
+		tCenter = (knee.getLateralEpicondyle() + knee.getMedialEpicondyle()) / 2.;
+	}
+
     cv::Mat kneeNormalVectorPlaneA = rotationMatrix * implant.getPlaneA().getNormalVectorMat();
     Plane kneePlaneA;
     kneePlaneA.init(Point(kneeNormalVectorPlaneA), knee.getMoveCondyle(implant.getImplantInfo()));
 
     cv::Mat kneeNormalVectorMidPlane = rotationMatrix * implant.getMidPlane().getNormalVectorMat();
     Plane kneeMidPlane;
-    kneeMidPlane.init(Point(kneeNormalVectorMidPlane), knee.getFemurKneeCenter());
+    kneeMidPlane.init(Point(kneeNormalVectorMidPlane), tCenter);
 
     cv::Mat kneeNormalVectorPlaneC = rotationMatrix * implant.getPlaneC().getNormalVectorMat();
     Plane kneePlaneC;
@@ -237,13 +248,23 @@ bool FemurImplantMatch::getTranslationMatrix()
 
 bool FemurImplantMatch::getTranslationMatrixByCortex()
 {
+	Point tCenter;
+	if (useKneeCenterAlignment = true)
+	{
+		tCenter = knee.getFemurKneeCenter();
+	}
+	else
+	{
+		tCenter = (knee.getLateralEpicondyle() + knee.getMedialEpicondyle()) / 2.;
+	}
+
     cv::Mat kneeNormalVectorPlaneE = rotationMatrix * implant.getPlaneE().getNormalVectorMat();
     Plane kneePlaneE;
     kneePlaneE.init(Point(kneeNormalVectorPlaneE), knee.getAnteriorCortex());
 
     cv::Mat kneeNormalVectorMidPlane = rotationMatrix * implant.getMidPlane().getNormalVectorMat();
     Plane kneeMidPlane;
-    kneeMidPlane.init(Point(kneeNormalVectorMidPlane), knee.getFemurKneeCenter());
+    kneeMidPlane.init(Point(kneeNormalVectorMidPlane), tCenter);
 
     cv::Mat kneeNormalVectorPlaneC = rotationMatrix * implant.getPlaneC().getNormalVectorMat();
     Plane kneePlaneC;

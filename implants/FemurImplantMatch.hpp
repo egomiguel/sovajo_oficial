@@ -22,7 +22,7 @@ public:
 
 	FemurImplantMatch();
 
-	void init(const FemurImplant& implant, const Knee& knee);
+	void init(const FemurImplant& implant, const Knee& knee, bool useKneeCenterAlignment = true);
 
 	Plane GetPlane(PlaneID id, bool translateByCondyle = true) const;
 
@@ -50,6 +50,7 @@ private:
 	cv::Mat translationMatrix;
 	cv::Mat translationMatrixByCortex;
 	bool isInit;
+	bool useKneeCenterAlignment;
 
 	void getRotationMatrix();
 

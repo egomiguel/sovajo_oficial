@@ -974,14 +974,14 @@ void MatchEasy()
 
     FemurImplantMatch femurImplantMatch;*/
 
-    std::string femurImplantStr = "D:\\Mega_Trabajo\\Knee_Implant\\femur\\right";
-    std::string tibiaImplantStr = "D:\\Mega_Trabajo\\Knee_Implant\\tibia";
+    std::string femurImplantStr = "D:\\sovajo\\Errores\\20230221\\Femur_Implant";
+    std::string tibiaImplantStr = "D:\\sovajo\\Errores\\20230221\\Tibia_Implant";
     //std::string patellaImplantStr = "D:\\3D_DICOM_DATA\\patella_Implant";
 
     /*Knee kneeLeftModo = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Modo\\Right_Modo");
     Knee kneeLeft = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Right");*/
 
-    Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores");
+    Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\20230221");
 
     vtkSmartPointer<vtkPolyData> polyTibiaImplant, polyPatellaImplant;
 
@@ -1004,11 +1004,11 @@ void MatchEasy()
 
     itk::Rigid3DTransform<double>::Pointer transformIn = itk::VersorRigid3DTransform<double>::New();
 
-    transformIn->SetMatrix(femurImplantMatch.GetRotationMatrix());
-    transformIn->SetOffset(femurImplantMatch.GetTranslationMatrix());
+    /*transformIn->SetMatrix(femurImplantMatch.GetRotationMatrix());
+    transformIn->SetOffset(femurImplantMatch.GetTranslationMatrix());*/
 
-	/*transformIn->SetMatrix(tibiaImplantMatch.GetRotationMatrix());
-	transformIn->SetOffset(tibiaImplantMatch.GetTranslationMatrix());*/
+	transformIn->SetMatrix(tibiaImplantMatch.GetRotationMatrix());
+	transformIn->SetOffset(tibiaImplantMatch.GetTranslationMatrix());
 
     std::vector<PointTypeITK> hull1;
 
@@ -1018,8 +1018,9 @@ void MatchEasy()
 
     try
     {
-        hull1 = femurImplantMatch.GetHullPoints(transformIn, transformOut, FemurImplantMatch::kPlaneA);
-		//hull1 = tibiaImplantMatch.GetHullPoints(transformIn, transformOut, 1, 1, 0.1);
+        //hull1 = femurImplantMatch.GetHullPoints(transformIn, transformOut, FemurImplantMatch::kPlaneA);
+		hull1 = tibiaImplantMatch.GetHullPoints(transformIn, transformOut);
+		std::cout << transformIn << std::endl;
 
         for (int i = 0; i < hull1.size(); i++)
         {
@@ -1047,7 +1048,7 @@ void MatchEasy()
 
     //vtkSmartPointer<vtkPolyData> polyNew1 = TestVTK::CreatePolyLine(hull1);
 	//TestVTK::show(myKnee.GetFemurPoly());
-    TestVTK::show(myKnee.GetFemurPoly(), tPoints, true);
+    TestVTK::show(myKnee.GetTibiaPoly(), tPoints, true);
 }
 
 void executeBalance()
@@ -3656,6 +3657,27 @@ int main()
 
     pig = "D:\\3D_DICOM_DATA\\Pig_Cerdo\\Pig_Right_2\\Tibia.nrrd";
 
+	std::string imageHoleStr = "D:\\Mega_Trabajo\\Person_2\\Raw_Right_Femur_Seg.nrrd";
+	std::string imageHoleStr2 = "D:\\Mega_Trabajo\\Person_2\\Femur_Right_very_smooth.nrrd";
+
+	SegmentImageType::Pointer imageHole;
+	Test::readImage<SegmentImageType>(imageHoleStr2, imageHole);
+
+	//auto close1 = Test::CloseImage3(imageHole);
+	auto close1 = Test::FillHole<SegmentImageType>(imageHole);
+
+	Test::SaveImage<SegmentImageType>(close1, "D:\\Mega_Trabajo\\Person_2\\close2.nrrd");
+
+	//TestVTK::SavePolyData(close1, "D:\\Mega_Trabajo\\Person_2\\close1.vtk");
+
+	/*
+	Test::SaveImage<SegmentImageType>(close1, "D:\\Mega_Trabajo\\Person_2\\close1.nrrd");
+
+	Test::CloseImage2(imageHole);
+
+	Test::SaveImage<SegmentImageType>(imageHole, "D:\\Mega_Trabajo\\Person_2\\close2.nrrd");*/
+
+
     /*SegmentImageType::Pointer myImage;
 
     RegistrationImageType::Pointer imageCT, imageMRI, imageOut;*/
@@ -3706,7 +3728,7 @@ int main()
     SegmentImageType::Pointer fillImage = Test::FillHole<SegmentImageType>(myImage);
     Test::SaveImage<SegmentImageType>(fillImage, "test_bone_willian");*/
 
-    MatchEasy();
+    //MatchEasy();
 
     //LS_Registration_Femur();
 
@@ -4131,7 +4153,7 @@ std::cout << "angle: " << angle << std::endl;*/
 
    std::cout << a1 * a2 * a3 << std::endl;*/
 
-
+	std::cout << "Finish .... press some letter" <<std::endl;
     char cc;
     std::cin >> cc;
     return EXIT_SUCCESS;

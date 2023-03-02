@@ -455,12 +455,12 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		closeAngle = 1.0;
 	}
 
-	if (closeAngle < 0.1)
+	if (closeAngle < 0.05)
 	{
-		closeAngle = 0.1;
+		closeAngle = 0.05;
 	}
 
-    Point obliquePointLat = tibiaCenter + vectorAP + closeAngle * vectorTrans;
+    Point obliquePointLat = tibiaCenter + vectorAP + 2.0 * closeAngle * vectorTrans;
     Point obliquePointMed = tibiaCenter + vectorAP - 3.0 * vectorTrans;
     obliqueLatPlaneDown = myPlane.getPerpendicularPlane(tibiaCenter, obliquePointLat);
     obliqueMedPlaneDown = myPlane.getPerpendicularPlane(tibiaCenter, obliquePointMed);
@@ -482,6 +482,8 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
     vtkSmartPointer<vtkPolyData> contourMax = ImplantTools::getMaxContour(knee.GetTibiaPoly(), myPlane.getNormalVector(), myPlane.getPoint());
     vtkSmartPointer<vtkPoints> vtkMyPoints = contourMax->GetPoints();
     int tVtkPointSize = vtkMyPoints->GetNumberOfPoints();
+
+	//ImplantTools::show(contourMax, knee.GetTibiaPoly());
 
     std::vector<Point> contourPoints;
 
@@ -581,6 +583,9 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
         }
     }
 
+	//ImplantTools::show(contourMax, contourMax);
+	//ImplantTools::show(contourMax, pclPoints);
+
     if (pclPoints.size() < 10)
     {
         throw ImplantExceptionCode::NOT_ENOUGH_POINTS_ON_PCL_BORDER;
@@ -629,6 +634,8 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
         cv::Mat tempMat = rotationPoly.inv() * temp.ToMatPoint();
         hullConcaveTemp.push_back(Point(tempMat));
     }
+
+	//ImplantTools::show(contourMax, hullConcaveTemp);
 
     int nearPos = average - 1;
     double reverseDistance = ImplantTools::getDistanceBetweenPoints(hullConcaveTemp[nearPos], beginTop, true);
@@ -871,6 +878,8 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
             std::reverse(finalSplinePoints.begin(), finalSplinePoints.end());
         }
     }
+
+	//ImplantTools::show(contourMax, finalSplinePoints);
 
     hull = increaseVectorToAmount(finalSplinePoints, amount);
 
