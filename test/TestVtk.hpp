@@ -908,7 +908,7 @@ namespace TestVTK
         return contour;
     }
 
-    vtkSmartPointer<vtkPolyData> CreateSphereTest(const cv::Point3d& pPoint)
+    vtkSmartPointer<vtkPolyData> CreateSphereTest(const cv::Point3d& pPoint, float radius = 1.)
     {
         double pnt[3];
         pnt[0] = pPoint.x;
@@ -917,7 +917,7 @@ namespace TestVTK
 
         vtkNew<vtkSphereSource> sphere;
         sphere->SetCenter(pnt);
-        sphere->SetRadius(10);
+        sphere->SetRadius(radius);
         sphere->Update();
 
         return sphere->GetOutput();

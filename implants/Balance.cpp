@@ -67,6 +67,8 @@ void Balance::init(const Knee& pKnee, const FemurImplant& pFemurImplant, const T
     PlaneD = TransformImplantPlaneToBone(pFemurImplant.getPlaneD(), pImplantToBoneFemurTransform);
     PlaneD.reverseByPoint(posteriorPoint);
 
+	PlaneMid = TransformImplantPlaneToBone(pFemurImplant.getMidPlane(), pImplantToBoneFemurTransform);
+
     PlaneTibia = TransformImplantPlaneToBone(pTibiaImplant.getTibiaPlane(), pImplantToBoneTibiaTransform);
     PlaneTibia.reverseByPoint(knee_.getAnkleCenter(), false);
 
@@ -612,6 +614,27 @@ vtkSmartPointer<vtkPolyData> Balance::ComputeNewPolyFemur(const itk::Rigid3DTran
     femurPolyCut = femurClipper->GetOutput();
 
     return femurPolyCut;
+}
+
+BalanceInfo Balance::distanceByAngleFemurImplantToTibiaPlane() const
+{
+	Point midPlaneVector = transformFemurVectorToCamera(PlaneMid.getNormalVector());
+	Point midPlanePoint = transformFemurPointToCamera(PlaneMid.getPoint());
+	Plane implantMidPlane;
+	implantMidPlane.init(midPlaneVector, midPlanePoint);
+
+	Point latEpicondyle = transformFemurPointToCamera(knee_.getLateralEpicondyle());
+	Point medEpicondyle = transformFemurPointToCamera(knee_.getMedialEpicondyle());
+
+	vtkSmartPointer<vtkPolyData> poly = TransformPolyFemurToCamera(femurImplantPoly);
+
+	implantMidPlane.reverseByPoint(latEpicondyle);
+
+	auto latData = ImplantTools::GetDistancePlaneToSurface(poly, PlaneTibia, implantMidPlane);
+	implantMidPlane.reverse();
+	auto medData = ImplantTools::GetDistancePlaneToSurface(poly, PlaneTibia, implantMidPlane);
+
+	return BalanceInfo(latData.first, medData.first);
 }
 
 BalanceInfo Balance::distanceByAngleAfterResectionBone(const Plane& pTibia, const vtkSmartPointer<vtkPolyData> pFemurPoly, double toolSize) const

@@ -86,6 +86,9 @@
 
 #include "CheckImageRod/CheckImageRod.hpp"
 
+#include <vtkPlane.h>
+#include <vtkDistancePolyDataFilter.h>
+
 
 std::string dicom = "C:\\DICOM\\dcm2";
 std::string wFemoralDir = "C:\\DICOM\\femur";
@@ -3645,6 +3648,16 @@ int main()
     //TestHullPoints();
     //Test30PointsVTK();
 
+	auto sphere1 = TestVTK::CreateSphereTest(cv::Point3d(0, 1, 0));
+	Plane myPlane;
+	myPlane.init(Point(1, 0, 0), Point(2, 0, 0));
+
+	std::pair<double, Point> result = ImplantTools::GetDistancePlaneToSurface(sphere1, myPlane);
+
+	std::cout << "Distancia1: " << result.first << ",  "<< result.second<< std::endl;
+
+
+	
 
     std::string path, pig, pathHoles;
     path = "D:\\work\\Varilla\\split_image.nrrd";
@@ -3660,13 +3673,13 @@ int main()
 	std::string imageHoleStr = "D:\\Mega_Trabajo\\Person_2\\Raw_Right_Femur_Seg.nrrd";
 	std::string imageHoleStr2 = "D:\\Mega_Trabajo\\Person_2\\Femur_Right_very_smooth.nrrd";
 
-	SegmentImageType::Pointer imageHole;
-	Test::readImage<SegmentImageType>(imageHoleStr2, imageHole);
+	//SegmentImageType::Pointer imageHole;
+	//Test::readImage<SegmentImageType>(imageHoleStr2, imageHole);
 
-	//auto close1 = Test::CloseImage3(imageHole);
-	auto close1 = Test::FillHole<SegmentImageType>(imageHole);
+	////auto close1 = Test::CloseImage3(imageHole);
+	//auto close1 = Test::FillHole<SegmentImageType>(imageHole);
 
-	Test::SaveImage<SegmentImageType>(close1, "D:\\Mega_Trabajo\\Person_2\\close2.nrrd");
+	//Test::SaveImage<SegmentImageType>(close1, "D:\\Mega_Trabajo\\Person_2\\close2.nrrd");
 
 	//TestVTK::SavePolyData(close1, "D:\\Mega_Trabajo\\Person_2\\close1.vtk");
 

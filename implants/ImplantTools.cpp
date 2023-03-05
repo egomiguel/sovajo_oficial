@@ -982,6 +982,39 @@ vtkIdType ImplantTools::GetNearestPoints(const vtkSmartPointer<vtkPolyData> poly
     return nearPoint;
 }
 
+std::pair<double, Point> ImplantTools::GetDistancePlaneToSurface(const vtkSmartPointer<vtkPolyData> poly, const Plane& pPlane, const Plane& pUseOneSide)
+{
+	double distance = -1;
+	double temp;
+	Point closest;
+	vtkSmartPointer<vtkPoints> points = poly->GetPoints();
+	vtkIdType tSize = points->GetNumberOfPoints();
+
+	for (int i = 0; i < tSize; i++)
+	{
+		double pnt[3];
+		points->GetPoint(i, pnt);
+
+		if (pUseOneSide.getIsInit() == true)
+		{
+			if (pUseOneSide.eval(pnt) < 0)
+			{
+				continue;
+			}
+		}
+
+		temp = pPlane.getDistanceFromPoint(Point(pnt[0], pnt[1], pnt[2]));
+
+		if (distance < 0 || distance > temp)
+		{
+			distance = temp;
+			closest = Point(pnt[0], pnt[1], pnt[2]);
+		}
+	}
+
+	return std::make_pair(distance, closest);
+}
+
 vtkIdType ImplantTools::GetNearestPoints(const vtkSmartPointer<vtkPolyData> poly, const Line& pLine, const Plane& pPlane1, const Plane& pPlane2)
 {
     double distance = -1;

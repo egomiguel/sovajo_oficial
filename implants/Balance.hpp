@@ -62,6 +62,8 @@ public:
 
     BalanceInfo distanceByAngleAfterResectionBone(const Plane& pTibia, const vtkSmartPointer<vtkPolyData> pFemurPoly, double toolSize = 0) const;
 
+	BalanceInfo distanceByAngleFemurImplantToTibiaPlane() const;
+
     Plane ComputeNewPlaneTibia(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTibiaTransform);
 
     vtkSmartPointer<vtkPolyData> ComputeNewPolyFemur(const itk::Rigid3DTransform<>::Pointer pImplantToBoneFemurTransform);
@@ -97,7 +99,7 @@ private:
 
     bool isInit;
 
-    Plane PlaneA, PlaneB, PlaneC, PlaneD, PlaneTibia;
+    Plane PlaneA, PlaneB, PlaneC, PlaneD, PlaneMid, PlaneTibia;
 
     cv::Mat femurTransformCtToMarker, tibiaTransformCtToMarker, femurTransformMarkerToCamera, tibiaTransformMarkerToCamera;
 
