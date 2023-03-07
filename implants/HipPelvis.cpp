@@ -84,7 +84,18 @@ Point HipPelvis::getPelvisVectorInfSup() const
     Point vector = getPelvisVectorASIS().cross(getPelvisVectorAP());
     vector.normalice();
     return vector;
+}
 
+Point HipPelvis::getPelvisVectorLateralASIS() const
+{
+	if (mSide == PelvisSide::RIGHT_SIDE)
+	{
+		return getPelvisVectorASIS();
+	}
+	else
+	{
+		return -getPelvisVectorASIS();
+	}
 }
 
 Point HipPelvis::getFemurVectorLatMed(const Point& pCenterOfRotation) const

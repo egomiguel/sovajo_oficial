@@ -18,6 +18,7 @@ public:
 
     Point getMidASIS() const;
     Point getPelvisVectorASIS() const;
+	Point getPelvisVectorLateralASIS() const;
     Point getPelvisVectorAP() const;
     Point getPelvisVectorInfSup() const;
 

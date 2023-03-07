@@ -14,13 +14,19 @@ public:
 
     void init(const HipPelvis& pPelvis, const HipPelvisCupImplant& pImplant, const Point& pHipCenterOfRotation);
 
-	itk::Rigid3DTransform<>::Pointer getTransform(double pAbductionAngle = 40, double pAnteversionAngle = 20);
+	itk::Rigid3DTransform<>::Pointer getTransform(double pAbductionAngle = 40, double pAnteversionAngle = 20) const;
 
-	double getCupInclination(const itk::Rigid3DTransform<>::Pointer pTransform);
+	double getCupInclination(const itk::Rigid3DTransform<>::Pointer pTransform) const;
 
-	double getCutVersion(const itk::Rigid3DTransform<>::Pointer pTransform);
+	double getCutVersion(const itk::Rigid3DTransform<>::Pointer pTransform) const;
 
-    void GetRobotTransform(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut);
+	double getCupShiftSuperior(const itk::Rigid3DTransform<>::Pointer pTransform) const;
+
+	double getCupShiftLateral(const itk::Rigid3DTransform<>::Pointer pTransform) const;
+
+	double getCupShiftAnterior(const itk::Rigid3DTransform<>::Pointer pTransform) const;
+
+    void GetRobotTransform(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut) const;
 
 private:
     HipPelvis mPelvis;
