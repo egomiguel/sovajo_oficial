@@ -23,6 +23,12 @@ namespace ImplantTools
         bool isFine = false;
     };
 
+	struct PolyConstraintPoint
+	{
+		Point a, b;
+		bool putConstraid = false;
+	};
+
     cv::Mat GetRotateZ(const Point& vector);
 
     cv::Mat GetRotateY(const Point& vector);
@@ -58,9 +64,9 @@ namespace ImplantTools
 
     Point getLocalMax(const std::vector<Point>& pPoints, const Plane& onPlane, const Point& vectorY, int degree = 7);
 
-    Poly polyFit(const std::list<Point>& pPoints, const cv::Mat& pTransformXY, int order);
+    Poly polyFit(const std::list<Point>& pPoints, const cv::Mat& pTransformXY, int order, PolyConstraintPoint constraint);
 
-    Poly polyFit(const std::vector<Point>& pPoints, const cv::Mat& pTransformXY, int order);
+    Poly polyFit(const std::vector<Point>& pPoints, const cv::Mat& pTransformXY, int order, PolyConstraintPoint constraint);
 
     vtkSmartPointer<vtkPolyData> getMaxContour(const vtkSmartPointer<vtkPolyData> polyData, const Point& pNormal, const Point& pPoint);
 

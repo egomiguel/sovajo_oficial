@@ -246,7 +246,7 @@ Knee CreateKneeFromFile(const std::string& sourcePath)
     return knee;
 }
 
-Knee CreateKneeFromFile_Numbers(const std::string& sourcePath)
+Knee CreateKneeFromFile_Numbers(const std::string& sourcePath, KneeSideEnum pSide = KneeSideEnum::KRight)
 {
     QDir directory(QString::fromStdString(sourcePath));
     QStringList files = directory.entryList(QStringList() << "*.json" << "*.JSON", QDir::Files);
@@ -317,7 +317,7 @@ Knee CreateKneeFromFile_Numbers(const std::string& sourcePath)
         lateralPlateau, medialPlateau, tibiaKneeCenter, tibiaTubercle, tibiaPCL, ankleCenter, myPatella, femurPoly, tibiaPoly);*/
 
     knee.init(hipCenter, anteriorCortex, femurKneeCenter, lateralEpicondyle, medialEpicondyle, /*lateralPlateau, 
-        medialPlateau,*/ tibiaKneeCenter, tibiaTubercle, tibiaPCL, ankleCenter, myPatella, femurPoly, tibiaPoly, KneeSideEnum::KRight);
+        medialPlateau,*/ tibiaKneeCenter, tibiaTubercle, tibiaPCL, ankleCenter, myPatella, femurPoly, tibiaPoly, pSide);
 
     return knee;
 }
@@ -977,14 +977,14 @@ void MatchEasy()
 
     FemurImplantMatch femurImplantMatch;*/
 
-    std::string femurImplantStr = "D:\\sovajo\\Errores\\20230221\\Femur_Implant";
-    std::string tibiaImplantStr = "D:\\sovajo\\Errores\\20230221\\Tibia_Implant";
+    std::string femurImplantStr = "D:\\sovajo\\Errores\\Error3\\Femur_Implant";
+    std::string tibiaImplantStr = "D:\\sovajo\\Errores\\Error3\\Tibia_Implant";
     //std::string patellaImplantStr = "D:\\3D_DICOM_DATA\\patella_Implant";
 
     /*Knee kneeLeftModo = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Modo\\Right_Modo");
     Knee kneeLeft = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Right");*/
 
-    Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\20230221");
+    Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error3", KneeSideEnum::KLeft);
 
     vtkSmartPointer<vtkPolyData> polyTibiaImplant, polyPatellaImplant;
 
@@ -1017,7 +1017,7 @@ void MatchEasy()
 
     itk::Rigid3DTransform<double>::Pointer transformOut = itk::VersorRigid3DTransform<double>::New();
 
-    std::vector<cv::Point3d> tPoints;
+    std::vector<cv::Point3d> tPoints, tPoints2;
 
     try
     {
@@ -1052,6 +1052,11 @@ void MatchEasy()
     //vtkSmartPointer<vtkPolyData> polyNew1 = TestVTK::CreatePolyLine(hull1);
 	//TestVTK::show(myKnee.GetFemurPoly());
     TestVTK::show(myKnee.GetTibiaPoly(), tPoints, true);
+
+	tPoints2.push_back(tPoints[0]);
+	tPoints2.push_back(tPoints[tPoints.size() - 1]);
+
+	//TestVTK::show(myKnee.GetTibiaPoly(), tPoints2);
 }
 
 void executeBalance()
@@ -3648,15 +3653,8 @@ int main()
     //TestHullPoints();
     //Test30PointsVTK();
 
-	auto sphere1 = TestVTK::CreateSphereTest(cv::Point3d(0, 1, 0));
-	Plane myPlane;
-	myPlane.init(Point(1, 0, 0), Point(2, 0, 0));
 
-	std::pair<double, Point> result = ImplantTools::GetDistancePlaneToSurface(sphere1, myPlane);
-
-	std::cout << "Distancia1: " << result.first << ",  "<< result.second<< std::endl;
-
-
+	MatchEasy();
 	
 
     std::string path, pig, pathHoles;

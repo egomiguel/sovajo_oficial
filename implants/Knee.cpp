@@ -492,6 +492,21 @@ void Knee::FillFemurPointsAndCondyles()
         }
     }
 
+	vtkNew<vtkImplicitPolyDataDistance> polyDistance;
+	polyDistance->SetInput(femurPoly);
+
+	Point vectorAP = femurDirectVectorAP;
+	vectorAP.normalice();
+
+	refPoint = coronalDistalLat - 3 * getDirectVectorFemurAxis();
+	Point extPoint = refPoint + 10. * vectorAP;
+
+	ImplantTools::GetInterceptionWithLine(polyDistance, refPoint, extPoint, coronalDistalLat);
+
+	refPoint = coronalDistalMed - 3 * getDirectVectorFemurAxis();;
+	extPoint = refPoint + 10. * vectorAP;
+	ImplantTools::GetInterceptionWithLine(polyDistance, refPoint, extPoint, coronalDistalMed);
+
     UpdateTopPointOnGroove();
 }
 
@@ -1043,6 +1058,21 @@ void Knee::setLateralAndMedialPosteriorFemurPoints(const Point& pLateral, const 
 
         }
     }
+
+	vtkNew<vtkImplicitPolyDataDistance> polyDistance;
+	polyDistance->SetInput(femurPoly);
+
+	Point vectorAP = femurDirectVectorAP;
+	vectorAP.normalice();
+
+	refPoint = coronalDistalLat - 3 * getDirectVectorFemurAxis();
+	Point extPoint = refPoint + 10. * vectorAP;
+
+	ImplantTools::GetInterceptionWithLine(polyDistance, refPoint, extPoint, coronalDistalLat);
+
+	refPoint = coronalDistalMed - 3 * getDirectVectorFemurAxis();
+	extPoint = refPoint + 10. * vectorAP;
+	ImplantTools::GetInterceptionWithLine(polyDistance, refPoint, extPoint, coronalDistalMed);
 
     UpdateTopPointOnGroove();
 
