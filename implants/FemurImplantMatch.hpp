@@ -66,9 +66,11 @@ private:
 
 	Point getNearPointUnderCortex(const Plane& myPlane, std::vector<Point>& points, double distance = 0) const;
 
+	Point getNearPointUnderCortex(const Plane& myPlane, std::vector<Point>& pointsLat, std::vector<Point>& pointsMed) const;
+
     void getVerticesCDE(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Point& centerP1, const Point& centerP2, double distanceSide, double distanceTop, double angleLat, double angleMed, std::vector<Point>& vertices) const;
 
-    void getVerticesA(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distance, int amount, bool longCurve) const;
+    void getVerticesA(const std::vector<Point>& points, const std::vector<Point>& pointsLat, const std::vector<Point>& pointsMed, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distance, int amount, bool longCurve) const;
 
     void getVerticesB(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distanceSide, double distanceTop, int amount) const;
 

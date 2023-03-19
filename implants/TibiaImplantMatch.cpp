@@ -8,6 +8,7 @@
 #include "ImplantTools.hpp"
 #include "vtkPlaneCollection.h"
 #include "vtkClipClosedSurface.h"
+#include "vtkExtractPolyDataGeometry.h"
 
 
 inline double squareDistance2d(cv::Point2d P0, cv::Point2d P1)
@@ -483,6 +484,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	vtkSmartPointer<vtkPoints> vtkMyPoints = contourMax->GetPoints();
 	int tVtkPointSize = vtkMyPoints->GetNumberOfPoints();
 
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//ImplantTools::show(contourMax, knee.GetTibiaPoly());
 
@@ -491,7 +493,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	for (int i = 0; i < tVtkPointSize; i++)
 	{
 		double pnt[3];
-		contourMax->GetPoint(i, pnt);
+		vtkMyPoints->GetPoint(i, pnt);
 		Point currentPoint(pnt[0], pnt[1], pnt[2]);
 		contourPoints.push_back(currentPoint);
 	}
@@ -575,7 +577,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	for (int i = 0; i < tVtkPointSize; i++)
 	{
 		double pnt[3];
-		contourMax->GetPoint(i, pnt);
+		vtkMyPoints->GetPoint(i, pnt);
 		Point currentPoint(pnt[0], pnt[1], pnt[2]);
 
 		if (obliqueLatPlaneUp.eval(currentPoint) >= 0 && obliqueMedPlaneUp.eval(currentPoint) >= 0)
@@ -585,6 +587,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	}
 	//////////////////////////////////////////////////////////////////////////////////////
 	//ImplantTools::show(contourMax, pclPoints);
+	//ImplantTools::show(contourMax, contourMax);
 
 	if (pclPoints.size() < 10)
 	{
@@ -617,18 +620,18 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	xVector = -xVector;
 	cv::Mat rotationPoly = getTransformToRobot(myPlane, xVector);
 
-	Point midRef = (pclPoints[0] + pclPoints[pclPoints.size() - 1]) / 2.;
+	Point midRef = (beginTop + lastTop) / 2.;
 	midRef = midRef - 20.0 * topPlane.getNormalVector();
-	Point initVectorPCL = pclPoints[0] - midRef;
-	Point endVectorPCL = pclPoints[pclPoints.size() - 1] - midRef;
+	Point initVectorPCL = beginTop - midRef;
+	Point endVectorPCL = lastTop - midRef;
 	initVectorPCL.normalice();
 	endVectorPCL.normalice();
 
 
-	for (float i = 1; i < 6; i++)
+	for (float i = 1; i < 11; i++)
 	{
-		Point newInitPCL = pclPoints[0] + i * initVectorPCL;
-		Point newEndPCL = pclPoints[pclPoints.size() - 1] + i * endVectorPCL;
+		Point newInitPCL = beginTop + i * initVectorPCL;
+		Point newEndPCL = lastTop + i * endVectorPCL;
 
 		pclPoints.insert(pclPoints.begin(), newInitPCL);
 		pclPoints.push_back(newEndPCL);
@@ -959,7 +962,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		}
 	}
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/*ImplantTools::show(contourMax, finalSplinePoints);*/
+	//ImplantTools::show(contourMax, finalSplinePoints);
 
 	hull = increaseVectorToAmount(finalSplinePoints, amount);
 

@@ -19,6 +19,9 @@
 #include "vtkSphereSource.h"
 #include <itkVersorRigid3DTransform.h>
 #include "vtkLine.h"
+#include "vtkSelectionNode.h"
+#include "vtkSelection.h"
+#include "vtkExtractSelectedIds.h"
 
 void ImplantTools::saveVectorPoints(const std::vector<Point>& pPoints, const std::string& pName, int axis)
 {
@@ -566,7 +569,7 @@ ImplantTools::Poly ImplantTools::polyFit(const std::vector<Point>& pPoints, cons
 	Xc = Xc / double(tSize);
 	Yc = Yc / double(tSize);
 
-	int dependentVar = -1;
+	int dependentVarPos = -1;
 	double bias;
 	std::vector<double> constraintCoeff(order + 1, 0);
 
@@ -592,24 +595,24 @@ ImplantTools::Poly ImplantTools::polyFit(const std::vector<Point>& pPoints, cons
 			if (abs(constraintCoeff[i]) > abs(maxVar))
 			{
 				maxVar = constraintCoeff[i];
-				dependentVar = i;
+				dependentVarPos = i;
 			}
 		}
 
-		if (dependentVar > 0)
+		if (dependentVarPos > 0)
 		{
 			for (int i = 1; i <= order; i++)
 			{
 				constraintCoeff[i] = -(constraintCoeff[i] / maxVar);
 			}
 
-			constraintCoeff[dependentVar] = 0;
+			constraintCoeff[dependentVarPos] = 0;
 
 			bias = bias / maxVar;
 		}
 	}
 
-	int fixOrder = (dependentVar > 0) ? order : order + 1;
+	int fixOrder = (dependentVarPos > 0) ? order : order + 1;
 
 	Eigen::MatrixXd T(tSize, fixOrder);
 	Eigen::VectorXd V(tSize, 1);
@@ -620,20 +623,20 @@ ImplantTools::Poly ImplantTools::polyFit(const std::vector<Point>& pPoints, cons
 	for (int i = 0; i < tSize; ++i)
 	{
 		cont = 0;
-		if (dependentVar > 0)
+		if (dependentVarPos > 0)
 		{
-			coefVar = pow((pointsX.at(i) - Xc), dependentVar);
+			coefVar = pow((pointsX.at(i) - Xc), dependentVarPos);
 		}
 
 		for (int j = 0; j < order + 1; ++j)
 		{
-			if (dependentVar < 0)
+			if (dependentVarPos < 0)
 			{
 				T(i, j) = pow((pointsX.at(i) - Xc), j);
 			}
 			else
 			{
-				if (j != dependentVar)
+				if (j != dependentVarPos)
 				{
 					T(i, cont) = pow((pointsX.at(i) - Xc), j) + (coefVar * constraintCoeff[j]);
 					cont++;
@@ -641,7 +644,7 @@ ImplantTools::Poly ImplantTools::polyFit(const std::vector<Point>& pPoints, cons
 			}
 		}
 
-		if (dependentVar < 0)
+		if (dependentVarPos < 0)
 		{
 			V(i, 0) = (pointsY.at(i) - Yc);
 		}
@@ -654,16 +657,16 @@ ImplantTools::Poly ImplantTools::polyFit(const std::vector<Point>& pPoints, cons
 	result = T.householderQr().solve(V);
 
 	std::vector<double> coeff;
-	double newVar = bias;
+	double dependentVar = bias;
 
 	for (int i = 0; i < fixOrder; i++)
 	{
 		coeff.push_back(result[i]);
 
-		if (dependentVar > 0)
+		if (dependentVarPos > 0)
 		{
 			int pos = 0;
-			if (i < dependentVar)
+			if (i < dependentVarPos)
 			{
 				pos = i;
 			}
@@ -672,19 +675,19 @@ ImplantTools::Poly ImplantTools::polyFit(const std::vector<Point>& pPoints, cons
 				pos = i + 1;
 			}
 
-			newVar = newVar + constraintCoeff[pos] * coeff[i];
+			dependentVar = dependentVar + constraintCoeff[pos] * coeff[i];
 		}
 	}
 
-	if (dependentVar > 0)
+	if (dependentVarPos > 0)
 	{
-		if (dependentVar == coeff.size())
+		if (dependentVarPos == coeff.size())
 		{
-			coeff.push_back(newVar);
+			coeff.push_back(dependentVar);
 		}
 		else
 		{
-			coeff.insert(coeff.begin() + dependentVar, newVar);
+			coeff.insert(coeff.begin() + dependentVarPos, dependentVar);
 		}
 	}
 
@@ -697,8 +700,8 @@ ImplantTools::Poly ImplantTools::polyFit(const std::vector<Point>& pPoints, cons
 	obj.isFine = true;
 
 	double diff1 = abs(obj.eval(pointsX[0]) - pointsY[0]);
-	double diff2 = abs(obj.eval(pointsX[tSize-1]) - pointsY[tSize-1]);
-	//std::cout << "Diff: " << diff1 << ";  " << diff2 << std::endl;
+	double diff2 = abs(obj.eval(pointsX[tSize - 1]) - pointsY[tSize - 1]);
+	//std::cout << "Diff: " << diff1 << ";  " << diff2 << "First coef: " << coeff[coeff.size() - 1] << std::endl;
 
 	return obj;
 }
@@ -903,6 +906,74 @@ vtkSmartPointer<vtkPolyData> ImplantTools::getMaxContour(const vtkSmartPointer<v
 	{
 		return vtkSmartPointer<vtkPolyData>::New();
 	}
+}
+
+std::vector<std::pair<vtkSmartPointer<vtkPolyData>, vtkSmartPointer<vtkPoints>>> ImplantTools::getAllContours(const vtkSmartPointer<vtkPolyData> polyData, const Point& pNormal, const Point& pPoint)
+{
+	std::vector<std::pair<vtkSmartPointer<vtkPolyData>, vtkSmartPointer<vtkPoints>>> result;
+	vtkNew<vtkPlane> plane;
+	vtkNew<vtkCutter> cutter;
+	cutter->SetInputData(polyData);
+
+	plane->SetNormal(pNormal.x, pNormal.y, pNormal.z);
+	plane->SetOrigin(pPoint.x, pPoint.y, pPoint.z);
+	cutter->SetCutFunction(plane);
+	cutter->Update();
+
+	auto contour = cutter->GetOutput();
+
+	if (contour->GetNumberOfPoints() > 0)
+	{
+		vtkNew<vtkPolyDataConnectivityFilter> connectivityFilter;
+		connectivityFilter->SetInputData(contour);
+
+		connectivityFilter->SetExtractionModeToAllRegions();
+		connectivityFilter->Update();
+		int connected_components = connectivityFilter->GetNumberOfExtractedRegions();
+
+		for (int i = 0; i < connected_components; i++)
+		{
+			vtkSmartPointer<vtkPolyData> region = vtkSmartPointer<vtkPolyData>::New();
+			connectivityFilter->SetExtractionModeToSpecifiedRegions();
+			connectivityFilter->AddSpecifiedRegion(i);
+			connectivityFilter->Update();
+			region->ShallowCopy(connectivityFilter->GetOutput());
+
+			vtkSmartPointer<vtkIdTypeArray> regionPointIds = vtkSmartPointer<vtkIdTypeArray>::New();
+			regionPointIds->SetNumberOfComponents(1);
+			for (vtkIdType j = 0; j < region->GetNumberOfCells(); j++)
+			{
+				vtkCell* cell = region->GetCell(j);
+				for (vtkIdType k = 0; k < cell->GetNumberOfPoints(); k++)
+				{
+					vtkIdType pointId = cell->GetPointId(k);
+					regionPointIds->InsertNextValue(pointId);
+				}
+			}
+
+			// Seleccionar solo los puntos que pertenecen a la región actual
+			vtkSmartPointer<vtkSelectionNode> selectionNode = vtkSmartPointer<vtkSelectionNode>::New();
+			selectionNode->SetFieldType(vtkSelectionNode::POINT);
+			selectionNode->SetContentType(vtkSelectionNode::INDICES);
+			selectionNode->SetSelectionList(regionPointIds);
+
+			vtkSmartPointer<vtkSelection> selection = vtkSmartPointer<vtkSelection>::New();
+			selection->AddNode(selectionNode);
+
+			vtkSmartPointer<vtkExtractSelectedIds> extractSelectedIds = vtkSmartPointer<vtkExtractSelectedIds>::New();
+			extractSelectedIds->SetInputData(0, region);
+			extractSelectedIds->SetInputData(1, selection);
+			extractSelectedIds->Update();
+
+			vtkSmartPointer<vtkPolyData> regionPoints = vtkSmartPointer<vtkPolyData>::New();
+			regionPoints->ShallowCopy(extractSelectedIds->GetOutput());
+
+			result.push_back(std::make_pair(region, regionPoints->GetPoints()));
+
+			connectivityFilter->DeleteSpecifiedRegion(i);
+		}
+	}
+	return result;
 }
 
 vtkSmartPointer<vtkPolyData> ImplantTools::getContours(const vtkSmartPointer<vtkPolyData> polyData, const Point& pNormal, const Point& pPoint)

@@ -573,6 +573,28 @@ double Plane::eval(const double a[3]) const
     return eval(myPoint);
 }
 
+void Plane::countPositiveAndNegativePoints(const vtkSmartPointer<vtkPoints>& vtkPointsList, int& positive, int& negative) const
+{
+	positive = 0;
+	negative = 0;
+
+	int tSize = vtkPointsList->GetNumberOfPoints();
+
+	for (int i = 0; i < tSize; i++)
+	{
+		double pnt[3];
+		vtkPointsList->GetPoint(i, pnt);
+		if (eval(pnt) >= 0)
+		{
+			positive++;
+		}
+		else
+		{
+			negative++;
+		}
+	}
+}
+
 void Plane::show() const
 {
 	std::cout << "Normal: " << std::setprecision(15) << normalVector.x << ", " << normalVector.y << ", " << normalVector.z << std::endl;

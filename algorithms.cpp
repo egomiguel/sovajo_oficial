@@ -1007,8 +1007,8 @@ void MatchEasy()
 
     itk::Rigid3DTransform<double>::Pointer transformIn = itk::VersorRigid3DTransform<double>::New();
 
-    /*transformIn->SetMatrix(femurImplantMatch.GetRotationMatrix());
-    transformIn->SetOffset(femurImplantMatch.GetTranslationMatrix());*/
+    //transformIn->SetMatrix(femurImplantMatch.GetRotationMatrix());
+    //transformIn->SetOffset(femurImplantMatch.GetTranslationMatrix());
 
 	transformIn->SetMatrix(tibiaImplantMatch.GetRotationMatrix());
 	transformIn->SetOffset(tibiaImplantMatch.GetTranslationMatrix());

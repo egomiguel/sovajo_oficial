@@ -3,6 +3,8 @@
 
 
 #include "Line.hpp"
+#include <vtkSmartPointer.h>
+#include <vtkPoints.h>
 #include "implants_export.h"
 
 class IMPLANTS_EXPORT Plane
@@ -36,6 +38,8 @@ public:
 	bool isPointNearToPlane(const Point& pPoint, double distance = 0.5) const;
 
 	double getDistanceFromPoint(const Point& pPoint) const;
+
+	void countPositiveAndNegativePoints(const vtkSmartPointer<vtkPoints>& vtkPointsList, int& positive, int& negative) const;
 
 	static void sortCoplanarPointsByAngle(std::vector<Point>& points, Point& centroid, Point& fixPlaneNormalIn, bool clockwise = false);
 

@@ -72,6 +72,8 @@ namespace ImplantTools
 
     vtkSmartPointer<vtkPolyData> getContours(const vtkSmartPointer<vtkPolyData> polyData, const Point& pNormal, const Point& pPoint);
 
+	std::vector<std::pair<vtkSmartPointer<vtkPolyData>, vtkSmartPointer<vtkPoints>>> getAllContours(const vtkSmartPointer<vtkPolyData> polyData, const Point& pNormal, const Point& pPoint);
+
     void ExtractSortLines(const vtkSmartPointer<vtkPolyData> polyData, std::list<std::pair<vtkIdType, vtkIdType>>& lines);
 
     vtkIdType GetNearestPoints(const vtkSmartPointer<vtkPolyData> poly, const Point& pPoint);
