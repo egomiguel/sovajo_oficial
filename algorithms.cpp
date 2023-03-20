@@ -1007,11 +1007,11 @@ void MatchEasy()
 
     itk::Rigid3DTransform<double>::Pointer transformIn = itk::VersorRigid3DTransform<double>::New();
 
-    //transformIn->SetMatrix(femurImplantMatch.GetRotationMatrix());
-    //transformIn->SetOffset(femurImplantMatch.GetTranslationMatrix());
+    transformIn->SetMatrix(femurImplantMatch.GetRotationMatrix());
+    transformIn->SetOffset(femurImplantMatch.GetTranslationMatrix());
 
-	transformIn->SetMatrix(tibiaImplantMatch.GetRotationMatrix());
-	transformIn->SetOffset(tibiaImplantMatch.GetTranslationMatrix());
+	/*transformIn->SetMatrix(tibiaImplantMatch.GetRotationMatrix());
+	transformIn->SetOffset(tibiaImplantMatch.GetTranslationMatrix());*/
 
     std::vector<PointTypeITK> hull1;
 
@@ -1021,8 +1021,8 @@ void MatchEasy()
 
     try
     {
-        //hull1 = femurImplantMatch.GetHullPoints(transformIn, transformOut, FemurImplantMatch::kPlaneA);
-		hull1 = tibiaImplantMatch.GetHullPoints(transformIn, transformOut);
+        hull1 = femurImplantMatch.GetHullPoints(transformIn, transformOut, FemurImplantMatch::kPlaneA, 0, 0);
+		//hull1 = tibiaImplantMatch.GetHullPoints(transformIn, transformOut);
 		std::cout << transformIn << std::endl;
 
         for (int i = 0; i < hull1.size(); i++)
@@ -1051,7 +1051,7 @@ void MatchEasy()
 
     //vtkSmartPointer<vtkPolyData> polyNew1 = TestVTK::CreatePolyLine(hull1);
 	//TestVTK::show(myKnee.GetFemurPoly());
-    TestVTK::show(myKnee.GetTibiaPoly(), tPoints, true);
+    TestVTK::show(myKnee.GetFemurPoly(), tPoints, true);
 
 	tPoints2.push_back(tPoints[0]);
 	tPoints2.push_back(tPoints[tPoints.size() - 1]);
@@ -3066,8 +3066,8 @@ void RotulaGroovePath()
 
     Knee myKnee = kneeLeft;
 
-    std::vector<Point> pointPath = myKnee.getKneeGroovePath();
-    std::vector<Point> pointPathOutLiers = myKnee.getKneeGrooveOutLiers();
+	std::vector<Point> pointPath; // = myKnee.getKneeGroovePath();
+	std::vector<Point> pointPathOutLiers; // = myKnee.getKneeGrooveOutLiers();
     std::vector<cv::Point3d> allPoints;
 
     for (int i = 0; i < pointPath.size(); i++)

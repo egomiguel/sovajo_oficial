@@ -1163,13 +1163,6 @@ void FemurImplantMatch::getVerticesA(const std::vector<Point>& points, const std
 	Point centerDownPoint = extremeDownPlane.getProjectionPoint(centerPoint);
 	bool isLatBegin = true;
 
-	////////////////////////////////////////////////
-
-	Line TestLine = Line::makeLineWithPoints(medTopPoint, latTopPoint);
-	centerDownPoint = (medTopPoint + latTopPoint) / 2;
-
-	/////////////////////////////////////////////
-
 	if (mainLatPoints.size() > 1)
 	{
 		//mainLatPoints.insert(mainLatPoints.begin(), extremeDownPlane.getProjectionPoint(mainLatPoints[0]));
