@@ -2409,20 +2409,20 @@ bool Knee::getIsVarus() const
     return isVarus;
 }
 
-Point Knee::getLateralCoronalDistalPoint() const
-{
-    return coronalDistalLat;
-}
-
-Point Knee::getMedialCoronalDistalPoint() const
-{
-    return coronalDistalMed;
-}
-
-Point Knee::getTopPointOnPatellaPath() const
-{
-    return topPointOnPatellaPath;
-}
+//Point Knee::getLateralCoronalDistalPoint() const
+//{
+//    return coronalDistalLat;
+//}
+//
+//Point Knee::getMedialCoronalDistalPoint() const
+//{
+//    return coronalDistalMed;
+//}
+//
+//Point Knee::getTopPointOnPatellaPath() const
+//{
+//    return topPointOnPatellaPath;
+//}
 
 void Knee::getAutomaticPlateaus()
 {
@@ -2764,10 +2764,10 @@ std::vector<Point> Knee::getKneeGroovePath() const
     return mKneeGroovePath;
 }
 
-std::vector<Point> Knee::getKneeGrooveOutLiers() const
-{
-    return mKneeGrooveOutLiers;
-}
+//std::vector<Point> Knee::getKneeGrooveOutLiers() const
+//{
+//    return mKneeGrooveOutLiers;
+//}
 
 double Knee::getPatellaThickness() const
 {

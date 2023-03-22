@@ -1406,11 +1406,11 @@ void ExecuteKneeCap()
     std::chrono::duration<double> elapsed_seconds = endTime - startTime;
     std::cout << "elapsed time genaral knee: " << elapsed_seconds.count() << std::endl;
 
-    vtkSmartPointer<vtkPolyData> topPointPath = TestVTK::CreateSphereTest(knee.getTopPointOnPatellaPath());
+    //vtkSmartPointer<vtkPolyData> topPointPath = TestVTK::CreateSphereTest(knee.getTopPointOnPatellaPath());
     vtkNew<vtkAppendPolyData> filter;
 
     filter->AddInputData(knee.GetFemurPoly());
-    filter->AddInputData(topPointPath);
+    //filter->AddInputData(topPointPath);
     filter->Update();
 
 
@@ -2223,100 +2223,11 @@ void ChangeCoordenate()
 
 void Test30PointsVTK()
 {
-    vtkSmartPointer<vtkPolyData> femurPoly, tibiaPoly, femurImplantPoly, patellaPoly;
-
-    femurPoly = TestVTK::ReadPolyData("D:\\fei_error\\femur_fei.vtk");
-    tibiaPoly = TestVTK::ReadPolyData("D:\\fei_error\\tibia_fei.vtk");
-    /*tibiaPoly = TestVTK::itkImageToSurface3D(tibia_right_modo_nrrd);
-    femurPoly = TestVTK::itkImageToSurface3D(femur_right_modo_nrrd);*/
-
-    femurImplantPoly = TestVTK::ReadPolyData(femur_implant_poly);
-
-    ////////////////////////Right modo
-
-    /*Point hipCenter(57.02, -49.02, 1160.60);
-    Point medialEpicondyle(67.17, -46.08, 781.60);
-    Point lateralEpicondyle(-10.45, -46.64, 782.20);
-    Point femurKneeCenter(25.55, -54.23, 768.40);
-    Point anteriorCortex(37.36, -72.80, 802.60);
-    Point medialCondyle(50.86, -21.05, 769.60);
-    Point lateralCondyle(2.20, -24.14, 779.20);
-
-    Point medialPlateau(42.08, -42.17, 738.10);
-    Point lateralPlateau(7.08, -43.17, 743.10);
-    Point tibiaKneeCenter(15.98, -54.23, 745.0);
-    Point tibiaTubercle(16.55, -74.48, 704.20);
-    Point tibiaPCL(19.36, -25.27, 731.80);
-    Point medialAnkle(40.89, -83.05, 394.90);
-    Point lateralAnkle(-19.30, -76.02, 388.90);*/
-
-    ///////////////////////////////Left Modo
-
-    Point hipCenter(-2.27496337890625, 57.824214935302734, 136.630859375);
-    Point medialEpicondyle(-29.759414672851562, 53.039058685302734, -258.758544921875);
-    Point lateralEpicondyle(45.43589782714844, 60.216793060302734, -258.2655029296875);
-    Point femurKneeCenter(5.7874603271484375, 46.886714935302734, -272.5667724609375);
-    Point anteriorCortex(21.168319702148438, 28.771480560302734, -228.5628662109375);
-    Point medialCondyle(-16.94, 82.28, -263.41);
-    Point lateralCondyle(30.06, 80.28, -261.41);
-
-    Point medialPlateau(-15.58, 65.98, -291.16);
-    Point lateralPlateau(22.42, 54.98, -288.42);
-    //Point medialPlateau(-11.985977172851562, 62.951168060302734, -290.1683349609375);
-    //Point lateralPlateau(21.168319702148438, 56.457027435302734, -288.5181884765625);
-    Point tibiaKneeCenter(6.4710540771484375, 48.937496185302734, -287.9681396484375);
-    Point tibiaTubercle(4.7620697021484375, 26.037105560302734, -311.6202392578125);
-    Point tibiaPCL(9.205429077148438, 72.17968368530273, -292.3685302734375);
-    Point medialAnkle(-24.386306762695312, 47.71842575073242, -646.7325439453125);
-    Point lateralAnkle(42.60588073730469, 45.66764450073242, -656.2325439453125);
-
-    Point ankleCenter = Knee::getComputeAnkleCenter(lateralAnkle, medialAnkle);
-
-    Point kneeCap(0, 0, 0);
-
-    auto startTime = std::chrono::system_clock::now();
-
-    Patella myPatella;
-    myPatella.init(kneeCap, lateralEpicondyle, medialEpicondyle, femurKneeCenter, femurPoly); // Just for avoid problem with patella
-
-    Knee knee;
-
-    knee.init(hipCenter, anteriorCortex, femurKneeCenter, lateralEpicondyle, medialEpicondyle, lateralCondyle, medialCondyle,
-        lateralPlateau, medialPlateau, tibiaKneeCenter, tibiaTubercle, tibiaPCL, ankleCenter, myPatella, femurPoly, tibiaPoly);
-
-    Knee newKnew1 = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Right");
-    Knee newKnew2 = CreateKneeFromFile_Numbers("D:\\fei_error\\problem2\\knee");
-
-    knee = newKnew2;
-
-
-    //knee.init(
-    //    { 55.453125,-46.671875,1158.814208984375 },
-    //    { 18.515625,-73.640625,817.592529296875 },
-    //    { 26.953125,-57.046875,767.194580078125 },
-    //    { -11.859375,-46.640625,781.593994140625 },
-    //    { 68.015625,-43.828125,779.73779296875 },
-    //    { 3.609375,-23.296875,778.5941162109375 },
-    //    { 50.015625,-20.203125,771.3944091796875 },
-
-    //    { 7.265625,-46.359375,746.1954345703125 },
-    //    { 47.484375,-38.203125,737.7957763671875 },
-    //    { 22.171875,-57.046875,746.79541015625 },//tibia knee center point
-    //    { 14.015625,-74.484375,714.9967041015625 }, //tuber
-    //    { 25.828125,-26.109375,734.1959228515625 }, //pcl
-
-    //    ankleCenter,
-    //    { 0,0,0 }, femurPoly, tibiaPoly
-    //);
+	Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error3", KneeSideEnum::KLeft);
 
     double tError;
-    auto endTime = std::chrono::system_clock::now();
-
-    std::chrono::duration<double> elapsed_seconds = endTime - startTime;
-    std::cout << "elapsed time genaral knee: " << elapsed_seconds.count() << std::endl;
-
     std::vector<Point> pCheckPointsFemur, pCheckPointsTibia;
-    FindRegistrationPoints myPointsObj(knee);
+    FindRegistrationPoints myPointsObj(myKnee);
 
     std::vector<RegistrationPoints> femurPoints = myPointsObj.GetRegistrationPointsFemur(pCheckPointsFemur, tError);
     std::cout << "Error femur: " << tError << std::endl;
@@ -2349,16 +2260,16 @@ void Test30PointsVTK()
         }
     }
 
-    myPointsTibia.push_back(knee.getLateralPlateau());
-    myPointsTibia.push_back(knee.getMedialPlateau());
+    myPointsTibia.push_back(myKnee.getLateralPlateau());
+    myPointsTibia.push_back(myKnee.getMedialPlateau());
 
-    auto surface1 = TestVTK::MergePolyWithSphere(knee.GetFemurPoly(), myPointsFemur);
-    auto surface2 = TestVTK::MergePolyWithSphere(knee.GetTibiaPoly(), myPointsTibia);
+    auto surface1 = TestVTK::MergePolyWithSphere(myKnee.GetFemurPoly(), myPointsFemur);
+    auto surface2 = TestVTK::MergePolyWithSphere(myKnee.GetTibiaPoly(), myPointsTibia);
 
-    TestVTK::show(knee.GetFemurPoly(), PointToPoint3D(pCheckPointsFemur));
-    TestVTK::show(knee.GetFemurPoly(), myPointsFemur);
-    TestVTK::show(knee.GetTibiaPoly(), PointToPoint3D(pCheckPointsTibia));
-    TestVTK::show(knee.GetTibiaPoly(), myPointsTibia);
+    TestVTK::show(myKnee.GetFemurPoly(), PointToPoint3D(pCheckPointsFemur));
+    TestVTK::show(myKnee.GetFemurPoly(), myPointsFemur);
+    TestVTK::show(myKnee.GetTibiaPoly(), PointToPoint3D(pCheckPointsTibia));
+    TestVTK::show(myKnee.GetTibiaPoly(), myPointsTibia);
 
     //writeListPoints(myPointsFemur, "Template_Official_Femur_Left.json");
 

@@ -30,12 +30,6 @@ std::vector<PointTypeITK> BoneRotulaPath::getKneeCapPathPoints() const
     std::vector<PointTypeITK> path;
     for (int i = 0; i < mKneeGroovePath.size(); i++)
     {
-        /*Point pnt = femurCoordenate->getPointCoordenate(mKneeGroovePath[i]);
-        PointTypeITK newPoint;
-        newPoint[0] = pnt.x;
-        newPoint[1] = pnt.y;
-        newPoint[2] = pnt.z;
-        path.push_back(newPoint);*/
         path.push_back(mKneeGroovePath[i].ToITKPoint());
     }
     return path;

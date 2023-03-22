@@ -141,17 +141,17 @@ public:
 
     bool getIsVarus() const;
 
-    Point getLateralCoronalDistalPoint() const;
+    /*Point getLateralCoronalDistalPoint() const;
 
     Point getMedialCoronalDistalPoint() const;
 
-    Point getTopPointOnPatellaPath() const;
+    Point getTopPointOnPatellaPath() const;*/
 
     void setTibiaSlope(double angleInDegrees);
 
-    std::vector<Point> getKneeGroovePath() const;
+    std::vector<Point> getKneeGroovePath() const; //Now it is returning an empty list ************************************
 
-    std::vector<Point> getKneeGrooveOutLiers() const;
+    //std::vector<Point> getKneeGrooveOutLiers() const;
 
     bool getIsRight() const;
 
