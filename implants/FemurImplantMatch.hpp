@@ -20,6 +20,16 @@ public:
 		kPlaneMid//Femur mid plane
 	};
 
+	struct ConvexHullFeatures
+	{
+		Line * topLine;
+		Line * downLine;
+		Line * medialLine;
+		Line * lateralLine;
+		Point centerPoint;
+		std::vector<Point> convexHull;
+	};
+
 	FemurImplantMatch();
 
 	void init(const FemurImplant& implant, const Knee& knee, bool useKneeCenterAlignment = true);
@@ -44,6 +54,7 @@ protected:
 	friend class Balance;
 
 private:
+
 	FemurImplant implant;
 	Knee knee;
 	cv::Mat rotationMatrix;
@@ -66,7 +77,7 @@ private:
 
 	Point getNearPointUnderCortex(const Plane& myPlane, std::vector<Point>& points, double distance = 0) const;
 
-	Point getNearPointUnderCortex(const Plane& myPlane, std::vector<Point>& pointsLat, std::vector<Point>& pointsMed) const;
+	Point getNearPointUnderCortex(const Plane& myPlane, std::vector<Point>& allPoints, std::vector<Point>& pointsLat, std::vector<Point>& pointsMed) const;
 
     void getVerticesCDE(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Point& centerP1, const Point& centerP2, double distanceSide, double distanceTop, double angleLat, double angleMed, std::vector<Point>& vertices) const;
 
@@ -76,7 +87,11 @@ private:
     
 	void getCurveLikeU(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distanceSide, double distanceTop, int amount) const;
 
-    void separateMedialAndLateralPoints(const std::vector<Point>& points, const Plane& sagitalPlane, const Point& extremeLatPoint, const Point& extremeMedPoint, std::vector<Point>& lateralOut, std::vector<Point>& medialOut, Point& centerPointOut) const;
+	void getCurveLikeW(const std::vector<Point>& pointsLat, const std::vector<Point>& pointsMed, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distanceSide, double distanceTop, int amount) const;
+	
+	ConvexHullFeatures getIncreaseBorder(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation,  double distanceSideLat, double distanceSideMed, double distanceTop, double downLatCornerOut = 0.75, double downMedCornerOut = 0.75) const;
+	
+	void separateMedialAndLateralPoints(const std::vector<Point>& points, const Plane& sagitalPlane, const Point& extremeLatPoint, const Point& extremeMedPoint, std::vector<Point>& lateralOut, std::vector<Point>& medialOut, Point& centerPointOut) const;
     
     bool getConcaveMainPoints(const std::vector<Point>& points, const Plane& currentPlane, const Plane& sagitalPlane, const Point& downPoint, int pDistanceTop, int pDistanceSideIn, std::vector<Point>& result, std::pair<int, int>& pInOutPos, double pMoveOnCenter = 0) const;
 

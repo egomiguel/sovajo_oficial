@@ -10,11 +10,17 @@ class ConvexHull
 {
 private:
     std::vector<cv::Point2f> points;
-    cv::Mat rotationOnZInv;
+	std::vector<cv::Point2f> mConvexHull2D;
+	std::vector<Point> mConvexHull;
+    cv::Mat rotationOnZ, rotationOnZInv;
     float axisZ;
     //std::vector<Point> GetPoints3D(const std::vector<cv::Point2f>& pPoints);
 public:
     ConvexHull(const std::vector<Point>& pPoints, const cv::Mat& pRotationOnZ);
+
+	bool isPointWithinConvexHull(const Point& pPoint, float pErrorMargin = 0);
+
+	bool areSomePointWithinConvexHull(const std::vector<Point>& pPoints, float pErrorMargin = 0);
 
     std::vector<Point> GetConvexHull(int vertices = -1);
 

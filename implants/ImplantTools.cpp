@@ -22,6 +22,7 @@
 #include "vtkSelectionNode.h"
 #include "vtkSelection.h"
 #include "vtkExtractSelectedIds.h"
+#include "ConvexHull.hpp"
 
 void ImplantTools::saveVectorPoints(const std::vector<Point>& pPoints, const std::string& pName, int axis)
 {
@@ -2487,6 +2488,26 @@ std::vector<Point> ImplantTools::getSortPointVectorFill(const std::vector<Point>
 	}
 
 	return result;
+}
+
+bool ImplantTools::areBothSetOfPointsSeparated(const std::vector<Point>& pPoints1, const std::vector<Point>& pPoints2, const cv::Mat& myRotationZ, float margin)
+{
+	if (pPoints1.size() == 0 || pPoints2.size() == 0)
+	{
+		return true;
+	}
+
+	ConvexHull hullObj1(pPoints1, myRotationZ);
+	ConvexHull hullObj2(pPoints2, myRotationZ);
+
+	std::vector<Point> convexHull1 = hullObj1.GetConvexHull();
+	std::vector<Point> convexHull2 = hullObj2.GetConvexHull();
+
+	bool result1 = hullObj1.areSomePointWithinConvexHull(convexHull2, margin);
+	bool result2 = hullObj2.areSomePointWithinConvexHull(convexHull1, margin);
+	bool areIntersection = result1 || result2;
+
+	return !areIntersection;
 }
 
 vtkSmartPointer<vtkPolyData> ImplantTools::getPolyLine(const std::vector<Point>& sortPoints)

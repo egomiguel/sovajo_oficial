@@ -445,7 +445,7 @@ vtkSmartPointer<vtkPolyData> FemurImplantMatch::getContour(const vtkSmartPointer
 	return contour;
 }
 
-Point FemurImplantMatch::getNearPointUnderCortex(const Plane& myPlane, std::vector<Point>& pointsLat, std::vector<Point>& pointsMed) const
+Point FemurImplantMatch::getNearPointUnderCortex(const Plane& myPlane, std::vector<Point>& allPoints, std::vector<Point>& pointsLat, std::vector<Point>& pointsMed) const
 {
 	Point cortex = knee.getAnteriorCortex();
 	Point hip = knee.getHipCenter();
@@ -467,6 +467,7 @@ Point FemurImplantMatch::getNearPointUnderCortex(const Plane& myPlane, std::vect
 	pointsMed.clear();
 
 	auto allContours = ImplantTools::getAllContours(knee.GetFemurPoly(), myPlane.getNormalVector(), myPlane.getPoint());
+	bool separated = true;
 
 	for (int i = 0; i < allContours.size(); i++)
 	{
@@ -487,13 +488,35 @@ Point FemurImplantMatch::getNearPointUnderCortex(const Plane& myPlane, std::vect
 			{
 				midPoint = midPoint + myPoint;
 
-				if (lateralCount > medialCount)
+				allPoints.push_back(myPoint);
+
+				if (lateralCount > medialCount && separated == true)
 				{
-					pointsLat.push_back(myPoint);
+					float comp = medialCount * 2.5;
+					if (lateralCount >= comp)
+					{
+						pointsLat.push_back(myPoint);
+					}
+					else
+					{
+						pointsLat.clear();
+						pointsMed.clear();
+						separated = false;
+					}
 				}
-				else if (medialCount > lateralCount)
+				else if (medialCount > lateralCount && separated == true)
 				{
-					pointsMed.push_back(myPoint);
+					float comp = lateralCount * 2.5;
+					if (medialCount >= comp)
+					{
+						pointsMed.push_back(myPoint);
+					}
+					else
+					{
+						pointsLat.clear();
+						pointsMed.clear();
+						separated = false;
+					}
 				}
 
 			}
@@ -501,9 +524,9 @@ Point FemurImplantMatch::getNearPointUnderCortex(const Plane& myPlane, std::vect
 
 	}
 
-	if (pointsLat.size() > 0 || pointsMed.size() > 0)
+	if (allPoints.size() > 0)
 	{
-		midPoint = midPoint / double(pointsLat.size() + pointsMed.size());
+		midPoint = midPoint / double(allPoints.size());
 	}
 
 	return midPoint;
@@ -694,17 +717,16 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	cv::Mat myRotation;
 	Point myNormal, myNormalTemp;
 
-	//std::vector<Point> pointsLatMio, pointsMedMio;
+	std::vector<Point> pointsLatTemp, pointsMedTemp;
 
 	if (id == kPlaneA)
 	{
 		planeName = "points_A";
 		currentPlane = finalTransformPlane(implant.getPlaneA(), pTransformIn);
 		projectedPoints.clear();
-		midPointPlane = getNearPointUnderCortex(currentPlane, projectedPoints);
+		//midPointPlane = getNearPointUnderCortex(currentPlane, projectedPoints);
 
-
-		//getNearPointUnderCortex(currentPlane, pointsLatMio, pointsMedMio);
+		midPointPlane = getNearPointUnderCortex(currentPlane, projectedPoints, pointsLatTemp, pointsMedTemp);
 
 		myNormalTemp = knee.getFemurKneeCenter() - resizeVector * knee.getFemurDirectVectorAP();
 		myNormal = currentPlane.getProjectionPoint(myNormalTemp) - myNormalTemp;
@@ -900,13 +922,28 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	{
 		getVerticesCDE(projectedPoints, downPoint, lateralSide, medialSide, topPoint, centerP1, centerP2, distanceSide, distanceTop, angleLatRad, angleMedRad, vertices);
 	}
-	else if (id == kPlaneA || id == kPlaneB)
+	else if (id == kPlaneB )
 	{
 		getCurveLikeU(projectedPoints, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
 	}
 	else
 	{
-		//getVerticesA(projectedPoints, pointsLatMio, pointsMedMio, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, amount, posteriorLongCurve);
+		if (pointsLatTemp.size() == 0 || pointsMedTemp.size() == 0)
+		{
+			getCurveLikeU(projectedPoints, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
+		}
+		else
+		{
+			bool areSeparated = ImplantTools::areBothSetOfPointsSeparated(pointsLatTemp, pointsMedTemp, myRotation, 5);
+			if (areSeparated == true)
+			{
+				getCurveLikeW(pointsLatTemp, pointsMedTemp, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
+			}
+			else
+			{
+				getCurveLikeU(projectedPoints, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
+			}
+		}
 	}
 
 	Point initExtreme, endExtreme;
@@ -1019,6 +1056,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 void FemurImplantMatch::getVerticesA(const std::vector<Point>& points, const std::vector<Point>& pointsLat, const std::vector<Point>& pointsMed, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distance, int amount, bool longCurve) const
 {
+
 	float maxDist = 15;
 	if (abs(distance) > maxDist)
 	{
@@ -1289,8 +1327,298 @@ void FemurImplantMatch::getVerticesA(const std::vector<Point>& points, const std
 	vertices = ConvexHull::interpolateSpline(vertices, amount);
 }
 
+void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const std::vector<Point>& pointsMed, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distanceSide, double distanceTop, int amount) const
+{
+	ConvexHullFeatures hullFeaturesLat = getIncreaseBorder(pointsLat, downPoint, lateralPoint, medialPoint, topPoint, midPlane, currentPlane, pRotation, distanceSide, 1, distanceTop, 0.75, 1);
+	ConvexHullFeatures hullFeaturesMed = getIncreaseBorder(pointsMed, downPoint, lateralPoint, medialPoint, topPoint, midPlane, currentPlane, pRotation, 1, distanceSide, distanceTop, 1, 0.75);
+	
+	std::vector<Point> allPoints, convexLat, convexMed;
+	convexLat = hullFeaturesLat.convexHull;
+	convexMed = hullFeaturesMed.convexHull;
+
+	if (knee.getIsRight())
+	{
+		for (int i = 0; i < convexLat.size(); i++)
+		{
+			allPoints.push_back(convexLat[i]);
+		}
+
+		for (int i = 0; i < convexMed.size(); i++)
+		{
+			allPoints.push_back(convexMed[i]);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < convexMed.size(); i++)
+		{
+			allPoints.push_back(convexMed[i]);
+		}
+
+		for (int i = 0; i < convexLat.size(); i++)
+		{
+			allPoints.push_back(convexLat[i]);
+		}
+	}
+
+	vertices = ConvexHull::interpolateSpline(allPoints, amount);
+
+	/*auto poly = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
+	ImplantTools::show(poly, vertices);*/
+}
+
+FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, double distanceSideLat, double distanceSideMed, double distanceTop, double downLatCornerOut, double downMedCornerOut) const
+{
+	double maxDist = 15.;
+
+	if (abs(distanceSideLat) > maxDist)
+	{
+		distanceSideLat = maxDist;
+	}
+
+	if (abs(distanceSideMed) > maxDist)
+	{
+		distanceSideMed = maxDist;
+	}
+
+	if (abs(distanceTop) > maxDist)
+	{
+		distanceTop = maxDist;
+	}
+
+	Point vectorAP = midPlane.getProjectionPoint(topPoint) - midPlane.getProjectionPoint(downPoint);
+	vectorAP.normalice();
+
+	Line topLine(midPlane.getNormalVector(), topPoint);
+	Line downLine(midPlane.getNormalVector(), downPoint);
+	Line medialLine(vectorAP, medialPoint);
+	Line lateralLine(vectorAP, lateralPoint);
+
+	double topDistance = -1.0;
+	double downDistance = -1.0;
+	double medialDistance = -1.0;
+	double lateralDistance = -1.0;
+
+	double topTemp, downTemp, lateralTemp, medialTemp;
+	Point topPointConv, downPointConv, latPointConv, medPointConv, centerPoint;
+
+	ConvexHull allHull(points, pRotation);
+	std::vector<Point> fullConvex = allHull.GetConvexHull();
+	int tSize = fullConvex.size();
+
+	if (tSize < 3)
+	{
+		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL_ON_LATERAL_SIDE;
+	}
+
+	std::vector<Point>::const_iterator it1, it2;
+	it1 = fullConvex.begin();
+	it2 = fullConvex.end();
+
+	for (; it1 != it2; ++it1)
+	{
+		topTemp = topLine.getDistanceFromPoint(*it1);
+		downTemp = downLine.getDistanceFromPoint(*it1);
+		lateralTemp = lateralLine.getDistanceFromPoint(*it1);
+		medialTemp = medialLine.getDistanceFromPoint(*it1);
+
+		if (topTemp < topDistance || topDistance < 0)
+		{
+			topDistance = topTemp;
+			topPointConv = *it1;
+		}
+
+		if (downTemp < downDistance || downDistance < 0)
+		{
+			downDistance = downTemp;
+			downPointConv = *it1;
+		}
+
+		if (lateralTemp < lateralDistance || lateralDistance < 0)
+		{
+			lateralDistance = lateralTemp;
+			latPointConv = *it1;
+		}
+
+		if (medialTemp < medialDistance || medialDistance < 0)
+		{
+			medialDistance = medialTemp;
+			medPointConv = *it1;
+		}
+
+		centerPoint = centerPoint + (*it1);
+	}
+
+	topLine.setPoint(topPointConv);
+	downLine.setPoint(downPointConv);
+	lateralLine.setPoint(latPointConv);
+	medialLine.setPoint(medPointConv);
+	centerPoint = centerPoint / double(tSize);
+
+	int topLatCorner = ImplantTools::GetCornerPointOnContour(fullConvex, centerPoint, topLine.getProjectPoint(centerPoint), lateralLine.getProjectPoint(centerPoint));
+	int topMedCorner = ImplantTools::GetCornerPointOnContour(fullConvex, centerPoint, topLine.getProjectPoint(centerPoint), medialLine.getProjectPoint(centerPoint));
+	int downLatCorner = ImplantTools::GetCornerPointOnContour(fullConvex, centerPoint, downLine.getProjectPoint(centerPoint), lateralLine.getProjectPoint(centerPoint));
+	int downMedCorner = ImplantTools::GetCornerPointOnContour(fullConvex, centerPoint, downLine.getProjectPoint(centerPoint), medialLine.getProjectPoint(centerPoint));
+
+	if (topLatCorner < 0 || topMedCorner < 0 || downLatCorner < 0 || downMedCorner < 0)
+	{
+		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL_ON_LATERAL_SIDE;
+	}
+
+	Plane obliqueLatTopUp, obliqueMedTopUp, obliqueLatTopSide, obliqueLatDownSide, obliqueMedTopSide, obliqueMedDownSide;
+
+	obliqueLatTopUp = currentPlane.getPerpendicularPlane(centerPoint, fullConvex[topLatCorner]);
+	obliqueMedTopUp = currentPlane.getPerpendicularPlane(centerPoint, fullConvex[topMedCorner]);
+	obliqueLatTopUp.reverseByPoint(fullConvex[topMedCorner]);
+	obliqueMedTopUp.reverseByPoint(fullConvex[topLatCorner]);
+
+	obliqueLatTopSide = currentPlane.getPerpendicularPlane(centerPoint, fullConvex[topLatCorner]);
+	obliqueLatDownSide = currentPlane.getPerpendicularPlane(centerPoint, fullConvex[downLatCorner]);
+	obliqueLatTopSide.reverseByPoint(fullConvex[downLatCorner]);
+	obliqueLatDownSide.reverseByPoint(fullConvex[topLatCorner]);
+
+	obliqueMedTopSide = currentPlane.getPerpendicularPlane(centerPoint, fullConvex[topMedCorner]);
+	obliqueMedDownSide = currentPlane.getPerpendicularPlane(centerPoint, fullConvex[downMedCorner]);
+	obliqueMedTopSide.reverseByPoint(fullConvex[downMedCorner]);
+	obliqueMedDownSide.reverseByPoint(fullConvex[topMedCorner]);
+
+	Plane myMidPlane = midPlane;
+	myMidPlane.movePlane(medPointConv);
+	myMidPlane.reverseByPoint(latPointConv);
+	myMidPlane.movePlane(centerPoint);
+
+	for (int i = 0; i < tSize; i++)
+	{
+		if (i == topLatCorner || i == topMedCorner)
+		{
+			fullConvex[i] = fullConvex[i] + distanceTop * vectorAP;
+
+			if (i == topLatCorner)
+			{
+				fullConvex[i] = fullConvex[i] + distanceSideLat * myMidPlane.getNormalVector();
+			}
+			else
+			{
+				fullConvex[i] = fullConvex[i] - distanceSideMed * myMidPlane.getNormalVector();
+			}
+			continue;
+		}
+
+		if (i == downLatCorner || i == downMedCorner)
+		{
+			if (i == downLatCorner)
+			{
+				fullConvex[i] = fullConvex[i] + distanceSideLat * myMidPlane.getNormalVector();
+
+				Point temp = downLine.getProjectPoint(fullConvex[i]);
+				temp = lateralLine.getProjectPoint(temp);
+				temp = temp + downLatCornerOut * distanceSideLat * myMidPlane.getNormalVector();
+				fullConvex[i] = temp;
+			}
+			else
+			{
+				fullConvex[i] = fullConvex[i] - distanceSideMed * myMidPlane.getNormalVector();
+
+				Point temp = downLine.getProjectPoint(fullConvex[i]);
+				temp = medialLine.getProjectPoint(temp);
+				temp = temp - downMedCornerOut * distanceSideMed * myMidPlane.getNormalVector();
+				fullConvex[i] = temp;
+			}
+			continue;
+		}
+
+
+		if (obliqueLatTopUp.eval(fullConvex[i]) > 0 && obliqueMedTopUp.eval(fullConvex[i]) > 0)
+		{
+			fullConvex[i] = fullConvex[i] + distanceTop * vectorAP;
+		}
+		else if (obliqueLatTopSide.eval(fullConvex[i]) > 0 && obliqueLatDownSide.eval(fullConvex[i]) > 0)
+		{
+			fullConvex[i] = fullConvex[i] + distanceSideLat * myMidPlane.getNormalVector();
+		}
+		else if (obliqueMedTopSide.eval(fullConvex[i]) > 0 && obliqueMedDownSide.eval(fullConvex[i]) > 0)
+		{
+			fullConvex[i] = fullConvex[i] - distanceSideMed * myMidPlane.getNormalVector();
+		}
+	}
+
+	ConvexHull convHull(fullConvex, pRotation);
+	fullConvex = convHull.GetConvexHull();
+	tSize = fullConvex.size();
+
+	topLine.setPoint((topLine.getPoint() + distanceTop * vectorAP));
+	lateralLine.setPoint((lateralLine.getPoint() + distanceSideLat * myMidPlane.getNormalVector()));
+	medialLine.setPoint((medialLine.getPoint() - distanceSideMed * myMidPlane.getNormalVector()));
+
+	if (tSize == 0)
+	{
+		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL_ON_LATERAL_SIDE;
+	}
+
+	downLatCorner = ImplantTools::GetCornerPointOnContour(fullConvex, centerPoint, downLine.getProjectPoint(centerPoint), lateralLine.getProjectPoint(centerPoint));
+	downMedCorner = ImplantTools::GetCornerPointOnContour(fullConvex, centerPoint, downLine.getProjectPoint(centerPoint), medialLine.getProjectPoint(centerPoint));
+
+	if (downLatCorner < 0 || downMedCorner < 0)
+	{
+		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL_ON_LATERAL_SIDE;
+	}
+
+	Plane obliqueLat = currentPlane.getPerpendicularPlane(centerPoint, fullConvex[downLatCorner]);
+	Plane obliqueMed = currentPlane.getPerpendicularPlane(centerPoint, fullConvex[downMedCorner]);
+
+	obliqueLat.reverseByPoint(fullConvex[downMedCorner]);
+	obliqueMed.reverseByPoint(fullConvex[downLatCorner]);
+
+	std::vector<Point> finalHull;
+	int posLat, posMed;
+
+	for (int i = 0; i < tSize; i++)
+	{
+		if (i == downLatCorner)
+		{
+			posLat = finalHull.size();
+			finalHull.push_back(fullConvex[i]);
+			continue;
+		}
+		else if (i == downMedCorner)
+		{
+			posMed = finalHull.size();
+			finalHull.push_back(fullConvex[i]);
+			continue;
+		}
+
+		if (!(obliqueLat.eval(fullConvex[i]) > 0 && obliqueMed.eval(fullConvex[i]) > 0))
+		{
+			finalHull.push_back(fullConvex[i]);
+		}
+	}
+
+	if (abs(posMed - posLat) == 1)
+	{
+		if (posMed > posLat)
+		{
+			std::rotate(finalHull.begin(), finalHull.begin() + posMed, finalHull.end());
+		}
+		else
+		{
+			std::rotate(finalHull.begin(), finalHull.begin() + posLat, finalHull.end());
+		}
+	}
+
+	ConvexHullFeatures result;
+	result.centerPoint = centerPoint;
+	result.convexHull = finalHull;
+	result.downLine = new Line(downLine.getDirectVector(), downLine.getPoint());
+	result.topLine = new Line(topLine.getDirectVector(), topLine.getPoint());
+	result.lateralLine = new Line(lateralLine.getDirectVector(), lateralLine.getPoint());
+	result.medialLine = new Line(medialLine.getDirectVector(), medialLine.getPoint());
+
+	return result;
+}
+
 void FemurImplantMatch::getCurveLikeU(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distanceSide, double distanceTop, int amount) const
 {
+	/*
 	double maxDist = 15.;
 
 	if (abs(distanceSide) > maxDist)
@@ -1443,26 +1771,26 @@ void FemurImplantMatch::getCurveLikeU(const std::vector<Point>& points, const Po
 			fullConvex[i] = temp;
 		}
 	}
+	
 
 	ConvexHull convHull(fullConvex, pRotation);
 	fullConvex = convHull.GetConvexHull();
-	tSize = fullConvex.size();
 
 	if (tSize == 0)
 	{
 		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL_ON_LATERAL_SIDE;
 	}
 
-	downLatCorner = ImplantTools::GetCornerPointOnContour(fullConvex, centerPoint, downLine.getProjectPoint(centerPoint), lateralLine.getProjectPoint(centerPoint));
-	downMedCorner = ImplantTools::GetCornerPointOnContour(fullConvex, centerPoint, downLine.getProjectPoint(centerPoint), medialLine.getProjectPoint(centerPoint));
+	int downLatCorner = ImplantTools::GetCornerPointOnContour(fullConvex, centerPoint, downLine->getProjectPoint(centerPoint), lateralLine->getProjectPoint(centerPoint));
+	int downMedCorner = ImplantTools::GetCornerPointOnContour(fullConvex, centerPoint, downLine->getProjectPoint(centerPoint), medialLine->getProjectPoint(centerPoint));
 
 	if (downLatCorner < 0 || downMedCorner < 0)
 	{
 		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL_ON_LATERAL_SIDE;
 	}
 	
-	obliqueLat = currentPlane.getPerpendicularPlane(centerPoint, fullConvex[downLatCorner]);
-	obliqueMed = currentPlane.getPerpendicularPlane(centerPoint, fullConvex[downMedCorner]);
+	Plane obliqueLat = currentPlane.getPerpendicularPlane(centerPoint, fullConvex[downLatCorner]);
+	Plane obliqueMed = currentPlane.getPerpendicularPlane(centerPoint, fullConvex[downMedCorner]);
 
 	obliqueLat.reverseByPoint(fullConvex[downMedCorner]);
 	obliqueMed.reverseByPoint(fullConvex[downLatCorner]);
@@ -1502,11 +1830,14 @@ void FemurImplantMatch::getCurveLikeU(const std::vector<Point>& points, const Po
 			std::rotate(finalHull.begin(), finalHull.begin() + posLat, finalHull.end());
 		}
 	}
+	*/
 
-	vertices = ConvexHull::interpolateSpline(finalHull, amount);
+	ConvexHullFeatures hullFeatures = getIncreaseBorder(points, downPoint, lateralPoint, medialPoint, topPoint, midPlane, currentPlane, pRotation, distanceSide, distanceSide, distanceTop);
 
-	/*auto poly = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
-	ImplantTools::show(poly, vertices);*/
+	vertices = ConvexHull::interpolateSpline(hullFeatures.convexHull, amount);
+
+	auto poly = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
+	ImplantTools::show(poly, vertices);
 }
 
 void FemurImplantMatch::getVerticesB(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distanceSide, double distanceTop, int amount) const

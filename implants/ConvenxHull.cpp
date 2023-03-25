@@ -9,16 +9,17 @@
 
 struct GeneralLine
 {
-    float slope, bias;
+    float A, B, C;
     GeneralLine(const cv::Point2f& p1, const cv::Point2f& p2)
     {
-        slope = (p2.y - p1.y) / (p2.x - p1.x);
-        bias = slope * p1.x - p1.y;
+		A = -(p2.y - p1.y);
+		B = p2.x - p1.x;
+		C = -(A * p1.x + B * p1.y);
     }
 
     float eval(const cv::Point2f& p)
     {
-        return (p.y - slope * p.x + bias);
+        return (A * p.x + B * p.y + C);
     }
 
 };
@@ -26,13 +27,14 @@ struct GeneralLine
 ConvexHull::ConvexHull(const std::vector<Point>& pPoints, const cv::Mat& pRotationOnZ)
 {
     rotationOnZInv = pRotationOnZ.inv();
+	rotationOnZ = pRotationOnZ;
     axisZ = 0;
     auto it1 = pPoints.begin();
     auto it2 = pPoints.end();
 
     for (; it1 != it2; ++it1)
     {
-        cv::Mat rotatePointMat = pRotationOnZ * (*it1).ToMatPoint();
+        cv::Mat rotatePointMat = rotationOnZ * (*it1).ToMatPoint();
         cv::Point3d rotatePoint = cv::Point3d(rotatePointMat);
         cv::Point3f fPoint = static_cast<cv::Point3f>(rotatePoint);
         points.push_back(cv::Point2f(fPoint.x, fPoint.y));
@@ -43,29 +45,74 @@ ConvexHull::ConvexHull(const std::vector<Point>& pPoints, const cv::Mat& pRotati
     {
         axisZ = axisZ / float(pPoints.size());
     }
+
+	cv::convexHull(points, mConvexHull2D, true);
+
+	auto hullIt1 = mConvexHull2D.begin();
+	auto hullIt2 = mConvexHull2D.end();
+
+	for (; hullIt1 != hullIt2; ++hullIt1)
+	{
+		cv::Point2d tempDouble = static_cast<cv::Point2d>(*hullIt1);
+		Point tempPoint(tempDouble.x, tempDouble.y, static_cast<double>(axisZ));
+		cv::Mat rotatePointMat = rotationOnZInv * tempPoint.ToMatPoint();
+		mConvexHull.push_back(Point(rotatePointMat));
+	}
+
+}
+
+bool ConvexHull::isPointWithinConvexHull(const Point& pPoint, float pErrorMargin)
+{
+	/*
+		The points are supposed to be clockwise, therefore a point that is inside 
+		the convex hull will always be to the right of each segment and its 
+		evaluation will be negative.
+	*/
+
+	cv::Mat rotatePointMat = rotationOnZ * pPoint.ToMatPoint();
+	Point rotationPoint = Point(rotatePointMat);
+	int tSize = mConvexHull2D.size();
+	cv::Point2d rotationPoint2D(rotationPoint.x, rotationPoint.y);
+
+	for (int i = 0; i < tSize; i++)
+	{
+		cv::Point2d p1 = mConvexHull2D[i];
+		cv::Point2d p2 = mConvexHull2D[(i + 1) % tSize];
+		GeneralLine tempLine(p1, p2);
+		float result = tempLine.eval(rotationPoint2D) - pErrorMargin;
+		//std::cout << pErrorMargin << " Dista: " << result << std::endl;
+		if (result > 0)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+bool ConvexHull::areSomePointWithinConvexHull(const std::vector<Point>& pPoints, float pErrorMargin)
+{
+	int tSize = pPoints.size();
+	for (int i = 0; i < tSize; i++)
+	{
+		bool result = isPointWithinConvexHull(pPoints[i], pErrorMargin);
+
+		if (result == true)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 std::vector<Point> ConvexHull::GetConvexHull(int vertices)
 {
-    std::vector<Point> result;
-    std::vector<cv::Point2f> hull;
-    cv::convexHull(points, hull, true);
 
-    auto hullIt1 = hull.begin();
-    auto hullIt2 = hull.end();
-
-    for (; hullIt1 != hullIt2; ++hullIt1)
+    if (vertices < 3 || vertices >= mConvexHull.size())
     {
-        cv::Point2d tempDouble = static_cast<cv::Point2d>(*hullIt1);
-        Point tempPoint(tempDouble.x, tempDouble.y, static_cast<double>(axisZ));
-        cv::Mat rotatePointMat = rotationOnZInv * tempPoint.ToMatPoint();
-        result.push_back(Point(rotatePointMat));
+        return mConvexHull;
     }
 
-    if (vertices < 3 || vertices >= result.size())
-    {
-        return result;
-    }
+	std::vector<Point> result = mConvexHull;
 
     std::vector<JoinedSegment> joinedSegment;
     std::list<std::pair<Point, int> > data;

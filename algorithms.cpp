@@ -1053,8 +1053,8 @@ void MatchEasy()
 	//TestVTK::show(myKnee.GetFemurPoly());
     TestVTK::show(myKnee.GetFemurPoly(), tPoints, true);
 
-	tPoints2.push_back(tPoints[0]);
-	tPoints2.push_back(tPoints[tPoints.size() - 1]);
+	/*tPoints2.push_back(tPoints[0]);
+	tPoints2.push_back(tPoints[tPoints.size() - 1]);*/
 
 	//TestVTK::show(myKnee.GetTibiaPoly(), tPoints2);
 }
