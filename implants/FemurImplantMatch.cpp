@@ -1408,7 +1408,7 @@ FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const
 
 	if (tSize < 3)
 	{
-		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL_ON_LATERAL_SIDE;
+		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL;
 	}
 
 	std::vector<Point>::const_iterator it1, it2;
@@ -1460,9 +1460,15 @@ FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const
 	int downLatCorner = ImplantTools::GetCornerPointOnContour(fullConvex, centerPoint, downLine.getProjectPoint(centerPoint), lateralLine.getProjectPoint(centerPoint));
 	int downMedCorner = ImplantTools::GetCornerPointOnContour(fullConvex, centerPoint, downLine.getProjectPoint(centerPoint), medialLine.getProjectPoint(centerPoint));
 
+
+	/*auto poly = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
+	ImplantTools::show(poly, fullConvex);
+	std::cout << topLatCorner << ", " << topMedCorner << ", " << downLatCorner << ", " << downMedCorner << std::endl;*/
+
+
 	if (topLatCorner < 0 || topMedCorner < 0 || downLatCorner < 0 || downMedCorner < 0)
 	{
-		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL_ON_LATERAL_SIDE;
+		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL_CORNERS;
 	}
 
 	Plane obliqueLatTopUp, obliqueMedTopUp, obliqueLatTopSide, obliqueLatDownSide, obliqueMedTopSide, obliqueMedDownSide;
@@ -1552,7 +1558,7 @@ FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const
 
 	if (tSize == 0)
 	{
-		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL_ON_LATERAL_SIDE;
+		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL;
 	}
 
 	downLatCorner = ImplantTools::GetCornerPointOnContour(fullConvex, centerPoint, downLine.getProjectPoint(centerPoint), lateralLine.getProjectPoint(centerPoint));
@@ -1560,7 +1566,7 @@ FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const
 
 	if (downLatCorner < 0 || downMedCorner < 0)
 	{
-		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL_ON_LATERAL_SIDE;
+		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL;
 	}
 
 	Plane obliqueLat = currentPlane.getPerpendicularPlane(centerPoint, fullConvex[downLatCorner]);
@@ -1836,8 +1842,8 @@ void FemurImplantMatch::getCurveLikeU(const std::vector<Point>& points, const Po
 
 	vertices = ConvexHull::interpolateSpline(hullFeatures.convexHull, amount);
 
-	auto poly = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
-	ImplantTools::show(poly, vertices);
+	/*auto poly = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
+	ImplantTools::show(poly, vertices);*/
 }
 
 void FemurImplantMatch::getVerticesB(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distanceSide, double distanceTop, int amount) const

@@ -985,11 +985,13 @@ void MatchEasy()
     Knee kneeLeft = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Right");*/
 
     Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error3", KneeSideEnum::KLeft);
-
+	
     vtkSmartPointer<vtkPolyData> polyTibiaImplant, polyPatellaImplant;
 
     FemurImplant femurImplant = CreateFemurImplantFromFile(femurImplantStr);
+
     TibiaImplant tibiaImplant = CreateTibiaImplantFromFile(tibiaImplantStr, polyTibiaImplant);
+
     //PatellaImplant patellaImplant = CreatePatellaImplantFromFile(patellaImplantStr, polyPatellaImplant);
 
     FemurImplantMatch femurImplantMatch;
@@ -997,7 +999,9 @@ void MatchEasy()
     //PatellaImplantMatch patellaImplantMatch;
 
     femurImplantMatch.init(femurImplant, myKnee);
+
     tibiaImplantMatch.init(tibiaImplant, myKnee);
+
 
     //patellaImplantMatch.init(patellaImplant, myKnee);
     /*vtkSmartPointer<vtkPolyData> newImplant = TestVTK::TransformPoly(polyPatellaImplant, patellaImplantMatch.GetRotationMatrix(), patellaImplantMatch.GetTranslationMatrix());
@@ -1021,7 +1025,7 @@ void MatchEasy()
 
     try
     {
-        hull1 = femurImplantMatch.GetHullPoints(transformIn, transformOut, FemurImplantMatch::kPlaneA, 0, 0);
+        hull1 = femurImplantMatch.GetHullPoints(transformIn, transformOut, FemurImplantMatch::kPlaneB, 0, 0);
 		//hull1 = tibiaImplantMatch.GetHullPoints(transformIn, transformOut);
 		std::cout << transformIn << std::endl;
 
