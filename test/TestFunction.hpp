@@ -895,6 +895,36 @@ namespace Test {
 		return points;
 	}
 
+	itk::Rigid3DTransform<>::Pointer MakeTransformITK(std::vector<double> transformByRows)
+	{
+		itk::Matrix< double, 3, 3 > rotation;
+
+		rotation[0][0] = transformByRows[0];
+		rotation[0][1] = transformByRows[1];
+		rotation[0][2] = transformByRows[2];
+
+		rotation[1][0] = transformByRows[4];
+		rotation[1][1] = transformByRows[5];
+		rotation[1][2] = transformByRows[6];
+
+		rotation[2][0] = transformByRows[8];
+		rotation[2][1] = transformByRows[9];
+		rotation[2][2] = transformByRows[10];
+
+		itk::Vector< double, 3 > translation;
+		translation[0] = transformByRows[3];
+		translation[1] = transformByRows[7];
+		translation[2] = transformByRows[11];
+
+		itk::Rigid3DTransform<double>::Pointer transformIn = itk::VersorRigid3DTransform<double>::New();
+
+		transformIn->SetMatrix(rotation);
+		transformIn->SetOffset(translation);
+
+		return transformIn;
+
+	}
+
 	cv::Mat Rigid3DTransformToCV(itk::Rigid3DTransform<>::Pointer transform)
 	{
 		itk::Matrix< double, 3, 3 > rotation = transform->GetMatrix();

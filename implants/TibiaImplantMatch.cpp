@@ -621,14 +621,14 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	cv::Mat rotationPoly = getTransformToRobot(myPlane, xVector);
 
 	Point midRef = (beginTop + lastTop) / 2.;
-	midRef = midRef - 20.0 * topPlane.getNormalVector();
+	midRef = midRef - 200.0 * topPlane.getNormalVector();
 	Point initVectorPCL = beginTop - midRef;
 	Point endVectorPCL = lastTop - midRef;
 	initVectorPCL.normalice();
 	endVectorPCL.normalice();
 
 
-	for (float i = 1; i < 11; i++)
+	for (float i = 1; i < 15; i++)
 	{
 		Point newInitPCL = beginTop + i * initVectorPCL;
 		Point newEndPCL = lastTop + i * endVectorPCL;
@@ -668,11 +668,11 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	}
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/*std::cout << tPoly.coeff[0] << ";  " << tPoly.coeff[1] << ";  " << tPoly.coeff[2] << std::endl;*/
-	/*auto vectorTemp1 = hullConcaveTemp;
-	vectorTemp1.push_back(pclPoints[0]);
-	vectorTemp1.push_back(pclPoints[pclPoints.size() - 1]);
-	ImplantTools::show(contourMax, pclPoints);
-	ImplantTools::show(contourMax, vectorTemp1);*/
+	//auto vectorTemp1 = hullConcaveTemp;
+	//vectorTemp1.push_back(pclPoints[0]);
+	//vectorTemp1.push_back(pclPoints[pclPoints.size() - 1]);
+	//ImplantTools::show(contourMax, pclPoints);
+	//ImplantTools::show(contourMax, vectorTemp1);
 
 	int nearPos = average - 1;
 	double reverseDistance = ImplantTools::getDistanceBetweenPoints(hullConcaveTemp[nearPos], beginTop, true);
@@ -881,9 +881,9 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	Point computePoint;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/*auto poly = ImplantTools::getPolyLine(hullConcave);
-	std::vector<Point> tExample = { hullConcave[posBeginPCL], hullConcave[posEndPCL], hullConcave[posEndTopArea], hullConcave[posBeginTopArea] };
-	ImplantTools::show(poly, tExample);*/
+	//auto poly = ImplantTools::getPolyLine(hullConcave);
+	//std::vector<Point> tExample = { hullConcave[posBeginPCL], hullConcave[posEndPCL], hullConcave[posEndTopArea], hullConcave[posBeginTopArea] };
+	//ImplantTools::show(poly, tExample);
 
 	for (int i = 0; i < hullConcave.size(); i++)
 	{
@@ -906,8 +906,8 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/*auto poly2 = ImplantTools::getPolyLine(hullConcave);
-	ImplantTools::show(poly2, finalHull, true);*/
+	//auto poly2 = ImplantTools::getPolyLine(hullConcave);
+	//ImplantTools::show(poly2, finalHull, true);
 
 	std::vector<Point> concaveSpline = ConvexHull::interpolateSpline(finalHull, amount);
 	int initPos = -1;

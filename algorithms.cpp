@@ -977,14 +977,14 @@ void MatchEasy()
 
     FemurImplantMatch femurImplantMatch;*/
 
-    std::string femurImplantStr = "D:\\sovajo\\Errores\\Error3\\Femur_Implant";
-    std::string tibiaImplantStr = "D:\\sovajo\\Errores\\Error3\\Tibia_Implant";
+    std::string femurImplantStr = "D:\\sovajo\\Errores\\Error4\\Femur_Implant";
+    std::string tibiaImplantStr = "D:\\sovajo\\Errores\\Error4\\Tibia_Implant";
     //std::string patellaImplantStr = "D:\\3D_DICOM_DATA\\patella_Implant";
 
     /*Knee kneeLeftModo = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Modo\\Right_Modo");
     Knee kneeLeft = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Right");*/
 
-    Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error3", KneeSideEnum::KLeft);
+    Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error4", KneeSideEnum::KRight);
 	
     vtkSmartPointer<vtkPolyData> polyTibiaImplant, polyPatellaImplant;
 
@@ -1009,13 +1009,22 @@ void MatchEasy()
     polyList.push_back(newImplant);
     TestVTK::show(patellaImplantMatch.GetCuttingPatella(), polyList);*/
 
+	std::vector<double> my_Transform = { -0.8510644835740226, 0.4940021459999185, 0.17790762925282486, 107.34124402717282,
+										  0.49079754865801617, 0.8688639863636932, -0.06475445491607344, 129.99908421613884,
+										-0.1865663716487183, 0.032206411592580066, -0.981914322139241, -993.3514342643502 };
+
     itk::Rigid3DTransform<double>::Pointer transformIn = itk::VersorRigid3DTransform<double>::New();
+	itk::Rigid3DTransform<double>::Pointer transformInTemp = Test::MakeTransformITK(my_Transform);
 
-    transformIn->SetMatrix(femurImplantMatch.GetRotationMatrix());
-    transformIn->SetOffset(femurImplantMatch.GetTranslationMatrix());
+    //transformIn->SetMatrix(femurImplantMatch.GetRotationMatrix());
+    //transformIn->SetOffset(femurImplantMatch.GetTranslationMatrixByCortex());
 
-	/*transformIn->SetMatrix(tibiaImplantMatch.GetRotationMatrix());
-	transformIn->SetOffset(tibiaImplantMatch.GetTranslationMatrix());*/
+	transformIn->SetMatrix(tibiaImplantMatch.GetRotationMatrix());
+	transformIn->SetOffset(tibiaImplantMatch.GetTranslationMatrix());
+
+	/*itk::Rigid3DTransform<double>::Pointer composedTransform = itk::VersorRigid3DTransform<double>::New();
+	composedTransform->Compose(transformIn);
+	composedTransform->Compose(transformInTemp);*/
 
     std::vector<PointTypeITK> hull1;
 
@@ -1025,8 +1034,8 @@ void MatchEasy()
 
     try
     {
-        hull1 = femurImplantMatch.GetHullPoints(transformIn, transformOut, FemurImplantMatch::kPlaneB, 0, 0);
-		//hull1 = tibiaImplantMatch.GetHullPoints(transformIn, transformOut);
+        //hull1 = femurImplantMatch.GetHullPoints(transformIn, transformOut, FemurImplantMatch::kPlaneA, 0, 0);
+		hull1 = tibiaImplantMatch.GetHullPoints(transformIn, transformOut);
 		std::cout << transformIn << std::endl;
 
         for (int i = 0; i < hull1.size(); i++)
@@ -1055,7 +1064,7 @@ void MatchEasy()
 
     //vtkSmartPointer<vtkPolyData> polyNew1 = TestVTK::CreatePolyLine(hull1);
 	//TestVTK::show(myKnee.GetFemurPoly());
-    TestVTK::show(myKnee.GetFemurPoly(), tPoints, true);
+    TestVTK::show(myKnee.GetTibiaPoly(), tPoints, true);
 
 	/*tPoints2.push_back(tPoints[0]);
 	tPoints2.push_back(tPoints[tPoints.size() - 1]);*/

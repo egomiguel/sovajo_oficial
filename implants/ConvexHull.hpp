@@ -13,7 +13,9 @@ private:
 	std::vector<cv::Point2f> mConvexHull2D;
 	std::vector<Point> mConvexHull;
     cv::Mat rotationOnZ, rotationOnZInv;
+	cv::Point2f mCenterPoint;
     float axisZ;
+	std::vector<cv::Point2f> increaseConvexHull(float increaseDist);
     //std::vector<Point> GetPoints3D(const std::vector<cv::Point2f>& pPoints);
 public:
     ConvexHull(const std::vector<Point>& pPoints, const cv::Mat& pRotationOnZ);

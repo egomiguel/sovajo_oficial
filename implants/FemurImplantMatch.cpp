@@ -922,7 +922,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	{
 		getVerticesCDE(projectedPoints, downPoint, lateralSide, medialSide, topPoint, centerP1, centerP2, distanceSide, distanceTop, angleLatRad, angleMedRad, vertices);
 	}
-	else if (id == kPlaneB )
+	else if (id == kPlaneB)
 	{
 		getCurveLikeU(projectedPoints, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
 	}
@@ -934,7 +934,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		}
 		else
 		{
-			bool areSeparated = ImplantTools::areBothSetOfPointsSeparated(pointsLatTemp, pointsMedTemp, myRotation, 5);
+			bool areSeparated = ImplantTools::areBothSetOfPointsSeparated(pointsLatTemp, pointsMedTemp, myRotation, 3);
 			if (areSeparated == true)
 			{
 				getCurveLikeW(pointsLatTemp, pointsMedTemp, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
@@ -1329,13 +1329,75 @@ void FemurImplantMatch::getVerticesA(const std::vector<Point>& points, const std
 
 void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const std::vector<Point>& pointsMed, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distanceSide, double distanceTop, int amount) const
 {
-	ConvexHullFeatures hullFeaturesLat = getIncreaseBorder(pointsLat, downPoint, lateralPoint, medialPoint, topPoint, midPlane, currentPlane, pRotation, distanceSide, 1, distanceTop, 0.75, 1);
-	ConvexHullFeatures hullFeaturesMed = getIncreaseBorder(pointsMed, downPoint, lateralPoint, medialPoint, topPoint, midPlane, currentPlane, pRotation, 1, distanceSide, distanceTop, 1, 0.75);
-	
+	ConvexHullFeatures hullFeaturesLat = getIncreaseBorder(pointsLat, downPoint, lateralPoint, medialPoint, topPoint, midPlane, currentPlane, pRotation, distanceSide, 0.5, distanceTop, 0.75, -1);
+	ConvexHullFeatures hullFeaturesMed = getIncreaseBorder(pointsMed, downPoint, lateralPoint, medialPoint, topPoint, midPlane, currentPlane, pRotation, 0.5, distanceSide, distanceTop, -1, 0.75);
+
 	std::vector<Point> allPoints, convexLat, convexMed;
 	convexLat = hullFeaturesLat.convexHull;
 	convexMed = hullFeaturesMed.convexHull;
 
+	Point upPointMid = (hullFeaturesLat.medialTopPoint + hullFeaturesMed.lateralTopPoint) / 2.;
+	Point downPointMid = (convexLat[hullFeaturesLat.medialDownPos] + convexMed[hullFeaturesMed.lateralDownPos]) / 2.;
+	Line centerLine = Line::makeLineWithPoints(upPointMid, downPointMid);
+
+	float dist = ImplantTools::getDistanceBetweenPoints(downPointMid, convexLat[hullFeaturesLat.medialDownPos]);
+
+	Point latDownPoint = hullFeaturesLat.downLine->getPoint();
+	Point medDownPoint = hullFeaturesMed.downLine->getPoint();
+	Plane downPlane = currentPlane.getPerpendicularPlane(latDownPoint, medDownPoint);
+	Point newCenterDown = downPlane.getInterceptionLinePoint(centerLine);
+	Point marginVector = latDownPoint - medDownPoint;
+	marginVector.normalice();
+
+	Line downUnionLine = Line::makeLineWithPoints(latDownPoint, medDownPoint);
+
+	convexLat[hullFeaturesLat.medialDownPos] = downUnionLine.getProjectPoint(convexLat[hullFeaturesLat.medialDownPos]);// newCenterDown + (dist / 2.) * marginVector;
+	convexMed[hullFeaturesMed.lateralDownPos] = downUnionLine.getProjectPoint(convexMed[hullFeaturesMed.lateralDownPos]);// newCenterDown - (dist / 2.) * marginVector;
+
+	Point insertPoint1, insertPoint2;
+
+	if (hullFeaturesLat.medialDownPos == 0)
+	{
+		//insertPoint1 = (convexLat[hullFeaturesLat.medialDownPos] + convexLat[hullFeaturesLat.medialDownPos + 1]) / 2.;
+		//insertPoint2 = (convexLat[hullFeaturesLat.medialDownPos + 1] + convexLat[hullFeaturesLat.medialDownPos + 2]) / 2.;
+
+		//convexLat.insert(convexLat.begin() + 2, insertPoint2);
+		//convexLat.insert(convexLat.begin() + 1, insertPoint1);
+
+		convexLat = ImplantTools::increaseVectorPoints(convexLat, hullFeaturesLat.medialDownPos, convexLat.size() / 2);
+	}
+	else
+	{
+		/*insertPoint1 = (convexLat[hullFeaturesLat.medialDownPos] + convexLat[hullFeaturesLat.medialDownPos - 1]) / 2.;
+		insertPoint2 = (convexLat[hullFeaturesLat.medialDownPos - 2] + convexLat[hullFeaturesLat.medialDownPos - 1]) / 2.;
+
+		convexLat.insert(convexLat.begin() + convexLat.size() - 2, insertPoint2);
+		convexLat.insert(convexLat.begin() + convexLat.size() - 1, insertPoint1);*/
+
+		convexLat = ImplantTools::increaseVectorPoints(convexLat, hullFeaturesLat.medialDownPos - convexLat.size() / 2, hullFeaturesLat.medialDownPos);
+	}
+
+	if (hullFeaturesMed.lateralDownPos == 0)
+	{
+		//insertPoint1 = (convexMed[hullFeaturesMed.lateralDownPos] + convexMed[hullFeaturesMed.lateralDownPos + 1]) / 2.;
+		//insertPoint2 = (convexMed[hullFeaturesMed.lateralDownPos + 1] + convexMed[hullFeaturesMed.lateralDownPos + 2]) / 2.;
+
+		//convexMed.insert(convexMed.begin() + 2, insertPoint2);
+		//convexMed.insert(convexMed.begin() + 1, insertPoint1);
+
+		convexMed = ImplantTools::increaseVectorPoints(convexMed, hullFeaturesMed.lateralDownPos, convexMed.size() / 2);
+	}
+	else
+	{
+		//insertPoint1 = (convexMed[hullFeaturesMed.lateralDownPos] + convexMed[hullFeaturesMed.lateralDownPos - 1]) / 2.;
+		//insertPoint2 = (convexMed[hullFeaturesMed.lateralDownPos - 1] + convexMed[hullFeaturesMed.lateralDownPos - 2]) / 2.;
+
+		//convexMed.insert(convexMed.begin() + convexMed.size() - 2, insertPoint2);
+		//convexMed.insert(convexMed.begin() + convexMed.size() - 1, insertPoint1);
+
+		convexMed = ImplantTools::increaseVectorPoints(convexMed, hullFeaturesMed.lateralDownPos - convexMed.size() / 2, hullFeaturesMed.lateralDownPos);
+	}
+	
 	if (knee.getIsRight())
 	{
 		for (int i = 0; i < convexLat.size(); i++)
@@ -1363,8 +1425,8 @@ void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const
 
 	vertices = ConvexHull::interpolateSpline(allPoints, amount);
 
-	/*auto poly = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
-	ImplantTools::show(poly, vertices);*/
+	auto poly = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
+	ImplantTools::show(poly, vertices);
 }
 
 FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, double distanceSideLat, double distanceSideMed, double distanceTop, double downLatCornerOut, double downMedCornerOut) const
@@ -1461,15 +1523,19 @@ FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const
 	int downMedCorner = ImplantTools::GetCornerPointOnContour(fullConvex, centerPoint, downLine.getProjectPoint(centerPoint), medialLine.getProjectPoint(centerPoint));
 
 
-	/*auto poly = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
-	ImplantTools::show(poly, fullConvex);
-	std::cout << topLatCorner << ", " << topMedCorner << ", " << downLatCorner << ", " << downMedCorner << std::endl;*/
+	//auto poly = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
+	//ImplantTools::show(poly, fullConvex, true);
 
 
 	if (topLatCorner < 0 || topMedCorner < 0 || downLatCorner < 0 || downMedCorner < 0)
 	{
 		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL_CORNERS;
 	}
+
+	ConvexHullFeatures result;
+	result.centerPoint = centerPoint;
+	result.lateralTopPoint = fullConvex[topLatCorner];
+	result.medialTopPoint = fullConvex[topMedCorner];
 
 	Plane obliqueLatTopUp, obliqueMedTopUp, obliqueLatTopSide, obliqueLatDownSide, obliqueMedTopSide, obliqueMedDownSide;
 
@@ -1515,20 +1581,24 @@ FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const
 			if (i == downLatCorner)
 			{
 				fullConvex[i] = fullConvex[i] + distanceSideLat * myMidPlane.getNormalVector();
-
-				Point temp = downLine.getProjectPoint(fullConvex[i]);
-				temp = lateralLine.getProjectPoint(temp);
-				temp = temp + downLatCornerOut * distanceSideLat * myMidPlane.getNormalVector();
-				fullConvex[i] = temp;
+				if (downLatCornerOut >= 0)
+				{
+					Point temp = downLine.getProjectPoint(fullConvex[i]);
+					temp = lateralLine.getProjectPoint(temp);
+					temp = temp + downLatCornerOut * distanceSideLat * myMidPlane.getNormalVector();
+					fullConvex[i] = temp;
+				}
 			}
 			else
 			{
 				fullConvex[i] = fullConvex[i] - distanceSideMed * myMidPlane.getNormalVector();
-
-				Point temp = downLine.getProjectPoint(fullConvex[i]);
-				temp = medialLine.getProjectPoint(temp);
-				temp = temp - downMedCornerOut * distanceSideMed * myMidPlane.getNormalVector();
-				fullConvex[i] = temp;
+				if (downMedCornerOut >= 0)
+				{
+					Point temp = downLine.getProjectPoint(fullConvex[i]);
+					temp = medialLine.getProjectPoint(temp);
+					temp = temp - downMedCornerOut * distanceSideMed * myMidPlane.getNormalVector();
+					fullConvex[i] = temp;
+				}
 			}
 			continue;
 		}
@@ -1583,12 +1653,14 @@ FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const
 		if (i == downLatCorner)
 		{
 			posLat = finalHull.size();
+			result.lateralDownPos = posLat;
 			finalHull.push_back(fullConvex[i]);
 			continue;
 		}
 		else if (i == downMedCorner)
 		{
 			posMed = finalHull.size();
+			result.medialDownPos = posMed;
 			finalHull.push_back(fullConvex[i]);
 			continue;
 		}
@@ -1599,20 +1671,32 @@ FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const
 		}
 	}
 
+	//auto poly = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
+	//std::vector<Point> tempTest = { result.medialTopPoint, finalHull[result.medialDownPos] };
+	//ImplantTools::show(poly, tempTest);
+
 	if (abs(posMed - posLat) == 1)
 	{
 		if (posMed > posLat)
 		{
 			std::rotate(finalHull.begin(), finalHull.begin() + posMed, finalHull.end());
+
+			result.lateralDownPos = ((result.lateralDownPos - posMed) >= 0) ? result.lateralDownPos - posMed : finalHull.size() + result.lateralDownPos - posMed;
+			result.medialDownPos = ((result.medialDownPos - posMed) >= 0) ? result.medialDownPos - posMed : finalHull.size() + result.medialDownPos - posMed;
 		}
 		else
 		{
 			std::rotate(finalHull.begin(), finalHull.begin() + posLat, finalHull.end());
+
+			result.lateralDownPos = ((result.lateralDownPos - posLat) >= 0) ? result.lateralDownPos - posLat : finalHull.size() + result.lateralDownPos - posLat;
+			result.medialDownPos = ((result.medialDownPos - posLat) >= 0) ? result.medialDownPos - posLat : finalHull.size() + result.medialDownPos - posLat;
 		}
 	}
 
-	ConvexHullFeatures result;
-	result.centerPoint = centerPoint;
+	//auto poly1 = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
+	//std::vector<Point> tempTest1 = { result.medialTopPoint, finalHull[result.medialDownPos] };
+	//ImplantTools::show(poly1, tempTest1);
+
 	result.convexHull = finalHull;
 	result.downLine = new Line(downLine.getDirectVector(), downLine.getPoint());
 	result.topLine = new Line(topLine.getDirectVector(), topLine.getPoint());
@@ -1718,7 +1802,7 @@ void FemurImplantMatch::getCurveLikeU(const std::vector<Point>& points, const Po
 	{
 		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL_ON_LATERAL_SIDE;
 	}
-	
+
 	Plane obliqueLat, obliqueMed;
 
 	obliqueLat = currentPlane.getPerpendicularPlane(centerPoint, fullConvex[topLatCorner]);
@@ -1777,7 +1861,7 @@ void FemurImplantMatch::getCurveLikeU(const std::vector<Point>& points, const Po
 			fullConvex[i] = temp;
 		}
 	}
-	
+
 
 	ConvexHull convHull(fullConvex, pRotation);
 	fullConvex = convHull.GetConvexHull();
@@ -1794,7 +1878,7 @@ void FemurImplantMatch::getCurveLikeU(const std::vector<Point>& points, const Po
 	{
 		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL_ON_LATERAL_SIDE;
 	}
-	
+
 	Plane obliqueLat = currentPlane.getPerpendicularPlane(centerPoint, fullConvex[downLatCorner]);
 	Plane obliqueMed = currentPlane.getPerpendicularPlane(centerPoint, fullConvex[downMedCorner]);
 

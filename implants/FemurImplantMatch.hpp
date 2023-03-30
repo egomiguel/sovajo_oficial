@@ -26,7 +26,8 @@ public:
 		Line * downLine;
 		Line * medialLine;
 		Line * lateralLine;
-		Point centerPoint;
+		Point centerPoint, lateralTopPoint, medialTopPoint;
+		int lateralDownPos, medialDownPos;
 		std::vector<Point> convexHull;
 	};
 

@@ -15,6 +15,11 @@ struct GeneralLine
 		A = -(p2.y - p1.y);
 		B = p2.x - p1.x;
 		C = -(A * p1.x + B * p1.y);
+
+		float norm = sqrt(A * A + B * B);
+		A = A / norm;
+		B = B / norm;
+		C = C / norm;
     }
 
     float eval(const cv::Point2f& p)
@@ -51,12 +56,20 @@ ConvexHull::ConvexHull(const std::vector<Point>& pPoints, const cv::Mat& pRotati
 	auto hullIt1 = mConvexHull2D.begin();
 	auto hullIt2 = mConvexHull2D.end();
 
+	mCenterPoint = cv::Point2f(0, 0);
+
 	for (; hullIt1 != hullIt2; ++hullIt1)
 	{
+		mCenterPoint = mCenterPoint + (*hullIt1);
 		cv::Point2d tempDouble = static_cast<cv::Point2d>(*hullIt1);
 		Point tempPoint(tempDouble.x, tempDouble.y, static_cast<double>(axisZ));
 		cv::Mat rotatePointMat = rotationOnZInv * tempPoint.ToMatPoint();
 		mConvexHull.push_back(Point(rotatePointMat));
+	}
+
+	if (mConvexHull2D.size() > 0)
+	{
+		mCenterPoint = mCenterPoint / float(mConvexHull2D.size());
 	}
 
 }
@@ -71,15 +84,26 @@ bool ConvexHull::isPointWithinConvexHull(const Point& pPoint, float pErrorMargin
 
 	cv::Mat rotatePointMat = rotationOnZ * pPoint.ToMatPoint();
 	Point rotationPoint = Point(rotatePointMat);
-	int tSize = mConvexHull2D.size();
+	std::vector<cv::Point2f> tempConvex;
+
+	if (pErrorMargin <= 0)
+	{
+		tempConvex = mConvexHull2D;
+	}
+	else
+	{
+		tempConvex = increaseConvexHull(pErrorMargin);
+	}
+
+	int tSize = tempConvex.size();
 	cv::Point2d rotationPoint2D(rotationPoint.x, rotationPoint.y);
 
 	for (int i = 0; i < tSize; i++)
 	{
-		cv::Point2d p1 = mConvexHull2D[i];
-		cv::Point2d p2 = mConvexHull2D[(i + 1) % tSize];
+		cv::Point2d p1 = tempConvex[i];
+		cv::Point2d p2 = tempConvex[(i + 1) % tSize];
 		GeneralLine tempLine(p1, p2);
-		float result = tempLine.eval(rotationPoint2D) - pErrorMargin;
+		float result = tempLine.eval(rotationPoint2D);
 		//std::cout << pErrorMargin << " Dista: " << result << std::endl;
 		if (result > 0)
 		{
@@ -102,6 +126,22 @@ bool ConvexHull::areSomePointWithinConvexHull(const std::vector<Point>& pPoints,
 		}
 	}
 	return false;
+}
+
+std::vector<cv::Point2f> ConvexHull::increaseConvexHull(float increaseDist)
+{
+	int tSize = mConvexHull2D.size();
+	std::vector<cv::Point2f> increasePoints, newConvexHull;
+
+	for (int i = 0; i < tSize; i++)
+	{
+		cv::Point2f vector = mConvexHull2D[i] - mCenterPoint;
+		vector = vector / sqrt(vector.dot(vector));
+		increasePoints.push_back(mConvexHull2D[i] + increaseDist * vector);
+	}
+
+	cv::convexHull(increasePoints, newConvexHull, true);
+	return newConvexHull;
 }
 
 std::vector<Point> ConvexHull::GetConvexHull(int vertices)

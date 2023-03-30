@@ -136,7 +136,9 @@ namespace ImplantTools
 
 	bool areBothSetOfPointsSeparated(const std::vector<Point>& pPoints1, const std::vector<Point>& pPoints2, const cv::Mat& myRotationZ, float margin = 0);
     
-    void show(const vtkSmartPointer<vtkPolyData> poly1, const vtkSmartPointer<vtkPolyData> poly2);
+	std::vector<Point> increaseVectorPoints(const std::vector<Point>& pPoints, int beginPos, int endPos, float distance = 1.);
+
+	void show(const vtkSmartPointer<vtkPolyData> poly1, const vtkSmartPointer<vtkPolyData> poly2);
 
     void show(vtkSmartPointer<vtkPolyData> poly, const std::vector<Point>& points, bool makePolyLine = false);
 

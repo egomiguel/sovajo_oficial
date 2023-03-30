@@ -2510,6 +2510,38 @@ bool ImplantTools::areBothSetOfPointsSeparated(const std::vector<Point>& pPoints
 	return !areIntersection;
 }
 
+std::vector<Point> ImplantTools::increaseVectorPoints(const std::vector<Point>& pPoints, int beginPos, int endPos, float distance)
+{
+	std::vector<Point> result;
+	int tSize = pPoints.size();
+	for (int i = 0; i < tSize; i++)
+	{
+		if ((i >= beginPos) && (i + 1 <= endPos) && (i + 1 < tSize))
+		{
+			result.push_back(pPoints[i]);
+			float dist = ImplantTools::getDistanceBetweenPoints(pPoints[i], pPoints[i + 1]);
+			if (dist > distance)
+			{
+				int diff = dist - distance;
+				if (diff > 1)
+				{
+					float weight = 1. / float(diff);
+					for (float j = 1; j < diff; j++)
+					{
+						Point vector = pPoints[i + 1] - pPoints[i];
+						result.push_back(pPoints[i] + j * weight * vector);
+					}
+				}
+			}
+		}
+		else
+		{
+			result.push_back(pPoints[i]);
+		}
+	}
+	return result;
+}
+
 vtkSmartPointer<vtkPolyData> ImplantTools::getPolyLine(const std::vector<Point>& sortPoints)
 {
 	vtkNew<vtkPoints> points;
