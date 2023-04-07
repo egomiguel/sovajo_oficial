@@ -80,6 +80,8 @@ namespace ImplantTools
 
     vtkIdType GetNearestPoints(const vtkSmartPointer<vtkPolyData> poly, const Line& pLine, const Plane& pPlane1, const Plane& pPlane2);
 
+	std::pair<int, float> GetNearestPointToLine(const std::vector<Point>& pPoints, const Line& pLine, const Plane& pConditionPlane);
+
 	std::pair<double, Point> GetDistancePlaneToSurface(const vtkSmartPointer<vtkPolyData> poly, const Plane& pPlane, const Plane& pUseOneSide = Plane());
 
     bool GetInterceptionWithSegment(const vtkSmartPointer<vtkPolyData> poly, const Point& p1, const Point& p2, Point& result);

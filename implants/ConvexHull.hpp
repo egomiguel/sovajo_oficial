@@ -24,6 +24,8 @@ public:
 
 	bool areSomePointWithinConvexHull(const std::vector<Point>& pPoints, float pErrorMargin = 0);
 
+	std::vector<Point> getChangeDirectionPoints();
+
     std::vector<Point> GetConvexHull(int vertices = -1);
 
     static std::vector<Point> ReduceConvexHull(const std::vector<Point>& pPoints, int vertices = -1);

@@ -759,9 +759,9 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		planeName = "points_B";
 		currentPlane = finalTransformPlane(implant.getPlaneB(), pTransformIn);
 		projectedPoints.clear();
-		midPointPlane = getNearPointUnderCortex(currentPlane, projectedPoints);
+		//midPointPlane = getNearPointUnderCortex(currentPlane, projectedPoints);
 
-		//getNearPointUnderCortex(currentPlane, pointsLatMio, pointsMedMio);
+		midPointPlane = getNearPointUnderCortex(currentPlane, projectedPoints, pointsLatTemp, pointsMedTemp);
 
 		myNormalTemp = knee.getFemurKneeCenter() - resizeVector * knee.getFemurDirectVectorAP();
 		myNormal = myNormalTemp - currentPlane.getProjectionPoint(myNormalTemp);
@@ -922,11 +922,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	{
 		getVerticesCDE(projectedPoints, downPoint, lateralSide, medialSide, topPoint, centerP1, centerP2, distanceSide, distanceTop, angleLatRad, angleMedRad, vertices);
 	}
-	else if (id == kPlaneB)
-	{
-		getCurveLikeU(projectedPoints, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
-	}
-	else
+	else if (id == kPlaneA || id == kPlaneB)
 	{
 		if (pointsLatTemp.size() == 0 || pointsMedTemp.size() == 0)
 		{
@@ -937,7 +933,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 			bool areSeparated = ImplantTools::areBothSetOfPointsSeparated(pointsLatTemp, pointsMedTemp, myRotation, 3);
 			if (areSeparated == true)
 			{
-				getCurveLikeW(pointsLatTemp, pointsMedTemp, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
+				getCurveLikeW(pointsLatTemp, pointsMedTemp, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount, id);
 			}
 			else
 			{
@@ -1327,7 +1323,7 @@ void FemurImplantMatch::getVerticesA(const std::vector<Point>& points, const std
 	vertices = ConvexHull::interpolateSpline(vertices, amount);
 }
 
-void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const std::vector<Point>& pointsMed, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distanceSide, double distanceTop, int amount) const
+void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const std::vector<Point>& pointsMed, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distanceSide, double distanceTop, int amount, PlaneID planeID) const
 {
 	ConvexHullFeatures hullFeaturesLat = getIncreaseBorder(pointsLat, downPoint, lateralPoint, medialPoint, topPoint, midPlane, currentPlane, pRotation, distanceSide, 0.5, distanceTop, 0.75, -1);
 	ConvexHullFeatures hullFeaturesMed = getIncreaseBorder(pointsMed, downPoint, lateralPoint, medialPoint, topPoint, midPlane, currentPlane, pRotation, 0.5, distanceSide, distanceTop, -1, 0.75);
@@ -1336,90 +1332,185 @@ void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const
 	convexLat = hullFeaturesLat.convexHull;
 	convexMed = hullFeaturesMed.convexHull;
 
-	Point upPointMid = (hullFeaturesLat.medialTopPoint + hullFeaturesMed.lateralTopPoint) / 2.;
-	Point downPointMid = (convexLat[hullFeaturesLat.medialDownPos] + convexMed[hullFeaturesMed.lateralDownPos]) / 2.;
-	Line centerLine = Line::makeLineWithPoints(upPointMid, downPointMid);
+	Line baseLineTemp = Line::makeLineWithPoints(knee.getLateralInferiorFemurPoint(), knee.getMedialInferiorFemurPoint());
+	Point baseVector = currentPlane.getProjectionVector(baseLineTemp.getDirectVector());
+	Line baseLine = Line(baseVector, downPoint);
 
-	float dist = ImplantTools::getDistanceBetweenPoints(downPointMid, convexLat[hullFeaturesLat.medialDownPos]);
+	std::pair<int, float> baseLat = ImplantTools::GetNearestPointToLine(pointsLat, baseLine, Plane());
+	std::pair<int, float> baseMed = ImplantTools::GetNearestPointToLine(pointsMed, baseLine, Plane());
 
-	Point latDownPoint = hullFeaturesLat.downLine->getPoint();
-	Point medDownPoint = hullFeaturesMed.downLine->getPoint();
-	Plane downPlane = currentPlane.getPerpendicularPlane(latDownPoint, medDownPoint);
-	Point newCenterDown = downPlane.getInterceptionLinePoint(centerLine);
-	Point marginVector = latDownPoint - medDownPoint;
-	marginVector.normalice();
+	if (baseLat.first < 0 )
+	{
+		throw ImplantExceptionCode::CAN_NOT_DETERMINE_BORDER_CURVE_ON_LATERAL;
+	}
 
-	Line downUnionLine = Line::makeLineWithPoints(latDownPoint, medDownPoint);
+	if (baseMed.first < 0)
+	{
+		throw ImplantExceptionCode::CAN_NOT_DETERMINE_BORDER_CURVE_ON_MEDIAL;
+	}
 
-	convexLat[hullFeaturesLat.medialDownPos] = downUnionLine.getProjectPoint(convexLat[hullFeaturesLat.medialDownPos]);// newCenterDown + (dist / 2.) * marginVector;
-	convexMed[hullFeaturesMed.lateralDownPos] = downUnionLine.getProjectPoint(convexMed[hullFeaturesMed.lateralDownPos]);// newCenterDown - (dist / 2.) * marginVector;
+	if (baseLat.second < baseMed.second)
+	{
+		baseLine.setPoint(pointsLat[baseLat.first]);
+	}
+	else
+	{
+		baseLine.setPoint(pointsMed[baseMed.first]);
+	}
 
-	Point insertPoint1, insertPoint2;
+	Point normalTemp = topPoint - baseLine.getProjectPoint(topPoint);
+	Plane basePlaneLat, basePlaneMed;
+
+	Point midLat = (hullFeaturesLat.medialTopPoint + convexLat[hullFeaturesLat.medialDownPos]) / 2.;
+	Point midMed = (hullFeaturesMed.lateralTopPoint + convexMed[hullFeaturesMed.lateralDownPos]) / 2.;
+
+	basePlaneLat.init(normalTemp, midLat);
+	basePlaneMed.init(normalTemp, midMed);
+	basePlaneLat.reverseByPoint(downPoint);
+	basePlaneMed.reverseByPoint(downPoint);
+
+	Line lineLat = Line(normalTemp, medialPoint);
+	Line lineMed = Line(normalTemp, lateralPoint);
 
 	if (hullFeaturesLat.medialDownPos == 0)
 	{
-		//insertPoint1 = (convexLat[hullFeaturesLat.medialDownPos] + convexLat[hullFeaturesLat.medialDownPos + 1]) / 2.;
-		//insertPoint2 = (convexLat[hullFeaturesLat.medialDownPos + 1] + convexLat[hullFeaturesLat.medialDownPos + 2]) / 2.;
-
-		//convexLat.insert(convexLat.begin() + 2, insertPoint2);
-		//convexLat.insert(convexLat.begin() + 1, insertPoint1);
-
 		convexLat = ImplantTools::increaseVectorPoints(convexLat, hullFeaturesLat.medialDownPos, convexLat.size() / 2);
 	}
 	else
 	{
-		/*insertPoint1 = (convexLat[hullFeaturesLat.medialDownPos] + convexLat[hullFeaturesLat.medialDownPos - 1]) / 2.;
-		insertPoint2 = (convexLat[hullFeaturesLat.medialDownPos - 2] + convexLat[hullFeaturesLat.medialDownPos - 1]) / 2.;
-
-		convexLat.insert(convexLat.begin() + convexLat.size() - 2, insertPoint2);
-		convexLat.insert(convexLat.begin() + convexLat.size() - 1, insertPoint1);*/
-
 		convexLat = ImplantTools::increaseVectorPoints(convexLat, hullFeaturesLat.medialDownPos - convexLat.size() / 2, hullFeaturesLat.medialDownPos);
 	}
 
 	if (hullFeaturesMed.lateralDownPos == 0)
 	{
-		//insertPoint1 = (convexMed[hullFeaturesMed.lateralDownPos] + convexMed[hullFeaturesMed.lateralDownPos + 1]) / 2.;
-		//insertPoint2 = (convexMed[hullFeaturesMed.lateralDownPos + 1] + convexMed[hullFeaturesMed.lateralDownPos + 2]) / 2.;
-
-		//convexMed.insert(convexMed.begin() + 2, insertPoint2);
-		//convexMed.insert(convexMed.begin() + 1, insertPoint1);
-
 		convexMed = ImplantTools::increaseVectorPoints(convexMed, hullFeaturesMed.lateralDownPos, convexMed.size() / 2);
 	}
 	else
 	{
-		//insertPoint1 = (convexMed[hullFeaturesMed.lateralDownPos] + convexMed[hullFeaturesMed.lateralDownPos - 1]) / 2.;
-		//insertPoint2 = (convexMed[hullFeaturesMed.lateralDownPos - 1] + convexMed[hullFeaturesMed.lateralDownPos - 2]) / 2.;
-
-		//convexMed.insert(convexMed.begin() + convexMed.size() - 2, insertPoint2);
-		//convexMed.insert(convexMed.begin() + convexMed.size() - 1, insertPoint1);
-
 		convexMed = ImplantTools::increaseVectorPoints(convexMed, hullFeaturesMed.lateralDownPos - convexMed.size() / 2, hullFeaturesMed.lateralDownPos);
 	}
-	
-	if (knee.getIsRight())
-	{
-		for (int i = 0; i < convexLat.size(); i++)
-		{
-			allPoints.push_back(convexLat[i]);
-		}
 
-		for (int i = 0; i < convexMed.size(); i++)
+	std::pair<int, float> sideLat = ImplantTools::GetNearestPointToLine(convexLat, lineLat, basePlaneLat);
+	std::pair<int, float> sideMed = ImplantTools::GetNearestPointToLine(convexMed, lineMed, basePlaneMed);
+
+	if (sideLat.first < 0)
+	{
+		throw ImplantExceptionCode::CAN_NOT_DETERMINE_BORDER_CURVE_ON_LATERAL;
+	}
+
+	if (sideMed.first < 0)
+	{
+		throw ImplantExceptionCode::CAN_NOT_DETERMINE_BORDER_CURVE_ON_MEDIAL;
+	}
+
+
+	//Point upPointMid = (hullFeaturesLat.medialTopPoint + hullFeaturesMed.lateralTopPoint) / 2.;
+	//Point downPointMid = (convexLat[hullFeaturesLat.medialDownPos] + convexMed[hullFeaturesMed.lateralDownPos]) / 2.;
+	//Line centerLine = Line::makeLineWithPoints(upPointMid, downPointMid);
+
+	//float dist = ImplantTools::getDistanceBetweenPoints(downPointMid, convexLat[hullFeaturesLat.medialDownPos]);
+
+	//Point latDownPoint = hullFeaturesLat.downLine->getPoint();
+	//Point medDownPoint = hullFeaturesMed.downLine->getPoint();
+	//Plane downPlane = currentPlane.getPerpendicularPlane(latDownPoint, medDownPoint);
+	//Point newCenterDown = downPlane.getInterceptionLinePoint(centerLine);
+	//Point marginVector = latDownPoint - medDownPoint;
+	//marginVector.normalice();
+
+	//Line downUnionLine = Line::makeLineWithPoints(latDownPoint, medDownPoint);
+
+	//convexLat[hullFeaturesLat.medialDownPos] = downUnionLine.getProjectPoint(convexLat[hullFeaturesLat.medialDownPos]);// newCenterDown + (dist / 2.) * marginVector;
+	//convexMed[hullFeaturesMed.lateralDownPos] = downUnionLine.getProjectPoint(convexMed[hullFeaturesMed.lateralDownPos]);// newCenterDown - (dist / 2.) * marginVector;
+
+	std::vector<Point> convexLatNew, convexMedNew;
+
+	Point basePointLat = baseLine.getProjectPoint(convexLat[sideLat.first]);
+	Point basePointMed = baseLine.getProjectPoint(convexMed[sideMed.first]);
+	Point basePointMid = (basePointLat + basePointMed) / 2.;
+	Point basePointMidFix = planeID == kPlaneA ? basePointMid : (((convexLat[sideLat.first] + convexMed[sideMed.first]) / 2.) + basePointMid) / 2.;
+	
+	if (hullFeaturesLat.medialDownPos == 0)
+	{
+		convexLatNew.push_back(basePointMidFix);
+		for (int i = sideLat.first; i < convexLat.size(); i++)
 		{
-			allPoints.push_back(convexMed[i]);
+			convexLatNew.push_back(convexLat[i]);
 		}
 	}
 	else
 	{
-		for (int i = 0; i < convexMed.size(); i++)
+		for (int i = 0; i <= sideLat.first; i++)
 		{
-			allPoints.push_back(convexMed[i]);
+			convexLatNew.push_back(convexLat[i]);
+		}
+		convexLatNew.push_back(basePointMidFix);
+	}
+
+	if (hullFeaturesMed.lateralDownPos == 0)
+	{
+		//convexMedNew.push_back(basePointMed);
+		for (int i = sideMed.first; i < convexMed.size(); i++)
+		{
+			convexMedNew.push_back(convexMed[i]);
+		}
+	
+	}
+	else
+	{
+		for (int i = 0; i <= sideMed.first; i++)
+		{
+			convexMedNew.push_back(convexMed[i]);
+		}
+		//convexMedNew.push_back(basePointMed);
+	}
+	
+	/*if ((knee.getIsRight() && planeID == kPlaneA) || (knee.getIsRight() == false && planeID == kPlaneB))
+	{
+		for (int i = 0; i < convexLatNew.size(); i++)
+		{
+			allPoints.push_back(convexLatNew[i]);
 		}
 
-		for (int i = 0; i < convexLat.size(); i++)
+		for (int i = 0; i < convexMedNew.size(); i++)
 		{
-			allPoints.push_back(convexLat[i]);
+			allPoints.push_back(convexMedNew[i]);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < convexMedNew.size(); i++)
+		{
+			allPoints.push_back(convexMedNew[i]);
+		}
+
+		for (int i = 0; i < convexLatNew.size(); i++)
+		{
+			allPoints.push_back(convexLatNew[i]);
+		}
+	}*/
+
+	if (hullFeaturesLat.medialDownPos == 0)
+	{
+		for (int i = 0; i < convexMedNew.size(); i++)
+		{
+			allPoints.push_back(convexMedNew[i]);
+		}
+
+		for (int i = 0; i < convexLatNew.size(); i++)
+		{
+			allPoints.push_back(convexLatNew[i]);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < convexLatNew.size(); i++)
+		{
+			allPoints.push_back(convexLatNew[i]);
+		}
+
+		for (int i = 0; i < convexMedNew.size(); i++)
+		{
+			allPoints.push_back(convexMedNew[i]);
 		}
 	}
 
@@ -1622,6 +1713,13 @@ FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const
 	fullConvex = convHull.GetConvexHull();
 	tSize = fullConvex.size();
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//auto poly = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
+	//ImplantTools::show(poly, convHull.getChangeDirectionPoints());
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::vector<Point> changeDirPoints = convHull.getChangeDirectionPoints();
+
 	topLine.setPoint((topLine.getPoint() + distanceTop * vectorAP));
 	lateralLine.setPoint((lateralLine.getPoint() + distanceSideLat * myMidPlane.getNormalVector()));
 	medialLine.setPoint((medialLine.getPoint() - distanceSideMed * myMidPlane.getNormalVector()));
@@ -1692,6 +1790,7 @@ FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const
 			result.medialDownPos = ((result.medialDownPos - posLat) >= 0) ? result.medialDownPos - posLat : finalHull.size() + result.medialDownPos - posLat;
 		}
 	}
+
 
 	//auto poly1 = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
 	//std::vector<Point> tempTest1 = { result.medialTopPoint, finalHull[result.medialDownPos] };

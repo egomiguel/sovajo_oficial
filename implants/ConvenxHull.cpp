@@ -144,6 +144,53 @@ std::vector<cv::Point2f> ConvexHull::increaseConvexHull(float increaseDist)
 	return newConvexHull;
 }
 
+std::vector<Point> ConvexHull::getChangeDirectionPoints()
+{
+	int tSize = mConvexHull2D.size();
+	bool positive, currentSign;
+	std::vector<Point> result;
+
+	for ( int i = 0; i <= tSize; i++ )
+	{
+		int nextPos = (i + 1) % tSize;
+		int prevPos = i % tSize;
+		float numerator = mConvexHull2D[nextPos].y - mConvexHull2D[prevPos].y;
+		float denominator = mConvexHull2D[nextPos].x - mConvexHull2D[prevPos].x;
+		float slope = 0;
+
+		if (denominator != 0)
+		{
+			slope = numerator / denominator;
+		}
+
+		if (slope < 0)
+		{
+			currentSign = false;
+		}
+		else
+		{
+			currentSign = true;
+		}
+
+		if (i == 0)
+		{
+			positive = currentSign;
+		}
+		else
+		{
+			if (positive != currentSign)
+			{
+				Point tempPoint(mConvexHull2D[prevPos].x, mConvexHull2D[prevPos].y, static_cast<double>(axisZ));
+				cv::Mat rotatePointMat = rotationOnZInv * tempPoint.ToMatPoint();
+				result.push_back(Point(rotatePointMat));
+				positive = currentSign;
+			}
+		}
+	}
+
+	return result;
+}
+
 std::vector<Point> ConvexHull::GetConvexHull(int vertices)
 {
 

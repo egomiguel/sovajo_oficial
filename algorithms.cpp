@@ -977,14 +977,14 @@ void MatchEasy()
 
     FemurImplantMatch femurImplantMatch;*/
 
-    std::string femurImplantStr = "D:\\sovajo\\Errores\\Error4\\Femur_Implant";
-    std::string tibiaImplantStr = "D:\\sovajo\\Errores\\Error4\\Tibia_Implant";
+    std::string femurImplantStr = "D:\\sovajo\\Errores\\Error6\\Femur_Implant";
+    std::string tibiaImplantStr = "D:\\sovajo\\Errores\\Error6\\Tibia_Implant";
     //std::string patellaImplantStr = "D:\\3D_DICOM_DATA\\patella_Implant";
 
     /*Knee kneeLeftModo = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Modo\\Right_Modo");
     Knee kneeLeft = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Right");*/
 
-    Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error4", KneeSideEnum::KRight);
+    Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error6", KneeSideEnum::KRight);
 	
     vtkSmartPointer<vtkPolyData> polyTibiaImplant, polyPatellaImplant;
 

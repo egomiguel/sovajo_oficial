@@ -1202,6 +1202,32 @@ std::pair<double, Point> ImplantTools::GetDistancePlaneToSurface(const vtkSmartP
 	return std::make_pair(distance, closest);
 }
 
+std::pair<int, float> ImplantTools::GetNearestPointToLine(const std::vector<Point>& pPoints, const Line& pLine, const Plane& pConditionPlane)
+{
+	int tSize = pPoints.size();
+	int pos = -1;
+	float distance = -1;
+	for (int i = 0; i < tSize; i++)
+	{
+		if (pConditionPlane.getIsInit() == true)
+		{
+			if (pConditionPlane.eval(pPoints[i]) < 0)
+			{
+				continue;
+			}
+		}
+
+		float temp = pLine.getDistanceFromPoint(pPoints[i]);
+		if (temp < distance || distance < 0)
+		{
+			distance = temp;
+			pos = i;
+		}
+	}
+
+	return std::make_pair(pos, distance);
+}
+
 vtkIdType ImplantTools::GetNearestPoints(const vtkSmartPointer<vtkPolyData> poly, const Line& pLine, const Plane& pPlane1, const Plane& pPlane2)
 {
 	double distance = -1;
