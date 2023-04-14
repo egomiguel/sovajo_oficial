@@ -64,7 +64,9 @@ namespace ImplantTools
 
     Point getLocalMax(const std::vector<Point>& pPoints, const Plane& onPlane, const Point& vectorY, int degree = 7);
 
-    Poly polyFit(const std::list<Point>& pPoints, const cv::Mat& pTransformXY, int order, PolyConstraintPoint constraint);
+    Poly polyFit(const std::list<Point>& pPoints, const cv::Mat& pTransformXY, int order);
+
+	Poly parabolaFitPCL(const std::vector<Point>& pPoints, const cv::Mat& pTransformXY, const Point& fixPointA, const Point& fixPointB);
 
     Poly polyFit(const std::vector<Point>& pPoints, const cv::Mat& pTransformXY, int order, PolyConstraintPoint constraint);
 

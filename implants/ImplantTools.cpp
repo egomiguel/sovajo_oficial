@@ -379,9 +379,9 @@ Point ImplantTools::getLocalMinimumTest(const std::list<Point>& pPoints, const P
 
 	ofstream MyFileFit("curve_fit.txt");
 
-	PolyConstraintPoint constraintObj;
+	//PolyConstraintPoint constraintObj;
 
-	Poly myPoly = polyFit(pPoints, rotateFinal, 7, constraintObj);
+	Poly myPoly = polyFit(pPoints, rotateFinal, 7);
 	std::cout << "Minx: " << myPoly.getLocalMin() << std::endl;
 	for (double i = minX; i <= maxX; i++)
 	{
@@ -417,8 +417,8 @@ Point ImplantTools::getLocalMinimum(const std::list<Point>& pPoints, const Plane
 
 	cv::Mat rotateFinal = rotateY * rotateZ;
 
-	PolyConstraintPoint constraintObj;
-	Poly myPoly = polyFit(pPoints, rotateFinal, degree, constraintObj);
+	//PolyConstraintPoint constraintObj;
+	Poly myPoly = polyFit(pPoints, rotateFinal, degree);
 	cv::Mat resultMat = rotateFinal.inv() * myPoly.getLocalMin().ToMatPoint();
 	return Point(resultMat);
 }
@@ -431,9 +431,9 @@ Point ImplantTools::getLocalMax(const std::list<Point>& pPoints, const Plane& on
 
 	cv::Mat rotateFinal = rotateY * rotateZ;
 
-	PolyConstraintPoint constraintObj;
+	//PolyConstraintPoint constraintObj;
 
-	Poly myPoly = polyFit(pPoints, rotateFinal, degree, constraintObj);
+	Poly myPoly = polyFit(pPoints, rotateFinal, degree);
 	cv::Mat resultMat = rotateFinal.inv() * myPoly.getLocalMax().ToMatPoint();
 	return Point(resultMat);
 }
@@ -702,12 +702,40 @@ ImplantTools::Poly ImplantTools::polyFit(const std::vector<Point>& pPoints, cons
 
 	double diff1 = abs(obj.eval(pointsX[0]) - pointsY[0]);
 	double diff2 = abs(obj.eval(pointsX[tSize - 1]) - pointsY[tSize - 1]);
-	//std::cout << "Diff: " << diff1 << ";  " << diff2 << "First coef: " << coeff[coeff.size() - 1] << std::endl;
+	//std::cout << "Diff: " << diff1 << ";  " << diff2 << " First coef: " << coeff[coeff.size() - 1] << std::endl;
 
 	return obj;
 }
 
-ImplantTools::Poly ImplantTools::polyFit(const std::list<Point>& pPoints, const cv::Mat& pTransformXY, int order, PolyConstraintPoint constraint)
+ImplantTools::Poly ImplantTools::parabolaFitPCL(const std::vector<Point>& pPoints, const cv::Mat& pTransformXY, const Point& fixPointA, const Point& fixPointB)
+{
+	ImplantTools::PolyConstraintPoint constraintObj;
+	constraintObj.putConstraid = false;
+
+	ImplantTools::Poly tPoly = ImplantTools::polyFit(pPoints, pTransformXY, 6, constraintObj);
+
+	if (tPoly.isFine == false)
+	{
+		return tPoly;
+	}
+
+	Point midPoint = (fixPointA + fixPointB) / 2.;
+
+	cv::Mat pointMat = pTransformXY * (midPoint.ToMatPoint());
+	Point temp = Point(pointMat);
+	double y = tPoly.eval(temp.x);
+	temp.y = y;
+
+	pointMat = pTransformXY.inv() * (temp.ToMatPoint());
+	midPoint = Point(pointMat);
+
+	std::vector<Point> parabolaPoints = {fixPointA, fixPointB, midPoint};
+
+	ImplantTools::Poly result = ImplantTools::polyFit(parabolaPoints, pTransformXY, 2, constraintObj);
+	return result;
+}
+
+ImplantTools::Poly ImplantTools::polyFit(const std::list<Point>& pPoints, const cv::Mat& pTransformXY, int order)
 {
 	auto it1 = pPoints.begin();
 	auto it2 = pPoints.end();
