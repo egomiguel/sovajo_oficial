@@ -9,7 +9,7 @@
 #include "implants/LegAngle.hpp"
 #include "implants/Balance.hpp"
 #include "implants/ImplantsException.hpp"
-#include "implants/HipPoints.hpp"
+//#include "implants/HipPoints.hpp"
 #include "ImplantsMatchFinalInfo.hpp"
 #include "implants/ImplantTools.hpp"
 #include "implants/Patella.hpp"
@@ -27,8 +27,8 @@
 #include "registration/RPlane.hpp"
 #include "registration/RegistrationException.hpp"
 #include "registration/KneeCapRegistration.hpp"
-#include "registration/HipPelvisRegistration.hpp"
-#include "registration/HipFemurRegistration.hpp"
+//#include "registration/HipPelvisRegistration.hpp"
+//#include "registration/HipFemurRegistration.hpp"
 #include "registration/LeastSquaresICP.hpp"
 #include "registration/GeneralRegistrationPointsToPolydata.hpp"
 //#include <itkViewImage.h>
@@ -38,7 +38,7 @@
 #include "vtkContourTriangulator.h"
 #include <cmath>
 
-#include "slicer/vtkPlanarContourToClosedSurfaceConversionRule.h"
+//#include "slicer/vtkPlanarContourToClosedSurfaceConversionRule.h"
 #include "segmentation/surface/BinaryTree.hpp"
 #include "segmentation/surface/Tiling.hpp"
 #include "vtkPointsProjectedHull.h"
@@ -61,11 +61,11 @@
 //#include "segmentation/coherent/rigid.hpp"
 #include "load_files/LoadFiles.hpp"
 
-#include "HipPelvis.hpp"
-#include "HipPelvisCupImplant.hpp"
-#include "HipPelvisCupImplantMatch.hpp"
-#include "HipFemurStemImplant.hpp"
-#include "HipFemurStemImplantMatch.hpp"
+//#include "HipPelvis.hpp"
+//#include "HipPelvisCupImplant.hpp"
+//#include "HipPelvisCupImplantMatch.hpp"
+//#include "HipFemurStemImplant.hpp"
+//#include "HipFemurStemImplantMatch.hpp"
 #include "vtkCardinalSpline.h"
 #include "vtkSplineFilter.h"
 
@@ -2336,6 +2336,7 @@ void TestSlice()
 
 void getPelvisPoint()
 {
+	/*
     //vtkSmartPointer<vtkPolyData> BoneVTK = TestVTK::ReadPolyData("D:\\3D_DICOM\\Pelvis\\pelvis_right_vtk.vtk");
 
 	vtkSmartPointer<vtkPolyData> BoneVTK = TestVTK::ReadPolyData("D:\\Mega_Trabajo\\Pelvis\\Segmentation.vtk");
@@ -2347,13 +2348,12 @@ void getPelvisPoint()
     posteriorAcetabulum = Registration::makeItkPoint(77.27, 20.66, 303.29);
     superiorAcetabulum = Registration::makeItkPoint(105.27, 10.66, 329.29);
 
-    /*anteriorAcetabulum = Registration::makeItkPoint(-42.48, -3.12, 298.29);
-    posteriorAcetabulum = Registration::makeItkPoint(-50.48, 19.88, 299.29);
-    superiorAcetabulum = Registration::makeItkPoint(-73.48, -1.12, 334.29);*/
+    //anteriorAcetabulum = Registration::makeItkPoint(-42.48, -3.12, 298.29);
+    //posteriorAcetabulum = Registration::makeItkPoint(-50.48, 19.88, 299.29);
+    //superiorAcetabulum = Registration::makeItkPoint(-73.48, -1.12, 334.29);
 
-    /*std::vector<cv::Point3d> landMark = { Point(-42.48, -3.12, 298.29), Point(-50.48, 19.88, 299.29), Point(-73.48, -1.12, 334.29) };
-
-	TestVTK::show(BoneVTK, landMark);*/
+    std::vector<cv::Point3d> landMark = { Point(-42.48, -3.12, 298.29), Point(-50.48, 19.88, 299.29), Point(-73.48, -1.12, 334.29) };
+	TestVTK::show(BoneVTK, landMark);
 
 
     PelvisRegistration* regis;
@@ -2398,6 +2398,7 @@ void getPelvisPoint()
 
     TestVTK::show(BoneVTK, pointsList);
 	TestVTK::show(BoneVTK, verificationPoints);
+	*/
 }
 
 void RegistrationScale()
@@ -2633,6 +2634,7 @@ void GetHipPoints()
 
 void HipFemoralRegistration()
 {
+	/*
     vtkSmartPointer<vtkPolyData> hipRight, hipLeft;
 
     hipLeft = TestVTK::ReadPolyData("D:\\Mega_Trabajo\\Modo\\Left_Modo\\hip_left.vtk");
@@ -2646,9 +2648,9 @@ void HipFemoralRegistration()
     lateralTrochanter = Registration::makeItkPoint(61.9828, 55.54, 112.63);
 
     ///////////////////////////////////Right
-    /*anteriorFemoralNeck = Registration::makeItkPoint(30.7806, -60.6593, 1149.39);
-    anteriorDistalTrochanter = Registration::makeItkPoint(33.015, -53.22, 1108.26);
-    lateralTrochanter = Registration::makeItkPoint(-7.67188, -42.89, 1137.5);*/
+    //anteriorFemoralNeck = Registration::makeItkPoint(30.7806, -60.6593, 1149.39);
+    //anteriorDistalTrochanter = Registration::makeItkPoint(33.015, -53.22, 1108.26);
+    //lateralTrochanter = Registration::makeItkPoint(-7.67188, -42.89, 1137.5);
 
     HipRegistrationFemur regis(hipLeft, anteriorFemoralNeck, anteriorDistalTrochanter, lateralTrochanter, RegisterSide::LEFT);
 
@@ -2682,6 +2684,7 @@ void HipFemoralRegistration()
 	std::vector < cv::Point3d > pp = {cv::Point3d(23.72, 47.1258, 127.53), cv::Point3d(18.19, 44.49, 92.25) , cv::Point3d(61.9828, 55.54, 112.63) };
     TestVTK::show(hipLeft, pointsList);
 	TestVTK::show(hipLeft, verificationPoint);
+	*/
 }
 
 int getPivot(std::vector<int>& data, int initPos, int endPos)
@@ -2808,6 +2811,7 @@ int readExample()
 
 void PelvisImplantMatch()
 {
+	/*
     std::string pelvisPath = "D:\\3D_DICOM_DATA\\Modo_Pelvis\\pelvis_full.vtk";
     std::string pelvisRealPath = "D:\\3D_DICOM_DATA\\Person_2\\Pelvis.vtk";
     std::string implantFullPath = "D:\\3D_DICOM_DATA\\Modo_Pelvis\\pelvis_implant.vtk";
@@ -2817,10 +2821,10 @@ void PelvisImplantMatch()
 	auto pelvis3D_Real = TestVTK::ReadPolyData("D:\\Mega_Trabajo\\Person_2\\Pelvis.vtk");
 	auto implant3D = TestVTK::ReadPolyDataSTL("D:\\Mega_Trabajo\\Person_2\\Implants\\acetabular_shell.stl");
 
-    /*auto pelvis3D = TestVTK::ReadPolyData(pelvisPath);
-    auto pelvis3D_Real = TestVTK::ReadPolyData(pelvisRealPath);
-    auto implant3D = TestVTK::ReadPolyData(implantCupPath);
-    auto stem3D = TestVTK::ReadPolyData(implantStemPath);*/
+    //auto pelvis3D = TestVTK::ReadPolyData(pelvisPath);
+    //auto pelvis3D_Real = TestVTK::ReadPolyData(pelvisRealPath);
+    //auto implant3D = TestVTK::ReadPolyData(implantCupPath);
+    //auto stem3D = TestVTK::ReadPolyData(implantStemPath);
 
     //////////////////////// Modo
 
@@ -2872,11 +2876,11 @@ void PelvisImplantMatch()
 
     //auto transformImplantStem = TestVTK::TransformPoly(stem3D, objMatchStem.GetRotationMatrix(), objMatchStem.GetTranslationMatrix());
 
-    /*vtkNew<vtkAppendPolyData> appendFilter;
-    appendFilter->AddInputData(pelvis3D_Real);
-    appendFilter->AddInputData(transformImplantCup);
-    appendFilter->AddInputData(transformImplantStem);
-    appendFilter->Update();*/
+    //vtkNew<vtkAppendPolyData> appendFilter;
+    //appendFilter->AddInputData(pelvis3D_Real);
+    //appendFilter->AddInputData(transformImplantCup);
+    //appendFilter->AddInputData(transformImplantStem);
+    //appendFilter->Update();
 
     //std::vector<vtkSmartPointer<vtkPolyData>> polyList = { transformImplantCup, transformImplantStem };
 
@@ -2912,7 +2916,7 @@ void PelvisImplantMatch()
 
      }*/
 
-    TestVTK::show(objPelvis.getPelvisVTK(), polyList);
+    //TestVTK::show(objPelvis.getPelvisVTK(), polyList);
     //TestVTK::show(implant3D, polyList);
 
     /*auto startTime = std::chrono::system_clock::now();
@@ -2930,6 +2934,7 @@ void PelvisImplantMatch()
 
 void PelvisImplantMatch_2()
 {
+	/*
     std::string pelvisPath = "D:\\3D_DICOM_DATA\\Pelvis Fei\\pelvis_full.vtk";
     std::string implantFullPath = "D:\\3D_DICOM_DATA\\Modo_Pelvis\\pelvis_implant.vtk";
     std::string implantCupPath = "D:\\3D_DICOM_DATA\\Modo_Pelvis\\acetabular_cup.vtk";
@@ -2981,6 +2986,7 @@ void PelvisImplantMatch_2()
     std::vector<vtkSmartPointer<vtkPolyData>> polyList = { transformImplantCup, transformImplantStem };
 
     TestVTK::show(objPelvis.getPelvisVTK(), polyList);
+	*/
 }
 
 void RotulaGroovePath()

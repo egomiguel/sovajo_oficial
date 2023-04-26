@@ -1,4 +1,4 @@
-#include "RegistrationPointsVTK.hpp"
+//#include "RegistrationPointsVTK.hpp"
 #include "FindRegistrationPoints.hpp"
 #include "LeastSquaresScaleICP.hpp"
 #include "TemplatePoints.hpp"
