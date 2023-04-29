@@ -1359,15 +1359,16 @@ void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const
 	}
 
 	Point normalTemp = topPoint - baseLine.getProjectPoint(topPoint);
+	normalTemp.normalice();
 	Plane basePlaneLat, basePlaneMed;
 
 	Point midLat = (hullFeaturesLat.medialTopPoint + convexLat[hullFeaturesLat.medialDownPos]) / 2.;
 	Point midMed = (hullFeaturesMed.lateralTopPoint + convexMed[hullFeaturesMed.lateralDownPos]) / 2.;
 
-	basePlaneLat.init(normalTemp, midLat);
+	/*basePlaneLat.init(normalTemp, midLat);
 	basePlaneMed.init(normalTemp, midMed);
 	basePlaneLat.reverseByPoint(downPoint);
-	basePlaneMed.reverseByPoint(downPoint);
+	basePlaneMed.reverseByPoint(downPoint);*/
 
 	Line lineLat = Line(normalTemp, medialPoint);
 	Line lineMed = Line(normalTemp, lateralPoint);
@@ -1427,7 +1428,7 @@ void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const
 	Point basePointLat = baseLine.getProjectPoint(convexLat[sideLat.first]);
 	Point basePointMed = baseLine.getProjectPoint(convexMed[sideMed.first]);
 	Point basePointMid = (basePointLat + basePointMed) / 2.;
-	Point basePointMidFix = planeID == kPlaneA ? basePointMid : (((convexLat[sideLat.first] + convexMed[sideMed.first]) / 2.) + basePointMid) / 2.;
+	Point basePointMidFix = basePointMid;// planeID == kPlaneA ? basePointMid : (((convexLat[sideLat.first] + convexMed[sideMed.first]) / 2.) + basePointMid) / 2.;
 	
 	if (hullFeaturesLat.medialDownPos == 0)
 	{
