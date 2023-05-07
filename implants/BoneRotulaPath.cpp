@@ -12,6 +12,8 @@
 //#include <pcl/surface/on_nurbs/fitting_curve_pdm.h>
 #include <fstream>
 
+using namespace TKA::IMPLANTS;
+
 BoneRotulaPath::BoneRotulaPath(const Knee& knee)
 {
     femurPoly = knee.GetFemurPoly();

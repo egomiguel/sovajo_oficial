@@ -10,6 +10,8 @@
 #include "vtkClipClosedSurface.h"
 #include "vtkExtractPolyDataGeometry.h"
 
+using namespace TKA::IMPLANTS;
+
 
 inline double squareDistance2d(cv::Point2d P0, cv::Point2d P1)
 {

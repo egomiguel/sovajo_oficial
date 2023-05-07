@@ -14,6 +14,8 @@
 #include <vtkPolyDataMapper.h>
 #include <random>
 
+using namespace TKA::IMPLANTS;
+
 vtkSmartPointer<vtkPolyData> CreateSphereTest(const cv::Point3d& pPoint)
 {
     double pnt[3];

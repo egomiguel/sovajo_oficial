@@ -116,6 +116,7 @@
 #include <fstream>
 #include <stdio.h>
 
+using namespace TKA::SEGMENTATION;
 
 struct SLine
 {

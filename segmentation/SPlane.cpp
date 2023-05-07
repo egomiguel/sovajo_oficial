@@ -4,6 +4,8 @@
 #include "SPlane.hpp"
 #include "SegmentationException.hpp"
 
+using namespace TKA::SEGMENTATION;
+
 const double EPSILON = std::numeric_limits<double>::epsilon();
 
 SPlane::SPlane()

@@ -5,67 +5,73 @@
 #include "vtkSmartPointer.h"
 #include <itkRigid3DTransform.h>
 #include "Plane.hpp"
-#include "implants_export.h"
+#include "tka_implants_export.h"
 #include "Utils.hpp"
 
-class IMPLANTS_EXPORT FemurImplant
+namespace TKA
 {
-public:
-	FemurImplant();
+	namespace IMPLANTS
+	{
+		class TKA_IMPLANTS_EXPORT FemurImplant
+		{
+		public:
+			FemurImplant();
 
-    FemurImplant(const FemurImplant& pImplant);
+			FemurImplant(const FemurImplant& pImplant);
 
-    void init(const Plane& A, const Plane& B, const Plane& C, const Plane& D, const Plane& E,
-        const Point& P3, const Point& P4, const Point& cortexPoint, const vtkSmartPointer<vtkPolyData> implantModel, 
-        const std::vector<PointTypeITK>& kneeCapPath, const FemurImplantInfo& pImplantInfo);
-    
-    Plane getPlaneA() const;
+			void init(const Plane& A, const Plane& B, const Plane& C, const Plane& D, const Plane& E,
+				const Point& P3, const Point& P4, const Point& cortexPoint, const vtkSmartPointer<vtkPolyData> implantModel,
+				const std::vector<PointTypeITK>& kneeCapPath, const FemurImplantInfo& pImplantInfo);
 
-	Plane getPlaneB() const;
+			Plane getPlaneA() const;
 
-	Plane getPlaneC() const;
+			Plane getPlaneB() const;
 
-	Plane getPlaneD() const;
+			Plane getPlaneC() const;
 
-	Plane getPlaneE() const;
+			Plane getPlaneD() const;
 
-	Plane getMidPlane() const;
+			Plane getPlaneE() const;
 
-	Point getCortexPoint() const;
+			Plane getMidPlane() const;
 
-	cv::Mat getCortexPointMat() const;
+			Point getCortexPoint() const;
 
-	Point getDirectVectorFemurAxis() const;
+			cv::Mat getCortexPointMat() const;
 
-	Point getDirectVectorTEA() const;
+			Point getDirectVectorFemurAxis() const;
 
-	Point getDirectVectorAP() const;
+			Point getDirectVectorTEA() const;
 
-    Point getPointP3() const;
+			Point getDirectVectorAP() const;
 
-    Point getPointP4() const;
+			Point getPointP3() const;
 
-    vtkSmartPointer<vtkPolyData> GetImplantModel() const;
+			Point getPointP4() const;
 
-    vtkSmartPointer<vtkPolyData> GetTransformImplantModel(const itk::Rigid3DTransform<>::Pointer transform) const;
+			vtkSmartPointer<vtkPolyData> GetImplantModel() const;
 
-    std::vector<Point> GetKneeCapPath() const;
+			vtkSmartPointer<vtkPolyData> GetTransformImplantModel(const itk::Rigid3DTransform<>::Pointer transform) const;
 
-    Point getMidPlaneInterceptionPoint() const;
+			std::vector<Point> GetKneeCapPath() const;
 
-    FemurImplantInfo getImplantInfo() const;
+			Point getMidPlaneInterceptionPoint() const;
 
-private:
-	Plane planeA, planeB, planeC, planeD, planeE, midPlane;
-	Point P3, P4;
-	Point cortexPoint;
-	bool isInit;
-	void fixNormalVectorC();
-    vtkSmartPointer<vtkPolyData> implantModel;
-    std::vector<Point> mKneeCapPath;
-    void FixKneeCapPath(const std::vector<PointTypeITK>& pKneeCapPath);
-    FemurImplantInfo mImplantInfo;
-};
+			FemurImplantInfo getImplantInfo() const;
 
+		private:
+			Plane planeA, planeB, planeC, planeD, planeE, midPlane;
+			Point P3, P4;
+			Point cortexPoint;
+			bool isInit;
+			void fixNormalVectorC();
+			vtkSmartPointer<vtkPolyData> implantModel;
+			std::vector<Point> mKneeCapPath;
+			void FixKneeCapPath(const std::vector<PointTypeITK>& pKneeCapPath);
+			FemurImplantInfo mImplantInfo;
+		};
+
+	}
+}
 
 #endif

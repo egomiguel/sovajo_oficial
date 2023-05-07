@@ -9,6 +9,8 @@
 #include "vtkContourTriangulator.h"
 #include "vtkAppendPolyData.h"
 
+using namespace TKA::SEGMENTATION;
+
 const double EPSILON = std::numeric_limits<double>::epsilon();
 
 const int lessAmount = 10;

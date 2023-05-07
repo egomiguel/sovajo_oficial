@@ -1,6 +1,7 @@
 
 #include "Point.hpp"
 
+using namespace TKA::IMPLANTS;
 
 Point::Point(double x, double y, double z)
 	:cv::Point3d(x, y, z)

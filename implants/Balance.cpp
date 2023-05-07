@@ -16,6 +16,7 @@
 #include "vtkCellLocator.h"
 #include "ImplantTools.hpp"
 
+using namespace TKA::IMPLANTS;
 
 double balanceSquareDistance(const Point& a, const Point& b)
 {

@@ -6,82 +6,89 @@
 #include "vtkImplicitPolyDataDistance.h"
 #include "vtkPolyData.h"
 
-class LeastSquaresScaleICP
+namespace TKA
 {
-private:
-    struct GaussNewton
-    {
-        cv::Mat A, B;
-        double totalError;
-        double localError;
-        GaussNewton(const cv::Mat& A, const cv::Mat& B, double totalError, double localError)
-        {
-            this->A = A;
-            this->B = B;
-            this->totalError = totalError;
-            this->localError = localError;
-        }
-    };
+	namespace IMPLANTS
+	{
 
-    double chi2;
+		class LeastSquaresScaleICP
+		{
+		private:
+			struct GaussNewton
+			{
+				cv::Mat A, B;
+				double totalError;
+				double localError;
+				GaussNewton(const cv::Mat& A, const cv::Mat& B, double totalError, double localError)
+				{
+					this->A = A;
+					this->B = B;
+					this->totalError = totalError;
+					this->localError = localError;
+				}
+			};
 
-    double maxError;
+			double chi2;
 
-    cv::Mat Rx(double angle);
+			double maxError;
 
-    cv::Mat Ry(double angle);
+			cv::Mat Rx(double angle);
 
-    cv::Mat Rz(double angle);
+			cv::Mat Ry(double angle);
 
-    cv::Mat DRx(double angle);
+			cv::Mat Rz(double angle);
 
-    cv::Mat DRy(double angle);
+			cv::Mat DRx(double angle);
 
-    cv::Mat DRz(double angle);
+			cv::Mat DRy(double angle);
 
-    cv::Mat CreatePoint(double x, double y, double z);
+			cv::Mat DRz(double angle);
 
-    cv::Mat CreatePoint(cv::Point3d Point);
+			cv::Mat CreatePoint(double x, double y, double z);
 
-    cv::Mat DF_Rx(double angleX, double angleY, double angleZ, const cv::Mat& Point);
+			cv::Mat CreatePoint(cv::Point3d Point);
 
-    cv::Mat DF_Ry(double angleX, double angleY, double angleZ, const cv::Mat& Point);
+			cv::Mat DF_Rx(double angleX, double angleY, double angleZ, const cv::Mat& Point);
 
-    cv::Mat DF_Rz(double angleX, double angleY, double angleZ, const cv::Mat& Point);
+			cv::Mat DF_Ry(double angleX, double angleY, double angleZ, const cv::Mat& Point);
 
-    cv::Mat JacobianScale(const cv::Mat& data, const cv::Mat& Point);
+			cv::Mat DF_Rz(double angleX, double angleY, double angleZ, const cv::Mat& Point);
 
-    cv::Mat SquareErrorScale(const cv::Mat& data, const cv::Mat& source, const cv::Mat& target);
+			cv::Mat JacobianScale(const cv::Mat& data, const cv::Mat& Point);
 
-    void GetScale(const std::vector<cv::Point3d>& target, cv::Mat& data);
+			cv::Mat SquareErrorScale(const cv::Mat& data, const cv::Mat& source, const cv::Mat& target);
 
-    GaussNewton GetSystemScale(const std::vector<cv::Point3d>& target, const cv::Mat& data, int posBegin, int posEnd, double lambda = 0);
+			void GetScale(const std::vector<cv::Point3d>& target, cv::Mat& data);
 
-    cv::Point3d ClosestPoint(const vtkSmartPointer<vtkPolyData>& surface, double point[3]);
+			GaussNewton GetSystemScale(const std::vector<cv::Point3d>& target, const cv::Mat& data, int posBegin, int posEnd, double lambda = 0);
 
-    std::vector<cv::Point3d> GetCorrespondenceScale(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const cv::Mat& data);
-    
-    void shuffleCenterSource();
+			cv::Point3d ClosestPoint(const vtkSmartPointer<vtkPolyData>& surface, double point[3]);
 
-    std::vector<cv::Point3d> source;
-    std::vector<cv::Point3d> centerSource;
-    cv::Point3d aveSource;
-public:
-    LeastSquaresScaleICP(const std::vector<cv::Point3d>& sourcePoints);
+			std::vector<cv::Point3d> GetCorrespondenceScale(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const cv::Mat& data);
 
-    static cv::Mat GetRotationAnglesXYZ(const std::vector<cv::Point3d>& threeVectorsSource, const std::vector<cv::Point3d>& threeVectorstarget, cv::Mat& data);
+			void shuffleCenterSource();
 
-    cv::Mat GetRotationMatrix(double angleX, double angleY, double angleZ);
-    
-    double LeastSquaresScale(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 200);
+			std::vector<cv::Point3d> source;
+			std::vector<cv::Point3d> centerSource;
+			cv::Point3d aveSource;
+		public:
+			LeastSquaresScaleICP(const std::vector<cv::Point3d>& sourcePoints);
 
-    void setChi2(double pChi2);
+			static cv::Mat GetRotationAnglesXYZ(const std::vector<cv::Point3d>& threeVectorsSource, const std::vector<cv::Point3d>& threeVectorstarget, cv::Mat& data);
 
-    void setMaxError(double pMaxError);
+			cv::Mat GetRotationMatrix(double angleX, double angleY, double angleZ);
 
-    double getChi2() const;
+			double LeastSquaresScale(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 200);
 
-    double getMaxError() const;
-};
+			void setChi2(double pChi2);
+
+			void setMaxError(double pMaxError);
+
+			double getChi2() const;
+
+			double getMaxError() const;
+		};
+	}
+}
 
 #endif

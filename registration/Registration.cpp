@@ -53,6 +53,7 @@
 
 
 using namespace std::chrono_literals;
+using namespace TKA::REGISTRATION;
 
 inline std::vector<PointTypeITK> PointToITKVector(const std::vector<cv::Point3d>& pData)
 {

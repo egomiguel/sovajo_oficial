@@ -1,5 +1,5 @@
 @PACKAGE_INIT@
-include("${CMAKE_CURRENT_LIST_DIR}/RegistrationTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/TKA_RegistrationTargets.cmake")
 
 
 find_package(ITK REQUIRED)
@@ -15,4 +15,4 @@ include(${VTK_USE_FILE})
 
 #target_link_libraries(Registration INTERFACE ${ITK_LIBRARIES} ${OpenCV_LIBS} ${PCL_LIBRARIES})
 
-check_required_components(Registration)
+check_required_components(TKA_Registration)

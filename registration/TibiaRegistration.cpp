@@ -8,6 +8,8 @@
 //#include <pcl/common/common_headers.h>
 //#include <pcl/registration/icp.h>
 
+using namespace TKA::REGISTRATION;
+
 TibiaRegistration::TibiaRegistration(const vtkSmartPointer<vtkPolyData> img, const PointTypeITK& pTibiaTubercleCT, const PointTypeITK& pLateralmalleolusCT, const PointTypeITK& pMedialmalleolusCT)
     :Registration(img)
 {

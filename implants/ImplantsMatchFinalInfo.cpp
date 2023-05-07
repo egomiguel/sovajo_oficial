@@ -4,6 +4,7 @@
 #include "ImplantTools.hpp"
 #include <itkVersorRigid3DTransform.h>
 
+using namespace TKA::IMPLANTS;
 
 ImplantsMatchFinalInfo::ImplantsMatchFinalInfo(Knee* pKnee, const FemurImplant pFemurImplant, const TibiaImplant pTibiaImplant, const itk::Rigid3DTransform<>::Pointer pImplantToBoneFemurTransform, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTibiaTransform)
 {

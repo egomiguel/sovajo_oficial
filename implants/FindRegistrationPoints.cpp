@@ -4,6 +4,8 @@
 #include "TemplatePoints.hpp"
 #include "ImplantTools.hpp"
 
+using namespace TKA::IMPLANTS;
+
 inline std::vector<PointTypeITK> PointToITKVector(const std::vector<Point>& pData)
 {
     std::vector<PointTypeITK> result;

@@ -22,6 +22,7 @@
 //    std::cout << a[0] << "; " << a[1] << "; " << a[2] << "; "<< a[3] << "; " << a[4] << "; " << a[5] << std::endl;
 //}
 
+using namespace TKA::SEGMENTATION;
 
 Tiling::Tiling(const vtkSmartPointer<vtkPolyData> sliceDown, const vtkSmartPointer<vtkPolyData> sliceUp, int offSet, bool closed, bool makeNormalization)
 {

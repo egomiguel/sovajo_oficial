@@ -15,6 +15,8 @@
 #include "TemplatePoints.hpp"
 #include "LeastSquaresScaleICP.hpp"
 
+using namespace TKA::IMPLANTS;
+
 const Point UnitVectorSagital(1, 0, 0);
 const Point UnitVectorCoronal(0, 1, 0);
 const Point UnitVectorAxial(0, 0, 1);

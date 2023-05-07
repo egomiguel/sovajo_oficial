@@ -3,6 +3,8 @@
 #include "vtkNew.h"
 #include "SPlane.hpp"
 
+using namespace TKA::SEGMENTATION;
+
 double CalculateValue(const double P1[3], const double P2[3], const double P3[3])
 {
     cv::Point3d point1 = { P1[0], P1[1], P1[2] };

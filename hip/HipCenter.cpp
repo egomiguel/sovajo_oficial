@@ -5,6 +5,7 @@
 #include "HipCenter.hpp"
 #include "HipException.hpp"
 
+using namespace TKA::HIP;
 
 HipCenter::HipCenter(const std::vector<std::vector<HipPoint> >& ellipse_list)
 {

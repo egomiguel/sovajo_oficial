@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(Implants VERSION 1.0.1 LANGUAGES CXX)
+project(TKA_Implants VERSION 1.0.1 LANGUAGES CXX)
 include(GenerateExportHeader)
 include(CMakePackageConfigHelpers)
 #find_package(ITK COMPONENTS ITKTransform REQUIRED)
@@ -18,31 +18,31 @@ set(Boost_COMPILER "-vc142")
 file(GLOB_RECURSE _HDRS "*.hpp")
 file(GLOB_RECURSE _SRCS "*.cpp")
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-add_library(Implants SHARED ${_HDRS} ${_SRCS})
-#target_link_libraries(Implants PRIVATE ${ITK_LIBRARIES} ${OpenCV_LIBS} ${VTK_LIBRARIES} ${PCL_LIBRARIES})
-target_link_libraries(Implants PRIVATE ${ITK_LIBRARIES} ${OpenCV_LIBS} ${VTK_LIBRARIES})
+add_library(TKA_Implants SHARED ${_HDRS} ${_SRCS})
+#target_link_libraries(TKA_Implants PRIVATE ${ITK_LIBRARIES} ${OpenCV_LIBS} ${VTK_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(TKA_Implants PRIVATE ${ITK_LIBRARIES} ${OpenCV_LIBS} ${VTK_LIBRARIES})
 
-generate_export_header(Implants)
+generate_export_header(TKA_Implants)
 target_include_directories(${PROJECT_NAME} PUBLIC 
 							"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>" 
 							"$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>" )
-install(TARGETS Implants
-	EXPORT ImplantsTargets
+install(TARGETS TKA_Implants
+	EXPORT TKA_ImplantsTargets
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib
 	INCLUDES DESTINATION include)
 install(FILES ${_HDRS} DESTINATION include)
-install(FILES ${PROJECT_BINARY_DIR}/implants_export.h DESTINATION include)
-install(EXPORT ImplantsTargets
-        FILE ImplantsTargets.cmake
-        DESTINATION lib/cmake/Implants)
-configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/ImplantsConfig.cmake.in
-	"${CMAKE_CURRENT_BINARY_DIR}/ImplantsConfig.cmake"
-	INSTALL_DESTINATION lib/cmake/Implants)
+install(FILES ${PROJECT_BINARY_DIR}/tka_implants_export.h DESTINATION include)
+install(EXPORT TKA_ImplantsTargets
+        FILE TKA_ImplantsTargets.cmake
+        DESTINATION lib/cmake/TKA_Implants)
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/TKA_ImplantsConfig.cmake.in
+	"${CMAKE_CURRENT_BINARY_DIR}/TKA_ImplantsConfig.cmake"
+	INSTALL_DESTINATION lib/cmake/TKA_Implants)
 install(FILES
-	"${CMAKE_CURRENT_BINARY_DIR}/ImplantsConfig.cmake"
-	DESTINATION lib/cmake/Implants)
+	"${CMAKE_CURRENT_BINARY_DIR}/TKA_ImplantsConfig.cmake"
+	DESTINATION lib/cmake/TKA_Implants)
 set(CPACK_GENERATOR NSIS)
 set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}")
 set(CPACK_PACKAGE_VENDOR "CMake.org")

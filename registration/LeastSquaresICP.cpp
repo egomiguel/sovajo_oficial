@@ -14,6 +14,8 @@
 #include <algorithm>
 #include <random>
 
+using namespace TKA::REGISTRATION;
+
 vtkSmartPointer<vtkPolyData> CreateSphereTest(const cv::Point3d& pPoint)
 {
     double pnt[3];

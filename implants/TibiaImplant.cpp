@@ -6,6 +6,8 @@
 #include "TibiaImplant.hpp"
 #include "ImplantsException.hpp"
 
+using namespace TKA::IMPLANTS;
+
 TibiaImplant::TibiaImplant()
 {
 	isInit = false;

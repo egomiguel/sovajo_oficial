@@ -3,6 +3,8 @@
 #include <numeric>
 #include "DataFit.hpp"
 
+using namespace TKA::HIP;
+
 DataFit::DataFit(const std::vector<cv::Point3d>& ellipse_points)
 {
 	ellipse_points_ = ellipse_points;

@@ -15,110 +15,116 @@
 #include "vtkSmartPointer.h"
 #include "vtkPolyData.h"
 
-class RegistrationPrivate
+namespace TKA
 {
-private:
-    void getPointsAtDistanceRecursiveVTK(vtkIdType baseId, const cv::Point3d& pCenterPoint, double radius, const vtkSmartPointer<vtkPolyData> pPoly, std::vector<std::pair<cv::Point3d, cv::Point3d>>& result, std::set<vtkIdType>& visited);
-public:
-    RegistrationPrivate();
+	namespace REGISTRATION
+	{
 
-    //pcl::PointCloud<pcl::PointXYZ>::Ptr PointsCT;
+		class RegistrationPrivate
+		{
+		private:
+			void getPointsAtDistanceRecursiveVTK(vtkIdType baseId, const cv::Point3d& pCenterPoint, double radius, const vtkSmartPointer<vtkPolyData> pPoly, std::vector<std::pair<cv::Point3d, cv::Point3d>>& result, std::set<vtkIdType>& visited);
+		public:
+			RegistrationPrivate();
 
-    std::vector<cv::Point3d> CvPointsCT;
+			//pcl::PointCloud<pcl::PointXYZ>::Ptr PointsCT;
 
-    Eigen::Matrix4d mMatrix;
+			std::vector<cv::Point3d> CvPointsCT;
 
-    double mError;
+			Eigen::Matrix4d mMatrix;
 
-    //void alignCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr source_cloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud, double near_radius);
+			double mError;
 
-    //double getFitnessScore_max(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_sc, const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_targe, bool show = false);
+			//void alignCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr source_cloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud, double near_radius);
 
-    //double getFitnessScore_max(const pcl::KdTreeFLANN<pcl::PointXYZ>& kdtree, const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_targe);
+			//double getFitnessScore_max(const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_sc, const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_targe, bool show = false);
 
-    double getFitnessScore_max(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const std::vector<Eigen::Vector4d>& cloud_targe);
-    
-    Eigen::Vector3d itkPointToEigen(const PointTypeITK& point);
+			//double getFitnessScore_max(const pcl::KdTreeFLANN<pcl::PointXYZ>& kdtree, const pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_targe);
 
-    //pcl::PointXYZ itkPointToPCL(const PointTypeITK& point);
+			double getFitnessScore_max(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const std::vector<Eigen::Vector4d>& cloud_targe);
 
-    cv::Point3d itkPointToCV(const PointTypeITK& point);
+			Eigen::Vector3d itkPointToEigen(const PointTypeITK& point);
 
-    //PointTypeITK pclPointToItk(const pcl::PointXYZ& point);
+			//pcl::PointXYZ itkPointToPCL(const PointTypeITK& point);
 
-    PointTypeITK cvPointToItk(const cv::Point3d& point);
+			cv::Point3d itkPointToCV(const PointTypeITK& point);
 
-    PointTypeITK vtkPointToItk(const double point[3]);
+			//PointTypeITK pclPointToItk(const pcl::PointXYZ& point);
 
-    Eigen::Vector3d cvPointToEigen(const cv::Point3d& point);
+			PointTypeITK cvPointToItk(const cv::Point3d& point);
 
-    cv::Mat cvPointToMat(const cv::Point3d& point);
+			PointTypeITK vtkPointToItk(const double point[3]);
 
-    //void itkPointVectorToPCLPointVector(const std::vector<PointTypeITK>& pointsIn, pcl::PointCloud<pcl::PointXYZ>::Ptr pointsOut);
+			Eigen::Vector3d cvPointToEigen(const cv::Point3d& point);
 
-    void itkPointVectorToEigenPointVector4(const std::vector<PointTypeITK>& pointsIn, std::vector<Eigen::Vector4d>& pointsOut);
+			cv::Mat cvPointToMat(const cv::Point3d& point);
 
-    void transformVectorEigen4(const std::vector<Eigen::Vector4d>& pointsIn, std::vector<Eigen::Vector4d>& pointsOut, const Eigen::Matrix4d& pMatrix);
+			//void itkPointVectorToPCLPointVector(const std::vector<PointTypeITK>& pointsIn, pcl::PointCloud<pcl::PointXYZ>::Ptr pointsOut);
 
-    /*void reduceBiggerCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr biggerCloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr smallerCloud,
-        pcl::PointCloud<pcl::PointXYZ>::Ptr reduceBiggerCloudOut, double radius = 80.0);*/
+			void itkPointVectorToEigenPointVector4(const std::vector<PointTypeITK>& pointsIn, std::vector<Eigen::Vector4d>& pointsOut);
 
-    /*void reduceBiggerCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr biggerCloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr smallerCloud,
-        Eigen::MatrixXd& outPut, double radius);*/
+			void transformVectorEigen4(const std::vector<Eigen::Vector4d>& pointsIn, std::vector<Eigen::Vector4d>& pointsOut, const Eigen::Matrix4d& pMatrix);
 
-    /*pcl::PointCloud<pcl::PointXYZ>::Ptr getNearPointsToReferencePoints(const std::vector<pcl::PointXYZ>& points, std::vector<pcl::PointXYZ>& point_list_1, std::vector<pcl::PointXYZ>& point_list_2,
-        std::vector<pcl::PointXYZ>& point_list_3, std::vector<pcl::PointXYZ>& point_list_4, double radius = 10.0);*/
+			/*void reduceBiggerCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr biggerCloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr smallerCloud,
+				pcl::PointCloud<pcl::PointXYZ>::Ptr reduceBiggerCloudOut, double radius = 80.0);*/
 
-    /*void getMostNearPointsToReferencePoints(const std::vector<pcl::PointXYZ>& points, std::vector<pcl::PointXYZ>& point_list_1, std::vector<pcl::PointXYZ>& point_list_2,
-        std::vector<pcl::PointXYZ>& point_list_3, std::vector<pcl::PointXYZ>& point_list_4, double radius = 10.0);*/
+				/*void reduceBiggerCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr biggerCloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr smallerCloud,
+					Eigen::MatrixXd& outPut, double radius);*/
 
-    //PointTypeITK getNearPointRandom(const pcl::KdTreeFLANN<pcl::PointXYZ>& kdtree, PointTypeITK& point, double radius);
+					/*pcl::PointCloud<pcl::PointXYZ>::Ptr getNearPointsToReferencePoints(const std::vector<pcl::PointXYZ>& points, std::vector<pcl::PointXYZ>& point_list_1, std::vector<pcl::PointXYZ>& point_list_2,
+						std::vector<pcl::PointXYZ>& point_list_3, std::vector<pcl::PointXYZ>& point_list_4, double radius = 10.0);*/
 
-    //PointTypeITK getNearPointRandom(const pcl::KdTreeFLANN<pcl::PointXYZ>& kdtree, const pcl::PointCloud<pcl::PointXYZ>::Ptr pointList, PointTypeITK& point);
-    
-    Eigen::Matrix4d InitRegistration(const std::vector<PointTypeITK>& source, const std::vector<PointTypeITK>& target);
+						/*void getMostNearPointsToReferencePoints(const std::vector<pcl::PointXYZ>& points, std::vector<pcl::PointXYZ>& point_list_1, std::vector<pcl::PointXYZ>& point_list_2,
+							std::vector<pcl::PointXYZ>& point_list_3, std::vector<pcl::PointXYZ>& point_list_4, double radius = 10.0);*/
 
-    //PointTypeITK getRandomPoint(const pcl::PointCloud<pcl::PointXYZ>::Ptr pointList, const PointTypeITK& point);
+							//PointTypeITK getNearPointRandom(const pcl::KdTreeFLANN<pcl::PointXYZ>& kdtree, PointTypeITK& point, double radius);
 
-    double GetNearPoint(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const PointTypeITK& point, PointTypeITK& nearPoint);
+							//PointTypeITK getNearPointRandom(const pcl::KdTreeFLANN<pcl::PointXYZ>& kdtree, const pcl::PointCloud<pcl::PointXYZ>::Ptr pointList, PointTypeITK& point);
 
-    double TransformPointDistance(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitDistance, const Eigen::Matrix4d& matrix, const PointTypeITK& point, PointTypeITK& pointOut);
+			Eigen::Matrix4d InitRegistration(const std::vector<PointTypeITK>& source, const std::vector<PointTypeITK>& target);
 
-    double GetITKPointDistance(const PointTypeITK& point1, const PointTypeITK& point2);
+			//PointTypeITK getRandomPoint(const pcl::PointCloud<pcl::PointXYZ>::Ptr pointList, const PointTypeITK& point);
 
-    void GetKneeCapPoints(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const cv::Point3d& a, const cv::Point3d& b, const cv::Point3d& vector, std::vector<PointTypeITK>& pPoints);
+			double GetNearPoint(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const PointTypeITK& point, PointTypeITK& nearPoint);
 
-    double GetDistance(const double p1[3], const double p2[3]) const;
+			double TransformPointDistance(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitDistance, const Eigen::Matrix4d& matrix, const PointTypeITK& point, PointTypeITK& pointOut);
 
-    double GetDistance(const cv::Point3d& p1, const cv::Point3d& p2) const;
+			double GetITKPointDistance(const PointTypeITK& point1, const PointTypeITK& point2);
 
-    cv::Mat GetRotateZ(const cv::Point3d& vector);
+			void GetKneeCapPoints(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const cv::Point3d& a, const cv::Point3d& b, const cv::Point3d& vector, std::vector<PointTypeITK>& pPoints);
 
-    cv::Point3d TransformPoint(const cv::Point3d& pPoint, const cv::Mat& pTransform);
+			double GetDistance(const double p1[3], const double p2[3]) const;
 
-    double getACos(double pValue);
+			double GetDistance(const cv::Point3d& p1, const cv::Point3d& p2) const;
 
-    std::vector<cv::Point3d> getPointsAtDistanceVTK(vtkIdType centerId, double radius, const vtkSmartPointer<vtkPolyData> pPoly);
+			cv::Mat GetRotateZ(const cv::Point3d& vector);
 
-    std::pair<std::vector<cv::Point3d>, std::vector<cv::Point3d>> getAxisPelvisVectors(const cv::Point3d& pAnteriorCamera, const cv::Point3d& pPosteriorCamera, const cv::Point3d& pSuperiorCamera, const cv::Point3d& pAnteriorCT, const cv::Point3d& pPosteriorCT, const cv::Point3d& pSuperiorCT);
+			cv::Point3d TransformPoint(const cv::Point3d& pPoint, const cv::Mat& pTransform);
 
-    std::vector<cv::Point3d> getAxisHipFemoral(const PointTypeITK& pAnteriorFemoralNeck, const PointTypeITK& pAnteriorDistalTrochanter, const PointTypeITK& pLateralTrochanter);
+			double getACos(double pValue);
 
-    std::vector<cv::Point3d> getAxisHipFemoral(const cv::Point3d& pAnteriorFemoralNeck, const cv::Point3d& pAnteriorDistalTrochanter, const cv::Point3d& pLateralTrochanter);
+			std::vector<cv::Point3d> getPointsAtDistanceVTK(vtkIdType centerId, double radius, const vtkSmartPointer<vtkPolyData> pPoly);
 
-    Eigen::Matrix4d getRigidTransform(const std::vector<cv::Point3d>& threeVectorsSource, const std::vector<cv::Point3d>& threeVectorstarget, const cv::Point3d& pointSource, const cv::Point3d& pointTarget);
+			std::pair<std::vector<cv::Point3d>, std::vector<cv::Point3d>> getAxisPelvisVectors(const cv::Point3d& pAnteriorCamera, const cv::Point3d& pPosteriorCamera, const cv::Point3d& pSuperiorCamera, const cv::Point3d& pAnteriorCT, const cv::Point3d& pPosteriorCT, const cv::Point3d& pSuperiorCT);
 
-    std::pair<double, cv::Point3d> getMinCircle(const cv::Point3d& a, const cv::Point3d& b, const cv::Point3d& c);
+			std::vector<cv::Point3d> getAxisHipFemoral(const PointTypeITK& pAnteriorFemoralNeck, const PointTypeITK& pAnteriorDistalTrochanter, const PointTypeITK& pLateralTrochanter);
 
-    std::pair<double, cv::Point3d> getMinCircle(const PointTypeITK& a, const PointTypeITK& b, const PointTypeITK& c);
+			std::vector<cv::Point3d> getAxisHipFemoral(const cv::Point3d& pAnteriorFemoralNeck, const cv::Point3d& pAnteriorDistalTrochanter, const cv::Point3d& pLateralTrochanter);
 
-    cv::Mat getRotateMatrix(const cv::Point3d& axis, double angle);
+			Eigen::Matrix4d getRigidTransform(const std::vector<cv::Point3d>& threeVectorsSource, const std::vector<cv::Point3d>& threeVectorstarget, const cv::Point3d& pointSource, const cv::Point3d& pointTarget);
 
-    cv::Mat GetRotateTransformVectors(const cv::Point3d& pFromVector, const cv::Point3d& pToVector);
+			std::pair<double, cv::Point3d> getMinCircle(const cv::Point3d& a, const cv::Point3d& b, const cv::Point3d& c);
 
-    double getAngleBetweenVectors(const cv::Point3d& a, const cv::Point3d& b);
-};
+			std::pair<double, cv::Point3d> getMinCircle(const PointTypeITK& a, const PointTypeITK& b, const PointTypeITK& c);
 
+			cv::Mat getRotateMatrix(const cv::Point3d& axis, double angle);
+
+			cv::Mat GetRotateTransformVectors(const cv::Point3d& pFromVector, const cv::Point3d& pToVector);
+
+			double getAngleBetweenVectors(const cv::Point3d& a, const cv::Point3d& b);
+		};
+	}
+}
 
 
 #endif

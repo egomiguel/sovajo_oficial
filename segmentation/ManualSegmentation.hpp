@@ -1,64 +1,72 @@
 #ifndef MANUAL_SEGMENTATION_H
 #define MANUAL_SEGMENTATION_H
+
 #include "Types.hpp"
-#include "segmentation_export.h"
+#include "tka_segmentation_export.h"
 #include "vtkSmartPointer.h"
 #include "vtkPolyData.h"
 
-const int8_t BinaryBackgroundPixel = 0;
-const int8_t BinaryNoBackgroundPixel = 1;
-
-class SEGMENTATION_EXPORT ManualSegmentation
+namespace TKA
 {
-public:
+	namespace SEGMENTATION
+	{
 
-    enum ViewPlane {
-        kSagital_X,
-        kCoronal_Y,
-        kAxial_Z
-    };
+		const int8_t BinaryBackgroundPixel = 0;
+		const int8_t BinaryNoBackgroundPixel = 1;
 
-    ManualSegmentation(const ImageType::Pointer pImage);
+		class TKA_SEGMENTATION_EXPORT ManualSegmentation
+		{
+		public:
 
-    ImageType::Pointer ApplyThresholds(short pMinthreshold, short pMaxthreshold, bool pDenoiseBefore = true);
+			enum ViewPlane {
+				kSagital_X,
+				kCoronal_Y,
+				kAxial_Z
+			};
 
-    static vtkSmartPointer<vtkPolyData> BinaryImageToPolyData(const SegmentImageType::Pointer pBinaryImage);
-    /*
-        pAnatomicalPlane: Cutting plane in its anatomical version, that is sagittal, coronal or axial.
+			ManualSegmentation(const ImageType::Pointer pImage);
 
-        pObliqueVector: Vector of the cutting plane in its original version, that is, inclined.
-    */
-    static ImageType::Pointer MakeRotation(const ImageType::Pointer& pImageIn, const ViewPlane& pAnatomicalPlane, const itk::Vector<double, 3>& pObliqueVector, itk::Matrix< double, 3, 3 >& pRotationOut, ImageType::PixelType pDefaultPixelValue = ImageTypeMin);
+			ImageType::Pointer ApplyThresholds(short pMinthreshold, short pMaxthreshold, bool pDenoiseBefore = true);
 
-    static SegmentImageType::Pointer RestoreImageSegmentation(const ImageType::Pointer& pSegmentationIn, const itk::Matrix< double, 3, 3 >& pRotationIn);
+			static vtkSmartPointer<vtkPolyData> BinaryImageToPolyData(const SegmentImageType::Pointer pBinaryImage);
+			/*
+				pAnatomicalPlane: Cutting plane in its anatomical version, that is sagittal, coronal or axial.
 
-    /*
-        Make a flood fill in closed contours. The outer area of the contours (auter background) must be greater than each inner area.
-    */
-    static ImageType::Pointer FloodFillBinaryImageSlice(const ImageType::Pointer& pImage, int8_t pNoBackgroundPixel = BinaryNoBackgroundPixel);
+				pObliqueVector: Vector of the cutting plane in its original version, that is, inclined.
+			*/
+			static ImageType::Pointer MakeRotation(const ImageType::Pointer& pImageIn, const ViewPlane& pAnatomicalPlane, const itk::Vector<double, 3>& pObliqueVector, itk::Matrix< double, 3, 3 >& pRotationOut, ImageType::PixelType pDefaultPixelValue = ImageTypeMin);
 
-    static ImageType2D::Pointer FloodFillBinaryImageSlice(const ImageType2D::Pointer& pImage, int8_t pNoBackgroundPixel = BinaryNoBackgroundPixel);
+			static SegmentImageType::Pointer RestoreImageSegmentation(const ImageType::Pointer& pSegmentationIn, const itk::Matrix< double, 3, 3 >& pRotationIn);
 
-private:
+			/*
+				Make a flood fill in closed contours. The outer area of the contours (auter background) must be greater than each inner area.
+			*/
+			static ImageType::Pointer FloodFillBinaryImageSlice(const ImageType::Pointer& pImage, int8_t pNoBackgroundPixel = BinaryNoBackgroundPixel);
 
-    ImageType::Pointer mLegImage;
+			static ImageType2D::Pointer FloodFillBinaryImageSlice(const ImageType2D::Pointer& pImage, int8_t pNoBackgroundPixel = BinaryNoBackgroundPixel);
 
-    void DeepCopy(const ImageType::Pointer pInput, ImageType::Pointer pOutput) const;
+		private:
 
-    static SegmentImageType::Pointer CastImage(const ImageType::Pointer pInput);
+			ImageType::Pointer mLegImage;
 
-    ImageType::Pointer GradientAnisotropicDiffusion(const ImageType::Pointer pImage) const;
+			void DeepCopy(const ImageType::Pointer pInput, ImageType::Pointer pOutput) const;
 
-    template<typename ImageType>
-    static typename ImageType::Pointer CloneImage(const typename ImageType::Pointer pInput);
+			static SegmentImageType::Pointer CastImage(const ImageType::Pointer pInput);
 
-    template<typename ImageType>
-    static typename ImageType::Pointer FillHole(typename ImageType::Pointer pImage, typename ImageType::PixelType pValue);
-    
-    template<typename ImageType>
-    static typename ImageType::Pointer RotateImage(typename ImageType::Pointer pImage, const itk::Matrix< double, 3, 3 >& pRotationIn, typename ImageType::PixelType pDefaultPixelValue);
+			ImageType::Pointer GradientAnisotropicDiffusion(const ImageType::Pointer pImage) const;
 
-    void Get2DSlice(const ImageType::Pointer& pImageIn, ImageType::Pointer& pImageOut, int pSliceNumber, const ViewPlane& pPlane) const;
-};
+			template<typename ImageType>
+			static typename ImageType::Pointer CloneImage(const typename ImageType::Pointer pInput);
+
+			template<typename ImageType>
+			static typename ImageType::Pointer FillHole(typename ImageType::Pointer pImage, typename ImageType::PixelType pValue);
+
+			template<typename ImageType>
+			static typename ImageType::Pointer RotateImage(typename ImageType::Pointer pImage, const itk::Matrix< double, 3, 3 >& pRotationIn, typename ImageType::PixelType pDefaultPixelValue);
+
+			void Get2DSlice(const ImageType::Pointer& pImageIn, ImageType::Pointer& pImageOut, int pSliceNumber, const ViewPlane& pPlane) const;
+		};
+	}
+}
 
 #endif

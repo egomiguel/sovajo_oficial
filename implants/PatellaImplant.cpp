@@ -6,6 +6,8 @@
 #include "PatellaImplant.hpp"
 #include "ImplantsException.hpp"
 
+using namespace TKA::IMPLANTS;
+
 PatellaImplant::PatellaImplant()
 {
 	isInit = false;

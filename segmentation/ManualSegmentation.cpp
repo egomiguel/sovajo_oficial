@@ -57,6 +57,8 @@
 #include "SegmentationException.hpp"
 #include "ManualSegmentation.hpp"
 
+using namespace TKA::SEGMENTATION;
+
 const double PI = acos(-1.0);
 
 namespace SegmentationUtils {

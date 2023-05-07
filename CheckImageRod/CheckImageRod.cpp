@@ -51,6 +51,7 @@
 #include "CheckImageRodException.hpp"
 #include "CheckImageRod.hpp"
 
+using namespace IMAGE_ROD;
 
 template<typename ImageType>
 void SaveImageTest(typename ImageType::Pointer img, std::string name, bool verbose = true)

@@ -4,6 +4,8 @@
 #include "RPlane.hpp"
 #include "RegistrationException.hpp"
 
+using namespace TKA::REGISTRATION;
+
 const double EPSILON = std::numeric_limits<double>::epsilon();
 
 RPlane::RPlane()

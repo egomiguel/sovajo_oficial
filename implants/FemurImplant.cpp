@@ -6,6 +6,8 @@
 #include "FemurImplant.hpp"
 #include "ImplantsException.hpp"
 
+using namespace TKA::IMPLANTS;
+
 FemurImplant::FemurImplant()
 {
 	isInit = false;

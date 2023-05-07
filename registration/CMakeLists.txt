@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(Registration VERSION 1.0.1 LANGUAGES CXX)
+project(TKA_Registration VERSION 1.0.1 LANGUAGES CXX)
 include(GenerateExportHeader)
 include(CMakePackageConfigHelpers)
 #find_package(ITK COMPONENTS ITKTransform REQUIRED)
@@ -20,31 +20,31 @@ set(Boost_COMPILER "-vc142")
 file(GLOB_RECURSE _HDRS "*.hpp")
 file(GLOB_RECURSE _SRCS "*.cpp")
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-add_library(Registration SHARED ${_HDRS} ${_SRCS})
-#target_link_libraries(Registration PRIVATE ${ITK_LIBRARIES} ${OpenCV_LIBS} ${VTK_LIBRARIES} ${PCL_LIBRARIES})
-target_link_libraries(Registration PRIVATE ${ITK_LIBRARIES} ${OpenCV_LIBS} ${VTK_LIBRARIES})
+add_library(TKA_Registration SHARED ${_HDRS} ${_SRCS})
+#target_link_libraries(TKA_Registration PRIVATE ${ITK_LIBRARIES} ${OpenCV_LIBS} ${VTK_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(TKA_Registration PRIVATE ${ITK_LIBRARIES} ${OpenCV_LIBS} ${VTK_LIBRARIES})
 
-generate_export_header(Registration)
+generate_export_header(TKA_Registration)
 target_include_directories(${PROJECT_NAME} PUBLIC 
 							"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>" 
 							"$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>" )
-install(TARGETS Registration
-	EXPORT RegistrationTargets
+install(TARGETS TKA_Registration
+	EXPORT TKA_RegistrationTargets
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib
 	INCLUDES DESTINATION include)
 install(FILES ${_HDRS} DESTINATION include)
-install(FILES ${PROJECT_BINARY_DIR}/registration_export.h DESTINATION include)
-install(EXPORT RegistrationTargets
-        FILE RegistrationTargets.cmake
-        DESTINATION lib/cmake/Registration)
-configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/RegistrationConfig.cmake.in
-	"${CMAKE_CURRENT_BINARY_DIR}/RegistrationConfig.cmake"
-	INSTALL_DESTINATION lib/cmake/Registration)
+install(FILES ${PROJECT_BINARY_DIR}/tka_registration_export.h DESTINATION include)
+install(EXPORT TKA_RegistrationTargets
+        FILE TKA_RegistrationTargets.cmake
+        DESTINATION lib/cmake/TKA_Registration)
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/TKA_RegistrationConfig.cmake.in
+	"${CMAKE_CURRENT_BINARY_DIR}/TKA_RegistrationConfig.cmake"
+	INSTALL_DESTINATION lib/cmake/TKA_Registration)
 install(FILES
-	"${CMAKE_CURRENT_BINARY_DIR}/RegistrationConfig.cmake"
-	DESTINATION lib/cmake/Registration)
+	"${CMAKE_CURRENT_BINARY_DIR}/TKA_RegistrationConfig.cmake"
+	DESTINATION lib/cmake/TKA_Registration)
 set(CPACK_GENERATOR NSIS)
 set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}")
 set(CPACK_PACKAGE_VENDOR "CMake.org")

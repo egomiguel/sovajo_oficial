@@ -5,58 +5,64 @@
 #include "TibiaImplant.hpp"
 #include "Knee.hpp"
 #include "Plane.hpp"
-#include "implants_export.h"
+#include "tka_implants_export.h"
 
-class IMPLANTS_EXPORT TibiaImplantMatch
+namespace TKA
 {
-public:
-	TibiaImplantMatch();
+	namespace IMPLANTS
+	{
 
-	void init(const TibiaImplant& implant, const Knee& knee);
+		class TKA_IMPLANTS_EXPORT TibiaImplantMatch
+		{
+		public:
+			TibiaImplantMatch();
 
-	Plane getTibiaPlane() const;
+			void init(const TibiaImplant& implant, const Knee& knee);
 
-	Point transformImplantPoint(const Point& point) const;
+			Plane getTibiaPlane() const;
 
-	std::vector<Point> getPointsNearImplant(double distance = 0) const;
+			Point transformImplantPoint(const Point& point) const;
 
-    std::vector<PointTypeITK> GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, double distance = 1., double distancePcl = 1., double closeAngle = 0.8, int amount = 200) const;
-    
-    itk::Matrix< double, 3, 3 > GetRotationMatrix() const;
+			std::vector<Point> getPointsNearImplant(double distance = 0) const;
 
-    itk::Vector< double, 3 > GetTranslationMatrix() const;
+			std::vector<PointTypeITK> GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, double distance = 1., double distancePcl = 1., double closeAngle = 0.8, int amount = 200) const;
 
-    vtkSmartPointer<vtkPolyData> GetCuttingTibia() const;
+			itk::Matrix< double, 3, 3 > GetRotationMatrix() const;
 
-protected:
-	friend class Balance;
-private:
-	TibiaImplant implant;
-	Knee knee;
-	cv::Mat rotationMatrix;
-	cv::Mat translationMatrix;
-	bool isInit;
+			itk::Vector< double, 3 > GetTranslationMatrix() const;
 
-	void makeRotationMatrix();
+			vtkSmartPointer<vtkPolyData> GetCuttingTibia() const;
 
-	void makeTranslationMatrix();
+		protected:
+			friend class Balance;
+		private:
+			TibiaImplant implant;
+			Knee knee;
+			cv::Mat rotationMatrix;
+			cv::Mat translationMatrix;
+			bool isInit;
 
-	Plane transformPlane(const Plane& plane) const;
+			void makeRotationMatrix();
 
-    Plane finalTransformPlane(const Plane& plane, const itk::Rigid3DTransform<>::Pointer pTransform) const;
+			void makeTranslationMatrix();
 
-	Knee getKnee() const;
+			Plane transformPlane(const Plane& plane) const;
 
-    bool deletePointsInsideRadius(std::list<Point>& points, const Point& centerPoint, const Point& diffPoint, Point& nearPoint, double radius = 0.2) const;
+			Plane finalTransformPlane(const Plane& plane, const itk::Rigid3DTransform<>::Pointer pTransform) const;
 
-    std::vector<Point> removeOutLiers(const std::vector<Point>& points, const Point& initPoint, const Point& lastPoint) const;
+			Knee getKnee() const;
 
-    Point movePointAtNormal(const Point& movePoint, const Point& nextPoint, const cv::Mat& rotationZ, double distance, bool changeMove = false, bool clockWise = true) const;
-    
-    std::vector<PointTypeITK> increaseVectorToAmount(const std::vector<Point>& points, int amount) const;
+			bool deletePointsInsideRadius(std::list<Point>& points, const Point& centerPoint, const Point& diffPoint, Point& nearPoint, double radius = 0.2) const;
 
-    vtkSmartPointer<vtkPolyData> getContour(const vtkSmartPointer<vtkPolyData> poly, const Point& pNormal, const Point& pPoint) const;
-};
+			std::vector<Point> removeOutLiers(const std::vector<Point>& points, const Point& initPoint, const Point& lastPoint) const;
 
+			Point movePointAtNormal(const Point& movePoint, const Point& nextPoint, const cv::Mat& rotationZ, double distance, bool changeMove = false, bool clockWise = true) const;
+
+			std::vector<PointTypeITK> increaseVectorToAmount(const std::vector<Point>& points, int amount) const;
+
+			vtkSmartPointer<vtkPolyData> getContour(const vtkSmartPointer<vtkPolyData> poly, const Point& pNormal, const Point& pPoint) const;
+		};
+	}
+}
 
 #endif

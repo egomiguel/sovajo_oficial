@@ -1,5 +1,6 @@
 #include "Segment.hpp"
 
+using namespace TKA::SEGMENTATION;
 
 JoinedSegment::JoinedSegment(const SegmentPoint& pA, const SegmentPoint& pB, const SegmentPoint& pC)
 {

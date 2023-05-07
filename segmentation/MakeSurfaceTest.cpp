@@ -18,7 +18,6 @@
 #include <vtkPointLocator.h>
 #include "vector"
 
-
 namespace MySurface {
 
     std::vector<double> DefaultSpacing = { 1.0, 1.0 };

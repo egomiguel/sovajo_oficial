@@ -1,5 +1,6 @@
 #ifndef REGISTRATION_H
 #define REGISTRATION_H
+
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/opencv.hpp>
 #include <itkRigid3DTransform.h>
@@ -8,92 +9,100 @@
 #include <vector>
 #include <string>
 #include "Types.hpp"
-#include "registration_export.h"
+#include "tka_registration_export.h"
 #include "vtkSmartPointer.h"
 #include "vtkPolyData.h"
 
-class RegistrationPrivate;
-
-enum RegisterSide { LEFT, RIGHT };
-
-struct REGISTRATION_EXPORT RegistrationPointsHip
+namespace TKA
 {
-    std::vector<PointTypeITK> points;
-    RegistrationPointsHip(std::vector<PointTypeITK> pPoints);
-    RegistrationPointsHip(std::vector<cv::Point3d> pPoints);
-};
+	namespace REGISTRATION
+	{
 
-class REGISTRATION_EXPORT Registration
-{
-public:
+		class RegistrationPrivate;
 
-    Registration(const vtkSmartPointer<vtkPolyData> img);
+		enum RegisterSide { LEFT, RIGHT };
 
-    virtual ~Registration();
+		struct TKA_REGISTRATION_EXPORT RegistrationPointsHip
+		{
+			std::vector<PointTypeITK> points;
+			RegistrationPointsHip(std::vector<PointTypeITK> pPoints);
+			RegistrationPointsHip(std::vector<cv::Point3d> pPoints);
+		};
 
-	PointTypeITK TransformCTPointToMarkerPointITK(const PointTypeITK& point) const;
+		class TKA_REGISTRATION_EXPORT Registration
+		{
+		public:
 
-	PointTypeITK TransformMarkerPointToCtPointITK(const PointTypeITK& point) const;
+			Registration(const vtkSmartPointer<vtkPolyData> img);
 
-    itk::Rigid3DTransform<double>::Pointer getTransformCtToMarker() const;
+			virtual ~Registration();
 
-    itk::Rigid3DTransform<double>::Pointer getTransformMarkerToCt() const ;
+			PointTypeITK TransformCTPointToMarkerPointITK(const PointTypeITK& point) const;
 
-    double getDistanceToBone(double x, double y, double z) const;
+			PointTypeITK TransformMarkerPointToCtPointITK(const PointTypeITK& point) const;
 
-	double getError() const;
+			itk::Rigid3DTransform<double>::Pointer getTransformCtToMarker() const;
 
-    //std::vector<PointTypeITK> getPointsCT() const;
+			itk::Rigid3DTransform<double>::Pointer getTransformMarkerToCt() const;
 
-    static PointTypeITK makeItkPoint(double x, double y, double z);
+			double getDistanceToBone(double x, double y, double z) const;
 
-    static itk::Rigid3DTransform<double>::Pointer GetTransformBetweenPoints(const std::vector<PointTypeITK>& source, const std::vector<PointTypeITK>& target);
+			double getError() const;
 
-    std::pair<cv::Point3d, double> getMinCircle(const std::vector<cv::Point3d>& pPoints, int amount, std::vector<cv::Point3d>& circlePoints);
+			//std::vector<PointTypeITK> getPointsCT() const;
 
-    //static void ReadImage(const std::string& path, RegistrationImageType::Pointer& imgOut);
+			static PointTypeITK makeItkPoint(double x, double y, double z);
 
-    //pcl::PointCloud<pcl::PointXYZ>::Ptr getPointsCT();
+			static itk::Rigid3DTransform<double>::Pointer GetTransformBetweenPoints(const std::vector<PointTypeITK>& source, const std::vector<PointTypeITK>& target);
 
-    /*static void drawCloudRGB(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
+			std::pair<cv::Point3d, double> getMinCircle(const std::vector<cv::Point3d>& pPoints, int amount, std::vector<cv::Point3d>& circlePoints);
 
-    static void drawCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr redPoints, bool applyCentroidToRed);
+			//static void ReadImage(const std::string& path, RegistrationImageType::Pointer& imgOut);
 
-    static double distanceBetweenPCLPoints(pcl::PointXYZRGB& p1, pcl::PointXYZ& p2);*/
+			//pcl::PointCloud<pcl::PointXYZ>::Ptr getPointsCT();
 
-    //void getTestTransformPoints(std::vector<PointTypeITK>& points, std::vector<int>& pos, int amount = 40);
-    //void showTestResult(pcl::PointCloud<pcl::PointXYZ>::Ptr a, pcl::PointCloud<pcl::PointXYZ>::Ptr b, std::vector<int>& pos, std::string msg = "");
-    //PointTypeITK TransformPointTest(PointTypeITK& point, bool putRandom = false);
-    //void SetTransformMatrixTest();
-    //Eigen::Matrix3f rotationTest;
-    //Eigen::Vector3f translationTest;
+			/*static void drawCloudRGB(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
 
-protected:
-    RegistrationPrivate* m_data = nullptr;
+			static void drawCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, pcl::PointCloud<pcl::PointXYZ>::Ptr redPoints, bool applyCentroidToRed);
 
-    bool isVTK;
+			static double distanceBetweenPCLPoints(pcl::PointXYZRGB& p1, pcl::PointXYZ& p2);*/
 
-    vtkSmartPointer<vtkPolyData> poly;
+			//void getTestTransformPoints(std::vector<PointTypeITK>& points, std::vector<int>& pos, int amount = 40);
+			//void showTestResult(pcl::PointCloud<pcl::PointXYZ>::Ptr a, pcl::PointCloud<pcl::PointXYZ>::Ptr b, std::vector<int>& pos, std::string msg = "");
+			//PointTypeITK TransformPointTest(PointTypeITK& point, bool putRandom = false);
+			//void SetTransformMatrixTest();
+			//Eigen::Matrix3f rotationTest;
+			//Eigen::Vector3f translationTest;
 
-    vtkSmartPointer<vtkPolyData> getContour(const vtkSmartPointer<vtkPolyData> polyData, const cv::Point3d& pNormal, const cv::Point3d& pPoint);
-	
-    PointTypeITK getPointInsideSphere(const PointTypeITK& center, double radius);
+		protected:
+			RegistrationPrivate* m_data = nullptr;
 
-    void deletePointsInsideRadius(std::list<cv::Point3d>& points, const cv::Point3d& centerPoint, double radius = 0.1);
+			bool isVTK;
 
-    int getOneVerticePosition(const std::vector<cv::Point3d>& sortPoints, const RLine& perpendicularRefL1, const RLine& perpendicularL2, double factor = 1.0);
+			vtkSmartPointer<vtkPolyData> poly;
 
-    std::vector<cv::Point3d> reduceSortPoints(const std::vector<cv::Point3d>& sortPoints, const RPlane& plane, bool isReverse = false);
+			vtkSmartPointer<vtkPolyData> getContour(const vtkSmartPointer<vtkPolyData> polyData, const cv::Point3d& pNormal, const cv::Point3d& pPoint);
 
-    std::vector<cv::Point3d> reduceSortPointsByAngle(const std::vector<cv::Point3d>& sortPoints, const cv::Point3d& vector, const cv::Point3d& centerPoint, double minAngle, bool isReverse = false);
+			PointTypeITK getPointInsideSphere(const PointTypeITK& center, double radius);
 
-    void getPointAtRadius(const std::vector<cv::Point3d>& sortPoints, std::vector<cv::Point3d>& outPoints, const cv::Point3d& centerPoint, double squareRadius, int amount);
+			void deletePointsInsideRadius(std::list<cv::Point3d>& points, const cv::Point3d& centerPoint, double radius = 0.1);
 
-    cv::Mat GetTranslationRotation(const std::vector<PointTypeITK>& source, const std::vector<PointTypeITK>& target);
+			int getOneVerticePosition(const std::vector<cv::Point3d>& sortPoints, const RLine& perpendicularRefL1, const RLine& perpendicularL2, double factor = 1.0);
 
-    void MakeResult(const cv::Mat& pData, double pError);
+			std::vector<cv::Point3d> reduceSortPoints(const std::vector<cv::Point3d>& sortPoints, const RPlane& plane, bool isReverse = false);
 
-    //std::pair<cv::Point3d, double> getMinCircle(const std::vector<cv::Point3d>& pPoints, int amount, std::vector<cv::Point3d>& circlePoints);
-};
+			std::vector<cv::Point3d> reduceSortPointsByAngle(const std::vector<cv::Point3d>& sortPoints, const cv::Point3d& vector, const cv::Point3d& centerPoint, double minAngle, bool isReverse = false);
+
+			void getPointAtRadius(const std::vector<cv::Point3d>& sortPoints, std::vector<cv::Point3d>& outPoints, const cv::Point3d& centerPoint, double squareRadius, int amount);
+
+			cv::Mat GetTranslationRotation(const std::vector<PointTypeITK>& source, const std::vector<PointTypeITK>& target);
+
+			void MakeResult(const cv::Mat& pData, double pError);
+
+			//std::pair<cv::Point3d, double> getMinCircle(const std::vector<cv::Point3d>& pPoints, int amount, std::vector<cv::Point3d>& circlePoints);
+		};
+
+	}
+}
 
 #endif

@@ -8,6 +8,8 @@
 //#include "CoherentPoint/CoherentPointDrift.hpp"
 #include "vtkKdTreePointLocator.h"
 
+using namespace TKA::REGISTRATION;
+
 /*
 KneeCapRegistration::KneeCapRegistration(const std::vector<RegistrationImageType::Pointer>& img, const PointTypeITK& pHipCenterCT, const PointTypeITK& pKneeCenterCT, const PointTypeITK& pLateralEpiCT, const PointTypeITK& pMedialEpiCT)
     :Registration(img)

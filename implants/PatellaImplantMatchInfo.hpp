@@ -4,37 +4,43 @@
 #include "PatellaImplant.hpp"
 #include "Knee.hpp"
 #include <itkRigid3DTransform.h>
-#include "implants_export.h"
+#include "tka_implants_export.h"
 
-class IMPLANTS_EXPORT PatellaImplantMatchInfo
+namespace TKA
 {
-public:
-    PatellaImplantMatchInfo();
+	namespace IMPLANTS
+	{
 
-	void init(const PatellaImplant& implant, const Knee& knee, const itk::Rigid3DTransform<>::Pointer pImplantToBonePatellaTransform);
+		class TKA_IMPLANTS_EXPORT PatellaImplantMatchInfo
+		{
+		public:
+			PatellaImplantMatchInfo();
 
-    void setPatellaTransform(const itk::Rigid3DTransform<>::Pointer pImplantToBonePatellaTransform);
+			void init(const PatellaImplant& implant, const Knee& knee, const itk::Rigid3DTransform<>::Pointer pImplantToBonePatellaTransform);
 
-    double getCutThickness() const;
+			void setPatellaTransform(const itk::Rigid3DTransform<>::Pointer pImplantToBonePatellaTransform);
 
-    double getAngleML() const;
+			double getCutThickness() const;
 
-    double getAngleSI() const;
+			double getAngleML() const;
 
-private:
-    PatellaImplant implant;
-	Knee knee;
-	bool isInit;
+			double getAngleSI() const;
 
-    cv::Mat patellaRotation, patellaTranslation;
+		private:
+			PatellaImplant implant;
+			Knee knee;
+			bool isInit;
 
-    cv::Mat Rigid3DTransformToCVRotation(const itk::Rigid3DTransform<>::Pointer transform) const;
+			cv::Mat patellaRotation, patellaTranslation;
 
-    cv::Mat Rigid3DTransformToCVTranslation(const itk::Rigid3DTransform<>::Pointer transform) const;
+			cv::Mat Rigid3DTransformToCVRotation(const itk::Rigid3DTransform<>::Pointer transform) const;
 
-    Plane TransformPlane(const Plane& plane, const cv::Mat& rotation, const cv::Mat& translation) const;
+			cv::Mat Rigid3DTransformToCVTranslation(const itk::Rigid3DTransform<>::Pointer transform) const;
 
-};
+			Plane TransformPlane(const Plane& plane, const cv::Mat& rotation, const cv::Mat& translation) const;
 
+		};
+	}
+}
 
 #endif

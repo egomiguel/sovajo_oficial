@@ -7,26 +7,33 @@
 #include <opencv2/imgproc.hpp>
 #include <vector>
 
-struct Normal
+namespace TKA
 {
-	cv::Point3d equation1;
-	cv::Point3d equation2;
-	double bias1, bias2;
-};
+	namespace HIP
+	{
 
-class DataFit
-{
-	friend class HipCenter;
-private:
-	std::vector<cv::Point3d> ellipse_points_;
-	cv::Point3d centroid_;
-	std::vector<double> plane_;
-	Normal normal_;
-	cv::Point3d GetCentroid(const std::vector<cv::Point3d>& points);
-	std::vector<double> FitPlane(std::vector<cv::Point3d>& points, const cv::Point3d& centroid);
-	Normal GetNormalEquation();
-public:
-	DataFit(const std::vector<cv::Point3d>& ellipse_points);
-};
+		struct Normal
+		{
+			cv::Point3d equation1;
+			cv::Point3d equation2;
+			double bias1, bias2;
+		};
+
+		class DataFit
+		{
+			friend class HipCenter;
+		private:
+			std::vector<cv::Point3d> ellipse_points_;
+			cv::Point3d centroid_;
+			std::vector<double> plane_;
+			Normal normal_;
+			cv::Point3d GetCentroid(const std::vector<cv::Point3d>& points);
+			std::vector<double> FitPlane(std::vector<cv::Point3d>& points, const cv::Point3d& centroid);
+			Normal GetNormalEquation();
+		public:
+			DataFit(const std::vector<cv::Point3d>& ellipse_points);
+		};
+	}
+}
 
 #endif

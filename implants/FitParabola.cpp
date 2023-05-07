@@ -1,6 +1,8 @@
 #include "FitParabola.hpp"
 #include "Line.hpp"
 
+using namespace TKA::IMPLANTS;
+
 FitParabola::FitParabola(const std::vector<Point>& pPoints, const Plane& plane, bool& result)
 {
     Point zAxis(0, 0, 1);

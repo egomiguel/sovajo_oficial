@@ -5,6 +5,8 @@
 #include "Plane.hpp"
 #include "ImplantsException.hpp"
 
+using namespace TKA::IMPLANTS;
+
 struct PointsComp
 {
 	cv::Mat rotation;

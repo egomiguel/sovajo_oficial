@@ -4,6 +4,7 @@
 #include "vtkCleanPolyData.h"
 #include "ImplantTools.hpp"
 
+using namespace TKA::IMPLANTS;
 
 Patella::Patella()
 {

@@ -1,6 +1,6 @@
 #include "SliceBorderPrivate.hpp"
 
-
+using namespace TKA::SEGMENTATION;
 
 SliceBorderPrivate::SliceBorderPrivate()
 {

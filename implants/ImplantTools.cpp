@@ -24,6 +24,8 @@
 #include "vtkExtractSelectedIds.h"
 #include "ConvexHull.hpp"
 
+using namespace TKA::IMPLANTS;
+
 void ImplantTools::saveVectorPoints(const std::vector<Point>& pPoints, const std::string& pName, int axis)
 {
 	ofstream MyFile(pName);
@@ -1295,6 +1297,26 @@ vtkIdType ImplantTools::GetNearestPoints(const vtkSmartPointer<vtkPolyData> poly
 	return result;
 }
 
+int ImplantTools::GetFarestPositivePoint(const std::vector<Point>& pPoints, const Plane& pPlane)
+{
+	int tSize = pPoints.size();
+	double distance = 0;
+	int pos = -1;
+
+	for (int i = 0; i < tSize; i++)
+	{
+		double temp = pPlane.eval(pPoints[i]);
+
+		if (temp >= distance)
+		{
+			distance = temp;
+			pos = i;
+		}
+	}
+
+	return pos;
+}
+
 Point ImplantTools::GetFarestPoint(const vtkSmartPointer<vtkPolyData> poly, const Plane& pPlane)
 {
 	vtkSmartPointer<vtkPoints> points = poly->GetPoints();
@@ -2562,6 +2584,29 @@ bool ImplantTools::areBothSetOfPointsSeparated(const std::vector<Point>& pPoints
 	bool areIntersection = result1 || result2;
 
 	return !areIntersection;
+}
+
+std::vector<Point> ImplantTools::removePointByCondition(const std::vector<Point>& pPoints, int beginPos, int endPos, const Plane& pCondition)
+{
+	std::vector<Point> result;
+	int tSize = pPoints.size();
+
+	for (int i = 0; i < tSize; i++)
+	{
+		if (i >= beginPos && i <= endPos)
+		{
+			if (pCondition.eval(pPoints[i]) > 0)
+			{
+				result.push_back(pPoints[i]);
+			}
+		}
+		else
+		{
+			result.push_back(pPoints[i]);
+		}
+	}
+
+	return result;
 }
 
 std::vector<Point> ImplantTools::increaseVectorPoints(const std::vector<Point>& pPoints, int beginPos, int endPos, float distance)

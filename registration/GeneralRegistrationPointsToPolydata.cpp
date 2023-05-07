@@ -13,6 +13,8 @@
 #include <itkRescaleIntensityImageFilter.h>
 #include <Eigen/Dense>
 
+using namespace TKA::REGISTRATION;
+
 GeneralRegistrationPointsToPolydata::GeneralRegistrationPointsToPolydata(const vtkSmartPointer<vtkPolyData>& pPoly, const std::vector<PointTypeITK>& pTargetPointsOnPoly, const std::vector<PointTypeITK>& pSourceExternalPoints)
 {
     mPoly = pPoly;

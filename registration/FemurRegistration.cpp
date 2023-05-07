@@ -14,6 +14,8 @@
 #include "LeastSquaresPoly.hpp"
 //#include "CoherentPoint/CoherentPointDrift.hpp"
 
+using namespace TKA::REGISTRATION;
+
 FemurRegistration::FemurRegistration(const vtkSmartPointer<vtkPolyData> img, const PointTypeITK& pHipCenterCT, const PointTypeITK& pKneeCenterCT, const PointTypeITK& pMedialEpicondyleCT)
     :Registration(img)
 {

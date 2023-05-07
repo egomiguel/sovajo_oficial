@@ -9,18 +9,25 @@
 #include "vtkPlaneSource.h"
 #include "vtkImagePlaneWidget.h"
 
-
-class vtkResliceCursorCallback : public vtkCommand
+namespace TKA
 {
-public:
-	static vtkResliceCursorCallback *New()
+	namespace SEGMENTATION
 	{
-		return new vtkResliceCursorCallback;
+
+		class vtkResliceCursorCallback : public vtkCommand
+		{
+		public:
+			static vtkResliceCursorCallback *New()
+			{
+				return new vtkResliceCursorCallback;
+			}
+			void Execute(vtkObject *caller, unsigned long, void *callData) override;
+			vtkResliceCursorCallback() {}
+			vtkImagePlaneWidget* IPW[3];
+			vtkResliceCursorWidget *RCW[3];
+		};
+
 	}
-	void Execute(vtkObject *caller, unsigned long, void *callData) override;
-	vtkResliceCursorCallback() {}
-	vtkImagePlaneWidget* IPW[3];
-	vtkResliceCursorWidget *RCW[3];
-};
+}
 
 #endif

@@ -7,6 +7,7 @@
 #include "vtkClipClosedSurface.h"
 #include "ConvexHull.hpp"
 
+using namespace TKA::IMPLANTS;
 
 inline cv::Mat Rigid3DTransformToCVRotation(const itk::Rigid3DTransform<>::Pointer transform)
 {

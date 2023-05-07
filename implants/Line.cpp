@@ -4,6 +4,7 @@
 #include "Line.hpp"
 #include "ImplantsException.hpp"
 
+using namespace TKA::IMPLANTS;
 
 Line::Line(const Point& directVector, const Point& pPoint)
 {

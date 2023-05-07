@@ -7,6 +7,8 @@
 #include <unsupported/Eigen/Splines>
 #include "Line.hpp"
 
+using namespace TKA::IMPLANTS;
+
 struct GeneralLine
 {
     float A, B, C;

@@ -2,6 +2,7 @@
 #include "ImplantsException.hpp"
 #include "ImplantTools.hpp"
 
+using namespace TKA::IMPLANTS;
 
 PatellaImplantMatchInfo::PatellaImplantMatchInfo()
 {

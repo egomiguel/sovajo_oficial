@@ -6,6 +6,7 @@
 #include "vtkContourTriangulator.h"
 #include "vtkTriangle.h"
 
+using namespace TKA::SEGMENTATION;
 
 GenerateSurface::GenerateSurface(const std::vector<vtkSmartPointer<vtkPolyData>>& pSlices, const double* normal)
 {

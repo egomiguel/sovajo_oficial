@@ -2,38 +2,45 @@
 #define KNEECAP_REGISTRATION_H
 
 #include "Registration.hpp"
-#include "registration_export.h"
+#include "tka_registration_export.h"
 
-class REGISTRATION_EXPORT KneeCapRegistration : public Registration
+namespace TKA
 {
-public:
-    KneeCapRegistration(const vtkSmartPointer<vtkPolyData> img, const PointTypeITK& pHipCenterCT, const PointTypeITK& pKneeCenterCT, const PointTypeITK& pLateralEpiCT, const PointTypeITK& pMedialEpiCT);
+	namespace REGISTRATION
+	{
 
-    ~KneeCapRegistration();
+		class TKA_REGISTRATION_EXPORT KneeCapRegistration : public Registration
+		{
+		public:
+			KneeCapRegistration(const vtkSmartPointer<vtkPolyData> img, const PointTypeITK& pHipCenterCT, const PointTypeITK& pKneeCenterCT, const PointTypeITK& pLateralEpiCT, const PointTypeITK& pMedialEpiCT);
 
-    bool MakeRegistration(const std::vector<PointTypeITK>& pBonePoints);
+			~KneeCapRegistration();
 
-    std::vector<PointTypeITK> GetRegistrationPoints() const;
+			bool MakeRegistration(const std::vector<PointTypeITK>& pBonePoints);
 
-private:
-    
-    bool MakeRegistrationLS(const std::vector<PointTypeITK>& pBonePoints);
+			std::vector<PointTypeITK> GetRegistrationPoints() const;
 
-    cv::Mat GetRotateZ(const cv::Point3d& vector) const;
+		private:
 
-    cv::Point3d GetPointOnCircle(const cv::Point3d& a, const cv::Point3d& b, const cv::Point3d& center, double perCent, double radius) const;
+			bool MakeRegistrationLS(const std::vector<PointTypeITK>& pBonePoints);
 
-    void GetMainPoints();
+			cv::Mat GetRotateZ(const cv::Point3d& vector) const;
 
-    std::vector<PointTypeITK> mPoints;
+			cv::Point3d GetPointOnCircle(const cv::Point3d& a, const cv::Point3d& b, const cv::Point3d& center, double perCent, double radius) const;
 
-    cv::Mat transformZ;
+			void GetMainPoints();
 
-    RPlane fitPlane;
+			std::vector<PointTypeITK> mPoints;
 
-    cv::Point3d kneeHipVector;
+			cv::Mat transformZ;
 
-    cv::Point3d medLatVector;
-};
+			RPlane fitPlane;
+
+			cv::Point3d kneeHipVector;
+
+			cv::Point3d medLatVector;
+		};
+	}
+}
 
 #endif

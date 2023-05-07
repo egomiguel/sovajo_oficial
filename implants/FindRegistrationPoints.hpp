@@ -1,43 +1,56 @@
+#ifndef IMPLANTS_RIGISTRATION_POINTS
+#define IMPLANTS_RIGISTRATION_POINTS
+
 #include "Knee.hpp"
 #include "Types.hpp"
-#include "implants_export.h"
+#include "tka_implants_export.h"
 
-class RegistrationPointsVTK;
-
-struct IMPLANTS_EXPORT RegistrationPoints
+namespace TKA
 {
-    std::vector<PointTypeITK> points;
-    RegistrationPoints(std::vector<PointTypeITK> pPoints);
-    RegistrationPoints(std::vector<Point> pPoints);
-};
+	namespace IMPLANTS
+	{
 
-class IMPLANTS_EXPORT FindRegistrationPoints
-{
-private:
+		class RegistrationPointsVTK;
 
-    Knee mKnee;
+		struct TKA_IMPLANTS_EXPORT RegistrationPoints
+		{
+			std::vector<PointTypeITK> points;
+			RegistrationPoints(std::vector<PointTypeITK> pPoints);
+			RegistrationPoints(std::vector<Point> pPoints);
+		};
 
-    /*
-    RegistrationPointsVTK * data;
+		class TKA_IMPLANTS_EXPORT FindRegistrationPoints
+		{
+		private:
 
-    std::vector<RegistrationPoints> GetRegistrationPointsTibiaTemplate(bool isLeft = true);
+			Knee mKnee;
 
-    std::vector<cv::Point3d> GetRegistrationPointsTibiaTemplateLikeCV(bool isLeft = true);
+			/*
+			RegistrationPointsVTK * data;
 
-    std::vector<cv::Point3d> GetRegistrationPointsFemurTemplateLikeCV(bool isLeft = true);
+			std::vector<RegistrationPoints> GetRegistrationPointsTibiaTemplate(bool isLeft = true);
 
-    double RegisterFemurTest(const std::vector<cv::Point3d>& templatePoints, const Point& vectorTea, const Point& vectorAp, const Point& center, double pScale = 1.0);
+			std::vector<cv::Point3d> GetRegistrationPointsTibiaTemplateLikeCV(bool isLeft = true);
 
-    double RegisterTibiaPoints();
+			std::vector<cv::Point3d> GetRegistrationPointsFemurTemplateLikeCV(bool isLeft = true);
 
-    double RegisterTibiaLeft(const std::vector<cv::Point3d>& templatePoints, const Point& vectorTea, const Point& vectorAp, const Point& center, double sizeAp, double sizeTea);
+			double RegisterFemurTest(const std::vector<cv::Point3d>& templatePoints, const Point& vectorTea, const Point& vectorAp, const Point& center, double pScale = 1.0);
 
-    double RegisterTibiaRight(const std::vector<cv::Point3d>& templatePoints, const Point& vectorTea, const Point& vectorAp, const Point& center, double sizeAp, double sizeTea);
-    */
+			double RegisterTibiaPoints();
 
-public:
-    FindRegistrationPoints(const Knee& pKnee);
-    ~FindRegistrationPoints();
-    std::vector<RegistrationPoints> GetRegistrationPointsFemur(std::vector<Point>& pCheckPoints, double& pError);
-    std::vector<RegistrationPoints> GetRegistrationPointsTibia(std::vector<Point>& pCheckPoints, double& pError);
-};
+			double RegisterTibiaLeft(const std::vector<cv::Point3d>& templatePoints, const Point& vectorTea, const Point& vectorAp, const Point& center, double sizeAp, double sizeTea);
+
+			double RegisterTibiaRight(const std::vector<cv::Point3d>& templatePoints, const Point& vectorTea, const Point& vectorAp, const Point& center, double sizeAp, double sizeTea);
+			*/
+
+		public:
+			FindRegistrationPoints(const Knee& pKnee);
+			~FindRegistrationPoints();
+			std::vector<RegistrationPoints> GetRegistrationPointsFemur(std::vector<Point>& pCheckPoints, double& pError);
+			std::vector<RegistrationPoints> GetRegistrationPointsTibia(std::vector<Point>& pCheckPoints, double& pError);
+		};
+	}
+}
+
+
+#endif

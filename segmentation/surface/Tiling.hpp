@@ -1,61 +1,73 @@
+#ifndef SEGMENTATION_TILING_H
+#define SEGMENTATION_TILING_H
+
 #include "vtkSmartPointer.h"
 #include "vtkPoints.h"
 #include "vtkPolyData.h"
 #include "map"
 
-class Tiling
+namespace TKA
 {
-private:
-    int offSet;
+	namespace SEGMENTATION
+	{
 
-    bool makeNormalization;
+		class Tiling
+		{
+		private:
+			int offSet;
 
-    bool closed;
+			bool makeNormalization;
 
-    int downRot, upRot;
+			bool closed;
 
-    vtkSmartPointer<vtkPoints> pointsDownRot, pointsUpRot, normaliceDownRot, normaliceUpRot;
+			int downRot, upRot;
 
-    vtkSmartPointer<vtkPoints> originalDown, originalUp;
+			vtkSmartPointer<vtkPoints> pointsDownRot, pointsUpRot, normaliceDownRot, normaliceUpRot;
 
-    vtkSmartPointer<vtkPoints> ExtractSortPoints(const vtkSmartPointer<vtkPolyData> polyData) const;
+			vtkSmartPointer<vtkPoints> originalDown, originalUp;
 
-    std::vector<std::pair<int, int>> GetTilingPoints(const vtkSmartPointer<vtkPoints> downPoints, const vtkSmartPointer<vtkPoints> upPoints);
+			vtkSmartPointer<vtkPoints> ExtractSortPoints(const vtkSmartPointer<vtkPolyData> polyData) const;
 
-    vtkSmartPointer<vtkPoints> normalice(vtkSmartPointer<vtkPoints> points, double center[3], double sizeX, double sizeY);
+			std::vector<std::pair<int, int>> GetTilingPoints(const vtkSmartPointer<vtkPoints> downPoints, const vtkSmartPointer<vtkPoints> upPoints);
 
-    vtkSmartPointer<vtkTriangle> MakeCell(const std::pair<int, int>& node1, const std::pair<int, int>& node2, int offSetDown, int offSetUp);
-    
-    double GetDistance(const double p1[3], const double p2[3]) const;
+			vtkSmartPointer<vtkPoints> normalice(vtkSmartPointer<vtkPoints> points, double center[3], double sizeX, double sizeY);
 
-    vtkSmartPointer<vtkPoints> RotatePoints(vtkSmartPointer<vtkPoints> points, vtkIdType id);
+			vtkSmartPointer<vtkTriangle> MakeCell(const std::pair<int, int>& node1, const std::pair<int, int>& node2, int offSetDown, int offSetUp);
 
-    std::pair<int, int> GetNearestPoints(const vtkSmartPointer<vtkPoints> pointsDown, const vtkSmartPointer<vtkPoints> pointsUp);
+			double GetDistance(const double p1[3], const double p2[3]) const;
 
-    void UpdatePath(std::vector<std::pair<int, int>>& path);
+			vtkSmartPointer<vtkPoints> RotatePoints(vtkSmartPointer<vtkPoints> points, vtkIdType id);
 
-    vtkSmartPointer<vtkPolyData> PointsToContour(const vtkSmartPointer<vtkPoints> points);
+			std::pair<int, int> GetNearestPoints(const vtkSmartPointer<vtkPoints> pointsDown, const vtkSmartPointer<vtkPoints> pointsUp);
 
-    vtkSmartPointer<vtkPolyData> TriangulateContour(const vtkSmartPointer<vtkPolyData> contour);
+			void UpdatePath(std::vector<std::pair<int, int>>& path);
 
-    vtkSmartPointer<vtkTriangle> CreateCells(vtkIdType p1, vtkIdType p2, vtkIdType p3);
+			vtkSmartPointer<vtkPolyData> PointsToContour(const vtkSmartPointer<vtkPoints> points);
 
-public:
-    Tiling(const vtkSmartPointer<vtkPolyData> sliceDown, const vtkSmartPointer<vtkPolyData> sliceUp, int offSet = 0, bool closed = true, bool makeNormalization = false);
-    
-    Tiling(const vtkSmartPointer<vtkPoints> pointsDown, const vtkSmartPointer<vtkPolyData> sliceUp, int offSet = 0, bool closed = true, bool makeNormalization = false);
+			vtkSmartPointer<vtkPolyData> TriangulateContour(const vtkSmartPointer<vtkPolyData> contour);
 
-    Tiling(const vtkSmartPointer<vtkPoints> pointsDown, const vtkSmartPointer<vtkPoints> pointsUp, int offSet = 0, bool closed = false, bool makeNormalization = false);
+			vtkSmartPointer<vtkTriangle> CreateCells(vtkIdType p1, vtkIdType p2, vtkIdType p3);
 
-    vtkSmartPointer<vtkPolyData> MakeTiling();
+		public:
+			Tiling(const vtkSmartPointer<vtkPolyData> sliceDown, const vtkSmartPointer<vtkPolyData> sliceUp, int offSet = 0, bool closed = true, bool makeNormalization = false);
 
-    void MakeTiling(vtkSmartPointer<vtkPoints>& points, vtkSmartPointer<vtkCellArray>& cells, bool addFixPoints = true);
+			Tiling(const vtkSmartPointer<vtkPoints> pointsDown, const vtkSmartPointer<vtkPolyData> sliceUp, int offSet = 0, bool closed = true, bool makeNormalization = false);
 
-    void GetTriangulateCellsDown(vtkSmartPointer<vtkCellArray>& cells, int currentOffset);
+			Tiling(const vtkSmartPointer<vtkPoints> pointsDown, const vtkSmartPointer<vtkPoints> pointsUp, int offSet = 0, bool closed = false, bool makeNormalization = false);
 
-    void GetTriangulateCellsUp(vtkSmartPointer<vtkCellArray>& cells, int currentOffset);
+			vtkSmartPointer<vtkPolyData> MakeTiling();
 
-    vtkSmartPointer<vtkPoints> GetOriginalUp() const;
+			void MakeTiling(vtkSmartPointer<vtkPoints>& points, vtkSmartPointer<vtkCellArray>& cells, bool addFixPoints = true);
 
-    vtkSmartPointer<vtkPoints> GetOriginalDown() const;
-};
+			void GetTriangulateCellsDown(vtkSmartPointer<vtkCellArray>& cells, int currentOffset);
+
+			void GetTriangulateCellsUp(vtkSmartPointer<vtkCellArray>& cells, int currentOffset);
+
+			vtkSmartPointer<vtkPoints> GetOriginalUp() const;
+
+			vtkSmartPointer<vtkPoints> GetOriginalDown() const;
+		};
+	}
+}
+
+#endif

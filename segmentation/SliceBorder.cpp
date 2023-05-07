@@ -24,6 +24,8 @@
 #include "vtkKdTreePointLocator.h"
 #include "vtkSmoothPolyDataFilter.h"
 
+using namespace TKA::SEGMENTATION;
+
 SliceBorder::SliceBorder()
 {
     m_data = new SliceBorderPrivate();

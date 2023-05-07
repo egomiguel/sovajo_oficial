@@ -2,6 +2,7 @@
 #include "Utils.hpp"
 #include "LegAngle.hpp"
 
+using namespace TKA::IMPLANTS;
 
 LegAngle::LegAngle()
 {

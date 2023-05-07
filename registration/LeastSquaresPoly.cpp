@@ -12,6 +12,8 @@
 #include <vtkNamedColors.h>
 #include <vtkPolyDataMapper.h>
 
+using namespace TKA::REGISTRATION;
+
 /*
 vtkSmartPointer<vtkPolyData> CreateSphereTest(const cv::Point3d& pPoint)
 {

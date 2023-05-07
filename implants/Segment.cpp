@@ -1,6 +1,7 @@
 #include "Segment.hpp"
 #include "Utils.hpp"
 
+using namespace TKA::IMPLANTS;
 
 JoinedSegment::JoinedSegment(const SegmentPoint2D& pA, const SegmentPoint2D& pB, const SegmentPoint2D& pC)
 {

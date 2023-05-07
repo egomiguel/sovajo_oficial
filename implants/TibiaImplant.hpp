@@ -5,41 +5,46 @@
 #include "vtkSmartPointer.h"
 #include <itkRigid3DTransform.h>
 #include "Plane.hpp"
-#include "implants_export.h"
+#include "tka_implants_export.h"
 #include "Utils.hpp"
 
-
-class IMPLANTS_EXPORT TibiaImplant
+namespace TKA
 {
-public:
-	TibiaImplant();
+	namespace IMPLANTS
+	{
+		class TKA_IMPLANTS_EXPORT TibiaImplant
+		{
+		public:
+			TibiaImplant();
 
-    TibiaImplant(const TibiaImplant& pImplant);
+			TibiaImplant(const TibiaImplant& pImplant);
 
-    void init(const Point& pclPoint1, const Point& pclPoint2, const Point& frontPoint, const Point& exteriorPoint, const TibiaImplantInfo& pImplantInfo);
+			void init(const Point& pclPoint1, const Point& pclPoint2, const Point& frontPoint, const Point& exteriorPoint, const TibiaImplantInfo& pImplantInfo);
 
-	Plane getTibiaPlane() const;
+			Plane getTibiaPlane() const;
 
-	Point getTibiaNormalVector() const;
+			Point getTibiaNormalVector() const;
 
-	Point getTibiaVectorAP() const;
+			Point getTibiaVectorAP() const;
 
-    Point getTibiaVectorTEA() const;
+			Point getTibiaVectorTEA() const;
 
-	cv::Mat getTibiaKneeCenter() const;
+			cv::Mat getTibiaKneeCenter() const;
 
-    Point getCentralPoint() const;
+			Point getCentralPoint() const;
 
-    Point getExteriorPoint() const;
+			Point getExteriorPoint() const;
 
-    TibiaImplantInfo getImplantInfo() const;
+			TibiaImplantInfo getImplantInfo() const;
 
-private:
-	Plane tibiaPlane;
-	Point centralPoint, midPoint, exteriorPoint;
-    TibiaImplantInfo mImplantInfo;
-	bool isInit;
-	//void fixNormalVectorTibia(const Point& fixPoint, const Point& referencePoint);
-};
+		private:
+			Plane tibiaPlane;
+			Point centralPoint, midPoint, exteriorPoint;
+			TibiaImplantInfo mImplantInfo;
+			bool isInit;
+			//void fixNormalVectorTibia(const Point& fixPoint, const Point& referencePoint);
+		};
+	}
+}
 
 #endif

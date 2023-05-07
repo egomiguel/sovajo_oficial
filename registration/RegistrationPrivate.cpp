@@ -4,6 +4,8 @@
 #include "RPlane.hpp"
 #include "LeastSquaresICP.hpp"
 
+using namespace TKA::REGISTRATION;
+
 RegistrationPrivate::RegistrationPrivate()
 {
     //PointsCT = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>);

@@ -3,10 +3,17 @@
 
 #include "itkImage.h"
 
-enum Side { LateralSide, MedialSide };
-enum PelvisSide { LEFT_SIDE, RIGHT_SIDE };
-using ImplantPixelType = uint8_t;
-using ImplantImageType = itk::Image<ImplantPixelType, 3>;
-using PointTypeITK = itk::Point<double, 3>;
+namespace TKA
+{
+	namespace IMPLANTS
+	{
+
+		enum Side { LateralSide, MedialSide };
+		enum PelvisSide { LEFT_SIDE, RIGHT_SIDE };
+		using ImplantPixelType = uint8_t;
+		using ImplantImageType = itk::Image<ImplantPixelType, 3>;
+		using PointTypeITK = itk::Point<double, 3>;
+	}
+}
 
 #endif

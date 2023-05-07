@@ -7,58 +7,65 @@
 #include "vtkPolyData.h"
 #include "Types.hpp"
 
-class LeastSquaresPoly
+namespace TKA
 {
-private:
+	namespace REGISTRATION
+	{
 
-    double maxError;
+		class LeastSquaresPoly
+		{
+		private:
 
-    cv::Mat Rx(double angle);
+			double maxError;
 
-    cv::Mat Ry(double angle);
+			cv::Mat Rx(double angle);
 
-    cv::Mat Rz(double angle);
+			cv::Mat Ry(double angle);
 
-    cv::Mat DRx(double angle);
+			cv::Mat Rz(double angle);
 
-    cv::Mat DRy(double angle);
+			cv::Mat DRx(double angle);
 
-    cv::Mat DRz(double angle);
+			cv::Mat DRy(double angle);
 
-    cv::Mat CreatePoint(double x, double y, double z);
+			cv::Mat DRz(double angle);
 
-    cv::Mat CreatePoint(cv::Point3d Point);
+			cv::Mat CreatePoint(double x, double y, double z);
 
-    double DF_Rx(double angleX, double angleY, double angleZ, const cv::Mat& pTranslation, const cv::Mat& Point);
+			cv::Mat CreatePoint(cv::Point3d Point);
 
-    double DF_Ry(double angleX, double angleY, double angleZ, const cv::Mat& pTranslation, const cv::Mat& Point);
+			double DF_Rx(double angleX, double angleY, double angleZ, const cv::Mat& pTranslation, const cv::Mat& Point);
 
-    double DF_Rz(double angleX, double angleY, double angleZ, const cv::Mat& pTranslation, const cv::Mat& Point);
+			double DF_Ry(double angleX, double angleY, double angleZ, const cv::Mat& pTranslation, const cv::Mat& Point);
 
-    double DF_Translation(double angleX, double angleY, double angleZ, const cv::Mat& pTranslation, const cv::Mat& Point);
+			double DF_Rz(double angleX, double angleY, double angleZ, const cv::Mat& pTranslation, const cv::Mat& Point);
 
-    double getDistance(double angleX, double angleY, double angleZ, const cv::Mat& pTranslation, const cv::Mat& Point);
+			double DF_Translation(double angleX, double angleY, double angleZ, const cv::Mat& pTranslation, const cv::Mat& Point);
 
-    cv::Mat getGradient(double angleX, double angleY, double angleZ, const cv::Mat& pTranslation);
+			double getDistance(double angleX, double angleY, double angleZ, const cv::Mat& pTranslation, const cv::Mat& Point);
 
-    cv::Point3d ClosestPoint(const vtkSmartPointer<vtkPolyData>& surface, double point[3]);
+			cv::Mat getGradient(double angleX, double angleY, double angleZ, const cv::Mat& pTranslation);
 
-    std::vector<cv::Point3d> source;
+			cv::Point3d ClosestPoint(const vtkSmartPointer<vtkPolyData>& surface, double point[3]);
 
-    vtkSmartPointer<vtkPolyData> surface;
+			std::vector<cv::Point3d> source;
 
-    vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
+			vtkSmartPointer<vtkPolyData> surface;
 
-    double computeFunction(double angleX, double angleY, double angleZ, const cv::Mat& pTranslation);
+			vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
 
-    cv::Mat getGradientDiff(double angleX, double angleY, double angleZ, const cv::Mat& pTranslation);
+			double computeFunction(double angleX, double angleY, double angleZ, const cv::Mat& pTranslation);
 
-public:
-    LeastSquaresPoly(const std::vector<PointTypeITK>& pSourcePoints, const vtkSmartPointer<vtkPolyData>& pSurface);
+			cv::Mat getGradientDiff(double angleX, double angleY, double angleZ, const cv::Mat& pTranslation);
 
-    LeastSquaresPoly(const std::vector<cv::Point3d>& pSourcePoints, const vtkSmartPointer<vtkPolyData>& pSurface);
+		public:
+			LeastSquaresPoly(const std::vector<PointTypeITK>& pSourcePoints, const vtkSmartPointer<vtkPolyData>& pSurface);
 
-    double LeastSquares(cv::Mat& data, double learningRate = 0.5, int iterations = 100);
-};
+			LeastSquaresPoly(const std::vector<cv::Point3d>& pSourcePoints, const vtkSmartPointer<vtkPolyData>& pSurface);
+
+			double LeastSquares(cv::Mat& data, double learningRate = 0.5, int iterations = 100);
+		};
+	}
+}
 
 #endif

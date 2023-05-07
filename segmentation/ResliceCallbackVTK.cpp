@@ -6,6 +6,8 @@
 #include "vtkPlane.h"
 
 
+using namespace TKA::SEGMENTATION;
+
 void vtkResliceCursorCallback::Execute(vtkObject *caller, unsigned long, void *callData)
 {
 	vtkImagePlaneWidget* ipw = dynamic_cast<vtkImagePlaneWidget*>(caller);

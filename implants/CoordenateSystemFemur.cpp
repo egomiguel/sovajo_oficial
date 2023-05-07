@@ -1,5 +1,7 @@
 #include "CoordenateSystemFemur.hpp"
 
+using namespace TKA::IMPLANTS;
+
 CoordenateSystemFemur::CoordenateSystemFemur(const Point& hipCenter, const Point& latEpicondyle, const Point& medEpicondyle, const Point& kneeCenter)
 {
     Point vectorZ = hipCenter - kneeCenter;

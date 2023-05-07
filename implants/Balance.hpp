@@ -1,157 +1,165 @@
-#ifndef BALANCE_H
-#define BALANCE_H
+#ifndef IMPLANT_BALANCE_H
+#define IMPLANT_BALANCE_H
 
 #include "Knee.hpp"
 #include "LegAngle.hpp"
 #include "itkImage.h"
 #include "Types.hpp"
 #include <itkRigid3DTransform.h>
-#include "implants_export.h"
+#include "tka_implants_export.h"
 #include "FemurImplant.hpp"
 #include "TibiaImplant.hpp"
 #include "vtkPlane.h"
 
-struct IMPLANTS_EXPORT BalanceInfo
+namespace TKA
 {
-    double distanceLateral;
-    double distanceMedial;
-    BalanceInfo(double distanceLateral, double distanceMedial)
-    {
-        this->distanceLateral = distanceLateral;
-        this->distanceMedial = distanceMedial;
-    }
-};
+	namespace IMPLANTS
+	{
 
-struct IMPLANTS_EXPORT AnglesInfo
-{
-    double varus_angle;
-    double flexion_angle;
-    double rotation_angle;
-    AnglesInfo(double flexion_angle, double varus_angle, double rotation_angle)
-    {
-        this->flexion_angle = flexion_angle;
-        this->varus_angle = varus_angle;
-        this->rotation_angle = rotation_angle;
-    }
-};
+		struct TKA_IMPLANTS_EXPORT BalanceInfo
+		{
+			double distanceLateral;
+			double distanceMedial;
+			BalanceInfo(double distanceLateral, double distanceMedial)
+			{
+				this->distanceLateral = distanceLateral;
+				this->distanceMedial = distanceMedial;
+			}
+		};
 
-class IMPLANTS_EXPORT Balance
-{
-public:
-    Balance();
+		struct TKA_IMPLANTS_EXPORT AnglesInfo
+		{
+			double varus_angle;
+			double flexion_angle;
+			double rotation_angle;
+			AnglesInfo(double flexion_angle, double varus_angle, double rotation_angle)
+			{
+				this->flexion_angle = flexion_angle;
+				this->varus_angle = varus_angle;
+				this->rotation_angle = rotation_angle;
+			}
+		};
 
-    ~Balance();
+		class TKA_IMPLANTS_EXPORT Balance
+		{
+		public:
+			Balance();
 
-    void init(const Knee& pKnee, const FemurImplant& pFemurImplant, const TibiaImplant& pTibiaImplant, const itk::Rigid3DTransform<>::Pointer pImplantToBoneFemurTransform, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTibiaTransform);
+			~Balance();
 
-    void setTransformFemurCtToMarker(const itk::Rigid3DTransform<>::Pointer transform);
+			void init(const Knee& pKnee, const FemurImplant& pFemurImplant, const TibiaImplant& pTibiaImplant, const itk::Rigid3DTransform<>::Pointer pImplantToBoneFemurTransform, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTibiaTransform);
 
-    void setTransformFemurMarkerToCamera(const itk::Rigid3DTransform<>::Pointer transform);
+			void setTransformFemurCtToMarker(const itk::Rigid3DTransform<>::Pointer transform);
 
-    void setTransformTibiaCtToMarker(const itk::Rigid3DTransform<>::Pointer transform);
+			void setTransformFemurMarkerToCamera(const itk::Rigid3DTransform<>::Pointer transform);
 
-    void setTransformTibiaMarkerToCamera(const itk::Rigid3DTransform<>::Pointer transform);
+			void setTransformTibiaCtToMarker(const itk::Rigid3DTransform<>::Pointer transform);
 
-    void setTransformKneeCapCtToMarker(const itk::Rigid3DTransform<>::Pointer transform);
+			void setTransformTibiaMarkerToCamera(const itk::Rigid3DTransform<>::Pointer transform);
 
-    void setTransformKneeCapMarkerToCamera(const itk::Rigid3DTransform<>::Pointer transform);
+			void setTransformKneeCapCtToMarker(const itk::Rigid3DTransform<>::Pointer transform);
 
-    BalanceInfo distanceByAngleBeforeResectionBone() const;
+			void setTransformKneeCapMarkerToCamera(const itk::Rigid3DTransform<>::Pointer transform);
 
-    BalanceInfo distanceByAngleAfterResectionBone(double toolSize = 0) const;
+			BalanceInfo distanceByAngleBeforeResectionBone() const;
 
-    BalanceInfo distanceByAngleAfterResectionBone(const Plane& pTibia, const vtkSmartPointer<vtkPolyData> pFemurPoly, double toolSize = 0) const;
+			BalanceInfo distanceByAngleAfterResectionBone(double toolSize = 0) const;
 
-	BalanceInfo distanceByAngleFemurImplantToTibiaPlane() const;
+			BalanceInfo distanceByAngleAfterResectionBone(const Plane& pTibia, const vtkSmartPointer<vtkPolyData> pFemurPoly, double toolSize = 0) const;
 
-    Plane ComputeNewPlaneTibia(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTibiaTransform);
+			BalanceInfo distanceByAngleFemurImplantToTibiaPlane() const;
 
-    vtkSmartPointer<vtkPolyData> ComputeNewPolyFemur(const itk::Rigid3DTransform<>::Pointer pImplantToBoneFemurTransform);
-    
-    BalanceInfo distanceByAngleWithImplant(const PointTypeITK& implantLateralPlateau, const PointTypeITK& implantMedialPlateau, bool useImplantThickness = false) const;
+			Plane ComputeNewPlaneTibia(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTibiaTransform);
 
-    AnglesInfo anglesByMotion() const;
+			vtkSmartPointer<vtkPolyData> ComputeNewPolyFemur(const itk::Rigid3DTransform<>::Pointer pImplantToBoneFemurTransform);
 
-    PointTypeITK getKneeCapPoint() const; 
+			BalanceInfo distanceByAngleWithImplant(const PointTypeITK& implantLateralPlateau, const PointTypeITK& implantMedialPlateau, bool useImplantThickness = false) const;
 
-    itk::Rigid3DTransform<>::Pointer getNewImplantToBoneFemurTransformAxial(const std::vector<PointTypeITK>& axialPointsCT);
+			AnglesInfo anglesByMotion() const;
 
-    itk::Rigid3DTransform<>::Pointer getNewImplantToBoneFemurTransformCoronal(const std::vector<PointTypeITK>& coronalPointsCT);
+			PointTypeITK getKneeCapPoint() const;
 
-    itk::Rigid3DTransform<>::Pointer getNewImplantToBoneTibiaTransformAxial(const std::vector<PointTypeITK>& axialPointsCT);
+			itk::Rigid3DTransform<>::Pointer getNewImplantToBoneFemurTransformAxial(const std::vector<PointTypeITK>& axialPointsCT);
 
-    /////////////////////////////Test
+			itk::Rigid3DTransform<>::Pointer getNewImplantToBoneFemurTransformCoronal(const std::vector<PointTypeITK>& coronalPointsCT);
 
-    vtkSmartPointer<vtkPolyData> getFemurPolyCut() const;
+			itk::Rigid3DTransform<>::Pointer getNewImplantToBoneTibiaTransformAxial(const std::vector<PointTypeITK>& axialPointsCT);
+
+			/////////////////////////////Test
+
+			vtkSmartPointer<vtkPolyData> getFemurPolyCut() const;
 
 
-private:
+		private:
 
-    Knee knee_;
+			Knee knee_;
 
-    FemurImplant femurImplant;
+			FemurImplant femurImplant;
 
-    TibiaImplant tibiaImplant;
+			TibiaImplant tibiaImplant;
 
-    vtkSmartPointer<vtkPolyData> femurImplantPoly, femurPolyCut;
+			vtkSmartPointer<vtkPolyData> femurImplantPoly, femurPolyCut;
 
-    void setImplantPlateaus(const Point& implantPlateau1, const Point& implantPlateau2, const Plane& tibia, const itk::Rigid3DTransform<>::Pointer transform);
+			void setImplantPlateaus(const Point& implantPlateau1, const Point& implantPlateau2, const Plane& tibia, const itk::Rigid3DTransform<>::Pointer transform);
 
-    bool isInit;
+			bool isInit;
 
-    Plane PlaneA, PlaneB, PlaneC, PlaneD, PlaneMid, PlaneTibia;
+			Plane PlaneA, PlaneB, PlaneC, PlaneD, PlaneMid, PlaneTibia;
 
-    cv::Mat femurTransformCtToMarker, tibiaTransformCtToMarker, femurTransformMarkerToCamera, tibiaTransformMarkerToCamera;
+			cv::Mat femurTransformCtToMarker, tibiaTransformCtToMarker, femurTransformMarkerToCamera, tibiaTransformMarkerToCamera;
 
-    cv::Mat kneeCapTransformCtToMarker, kneeCapTransformMarkerToCamera;
+			cv::Mat kneeCapTransformCtToMarker, kneeCapTransformMarkerToCamera;
 
-    cv::Mat mFemurTransformImplantToBone, mTibiaTransformImplantToBone;
+			cv::Mat mFemurTransformImplantToBone, mTibiaTransformImplantToBone;
 
-    //CoordenateSystemFemur * femurCoordenate;
+			//CoordenateSystemFemur * femurCoordenate;
 
-    //void getTibiPlaneAfterResection(Plane& tibiaFixPlane, Plane& tibiaRotatePlane) const;
+			//void getTibiPlaneAfterResection(Plane& tibiaFixPlane, Plane& tibiaRotatePlane) const;
 
-    Point transformFemurPointToCamera(const Point& phisicalPoint) const;
+			Point transformFemurPointToCamera(const Point& phisicalPoint) const;
 
-    Point transformTibiaPointToCamera(const Point& phisicalPoint) const;
+			Point transformTibiaPointToCamera(const Point& phisicalPoint) const;
 
-    Point transformFemurVectorToCamera(const Point& pLandmarkVector) const;
+			Point transformFemurVectorToCamera(const Point& pLandmarkVector) const;
 
-    Point transformTibiaVectorToCamera(const Point& pLandmarkVector) const;
+			Point transformTibiaVectorToCamera(const Point& pLandmarkVector) const;
 
-    /*Plane transformFemurPlane(const Plane& femurCT) const;*/
+			/*Plane transformFemurPlane(const Plane& femurCT) const;*/
 
-    Plane transformTibiaPlane(const Plane& tibiaCT) const;
+			Plane transformTibiaPlane(const Plane& tibiaCT) const;
 
-    ImplantImageType::PointType cvPointToITK(const Point& phisicalPoint) const;
+			ImplantImageType::PointType cvPointToITK(const Point& phisicalPoint) const;
 
-    Point itkPointToCV(const ImplantImageType::PointType& phisicalPoint) const;
+			Point itkPointToCV(const ImplantImageType::PointType& phisicalPoint) const;
 
-    cv::Mat Rigid3DTransformToCV(const itk::Rigid3DTransform<>::Pointer transform) const;
+			cv::Mat Rigid3DTransformToCV(const itk::Rigid3DTransform<>::Pointer transform) const;
 
-    cv::Mat Rigid3DTransformToCVRotation(const itk::Rigid3DTransform<>::Pointer transform) const;
+			cv::Mat Rigid3DTransformToCVRotation(const itk::Rigid3DTransform<>::Pointer transform) const;
 
-    cv::Mat Rigid3DTransformToCVTranslation(const itk::Rigid3DTransform<>::Pointer transform) const;
+			cv::Mat Rigid3DTransformToCVTranslation(const itk::Rigid3DTransform<>::Pointer transform) const;
 
-    Plane TransformImplantPlaneToBone(const Plane& plane, const itk::Rigid3DTransform<>::Pointer transform) const;
+			Plane TransformImplantPlaneToBone(const Plane& plane, const itk::Rigid3DTransform<>::Pointer transform) const;
 
-    vtkSmartPointer<vtkPolyData> TransformPolyFemurToCamera(const vtkSmartPointer<vtkPolyData> poly) const;
+			vtkSmartPointer<vtkPolyData> TransformPolyFemurToCamera(const vtkSmartPointer<vtkPolyData> poly) const;
 
-    vtkSmartPointer<vtkPolyData> TransformPolyTibiaToCamera(const vtkSmartPointer<vtkPolyData> poly) const;
+			vtkSmartPointer<vtkPolyData> TransformPolyTibiaToCamera(const vtkSmartPointer<vtkPolyData> poly) const;
 
-    double closestPoint(const vtkSmartPointer<vtkPolyData> poly, double * point, Point& closest) const;
+			double closestPoint(const vtkSmartPointer<vtkPolyData> poly, double * point, Point& closest) const;
 
-    double closestPoint(const vtkSmartPointer<vtkPolyData> poly, const Point& p, Point& closest) const;
+			double closestPoint(const vtkSmartPointer<vtkPolyData> poly, const Point& p, Point& closest) const;
 
-    double GetTriangleArea(const Point& a, const Point& b, const Point& c) const;
+			double GetTriangleArea(const Point& a, const Point& b, const Point& c) const;
 
-    double GetDistancePointToSegment(const Point& S1, const Point& S2, const Point& P, Point& closestPoint) const;
+			double GetDistancePointToSegment(const Point& S1, const Point& S2, const Point& P, Point& closestPoint) const;
 
-    double GetClosestPointOnTriangle(const Point& a, const Point& b, const Point& c, const Point& myPoint, Point& closestPoint) const;
+			double GetClosestPointOnTriangle(const Point& a, const Point& b, const Point& c, const Point& myPoint, Point& closestPoint) const;
 
-    cv::Point3d VtkToCv(double * P) const;
+			cv::Point3d VtkToCv(double * P) const;
 
-    vtkSmartPointer<vtkPolyData> GetFemurPolyCut() const;
-};
+			vtkSmartPointer<vtkPolyData> GetFemurPolyCut() const;
+		};
+
+	}
+}
 
 #endif
