@@ -1,0 +1,43 @@
+#ifndef EXCEPTION_REGISTRATION_H
+#define EXCEPTION_REGISTRATION_H
+
+#include <exception>
+#include <string>
+#include "tha_registration_export.h"
+
+namespace THA
+{
+	namespace RIGISTRATION
+	{
+		class THA_REGISTRATION_EXPORT RegistrationException : public std::exception
+		{
+			std::string msg_;
+		public:
+			RegistrationException(const std::string& msg) : msg_(msg) {}
+
+			virtual const char* what() const noexcept override
+			{
+				return msg_.c_str();
+			}
+		};
+
+		enum THA_REGISTRATION_EXPORT RegistrationExceptionCode
+		{
+			CAN_NOT_DEFINE_FIT_PLANE_TO_PATELLA = 201,
+			CAN_NOT_CONVERT_ITK_IMAGE_TO_3D_MESH_SURFACE,
+			LIST_OF_IMAGE_MESH_POINTS_IS_EMPTY,
+			CAN_NOT_GET_LIST_OF_IMAGE_MESH_POINTS,
+			CAN_NOT_DETERMINE_DISTANCE_TO_3D_MESH_SURFACE,
+			NOT_ENOUGH_POINTS_TO_FIT_CIRCLE,
+			CAN_NOT_DETERMINE_PERPENDICULAR_LINE_TO_LINE_ON_REGISTRATION,
+			POINTS_TO_DEFINE_PLANE_CAN_NOT_BE_COLLINEAR_ON_REGISTRATION,
+			ALREADY_INITIALIZED_PLANE_ON_REGISTRATION,
+			CAN_NOT_DETERMINE_PERPENDICULAR_PLANE_TO_PLANE_ON_REGISTRATION,
+			CAN_NOT_DETERMINE_INTERCEPTION_LINE_TO_PLANE_ON_REGISTRATION,
+			REFERENCE_POINTS_DO_NOT_CORRESPOND_TO_PELVIS_RIGHT_SIDE,
+			REFERENCE_POINTS_DO_NOT_CORRESPOND_TO_PELVIS_LEFT_SIDE
+		};
+	}
+}
+
+#endif

@@ -1,0 +1,45 @@
+#ifndef HIP_PELVIS_CUP_IMPLANT_MATCH_H
+#define HIP_PELVIS_CUP_IMPLANT_MATCH_H
+
+#include "HipPelvisCupImplant.hpp"
+#include "HipPelvis.hpp"
+#include <itkRigid3DTransform.h>
+#include "tha_implants_export.h"
+
+namespace THA
+{
+	namespace IMPLANTS
+	{
+		class THA_IMPLANTS_EXPORT HipPelvisCupImplantMatch
+		{
+		public:
+			HipPelvisCupImplantMatch();
+
+			void init(const HipPelvis& pPelvis, const HipPelvisCupImplant& pImplant, const Point& pHipCenterOfRotation);
+
+			itk::Rigid3DTransform<>::Pointer getTransform(double pAbductionAngle = 40, double pAnteversionAngle = 20) const;
+
+			double getCupInclination(const itk::Rigid3DTransform<>::Pointer pTransform) const;
+
+			double getCutVersion(const itk::Rigid3DTransform<>::Pointer pTransform) const;
+
+			double getCupShiftSuperior(const itk::Rigid3DTransform<>::Pointer pTransform) const;
+
+			double getCupShiftLateral(const itk::Rigid3DTransform<>::Pointer pTransform) const;
+
+			double getCupShiftAnterior(const itk::Rigid3DTransform<>::Pointer pTransform) const;
+
+			void GetRobotTransform(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut) const;
+
+		private:
+			HipPelvis mPelvis;
+			HipPelvisCupImplant mImplant;
+			Point mHipCenterOfRotation;
+			bool isInit;
+		};
+
+	}
+}
+
+
+#endif

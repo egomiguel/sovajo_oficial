@@ -10,7 +10,6 @@ namespace TKA
 {
 	namespace SEGMENTATION
 	{
-
 		class Tiling
 		{
 		private:

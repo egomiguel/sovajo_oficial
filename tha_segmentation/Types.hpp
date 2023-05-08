@@ -3,7 +3,7 @@
 
 #include "itkImage.h"
 
-namespace TKA
+namespace THA
 {
 	namespace SEGMENTATION
 	{

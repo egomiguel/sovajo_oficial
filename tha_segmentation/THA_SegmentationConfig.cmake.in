@@ -1,0 +1,10 @@
+@PACKAGE_INIT@
+include("${CMAKE_CURRENT_LIST_DIR}/THA_SegmentationTargets.cmake")
+
+find_package(ITK REQUIRED)
+include(${ITK_USE_FILE})
+
+find_package(VTK REQUIRED)
+include(${VTK_USE_FILE})
+
+check_required_components(THA_Segmentation)
