@@ -29,7 +29,10 @@ namespace THA
 			Point getFemurVectorInfSup() const;
 
 			double getHipLengthDistance() const;
+			double getHipLengthDistanceOppsite(const Point& mechanicalFemoralAxisPointHip, const Point& mechanicalFemoralAxisPointKnee) const;
+
 			double getCombinedOffsetDistance() const;
+			double getCombinedOffsetDistanceOppsite() const;
 
 			std::pair<Point, Point> getAbductionAnteversionVectorsZX(const Point& pCenterOfRotation, double pAbductionAngle, double pAnteversionAngle) const;
 			Point getPubicJoin() const;

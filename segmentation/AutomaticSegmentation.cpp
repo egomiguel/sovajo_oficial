@@ -1,5 +1,5 @@
-﻿#include "itkGDCMImageIO.h"
-#include "itkGDCMSeriesFileNames.h"
+﻿//#include "itkGDCMImageIO.h"
+//#include "itkGDCMSeriesFileNames.h"
 #include "itkImage.h"
 #include "itkImageSeriesReader.h"
 #include "itkImageFileWriter.h"

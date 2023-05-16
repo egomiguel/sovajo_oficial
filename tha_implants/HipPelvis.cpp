@@ -131,10 +131,72 @@ double HipPelvis::getHipLengthDistance() const
 	return lineASIS.getDistanceFromPoint(ref);
 }
 
+double HipPelvis::getHipLengthDistanceOppsite(const Point& mechanicalFemoralAxisPointHip, const Point& mechanicalFemoralAxisPointKnee) const
+{
+	Plane coronal;
+	coronal.init(mPlaneAPP.getNormalVector(), mPlaneAPP.getPoint());
+
+	Point ref;
+	Line lineASIS = Line::makeLineWithPoints(mRightASIS, mLeftASIS);
+	if (mSide == RIGHT_SIDE)
+	{
+		ref = mRightLesserTrochanter;
+	}
+	else
+	{
+		ref = mLeftLesserTrochanter;
+	}
+
+	Point mechanicalVector = mechanicalFemoralAxisPointHip - mechanicalFemoralAxisPointKnee;
+	mechanicalVector.normalice();
+
+	Point verticalVector = getPelvisVectorInfSup();
+
+	mechanicalVector = coronal.getProjectionVector(mechanicalVector);
+	verticalVector = coronal.getProjectionVector(verticalVector);
+	ref = coronal.getProjectionPoint(ref);
+
+	double angle = ImplantTools::getAngleBetweenVectors(mechanicalVector, verticalVector);
+	Point crossVector = mechanicalVector.cross(verticalVector);
+	crossVector.normalice();
+
+	cv::Mat rotation = ImplantTools::getRotateMatrix(crossVector, angle);
+	cv::Mat rotationRef = rotation * ref.ToMatPoint();
+	ref = Point(rotationRef);
+	return lineASIS.getDistanceFromPoint(ref);
+}
+
 double HipPelvis::getCombinedOffsetDistance() const
 {
 	Line femoralCanalAxes(mFemurAxisVector, mFemurPointInsideCenter);
 	return femoralCanalAxes.getDistanceFromPoint(mPubicJoin);
+}
+
+double HipPelvis::getCombinedOffsetDistanceOppsite() const
+{
+	Plane coronal;
+	coronal.init(mPlaneAPP.getNormalVector(), mPlaneAPP.getPoint());
+
+	Point ref = mPubicJoin;
+
+	Point canalAxis = getFemurVectorInfSup();
+	Point verticalVector = getPelvisVectorInfSup();
+
+	canalAxis = coronal.getProjectionVector(canalAxis);
+	verticalVector = coronal.getProjectionVector(verticalVector);
+	ref = coronal.getProjectionPoint(ref);
+
+	double angle = ImplantTools::getAngleBetweenVectors(canalAxis, verticalVector);
+	Point crossVector = canalAxis.cross(verticalVector);
+	crossVector.normalice();
+
+	cv::Mat rotation = ImplantTools::getRotateMatrix(crossVector, angle);
+	cv::Mat canalAxisMat = rotation * canalAxis.ToMatPoint();
+
+	canalAxis = Point(canalAxisMat);
+
+	Line femoralCanalAxes(canalAxis, coronal.getProjectionPoint(mFemurPointInsideCenter));
+	return femoralCanalAxes.getDistanceFromPoint(ref);
 }
 
 std::pair<Point, Point> HipPelvis::getAbductionAnteversionVectorsZX(const Point& pCenterOfRotation, double pAbductionAngle, double pAnteversionAngle) const
