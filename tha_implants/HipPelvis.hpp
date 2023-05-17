@@ -28,11 +28,11 @@ namespace THA
 			Point getFemurVectorLatMed(const Point& pCenterOfRotation) const;
 			Point getFemurVectorInfSup() const;
 
-			double getHipLengthDistance() const;
-			double getHipLengthDistanceOppsite(const Point& mechanicalFemoralAxisPointHip, const Point& mechanicalFemoralAxisPointKnee) const;
+			double getHipLengthDistance(const Point& femurHeadCenter) const; 
+			double getHipLengthDistanceOppsite(const Point& femurHeadCenterOppsite) const;
 
-			double getCombinedOffsetDistance() const;
-			double getCombinedOffsetDistanceOppsite() const;
+			double getCombinedOffsetDistance(const Point& femurHeadCenter) const;
+			double getCombinedOffsetDistanceOppsite(const Point& femurHeadCenterOppsite) const;
 
 			std::pair<Point, Point> getAbductionAnteversionVectorsZX(const Point& pCenterOfRotation, double pAbductionAngle, double pAnteversionAngle) const;
 			Point getPubicJoin() const;
@@ -50,12 +50,13 @@ namespace THA
 			Point mLeftPubicTubercle, mRightPubicTubercle;
 			Point mPubicJoin;
 			Point mFemurAxisVector, mFemurPointInsideCenter;
+			Point mFemurAxisVectorOppsite, mFemurPointInsideCenterOppsite;
 			Plane mPlaneAPP;
 			PelvisSide mSide;
 			vtkSmartPointer<vtkPolyData> mPelvis;
 			bool isInit;
 
-			void extractFemurAxisVector();
+			void extractFemurAxisVector(bool surgerySide);
 		};
 	}
 }
