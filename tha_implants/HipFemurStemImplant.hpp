@@ -12,13 +12,14 @@ namespace THA
 		{
 		public:
 			HipFemurStemImplant();
-			void init(const Point& pTopPoint, const Point& pBasePoint, const Point& pHeadCenter);
+			void init(const Point& pTopPoint, const Point& pBasePoint, const Point& pHeadCenter, const Point& pNeckCenter);
 			Point getVectorInfoSup() const;
 			Point getVectorLatMed() const;
+			Point getVectorNeck() const;
 			Point getHeadCenter() const;
 
 		private:
-			Point mTopPoint, mBasePoint, mHeadCenter;
+			Point mTopPoint, mBasePoint, mHeadCenter, mNeckCenter;
 			bool isInit;
 		};
 

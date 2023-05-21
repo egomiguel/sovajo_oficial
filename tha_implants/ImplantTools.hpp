@@ -113,6 +113,8 @@ namespace THA
 
 			std::pair<double, double> fitEllipse(const vtkSmartPointer<vtkPolyData> pContour, const Point& pNormal, Point& center);
 
+			std::pair<Point, double> minCircle(const vtkSmartPointer<vtkPolyData> pContour, const Point& pNormal);
+
 			int orientation(const cv::Point2d& p1, const cv::Point2d& p2, const cv::Point2d& p3); //0 collinear, 1 Clockwise, 2 Counterclockwise
 
 			int orientation(const Point& p1, const Point& p2, const Point& p3, const cv::Mat& pRotationZ); //0 collinear, 1 Clockwise, 2 Counterclockwise

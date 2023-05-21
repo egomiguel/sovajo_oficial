@@ -1,5 +1,7 @@
 #include "HipFemurStemImplantMatch.hpp"
 #include "ImplantsException.hpp"
+#include "ImplantTools.hpp"
+#include <itkVersorRigid3DTransform.h>
 
 using namespace THA::IMPLANTS;
 
@@ -81,4 +83,89 @@ void HipFemurStemImplantMatch::getRigidTransform()
     cv::Mat inverse = (implantMatrix.t()).inv();
     rotationMatrix = (pelvisMatrix.t()) * inverse;
     translationMatrix = mHipCenterOfRotation.ToMatPoint() - (rotationMatrix * mImplant.getHeadCenter().ToMatPoint());
+}
+
+double HipFemurStemImplantMatch::getStemVersion(const itk::Rigid3DTransform<>::Pointer pTransform, const HipFemur& pFemur) const
+{
+	cv::Mat rotation = ImplantTools::Rigid3DTransformToCVRotation(pTransform);
+	cv::Mat neckAxisMat = rotation * mImplant.getVectorNeck().ToMatPoint();
+	Point neckAxis = Point(neckAxisMat);
+
+	return mPelvis.getFemurVersion(pFemur, neckAxis);
+}
+
+itk::Rigid3DTransform<>::Pointer HipFemurStemImplantMatch::getTransform(double pStemVersionAngleDegree, const HipFemur& pFemur) const
+{
+	cv::Mat neckAxisMat = rotationMatrix * mImplant.getVectorNeck().ToMatPoint();
+	Point neckAxis = Point(neckAxisMat);
+
+	double angle = mPelvis.getFemurVersion(pFemur, neckAxis);
+
+	double refAngle = (pStemVersionAngleDegree * PI) / 180.;
+
+	itk::Rigid3DTransform<double>::Pointer transform = itk::VersorRigid3DTransform<double>::New();
+	cv::Mat transformation;
+	Point canalAxis;
+
+	if (pFemur.getFemurSide() == mPelvis.getSide())
+	{
+		canalAxis = mPelvis.getFemurVectorInfSup();
+	}
+	else
+	{
+		canalAxis = mPelvis.getFemurVectorInfSupOppsite();
+	}
+
+	if (refAngle == angle)
+	{
+		transform->SetMatrix(GetRotationMatrix());
+		transform->SetOffset(GetTranslationMatrix());
+		return transform;
+	}
+	else if (refAngle > angle)
+	{
+		double temp = refAngle - angle;
+
+		if (pFemur.getFemurSide() == PelvisSide::RIGHT_SIDE)
+		{
+			transformation = ImplantTools::getRotateMatrix(-canalAxis, temp);
+		}
+		else
+		{
+			transformation = ImplantTools::getRotateMatrix(canalAxis, temp);
+		}
+	}
+	else
+	{
+		double temp = angle - refAngle;
+
+		if (pFemur.getFemurSide() == PelvisSide::RIGHT_SIDE)
+		{
+			transformation = ImplantTools::getRotateMatrix(canalAxis, temp);
+		}
+		else
+		{
+			transformation = ImplantTools::getRotateMatrix(-canalAxis, temp);
+		}
+	}
+
+	cv::Mat lastRotation = transformation * rotationMatrix;
+
+	itk::Matrix< double, 3, 3 > rotation;
+
+	rotation[0][0] = lastRotation.at <double>(0, 0);
+	rotation[0][1] = lastRotation.at <double>(0, 1);
+	rotation[0][2] = lastRotation.at <double>(0, 2);
+
+	rotation[1][0] = lastRotation.at <double>(1, 0);
+	rotation[1][1] = lastRotation.at <double>(1, 1);
+	rotation[1][2] = lastRotation.at <double>(1, 2);
+
+	rotation[2][0] = lastRotation.at <double>(2, 0);
+	rotation[2][1] = lastRotation.at <double>(2, 1);
+	rotation[2][2] = lastRotation.at <double>(2, 2);
+
+	transform->SetMatrix(rotation);
+	transform->SetOffset(GetTranslationMatrix());
+	return transform;
 }

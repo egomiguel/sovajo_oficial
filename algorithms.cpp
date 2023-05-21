@@ -3591,7 +3591,7 @@ int main()
 	//Test30PointsVTK();
 
 
-	MatchEasy();
+	//MatchEasy();
 
 
 	std::string path, pig, pathHoles;

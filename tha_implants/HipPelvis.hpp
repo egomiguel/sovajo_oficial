@@ -8,6 +8,7 @@
 #include "tha_implants_export.h"
 #include "vtkPolyData.h"
 #include "vtkSmartPointer.h"
+#include "HipFemur.hpp"
 
 namespace THA
 {
@@ -27,6 +28,7 @@ namespace THA
 
 			Point getFemurVectorLatMed(const Point& pCenterOfRotation) const;
 			Point getFemurVectorInfSup() const;
+			Point getFemurVectorInfSupOppsite() const;
 
 			double getHipLengthDistance(const Point& femurHeadCenter) const; 
 			double getHipLengthDistanceOppsite(const Point& femurHeadCenterOppsite) const;
@@ -34,8 +36,14 @@ namespace THA
 			double getCombinedOffsetDistance(const Point& femurHeadCenter) const;
 			double getCombinedOffsetDistanceOppsite(const Point& femurHeadCenterOppsite) const;
 
+			double getFemurVersion(const HipFemur& pFemur) const;
+
+			double getFemurVersion(const HipFemur& pFemur, const Point& pNeckAxisVectorToHead) const;
+
 			std::pair<Point, Point> getAbductionAnteversionVectorsZX(const Point& pCenterOfRotation, double pAbductionAngle, double pAnteversionAngle) const;
 			Point getPubicJoin() const;
+
+			PelvisSide getSide() const;
 
 			vtkSmartPointer<vtkPolyData> getPelvisVTK() const;
 			static Point getNativeCenterOfRotation(const std::vector<Point>& pPoints);
@@ -56,6 +64,7 @@ namespace THA
 			vtkSmartPointer<vtkPolyData> mPelvis;
 			bool isInit;
 
+			Point getNeckAxisVector(const Point& femurHeadCenter, const Point& femurNeck, const Point& greaterTrochanter, const vtkSmartPointer<vtkPolyData>& femurPoly, const PelvisSide& side) const;
 			void extractFemurAxisVector(bool surgerySide);
 		};
 	}

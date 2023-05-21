@@ -1628,7 +1628,7 @@ std::pair<Point, double> ImplantTools::fitSphere(const std::vector<Point>& pPoin
 	return std::make_pair(center, radius);
 }
 
-std::pair<double, double> ImplantTools::fitEllipse(const vtkSmartPointer<vtkPolyData> pContour, const Point& pNormal, Point& center)
+std::pair<Point, double> ImplantTools::minCircle(const vtkSmartPointer<vtkPolyData> pContour, const Point& pNormal)
 {
 	cv::Mat rotate = GetRotateZ(pNormal);
 	vtkSmartPointer<vtkPoints> pointList = pContour->GetPoints();
@@ -1648,6 +1648,37 @@ std::pair<double, double> ImplantTools::fitEllipse(const vtkSmartPointer<vtkPoly
 		z = tPoint.z;
 	}
 
+	cv::Point2f center;
+	float radius = 0;
+
+	cv::minEnclosingCircle(coplanar2d, center, radius);
+
+	Point newCenter = Point(center.x, center.y, z);
+	cv::Mat resultCenter = rotate.inv() * newCenter.ToMatPoint();
+	Point center3D = Point(resultCenter);
+
+	return std::make_pair(center3D, radius);
+}
+
+std::pair<double, double> ImplantTools::fitEllipse(const vtkSmartPointer<vtkPolyData> pContour, const Point& pNormal, Point& center)
+{
+	cv::Mat rotate = GetRotateZ(pNormal);
+	vtkSmartPointer<vtkPoints> pointList = pContour->GetPoints();
+	int tSize = pointList->GetNumberOfPoints();
+
+	std::vector<cv::Point2f> coplanar2d;
+	double z = 0;
+
+	for (int i = 0; i < tSize; i++)
+	{
+		double pnt[3];
+		pointList->GetPoint(i, pnt);
+		Point newPoint(pnt[0], pnt[1], pnt[2]);
+		cv::Mat transformPointMat = rotate * newPoint.ToMatPoint();
+		Point tPoint = Point(transformPointMat);
+		coplanar2d.push_back(cv::Point2f(tPoint.x, tPoint.y));
+		z = tPoint.z;
+	}
 	cv::RotatedRect box = cv::fitEllipse(coplanar2d);
 	std::pair<double, double> result = std::make_pair(box.size.width, box.size.height);
 

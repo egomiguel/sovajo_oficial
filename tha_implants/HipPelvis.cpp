@@ -117,6 +117,11 @@ Point HipPelvis::getFemurVectorInfSup() const
     return mFemurAxisVector;
 }
 
+Point HipPelvis::getFemurVectorInfSupOppsite() const
+{
+	return mFemurAxisVectorOppsite;
+}
+
 double HipPelvis::getHipLengthDistance(const Point& femurHeadCenter) const
 {
 	Plane coronal;
@@ -249,6 +254,203 @@ Point HipPelvis::getPubicJoin() const
 vtkSmartPointer<vtkPolyData> HipPelvis::getPelvisVTK() const
 {
     return mPelvis;
+}
+
+PelvisSide HipPelvis::getSide() const
+{
+	return mSide;
+}
+
+double HipPelvis::getFemurVersion(const HipFemur& pFemur, const Point& pNeckAxisVectorToHead) const
+{
+	Point lateralMedialAxis = pFemur.getMedialEpicondyle() - pFemur.getLateralEpicondyle();
+	lateralMedialAxis.normalice();
+	Point midPoint = (pFemur.getMedialEpicondyle() + pFemur.getLateralEpicondyle()) / 2.;
+
+	Plane axial;
+	Point anteriorDirectionVector;
+
+	if (pFemur.getFemurSide() == mSide)
+	{
+		axial.init(mFemurAxisVector, mFemurPointInsideCenter);
+	}
+	else
+	{
+		axial.init(mFemurAxisVectorOppsite, mFemurPointInsideCenterOppsite);
+	}
+
+	Point neckAxis = axial.getProjectionVector(pNeckAxisVectorToHead);
+	lateralMedialAxis = axial.getProjectionVector(lateralMedialAxis);
+
+	neckAxis.normalice();
+	lateralMedialAxis.normalice();
+
+	double angle = ImplantTools::getAngleBetweenVectors(neckAxis, lateralMedialAxis);
+
+	if (pFemur.getFemurSide() == PelvisSide::RIGHT_SIDE)
+	{
+		if (pFemur.getFemurSide() == mSide)
+		{
+			anteriorDirectionVector = lateralMedialAxis.cross(mFemurAxisVector);
+		}
+		else
+		{
+			anteriorDirectionVector = lateralMedialAxis.cross(mFemurAxisVectorOppsite);
+		}
+	}
+	else
+	{
+		if (pFemur.getFemurSide() == mSide)
+		{
+			anteriorDirectionVector = mFemurAxisVector.cross(lateralMedialAxis);
+		}
+		else
+		{
+			anteriorDirectionVector = mFemurAxisVectorOppsite.cross(lateralMedialAxis);
+		}
+	}
+
+	anteriorDirectionVector.normalice();
+
+	Plane coronal;
+	coronal.init(anteriorDirectionVector, midPoint);
+
+	Point checkPoint = midPoint + 1000. * neckAxis;
+
+	if (coronal.eval(checkPoint) >= 0)
+	{
+		return angle;
+	}
+	else
+	{
+		return -angle;
+	}
+}
+
+double HipPelvis::getFemurVersion(const HipFemur& pFemur) const
+{
+	Point neckAxis = getNeckAxisVector(pFemur.getHeadCenter(), pFemur.getNeck(), pFemur.getGreaterTrochanter(), pFemur.getFemur(), pFemur.getFemurSide());
+	Point lateralMedialAxis = pFemur.getMedialEpicondyle() - pFemur.getLateralEpicondyle();
+	lateralMedialAxis.normalice();
+	Point midPoint = (pFemur.getMedialEpicondyle() + pFemur.getLateralEpicondyle()) / 2.;
+
+	Plane axial;
+	Point anteriorDirectionVector;
+
+	if (pFemur.getFemurSide() == mSide)
+	{
+		axial.init(mFemurAxisVector, mFemurPointInsideCenter);
+	}
+	else
+	{
+		axial.init(mFemurAxisVectorOppsite, mFemurPointInsideCenterOppsite);
+	}
+
+	neckAxis = axial.getProjectionVector(neckAxis);
+	lateralMedialAxis = axial.getProjectionVector(lateralMedialAxis);
+
+	neckAxis.normalice();
+	lateralMedialAxis.normalice();
+
+	double angle = ImplantTools::getAngleBetweenVectors(neckAxis, lateralMedialAxis);
+
+	if (pFemur.getFemurSide() == PelvisSide::RIGHT_SIDE)
+	{
+		if (pFemur.getFemurSide() == mSide)
+		{
+			anteriorDirectionVector = lateralMedialAxis.cross(mFemurAxisVector);
+		}
+		else
+		{
+			anteriorDirectionVector = lateralMedialAxis.cross(mFemurAxisVectorOppsite);
+		}
+	}
+	else
+	{
+		if (pFemur.getFemurSide() == mSide)
+		{
+			anteriorDirectionVector = mFemurAxisVector.cross(lateralMedialAxis);
+		}
+		else
+		{
+			anteriorDirectionVector = mFemurAxisVectorOppsite.cross(lateralMedialAxis);
+		}
+	}
+
+	anteriorDirectionVector.normalice();
+
+	Plane coronal;
+	coronal.init(anteriorDirectionVector, midPoint);
+	
+	Point checkPoint = midPoint + 1000. * neckAxis;
+
+	if (coronal.eval(checkPoint) >= 0)
+	{
+		return angle;
+	}
+	else
+	{
+		return -angle;
+	}
+}
+
+Point HipPelvis::getNeckAxisVector(const Point& femurHeadCenter, const Point& femurNeck, const Point& greaterTrochanter, const vtkSmartPointer<vtkPolyData>& femurPoly, const PelvisSide& side) const
+{
+	Point refLesserTrochanter, refFemurAxis, refFemurPoint;
+
+	if (side == LEFT_SIDE)
+	{
+		refLesserTrochanter = mLeftLesserTrochanter;
+	}
+	else
+	{
+		refLesserTrochanter = mRightLesserTrochanter;
+	}
+
+	if (side == mSide)
+	{
+		refFemurAxis = mFemurAxisVector;
+		refFemurPoint = mFemurPointInsideCenter;
+	}
+	else
+	{
+		refFemurAxis = mFemurAxisVectorOppsite;
+		refFemurPoint = mFemurPointInsideCenterOppsite;
+	}
+
+	Point midPoint = (refLesserTrochanter + greaterTrochanter) / 2.;
+
+	Line canalAxis(refFemurAxis, refFemurPoint);
+
+	midPoint = canalAxis.getProjectPoint(midPoint);
+
+	Point tempAxis = femurHeadCenter - midPoint;
+	tempAxis.normalice();
+
+	double radius = -1;
+	Point neckCenter = midPoint;
+
+	for (float i = 0.2; i < 0.9; i+= 0.1)
+	{
+		Point cutPoint = midPoint + i * (femurHeadCenter - midPoint);
+
+		auto contour = ImplantTools::getContours(femurPoly, tempAxis, cutPoint);
+		if (contour->GetNumberOfPoints() != 0)
+		{
+			std::pair<Point, double> circle = ImplantTools::minCircle(contour, tempAxis);
+
+			if (circle.second > 0  && (circle.second < radius || radius < 0))
+			{
+				radius = circle.second;
+				neckCenter = circle.first;
+			}
+		}
+
+	}
+
+	Point neckAxis = femurHeadCenter - neckCenter;
+	neckAxis.normalice();
+	return neckAxis;
 }
 
 void HipPelvis::extractFemurAxisVector(bool surgerySide)

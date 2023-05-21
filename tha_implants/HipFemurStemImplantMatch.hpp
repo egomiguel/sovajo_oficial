@@ -5,12 +5,12 @@
 #include "HipPelvis.hpp"
 #include <itkRigid3DTransform.h>
 #include "tha_implants_export.h"
+#include "HipFemur.hpp"
 
 namespace THA
 {
 	namespace IMPLANTS
 	{
-
 		class THA_IMPLANTS_EXPORT HipFemurStemImplantMatch
 		{
 		public:
@@ -21,6 +21,10 @@ namespace THA
 			itk::Matrix< double, 3, 3 > GetRotationMatrix() const;
 
 			itk::Vector< double, 3 > GetTranslationMatrix() const;
+
+			double getStemVersion(const itk::Rigid3DTransform<>::Pointer pTransform, const HipFemur& pFemur) const;
+
+			itk::Rigid3DTransform<>::Pointer getTransform(double pStemVersionAngleDegree, const HipFemur& pFemur) const;
 
 		private:
 			HipPelvis mPelvis;

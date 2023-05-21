@@ -8,7 +8,7 @@ HipFemurStemImplant::HipFemurStemImplant()
     isInit = false;
 }
 
-void HipFemurStemImplant::init(const Point& pTopPoint, const Point& pBasePoint, const Point& pHeadCenter)
+void HipFemurStemImplant::init(const Point& pTopPoint, const Point& pBasePoint, const Point& pHeadCenter, const Point& pNeckCenter)
 {
     if (isInit == true)
     {
@@ -18,6 +18,7 @@ void HipFemurStemImplant::init(const Point& pTopPoint, const Point& pBasePoint, 
     this->mTopPoint = pTopPoint;
     this->mBasePoint = pBasePoint;
     this->mHeadCenter = pHeadCenter;
+	this->mNeckCenter = pNeckCenter;
     isInit = true;
 }
 
@@ -26,6 +27,13 @@ Point HipFemurStemImplant::getVectorInfoSup() const
     Point vector = mTopPoint - mBasePoint;
     vector.normalice();
     return vector;
+}
+
+Point HipFemurStemImplant::getVectorNeck() const
+{
+	Point neckAxis = mHeadCenter - mNeckCenter;
+	neckAxis.normalice();
+	return neckAxis;
 }
 
 Point HipFemurStemImplant::getVectorLatMed() const
