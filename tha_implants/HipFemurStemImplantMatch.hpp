@@ -5,7 +5,6 @@
 #include "HipPelvis.hpp"
 #include <itkRigid3DTransform.h>
 #include "tha_implants_export.h"
-#include "HipFemur.hpp"
 
 namespace THA
 {
@@ -22,9 +21,7 @@ namespace THA
 
 			itk::Vector< double, 3 > GetTranslationMatrix() const;
 
-			double getStemVersion(const itk::Rigid3DTransform<>::Pointer pTransform, const HipFemur& pFemur) const;
-
-			itk::Rigid3DTransform<>::Pointer getTransform(double pStemVersionAngleDegree, const HipFemur& pFemur) const;
+			itk::Rigid3DTransform<>::Pointer getTransform(double pStemVersionAngleDegree) const;
 
 		private:
 			HipPelvis mPelvis;

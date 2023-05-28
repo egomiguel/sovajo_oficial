@@ -19,6 +19,8 @@ namespace THA
 
 			Point getDirectVector() const;
 
+			void TransformLine(const cv::Mat& rotation, const cv::Mat& translation);
+
 			double getSquareNorm(const Point& pPoint) const;
 
 			double getDistanceFromPoint(const Point& pPoint) const;

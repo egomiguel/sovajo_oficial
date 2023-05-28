@@ -18,32 +18,34 @@ namespace THA
 		{
 		public:
 			HipPelvis();
-			void init(const Point& pLeftASIS, const Point& pRightASIS, const Point& pLeftPubicTubercle, const Point& pRightPubicTubercle, const Point& pLeftLesserTrochanter, const Point& pRightLesserTrochanter, const vtkSmartPointer<vtkPolyData>& pPelvis, PelvisSide pSide);
+			void init(const Point& pLeftASIS, const Point& pRightASIS, const Point& pLeftPubicTubercle, const Point& pRightPubicTubercle, const vtkSmartPointer<vtkPolyData>& pPelvis,
+					  const HipFemur& pFemurRight, const HipFemur& pFemurLeft, PelvisSide pSide);
 
 			Point getMidASIS() const;
+			Point getRightASIS() const;
+			Point getLeftASIS() const;
+
 			Point getPelvisVectorASIS() const;
 			Point getPelvisVectorLateralASIS() const;
 			Point getPelvisVectorAP() const;
 			Point getPelvisVectorInfSup() const;
 
-			Point getFemurVectorLatMed(const Point& pCenterOfRotation) const;
-			Point getFemurVectorInfSup() const;
-			Point getFemurVectorInfSupOppsite() const;
+			double getHipLengthDistance() const; 
+			double getHipLengthDistanceOppsite() const;
 
-			double getHipLengthDistance(const Point& femurHeadCenter) const; 
-			double getHipLengthDistanceOppsite(const Point& femurHeadCenterOppsite) const;
+			double getCombinedOffsetDistance() const;
+			double getCombinedOffsetDistanceOppsite() const;
 
-			double getCombinedOffsetDistance(const Point& femurHeadCenter) const;
-			double getCombinedOffsetDistanceOppsite(const Point& femurHeadCenterOppsite) const;
+			double getFemurVersion() const;
 
-			double getFemurVersion(const HipFemur& pFemur) const;
-
-			double getFemurVersion(const HipFemur& pFemur, const Point& pNeckAxisVectorToHead) const;
+			double getFemurVersion(const Point& pNeckAxisVectorToHead) const;
 
 			std::pair<Point, Point> getAbductionAnteversionVectorsZX(const Point& pCenterOfRotation, double pAbductionAngle, double pAnteversionAngle) const;
 			Point getPubicJoin() const;
-
 			PelvisSide getSide() const;
+
+			HipFemur getFemurOperationSide() const;
+			HipFemur getFemurOppsite() const;
 
 			vtkSmartPointer<vtkPolyData> getPelvisVTK() const;
 			static Point getNativeCenterOfRotation(const std::vector<Point>& pPoints);
@@ -53,19 +55,14 @@ namespace THA
 			vtkSmartPointer<vtkPolyData> getPelvisFemurCutTest();
 
 		private:
-			Point mLeftLesserTrochanter, mRightLesserTrochanter;
 			Point mLeftASIS, mRightASIS;
 			Point mLeftPubicTubercle, mRightPubicTubercle;
 			Point mPubicJoin;
-			Point mFemurAxisVector, mFemurPointInsideCenter;
-			Point mFemurAxisVectorOppsite, mFemurPointInsideCenterOppsite;
 			Plane mPlaneAPP;
 			PelvisSide mSide;
 			vtkSmartPointer<vtkPolyData> mPelvis;
+			HipFemur mFemurOperationSide, mFemurOppsite;
 			bool isInit;
-
-			Point getNeckAxisVector(const Point& femurHeadCenter, const Point& femurNeck, const Point& greaterTrochanter, const vtkSmartPointer<vtkPolyData>& femurPoly, const PelvisSide& side) const;
-			void extractFemurAxisVector(bool surgerySide);
 		};
 	}
 }

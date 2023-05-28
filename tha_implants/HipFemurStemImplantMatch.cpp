@@ -60,7 +60,7 @@ void HipFemurStemImplantMatch::getRigidTransform()
     std::vector<cv::Point3d> femurVectors;
 
     Point implantX = mImplant.getVectorLatMed();
-    Point implantZ = mImplant.getVectorInfoSup();
+    Point implantZ = mImplant.getVectorInfSup();
     Point implantY = implantX.cross(implantZ);
     implantY.normalice();
 
@@ -68,8 +68,8 @@ void HipFemurStemImplantMatch::getRigidTransform()
     implantVectors.push_back(implantZ.ToCVPoint());
     implantVectors.push_back(implantY.ToCVPoint());
 
-    Point femurX = mPelvis.getFemurVectorLatMed(mHipCenterOfRotation);
-    Point femurZ = mPelvis.getFemurVectorInfSup();
+	Point femurX = mPelvis.getFemurOperationSide().getVectorLatMed();  //getFemurVectorLatMed(mHipCenterOfRotation);
+	Point femurZ = mPelvis.getFemurOperationSide().getCanalAxisVectorInfSup();  //getFemurVectorInfSup();
     Point femurY = femurX.cross(femurZ);
     femurY.normalice();
 
@@ -85,36 +85,18 @@ void HipFemurStemImplantMatch::getRigidTransform()
     translationMatrix = mHipCenterOfRotation.ToMatPoint() - (rotationMatrix * mImplant.getHeadCenter().ToMatPoint());
 }
 
-double HipFemurStemImplantMatch::getStemVersion(const itk::Rigid3DTransform<>::Pointer pTransform, const HipFemur& pFemur) const
+itk::Rigid3DTransform<>::Pointer HipFemurStemImplantMatch::getTransform(double pStemVersionAngleDegree) const
 {
-	cv::Mat rotation = ImplantTools::Rigid3DTransformToCVRotation(pTransform);
-	cv::Mat neckAxisMat = rotation * mImplant.getVectorNeck().ToMatPoint();
+	cv::Mat neckAxisMat = rotationMatrix * mImplant.getVectorNeckToHead().ToMatPoint();
 	Point neckAxis = Point(neckAxisMat);
 
-	return mPelvis.getFemurVersion(pFemur, neckAxis);
-}
-
-itk::Rigid3DTransform<>::Pointer HipFemurStemImplantMatch::getTransform(double pStemVersionAngleDegree, const HipFemur& pFemur) const
-{
-	cv::Mat neckAxisMat = rotationMatrix * mImplant.getVectorNeck().ToMatPoint();
-	Point neckAxis = Point(neckAxisMat);
-
-	double angle = mPelvis.getFemurVersion(pFemur, neckAxis);
+	double angle = mPelvis.getFemurVersion(neckAxis);
 
 	double refAngle = (pStemVersionAngleDegree * PI) / 180.;
 
 	itk::Rigid3DTransform<double>::Pointer transform = itk::VersorRigid3DTransform<double>::New();
 	cv::Mat transformation;
-	Point canalAxis;
-
-	if (pFemur.getFemurSide() == mPelvis.getSide())
-	{
-		canalAxis = mPelvis.getFemurVectorInfSup();
-	}
-	else
-	{
-		canalAxis = mPelvis.getFemurVectorInfSupOppsite();
-	}
+	Point canalAxis = mPelvis.getFemurOperationSide().getCanalAxisVectorInfSup();
 
 	if (refAngle == angle)
 	{
@@ -126,7 +108,7 @@ itk::Rigid3DTransform<>::Pointer HipFemurStemImplantMatch::getTransform(double p
 	{
 		double temp = refAngle - angle;
 
-		if (pFemur.getFemurSide() == PelvisSide::RIGHT_SIDE)
+		if (mPelvis.getFemurOperationSide().getFemurSide() == PelvisSide::RIGHT_SIDE)
 		{
 			transformation = ImplantTools::getRotateMatrix(-canalAxis, temp);
 		}
@@ -139,7 +121,7 @@ itk::Rigid3DTransform<>::Pointer HipFemurStemImplantMatch::getTransform(double p
 	{
 		double temp = angle - refAngle;
 
-		if (pFemur.getFemurSide() == PelvisSide::RIGHT_SIDE)
+		if (mPelvis.getFemurOperationSide().getFemurSide() == PelvisSide::RIGHT_SIDE)
 		{
 			transformation = ImplantTools::getRotateMatrix(canalAxis, temp);
 		}

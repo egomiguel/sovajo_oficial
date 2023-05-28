@@ -23,6 +23,17 @@ Line::Line(const Line& pLine)
     this->mPoint = pLine.getPoint();
 }
 
+void Line::TransformLine(const cv::Mat& rotation, const cv::Mat& translation)
+{
+	cv::Mat transformVector = rotation * (directVector.ToMatPoint());
+	cv::Mat transformPoint = (rotation * (mPoint.ToMatPoint())) + translation;
+
+	this->directVector = Point(transformVector);
+	this->mPoint = Point(transformPoint);
+
+	normaliceDirectVector();
+}
+
 void Line::setDirectVector(const Point& newVector)
 {
     if (newVector.dot(newVector) == 0)

@@ -11,8 +11,8 @@ HipFemur::HipFemur()
 }
 
 void HipFemur::init(const Point& headCenter, const Point& neck, const Point& greaterTrochanter, const Point& lesserTrochanter,
-	const Point& medialEpicondyle, const Point& lateralEpicondyle, const vtkSmartPointer<vtkPolyData>& femurPoly,
-	const PelvisSide& femurSide)
+	const Point& medialEpicondyle, const Point& lateralEpicondyle, const Point& canalAxisPoint, const Point& canalAxisVectorSupInf, 
+	const vtkSmartPointer<vtkPolyData>& femurPoly, const PelvisSide& femurSide)
 {
 	if (isInit == true)
 	{
@@ -27,6 +27,10 @@ void HipFemur::init(const Point& headCenter, const Point& neck, const Point& gre
 	mLateralEpicondyle = lateralEpicondyle;
 	mFemur = femurPoly;
 	mFemurSide = femurSide;
+	mCanalAxisVectorInfSup = -canalAxisVectorSupInf;
+	mCanalAxisVectorInfSup.normalice();
+	mCanalAxisPoint = canalAxisPoint;
+	getNeckAxisVector();
 	isInit = true;
 }
 
@@ -68,4 +72,111 @@ Point HipFemur::getLateralEpicondyle() const
 PelvisSide HipFemur::getFemurSide() const
 {
 	return mFemurSide;
+}
+
+Point HipFemur::getCanalAxisVectorInfSup() const
+{
+	return mCanalAxisVectorInfSup;
+}
+
+Point HipFemur::getVectorLatMed() const
+{
+	Line canalAxis(mCanalAxisVectorInfSup, mCanalAxisPoint);
+	Point vector = mHeadCenter - canalAxis.getProjectPoint(mHeadCenter);
+	vector.normalice();
+	return vector;
+}
+
+Point HipFemur::getCanalAxisPoint() const
+{
+	return mCanalAxisPoint;
+}
+
+Point HipFemur::GetNeckAxisVectorToHead() const
+{
+	return mNeckAxisVectorToHead;
+}
+
+void HipFemur::getNeckAxisVector()
+{
+	Point midPoint = (mLesserTrochanter + mGreaterTrochanter) / 2.;
+
+	Line canalAxis(mCanalAxisVectorInfSup, mCanalAxisPoint);
+
+	midPoint = canalAxis.getProjectPoint(midPoint);
+
+	Point tempAxis = mHeadCenter - midPoint;
+	tempAxis.normalice();
+
+	double radius = -1;
+	Point neckCenter = midPoint;
+
+	for (float i = 0.2; i < 0.9; i += 0.1)
+	{
+		Point cutPoint = midPoint + i * (mHeadCenter - midPoint);
+
+		auto contour = ImplantTools::getContours(mFemur, tempAxis, cutPoint);
+		if (contour->GetNumberOfPoints() != 0)
+		{
+			std::pair<Point, double> circle = ImplantTools::minCircle(contour, tempAxis);
+
+			if (circle.second > 0 && (circle.second < radius || radius < 0))
+			{
+				radius = circle.second;
+				neckCenter = circle.first;
+			}
+		}
+
+	}
+
+	mNeckAxisVectorToHead = mHeadCenter - neckCenter;
+	mNeckAxisVectorToHead.normalice();
+}
+
+double HipFemur::getFemurVersion(const Point& pNeckAxisVectorToHead) const
+{
+	Point neckAxisParameter = pNeckAxisVectorToHead;
+	neckAxisParameter.normalice();
+
+	Point lateralMedialAxis = mMedialEpicondyle - mLateralEpicondyle;
+	lateralMedialAxis.normalice();
+	Point midPoint = (mMedialEpicondyle + mLateralEpicondyle) / 2.;
+
+	Plane axial;
+	axial.init(mCanalAxisVectorInfSup, mCanalAxisPoint);
+
+	Point neckAxis = axial.getProjectionVector(neckAxisParameter);
+	lateralMedialAxis = axial.getProjectionVector(lateralMedialAxis);
+
+	neckAxis.normalice();
+	lateralMedialAxis.normalice();
+
+	double angle = ImplantTools::getAngleBetweenVectors(neckAxis, lateralMedialAxis);
+
+	Point anteriorDirectionVector;
+
+	if (mFemurSide == PelvisSide::RIGHT_SIDE)
+	{
+		anteriorDirectionVector = lateralMedialAxis.cross(mCanalAxisVectorInfSup);
+	}
+	else
+	{
+		anteriorDirectionVector = mCanalAxisVectorInfSup.cross(lateralMedialAxis);
+	}
+
+	anteriorDirectionVector.normalice();
+
+	Plane coronal;
+	coronal.init(anteriorDirectionVector, midPoint);
+
+	Point checkPoint = midPoint + 1000. * neckAxis;
+
+	if (coronal.eval(checkPoint) >= 0)
+	{
+		return angle;
+	}
+	else
+	{
+		return -angle;
+	}
 }

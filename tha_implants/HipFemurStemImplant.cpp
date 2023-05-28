@@ -22,14 +22,14 @@ void HipFemurStemImplant::init(const Point& pTopPoint, const Point& pBasePoint, 
     isInit = true;
 }
 
-Point HipFemurStemImplant::getVectorInfoSup() const
+Point HipFemurStemImplant::getVectorInfSup() const
 {
     Point vector = mTopPoint - mBasePoint;
     vector.normalice();
     return vector;
 }
 
-Point HipFemurStemImplant::getVectorNeck() const
+Point HipFemurStemImplant::getVectorNeckToHead() const
 {
 	Point neckAxis = mHeadCenter - mNeckCenter;
 	neckAxis.normalice();
@@ -38,7 +38,7 @@ Point HipFemurStemImplant::getVectorNeck() const
 
 Point HipFemurStemImplant::getVectorLatMed() const
 {
-    Line myLine(getVectorInfoSup(), mTopPoint);
+    Line myLine(getVectorInfSup(), mTopPoint);
     Line perpendicular = myLine.getPerpendicularLine(mHeadCenter);
     Point vector = perpendicular.getDirectVector();
     Plane temp;
@@ -50,4 +50,9 @@ Point HipFemurStemImplant::getVectorLatMed() const
 Point HipFemurStemImplant::getHeadCenter() const
 {
     return mHeadCenter;
+}
+
+Point HipFemurStemImplant::getCanalAxisPoint() const
+{
+	return mBasePoint;
 }
