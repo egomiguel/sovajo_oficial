@@ -168,17 +168,22 @@ cv::Mat ImplantTools::GetGeneralRotateTransformVectors(const Point pFromVector, 
 	toVector.normalice();
 
 	Point rotationAxis = fromVector.cross(toVector);
-	rotationAxis.normalice();
 
 	double rotationAngle = Line::getAngleBetweenVectors(fromVector, toVector);
 
-	cv::Mat rotation_1 = ImplantTools::getRotateMatrix(rotationAxis, -rotationAngle);
+	if (rotationAngle < EPSILON)
+	{
+		return cv::Mat::eye(3, 3, CV_64F);
+	}
+
+	rotationAxis.normalice();
+	cv::Mat rotate = ImplantTools::getRotateMatrix(rotationAxis, rotationAngle);
+
+	/*cv::Mat rotation_1 = ImplantTools::getRotateMatrix(rotationAxis, -rotationAngle);
 	cv::Mat rotation_2 = ImplantTools::getRotateMatrix(rotationAxis, rotationAngle);
 
 	cv::Mat rotateVector_1 = rotation_1 * fromVector.ToMatPoint();
 	cv::Mat rotateVector_2 = rotation_2 * fromVector.ToMatPoint();
-
-	cv::Mat rotate;
 
 	double distance_1 = ImplantTools::getAngleBetweenVectors(Point(rotateVector_1), toVector);
 	double distance_2 = ImplantTools::getAngleBetweenVectors(Point(rotateVector_2), toVector);
@@ -191,7 +196,7 @@ cv::Mat ImplantTools::GetGeneralRotateTransformVectors(const Point pFromVector, 
 	{
 		rotate = rotation_2;
 	}
-
+*/
 	return rotate;
 }
 

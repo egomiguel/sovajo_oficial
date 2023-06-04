@@ -52,7 +52,7 @@ Point HipFemurStemImplant::getHeadCenter() const
     return mHeadCenter;
 }
 
-Point HipFemurStemImplant::getCanalAxisPoint() const
+Point HipFemurStemImplant::getCanalAxisTopPoint() const
 {
-	return mBasePoint;
+	return mTopPoint;
 }

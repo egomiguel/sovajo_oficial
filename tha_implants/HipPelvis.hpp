@@ -1,7 +1,6 @@
-#ifndef HIP_PELVIS_H
-#define HIP_PELVIS_H
+#ifndef THA_HIP_PELVIS_H
+#define THA_HIP_PELVIS_H
 
-#include "Plane.hpp"
 #include "Utils.hpp"
 #include <vector>
 #include "Types.hpp"
@@ -9,6 +8,7 @@
 #include "vtkPolyData.h"
 #include "vtkSmartPointer.h"
 #include "HipFemur.hpp"
+#include "HipFemurOppside.hpp"
 
 namespace THA
 {
@@ -19,9 +19,9 @@ namespace THA
 		public:
 			HipPelvis();
 			void init(const Point& pLeftASIS, const Point& pRightASIS, const Point& pLeftPubicTubercle, const Point& pRightPubicTubercle, const vtkSmartPointer<vtkPolyData>& pPelvis,
-					  const HipFemur& pFemurRight, const HipFemur& pFemurLeft, PelvisSide pSide);
+					  const HipFemur& pFemur, const HipFemurOppside& pFemurOppside, PelvisSide pSide);
 
-			Point getMidASIS() const;
+			//Point getMidASIS() const;
 			Point getRightASIS() const;
 			Point getLeftASIS() const;
 
@@ -30,11 +30,16 @@ namespace THA
 			Point getPelvisVectorAP() const;
 			Point getPelvisVectorInfSup() const;
 
+			Plane getCoronalPlaneAPP() const;
+
 			double getHipLengthDistance() const; 
 			double getHipLengthDistanceOppsite() const;
 
 			double getCombinedOffsetDistance() const;
 			double getCombinedOffsetDistanceOppsite() const;
+
+			double getHipLengthDistance(const Point& pMechanicalAxis) const;
+			double getCombinedOffsetDistance(const Point& pCanalAxis, const Point& pCanalAxisPoint) const;
 
 			double getFemurVersion() const;
 
@@ -45,7 +50,7 @@ namespace THA
 			PelvisSide getSide() const;
 
 			HipFemur getFemurOperationSide() const;
-			HipFemur getFemurOppsite() const;
+			HipFemurOppside getFemurOppsite() const;
 
 			vtkSmartPointer<vtkPolyData> getPelvisVTK() const;
 			static Point getNativeCenterOfRotation(const std::vector<Point>& pPoints);
@@ -61,7 +66,8 @@ namespace THA
 			Plane mPlaneAPP;
 			PelvisSide mSide;
 			vtkSmartPointer<vtkPolyData> mPelvis;
-			HipFemur mFemurOperationSide, mFemurOppsite;
+			HipFemur mFemurOperationSide;
+			HipFemurOppside mFemurOppsite;
 			bool isInit;
 		};
 	}

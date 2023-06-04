@@ -1,5 +1,5 @@
-#ifndef LINE_H
-#define LINE_H
+#ifndef THA_LINE_H
+#define THA_LINE_H
 
 #include "Point.hpp"
 #include "tha_implants_export.h"

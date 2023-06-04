@@ -1,5 +1,5 @@
-#ifndef HIP_FEMUR_STEM_IMPLANT_H
-#define HIP_FEMUR_STEM_IMPLANT_H
+#ifndef THA_HIP_FEMUR_STEM_IMPLANT_H
+#define THA_HIP_FEMUR_STEM_IMPLANT_H
 
 #include "tha_implants_export.h"
 #include "Plane.hpp"
@@ -17,7 +17,7 @@ namespace THA
 			Point getVectorLatMed() const;
 			Point getVectorNeckToHead() const;
 			Point getHeadCenter() const;
-			Point getCanalAxisPoint() const;
+			Point getCanalAxisTopPoint() const;
 
 		private:
 			Point mTopPoint, mBasePoint, mHeadCenter, mNeckCenter;

@@ -1,5 +1,5 @@
-#ifndef HIP_PELVIS_CUP_IMPLANT_H
-#define HIP_PELVIS_CUP_IMPLANT_H
+#ifndef THA_HIP_PELVIS_CUP_IMPLANT_H
+#define THA_HIP_PELVIS_CUP_IMPLANT_H
 
 #include "tha_implants_export.h"
 #include "Plane.hpp"

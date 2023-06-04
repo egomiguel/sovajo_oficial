@@ -1,5 +1,5 @@
-#ifndef SEGMENT2D_IMPLANT_H
-#define SEGMENT2D_IMPLANT_H
+#ifndef THA_SEGMENT2D_IMPLANT_H
+#define THA_SEGMENT2D_IMPLANT_H
 
 #include <opencv2/calib3d/calib3d.hpp>
 #include "Point.hpp"

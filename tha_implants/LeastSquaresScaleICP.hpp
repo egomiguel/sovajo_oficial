@@ -1,5 +1,5 @@
-#ifndef IMPLANT_ICPLS_H
-#define IMPLANT_ICPLS_H
+#ifndef THA_IMPLANT_ICPLS_H
+#define THA_IMPLANT_ICPLS_H
 
 #include <opencv2/calib3d/calib3d.hpp>
 #include "vtkSmartPointer.h"

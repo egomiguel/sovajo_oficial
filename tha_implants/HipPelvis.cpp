@@ -21,7 +21,7 @@ HipPelvis::HipPelvis()
 
 
 void HipPelvis::init(const Point& pLeftASIS, const Point& pRightASIS, const Point& pLeftPubicTubercle, const Point& pRightPubicTubercle, const vtkSmartPointer<vtkPolyData>& pPelvis,
-	const HipFemur& pFemurRight, const HipFemur& pFemurLeft, PelvisSide pSide)
+	const HipFemur& pFemur, const HipFemurOppside& pFemurOppside, PelvisSide pSide)
 {
     if (isInit == true)
     {
@@ -53,34 +53,21 @@ void HipPelvis::init(const Point& pLeftASIS, const Point& pRightASIS, const Poin
 
     mPlaneAPP.init(normalRef, mPubicJoin);
 
-	if (pFemurRight.getFemurSide() == pFemurLeft.getFemurSide())
-	{
-		throw ImplantExceptionCode::ALREADY_INITIALIZED_HIP_PELVIS;
-	}
-	
-	if (pFemurRight.getFemurSide() == mSide)
-	{
-		mFemurOperationSide = pFemurRight;
-		mFemurOppsite = pFemurLeft;
-	}
-	else
-	{
-		mFemurOperationSide = pFemurLeft;
-		mFemurOppsite = pFemurRight;
-	}
+	mFemurOperationSide = pFemur;
+	mFemurOppsite = pFemurOppside;
 
     isInit = true;
 }
 
-Point HipPelvis::getMidASIS() const
-{
-    Plane sagital;
-    sagital.init(getPelvisVectorASIS(), mPubicJoin);
-
-    Line lineASIS = Line::makeLineWithPoints(mRightASIS, mLeftASIS);
-    Point midASIS = sagital.getInterceptionLinePoint(lineASIS);
-    return midASIS;
-}
+//Point HipPelvis::getMidASIS() const
+//{
+//    Plane sagital;
+//    sagital.init(getPelvisVectorASIS(), mPubicJoin);
+//
+//    Line lineASIS = Line::makeLineWithPoints(mRightASIS, mLeftASIS);
+//    Point midASIS = sagital.getInterceptionLinePoint(lineASIS);
+//    return midASIS;
+//}
 
 Point HipPelvis::getRightASIS() const
 {
@@ -104,6 +91,11 @@ Point HipPelvis::getPelvisVectorAP() const
     return mPlaneAPP.getNormalVector();
 }
 
+Plane HipPelvis::getCoronalPlaneAPP() const
+{
+	return mPlaneAPP;
+}
+
 Point HipPelvis::getPelvisVectorInfSup() const
 {
     Point vector = getPelvisVectorASIS().cross(getPelvisVectorAP());
@@ -125,50 +117,114 @@ Point HipPelvis::getPelvisVectorLateralASIS() const
 
 double HipPelvis::getHipLengthDistance() const
 {
-	Plane coronal;
-	Point temp = mFemurOperationSide.getCanalAxisPoint() + 10. * mFemurOperationSide.getCanalAxisVectorInfSup();
-	coronal.init(mFemurOperationSide.getHeadCenter(), mFemurOperationSide.getCanalAxisPoint(), temp);
+	auto femurObj = mFemurOperationSide;
 
-	Line lineASIS = Line::makeLineWithPoints(coronal.getProjectionPoint(mRightASIS), coronal.getProjectionPoint(mLeftASIS));
-	Point ref = coronal.getProjectionPoint(mFemurOperationSide.getLesserTrochanter());
-	
+	Point mechanicalAxis = femurObj.getHeadCenter() - femurObj.getKneeCenter();
+	mechanicalAxis.normalice();
+	mechanicalAxis = mPlaneAPP.getProjectionVector(mechanicalAxis);
+	mechanicalAxis.normalice();
+	Point refVector = getPelvisVectorInfSup();
+	cv::Mat rotation = ImplantTools::GetGeneralRotateTransformVectors(mechanicalAxis, refVector);
+
+	Point ref = mPlaneAPP.getProjectionPoint(femurObj.getLesserTrochanter());
+	auto refMat = rotation * ref.ToMatPoint();
+	ref = Point(refMat);
+
+	Line lineASIS = Line::makeLineWithPoints(mRightASIS, mLeftASIS);
 	return lineASIS.getDistanceFromPoint(ref);
 }
 
 double HipPelvis::getHipLengthDistanceOppsite() const
 {
-	Plane coronal;
-	Point temp = mFemurOppsite.getCanalAxisPoint() + 10. * mFemurOppsite.getCanalAxisVectorInfSup();
-	coronal.init(mFemurOppsite.getHeadCenter(), mFemurOppsite.getCanalAxisPoint(), temp);
+	auto femurObj = mFemurOppsite;
 
-	Line lineASIS = Line::makeLineWithPoints(coronal.getProjectionPoint(mRightASIS), coronal.getProjectionPoint(mLeftASIS));
-	Point ref = coronal.getProjectionPoint(mFemurOppsite.getLesserTrochanter());
+	Point mechanicalAxis = femurObj.getHeadCenter() - femurObj.getKneeCenter();
+	mechanicalAxis.normalice();
+	mechanicalAxis = mPlaneAPP.getProjectionVector(mechanicalAxis);
+	mechanicalAxis.normalice();
+	Point refVector = getPelvisVectorInfSup();
+	cv::Mat rotation = ImplantTools::GetGeneralRotateTransformVectors(mechanicalAxis, refVector);
 
+	Point ref = mPlaneAPP.getProjectionPoint(femurObj.getLesserTrochanter());
+	auto refMat = rotation * ref.ToMatPoint();
+	ref = Point(refMat);
+
+	Line lineASIS = Line::makeLineWithPoints(mRightASIS, mLeftASIS);
 	return lineASIS.getDistanceFromPoint(ref);
 }
 
 double HipPelvis::getCombinedOffsetDistance() const
 {
-	Plane coronal;
-	Point temp = mFemurOperationSide.getCanalAxisPoint() + 10. * mFemurOperationSide.getCanalAxisVectorInfSup();
-	coronal.init(mFemurOperationSide.getHeadCenter(), mFemurOperationSide.getCanalAxisPoint(), temp);
+	auto femurObj = mFemurOperationSide;
+	Point canalAxis = mPlaneAPP.getProjectionVector(femurObj.getCanalAxisVectorInfSup());
+	canalAxis.normalice();
+	Point refVector = getPelvisVectorInfSup();
+	cv::Mat rotation = ImplantTools::GetGeneralRotateTransformVectors(canalAxis, refVector);
 
-	Line femoralCanalAxes(mFemurOperationSide.getCanalAxisVectorInfSup(), mFemurOperationSide.getCanalAxisPoint());
-	return femoralCanalAxes.getDistanceFromPoint(coronal.getProjectionPoint(mPubicJoin));
+	Point ref = mPlaneAPP.getProjectionPoint(femurObj.getCanalAxisPoint());
+	Line femoralCanalAxis(canalAxis, ref);
+	femoralCanalAxis.TransformLine(rotation, Point().ToMatPoint());
+
+	return femoralCanalAxis.getDistanceFromPoint(mPlaneAPP.getProjectionPoint(mPubicJoin));
 }
 
 double HipPelvis::getCombinedOffsetDistanceOppsite() const
 {
-	Plane coronal;
-	Point temp = mFemurOppsite.getCanalAxisPoint() + 10. * mFemurOppsite.getCanalAxisVectorInfSup();
-	coronal.init(mFemurOppsite.getHeadCenter(), mFemurOppsite.getCanalAxisPoint(), temp);
+	auto femurObj = mFemurOppsite;
+	Point canalAxis = mPlaneAPP.getProjectionVector(femurObj.getCanalAxisVectorInfSup());
+	canalAxis.normalice();
+	Point refVector = getPelvisVectorInfSup();
+	cv::Mat rotation = ImplantTools::GetGeneralRotateTransformVectors(canalAxis, refVector);
 
-	Line femoralCanalAxes(mFemurOppsite.getCanalAxisVectorInfSup(), mFemurOppsite.getCanalAxisPoint());
-	return femoralCanalAxes.getDistanceFromPoint(coronal.getProjectionPoint(mPubicJoin));
+	Point ref = mPlaneAPP.getProjectionPoint(femurObj.getCanalAxisPoint());
+	Line femoralCanalAxis(canalAxis, ref);
+	femoralCanalAxis.TransformLine(rotation, Point().ToMatPoint());
+
+	return femoralCanalAxis.getDistanceFromPoint(mPlaneAPP.getProjectionPoint(mPubicJoin));
+}
+
+double HipPelvis::getHipLengthDistance(const Point& pMechanicalAxis) const
+{
+	auto femurObj = mFemurOperationSide;
+
+	Point mechanicalAxis = pMechanicalAxis;
+	mechanicalAxis.normalice();
+	mechanicalAxis = mPlaneAPP.getProjectionVector(mechanicalAxis);
+	mechanicalAxis.normalice();
+	Point refVector = getPelvisVectorInfSup();
+	cv::Mat rotation = ImplantTools::GetGeneralRotateTransformVectors(mechanicalAxis, refVector);
+
+	Point ref = mPlaneAPP.getProjectionPoint(femurObj.getLesserTrochanter());
+	auto refMat = rotation * ref.ToMatPoint();
+	ref = Point(refMat);
+
+	Line lineASIS = Line::makeLineWithPoints(mRightASIS, mLeftASIS);
+	return lineASIS.getDistanceFromPoint(ref);
+}
+
+double HipPelvis::getCombinedOffsetDistance(const Point& pCanalAxis, const Point& pCanalAxisPoint) const
+{
+	auto femurObj = mFemurOperationSide;
+	Point canalAxis = pCanalAxis;
+	canalAxis.normalice();
+	canalAxis =	mPlaneAPP.getProjectionVector(canalAxis);
+	canalAxis.normalice();
+	Point refVector = getPelvisVectorInfSup();
+	cv::Mat rotation = ImplantTools::GetGeneralRotateTransformVectors(canalAxis, refVector);
+
+	Point ref = mPlaneAPP.getProjectionPoint(pCanalAxisPoint);
+	Line femoralCanalAxis(canalAxis, ref);
+	femoralCanalAxis.TransformLine(rotation, Point().ToMatPoint());
+
+	return femoralCanalAxis.getDistanceFromPoint(mPlaneAPP.getProjectionPoint(mPubicJoin));
 }
 
 std::pair<Point, Point> HipPelvis::getAbductionAnteversionVectorsZX(const Point& pCenterOfRotation, double pAbductionAngle, double pAnteversionAngle) const
 {
+	/*
+		The vector that goes from the base of the cup to its highest point is the one used as a reference to make the rotations.
+	*/
+
 	////////////////////////////////////////////// Abduction or incination
 
     Plane sagital;
@@ -189,20 +245,6 @@ std::pair<Point, Point> HipPelvis::getAbductionAnteversionVectorsZX(const Point&
     ////////////////////////////////////////////// Anteversion
 
     rotateVector = getPelvisVectorAP();
-    //referenceVector = -sagital.getNormalVector(); //rotateVector will rotate towards referenceVector.
-    //cv::Mat referenceVectorMat = rotMatrix * referenceVector.ToMatPoint();
-    //referenceVector = Point(referenceVectorMat);
-    //rotationAxis = rotateVector.cross(referenceVector); //it needs make cross because rotateVector will rotate towards referenceVector.
-	
-	///////////////////////////// 2nd way
-
-	//referenceVector = getPelvisVectorInfSup(); //rotateVector will rotate towards referenceVector.
-	//cv::Mat referenceVectorMat = rotMatrix * referenceVector.ToMatPoint();
-	//referenceVector = Point(referenceVectorMat);
-	//rotationAxis = rotateVector.cross(referenceVector);
-
-	///////////////////////////////////////
-
 	referenceVector = resultAbduction;
 	rotationAxis = rotateVector.cross(referenceVector);
 	
@@ -248,12 +290,12 @@ PelvisSide HipPelvis::getSide() const
 
 double HipPelvis::getFemurVersion(const Point& pNeckAxisVectorToHead) const
 {
-	return mFemurOperationSide.getFemurVersion(pNeckAxisVectorToHead);
+	return mFemurOperationSide.getFemurVersion(pNeckAxisVectorToHead, mSide);
 }
 
 double HipPelvis::getFemurVersion() const
 {
-	return mFemurOperationSide.getFemurVersion(mFemurOperationSide.GetNeckAxisVectorToHead());
+	return mFemurOperationSide.getFemurVersion(mFemurOperationSide.getNeckAxisVectorToHead(), mSide);
 }
 
 HipFemur HipPelvis::getFemurOperationSide() const
@@ -261,7 +303,7 @@ HipFemur HipPelvis::getFemurOperationSide() const
 	return mFemurOperationSide;
 }
 
-HipFemur HipPelvis::getFemurOppsite() const
+HipFemurOppside HipPelvis::getFemurOppsite() const
 {
 	return mFemurOppsite;
 }

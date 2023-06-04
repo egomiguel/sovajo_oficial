@@ -1,5 +1,5 @@
-#ifndef POINT_H
-#define POINT_H
+#ifndef THA_POINT_H
+#define THA_POINT_H
 
 #include <opencv2/calib3d/calib3d.hpp>
 #include "tha_implants_export.h"

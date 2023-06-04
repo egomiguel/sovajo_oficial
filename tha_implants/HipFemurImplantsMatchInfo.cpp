@@ -50,6 +50,34 @@ itk::Rigid3DTransform<>::Pointer HipFemurImplantsMatchInfo::getITKStemTransform(
 	return transform;
 }
 
+itk::Rigid3DTransform<>::Pointer HipFemurImplantsMatchInfo::getITKTransform(const cv::Mat& pRotation, const cv::Mat& pTranslation) const
+{
+	itk::Matrix< double, 3, 3 > rotation;
+	itk::Vector< double, 3 > translate;
+
+	rotation[0][0] = pRotation.at<double>(0, 0);
+	rotation[0][1] = pRotation.at<double>(0, 1);
+	rotation[0][2] = pRotation.at<double>(0, 2);
+
+	rotation[1][0] = pRotation.at<double>(1, 0);
+	rotation[1][1] = pRotation.at<double>(1, 1);
+	rotation[1][2] = pRotation.at<double>(1, 2);
+
+	rotation[2][0] = pRotation.at<double>(2, 0);
+	rotation[2][1] = pRotation.at<double>(2, 1);
+	rotation[2][2] = pRotation.at<double>(2, 2);
+
+	translate[0] = pTranslation.at<double>(0, 0);
+	translate[1] = pTranslation.at<double>(1, 0);
+	translate[2] = pTranslation.at<double>(2, 0);
+
+	itk::Rigid3DTransform<double>::Pointer transform = itk::VersorRigid3DTransform<double>::New();
+	transform->SetMatrix(rotation);
+	transform->SetOffset(translate);
+
+	return transform;
+}
+
 cv::Mat HipFemurImplantsMatchInfo::Rigid3DTransformToCVRotation(const itk::Rigid3DTransform<>::Pointer transform) const
 {
 	itk::Matrix< double, 3, 3 > rotation = transform->GetMatrix();
@@ -101,27 +129,21 @@ double HipFemurImplantsMatchInfo::getStemVersion() const
 
 double HipFemurImplantsMatchInfo::getCombinedOffsetDistance() const
 {
-	Plane coronal;
-	Point temp = mImplantStem.getCanalAxisPoint() + 10. * mImplantStem.getVectorInfSup();
-	coronal.init(mImplantStem.getHeadCenter(), mImplantStem.getCanalAxisPoint(), temp);
-	coronal = TransformPlane(coronal, mRotationStem, mTranslationStem);
+	auto canalAxisTopPointMat = mRotationStem * mImplantStem.getCanalAxisTopPoint().ToMatPoint() + mTranslationStem;
+	Point canalAxisTopPoint = Point(canalAxisTopPointMat);
 
-	Line femoralCanalAxes(mImplantStem.getVectorInfSup(), mImplantStem.getCanalAxisPoint());
-	femoralCanalAxes.TransformLine(mRotationStem, mTranslationStem);
+	Point canalAxisVector = canalAxisTopPoint - mPelvis.getFemurOperationSide().getKneeCenter();
 
-	return femoralCanalAxes.getDistanceFromPoint(coronal.getProjectionPoint(mPelvis.getPubicJoin()));
+	return mPelvis.getCombinedOffsetDistance(canalAxisVector, canalAxisTopPoint);
 }
 
 double HipFemurImplantsMatchInfo::getHipLengthDistance() const
 {
-	Plane coronal;
-	Point temp = mImplantStem.getCanalAxisPoint() + 10. * mImplantStem.getVectorInfSup();
-	coronal.init(mImplantStem.getHeadCenter(), mImplantStem.getCanalAxisPoint(), temp);
-	coronal = TransformPlane(coronal, mRotationStem, mTranslationStem);
+	auto headCenterPointMat = mRotationStem * mImplantStem.getHeadCenter().ToMatPoint() + mTranslationStem;
+	Point headCenterPoint = Point(headCenterPointMat);
 
-	Line lineASIS = Line::makeLineWithPoints(coronal.getProjectionPoint(mPelvis.getRightASIS()), coronal.getProjectionPoint(mPelvis.getLeftASIS()));
-	Point ref = coronal.getProjectionPoint(mPelvis.getFemurOperationSide().getLesserTrochanter());
+	Point mechanicalAxisVector = headCenterPoint - mPelvis.getFemurOperationSide().getKneeCenter();
 
-	return lineASIS.getDistanceFromPoint(ref);
+	return mPelvis.getHipLengthDistance(mechanicalAxisVector);
 }
 

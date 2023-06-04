@@ -1,5 +1,4 @@
 #include "HipFemur.hpp"
-#include "Plane.hpp"
 #include "ImplantTools.hpp"
 #include "ImplantsException.hpp"
 
@@ -11,8 +10,8 @@ HipFemur::HipFemur()
 }
 
 void HipFemur::init(const Point& headCenter, const Point& neck, const Point& greaterTrochanter, const Point& lesserTrochanter,
-	const Point& medialEpicondyle, const Point& lateralEpicondyle, const Point& canalAxisPoint, const Point& canalAxisVectorSupInf, 
-	const vtkSmartPointer<vtkPolyData>& femurPoly, const PelvisSide& femurSide)
+	const Point& medialEpicondyle, const Point& lateralEpicondyle, const Point& femurKneeCenter,
+	const vtkSmartPointer<vtkPolyData>& femurPoly)
 {
 	if (isInit == true)
 	{
@@ -26,10 +25,10 @@ void HipFemur::init(const Point& headCenter, const Point& neck, const Point& gre
 	mMedialEpicondyle = medialEpicondyle;
 	mLateralEpicondyle = lateralEpicondyle;
 	mFemur = femurPoly;
-	mFemurSide = femurSide;
-	mCanalAxisVectorInfSup = -canalAxisVectorSupInf;
+	mCanalAxisVectorInfSup = greaterTrochanter - femurKneeCenter;
 	mCanalAxisVectorInfSup.normalice();
-	mCanalAxisPoint = canalAxisPoint;
+	mCanalAxisPoint = femurKneeCenter;
+	mKneeCenter = femurKneeCenter;
 	getNeckAxisVector();
 	isInit = true;
 }
@@ -69,11 +68,6 @@ Point HipFemur::getLateralEpicondyle() const
 	return mLateralEpicondyle;
 }
 
-PelvisSide HipFemur::getFemurSide() const
-{
-	return mFemurSide;
-}
-
 Point HipFemur::getCanalAxisVectorInfSup() const
 {
 	return mCanalAxisVectorInfSup;
@@ -92,9 +86,14 @@ Point HipFemur::getCanalAxisPoint() const
 	return mCanalAxisPoint;
 }
 
-Point HipFemur::GetNeckAxisVectorToHead() const
+Point HipFemur::getNeckAxisVectorToHead() const
 {
 	return mNeckAxisVectorToHead;
+}
+
+Point HipFemur::getKneeCenter() const
+{
+	return mKneeCenter;
 }
 
 void HipFemur::getNeckAxisVector()
@@ -133,7 +132,7 @@ void HipFemur::getNeckAxisVector()
 	mNeckAxisVectorToHead.normalice();
 }
 
-double HipFemur::getFemurVersion(const Point& pNeckAxisVectorToHead) const
+double HipFemur::getFemurVersion(const Point& pNeckAxisVectorToHead, const PelvisSide& pOperationSide) const
 {
 	Point neckAxisParameter = pNeckAxisVectorToHead;
 	neckAxisParameter.normalice();
@@ -155,7 +154,7 @@ double HipFemur::getFemurVersion(const Point& pNeckAxisVectorToHead) const
 
 	Point anteriorDirectionVector;
 
-	if (mFemurSide == PelvisSide::RIGHT_SIDE)
+	if (pOperationSide == PelvisSide::RIGHT_SIDE)
 	{
 		anteriorDirectionVector = lateralMedialAxis.cross(mCanalAxisVectorInfSup);
 	}

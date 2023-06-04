@@ -1,5 +1,5 @@
-#ifndef IMPLANT_TOOLS_H
-#define IMPLANT_TOOLS_H
+#ifndef THA_IMPLANT_TOOLS_H
+#define THA_IMPLANT_TOOLS_H
 
 #include "Plane.hpp"
 #include "Utils.hpp"

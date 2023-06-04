@@ -1,5 +1,5 @@
-#ifndef IMPLANT_REGION2D_H
-#define IMPLANT_REGION2D_H
+#ifndef THA_IMPLANT_REGION2D_H
+#define THA_IMPLANT_REGION2D_H
 
 #include <opencv2/calib3d/calib3d.hpp>
 #include "Segment.hpp"

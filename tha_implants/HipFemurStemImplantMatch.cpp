@@ -85,7 +85,7 @@ void HipFemurStemImplantMatch::getRigidTransform()
     translationMatrix = mHipCenterOfRotation.ToMatPoint() - (rotationMatrix * mImplant.getHeadCenter().ToMatPoint());
 }
 
-itk::Rigid3DTransform<>::Pointer HipFemurStemImplantMatch::getTransform(double pStemVersionAngleDegree) const
+itk::Rigid3DTransform<>::Pointer HipFemurStemImplantMatch::getStemTransform(double pStemVersionAngleDegree) const
 {
 	cv::Mat neckAxisMat = rotationMatrix * mImplant.getVectorNeckToHead().ToMatPoint();
 	Point neckAxis = Point(neckAxisMat);
@@ -100,15 +100,13 @@ itk::Rigid3DTransform<>::Pointer HipFemurStemImplantMatch::getTransform(double p
 
 	if (refAngle == angle)
 	{
-		transform->SetMatrix(GetRotationMatrix());
-		transform->SetOffset(GetTranslationMatrix());
-		return transform;
+		return getITKTransform(rotationMatrix, translationMatrix);
 	}
 	else if (refAngle > angle)
 	{
 		double temp = refAngle - angle;
 
-		if (mPelvis.getFemurOperationSide().getFemurSide() == PelvisSide::RIGHT_SIDE)
+		if (mPelvis.getSide() == PelvisSide::RIGHT_SIDE)
 		{
 			transformation = ImplantTools::getRotateMatrix(-canalAxis, temp);
 		}
@@ -121,7 +119,7 @@ itk::Rigid3DTransform<>::Pointer HipFemurStemImplantMatch::getTransform(double p
 	{
 		double temp = angle - refAngle;
 
-		if (mPelvis.getFemurOperationSide().getFemurSide() == PelvisSide::RIGHT_SIDE)
+		if (mPelvis.getSide() == PelvisSide::RIGHT_SIDE)
 		{
 			transformation = ImplantTools::getRotateMatrix(canalAxis, temp);
 		}
@@ -133,21 +131,33 @@ itk::Rigid3DTransform<>::Pointer HipFemurStemImplantMatch::getTransform(double p
 
 	cv::Mat lastRotation = transformation * rotationMatrix;
 
+	return getITKTransform(lastRotation, translationMatrix);
+}
+
+itk::Rigid3DTransform<>::Pointer HipFemurStemImplantMatch::getITKTransform(const cv::Mat& pRotation, const cv::Mat& pTranslation) const
+{
 	itk::Matrix< double, 3, 3 > rotation;
+	itk::Vector< double, 3 > translate;
 
-	rotation[0][0] = lastRotation.at <double>(0, 0);
-	rotation[0][1] = lastRotation.at <double>(0, 1);
-	rotation[0][2] = lastRotation.at <double>(0, 2);
+	rotation[0][0] = pRotation.at<double>(0, 0);
+	rotation[0][1] = pRotation.at<double>(0, 1);
+	rotation[0][2] = pRotation.at<double>(0, 2);
 
-	rotation[1][0] = lastRotation.at <double>(1, 0);
-	rotation[1][1] = lastRotation.at <double>(1, 1);
-	rotation[1][2] = lastRotation.at <double>(1, 2);
+	rotation[1][0] = pRotation.at<double>(1, 0);
+	rotation[1][1] = pRotation.at<double>(1, 1);
+	rotation[1][2] = pRotation.at<double>(1, 2);
 
-	rotation[2][0] = lastRotation.at <double>(2, 0);
-	rotation[2][1] = lastRotation.at <double>(2, 1);
-	rotation[2][2] = lastRotation.at <double>(2, 2);
+	rotation[2][0] = pRotation.at<double>(2, 0);
+	rotation[2][1] = pRotation.at<double>(2, 1);
+	rotation[2][2] = pRotation.at<double>(2, 2);
 
+	translate[0] = pTranslation.at<double>(0, 0);
+	translate[1] = pTranslation.at<double>(1, 0);
+	translate[2] = pTranslation.at<double>(2, 0);
+
+	itk::Rigid3DTransform<double>::Pointer transform = itk::VersorRigid3DTransform<double>::New();
 	transform->SetMatrix(rotation);
-	transform->SetOffset(GetTranslationMatrix());
+	transform->SetOffset(translate);
+
 	return transform;
 }

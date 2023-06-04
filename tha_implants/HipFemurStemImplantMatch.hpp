@@ -1,5 +1,5 @@
-#ifndef HIP_FEMUR_STEM_IMPLANT_MATCH_H
-#define HIP_FEMUR_STEM_IMPLANT_MATCH_H
+#ifndef THA_HIP_FEMUR_STEM_IMPLANT_MATCH_H
+#define THA_HIP_FEMUR_STEM_IMPLANT_MATCH_H
 
 #include "HipFemurStemImplant.hpp"
 #include "HipPelvis.hpp"
@@ -21,7 +21,7 @@ namespace THA
 
 			itk::Vector< double, 3 > GetTranslationMatrix() const;
 
-			itk::Rigid3DTransform<>::Pointer getTransform(double pStemVersionAngleDegree) const;
+			itk::Rigid3DTransform<>::Pointer getStemTransform(double pStemVersionAngleDegree) const;
 
 		private:
 			HipPelvis mPelvis;
@@ -31,6 +31,8 @@ namespace THA
 			cv::Mat translationMatrix;
 
 			void getRigidTransform();
+
+			itk::Rigid3DTransform<>::Pointer getITKTransform(const cv::Mat& pRotation, const cv::Mat& pTranslation) const;
 
 			bool isInit;
 		};

@@ -1,5 +1,5 @@
-#ifndef HIP_FEMUR_IMPLANT_MATCH_INFO_H
-#define HIP_FEMUR_IMPLANT_MATCH_INFO_H
+#ifndef THA_HIP_FEMUR_IMPLANT_MATCH_INFO_H
+#define THA_HIP_FEMUR_IMPLANT_MATCH_INFO_H
 
 #include "HipFemurStemImplant.hpp"
 #include "HipPelvis.hpp"
@@ -40,6 +40,8 @@ namespace THA
 			cv::Mat Rigid3DTransformToCVTranslation(const itk::Rigid3DTransform<>::Pointer transform) const;
 
 			Plane TransformPlane(const Plane& plane, const cv::Mat& rotation, const cv::Mat& translation) const;
+
+			itk::Rigid3DTransform<>::Pointer getITKTransform(const cv::Mat& pRotation, const cv::Mat& pTranslation) const;
 
 		};
 	}

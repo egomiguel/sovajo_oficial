@@ -1,9 +1,7 @@
-#ifndef HIP_FEMUR_H
-#define HIP_FEMUR_H
+#ifndef THA_HIP_FEMUR_H
+#define THA_HIP_FEMUR_H
 
-#include "Types.hpp"
-#include "Point.hpp"
-#include "tha_implants_export.h"
+#include "Plane.hpp"
 #include "vtkPolyData.h"
 #include "vtkSmartPointer.h"
 
@@ -11,17 +9,17 @@ namespace THA
 {
 	namespace IMPLANTS
 	{
-		class HipFemur
+		class THA_IMPLANTS_EXPORT HipFemur
 		{
 		public:
 			HipFemur();
 			void init(const Point& headCenter, const Point& neck, const Point& greaterTrochanter, const Point& lesserTrochanter,
-				const Point& medialEpicondyle, const Point& lateralEpicondyle, const Point& canalAxisPoint, const Point& canalAxisVectorSupInf,
-				const vtkSmartPointer<vtkPolyData>& femurPoly, const PelvisSide& femurSide);
-
+				const Point& medialEpicondyle, const Point& lateralEpicondyle, const Point& femurKneeCenter,
+				const vtkSmartPointer<vtkPolyData>& femurPoly);
+			Point getNeck() const;
 			vtkSmartPointer<vtkPolyData> getFemur() const;
 			Point getHeadCenter() const;
-			Point getNeck() const;
+			
 			Point getGreaterTrochanter() const;
 			Point getLesserTrochanter() const;
 			Point getMedialEpicondyle() const;
@@ -29,9 +27,9 @@ namespace THA
 			Point getCanalAxisVectorInfSup() const;
 			Point getVectorLatMed() const;
 			Point getCanalAxisPoint() const;
-			PelvisSide getFemurSide() const;
-			Point GetNeckAxisVectorToHead() const;
-			double getFemurVersion(const Point& pNeckAxisVectorToHead) const;
+			Point getNeckAxisVectorToHead() const;
+			Point getKneeCenter() const;
+			double getFemurVersion(const Point& pNeckAxisVectorToHead, const PelvisSide& pOperationSide) const;
 
 		private:
 			vtkSmartPointer<vtkPolyData> mFemur;
@@ -44,7 +42,7 @@ namespace THA
 			Point mCanalAxisVectorInfSup;
 			Point mNeckAxisVectorToHead;
 			Point mCanalAxisPoint;
-			PelvisSide mFemurSide;
+			Point mKneeCenter;
 			void getNeckAxisVector();
 			bool isInit;
 		};

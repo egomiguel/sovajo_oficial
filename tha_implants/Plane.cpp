@@ -414,7 +414,7 @@ Plane Plane::getPerpendicularPlane(const Point& point1, const Point& point2) con
 Point Plane::getInterceptionLinePoint(const Line& a) const
 {
 	double magnitude = normalVector.dot(a.getDirectVector());
-	if (magnitude == 0.0)
+	if (magnitude < EPSILON)
 	{
         throw ImplantExceptionCode::CAN_NOT_DETERMINE_INTERCEPTION_LINE_TO_PLANE;
 	}
@@ -423,6 +423,40 @@ Point Plane::getInterceptionLinePoint(const Line& a) const
 	Point result = a.getPoint() + (a.getDirectVector() * parameter);
 	
 	return result;
+}
+
+Point Plane::getInterceptionPlaneVector(const Plane& pPlane) const
+{
+	Point crossVector = normalVector.cross(pPlane.getNormalVector());
+
+	if (crossVector.dot(crossVector) < EPSILON)
+	{
+		throw ImplantExceptionCode::CAN_NOT_DETERMINE_INTERCEPTION_ON_PARALLEL_PLANE;
+	}
+
+	crossVector.normalice();
+	return crossVector;
+}
+
+Point Plane::getInterceptionPlaneVector(const Point& pPlaneVector1, const Point& pPlaneVector2) const
+{
+	Point normalTemp = pPlaneVector1.cross(pPlaneVector2);
+	normalTemp.normalice();
+	double magnitude = normalTemp.dot(normalTemp);
+	if (magnitude < EPSILON)
+	{
+		throw ImplantExceptionCode::CAN_NOT_DETERMINE_INTERCEPTION_ON_PARALLEL_PLANE;
+	}
+
+	Point crossVector = normalVector.cross(normalTemp);
+
+	if (crossVector.dot(crossVector) < EPSILON)
+	{
+		throw ImplantExceptionCode::CAN_NOT_DETERMINE_INTERCEPTION_ON_PARALLEL_PLANE;
+	}
+
+	crossVector.normalice();
+	return crossVector;
 }
 
 Point Plane::getProjectionVector(const Point& vector) const

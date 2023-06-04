@@ -1,5 +1,5 @@
-#ifndef PLANE_H
-#define PLANE_H
+#ifndef THA_PLANE_H
+#define THA_PLANE_H
 
 
 #include "Line.hpp"
@@ -32,6 +32,10 @@ namespace THA
 			Plane getPerpendicularPlane(const Point& point1, const Point& point2) const;
 
 			Point getInterceptionLinePoint(const Line& a) const;
+
+			Point getInterceptionPlaneVector(const Plane& pPlane) const;
+
+			Point getInterceptionPlaneVector(const Point& pPlaneVector1, const Point& pPlaneVector2) const;
 
 			Point getProjectionVector(const Point& vector) const;
 

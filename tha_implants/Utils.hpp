@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef THA_UTILS_H
+#define THA_UTILS_H
 
 namespace THA
 {
