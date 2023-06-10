@@ -2889,14 +2889,14 @@ void PelvisImplantMatch()
 
 	itk::Rigid3DTransform<>::Pointer transformMatch = objMatch.getTransform(50, 25, 10, 15, -11);
 
-	auto pelvisInfo = THA::IMPLANTS::HipPelvisImplantsMatchInfo(objPelvis, objImplant, centerOfRotation, transformMatch);
+	//auto pelvisInfo = THA::IMPLANTS::HipPelvisImplantsMatchInfo(objPelvis, centerOfRotation, objImplant, transformMatch);
 
-	double antVersion = pelvisInfo.getCupAntversion();
-	double inclination = pelvisInfo.getCupInclination();
+	//double antVersion = pelvisInfo.getCupAntversion();
+	//double inclination = pelvisInfo.getCupInclination();
 
-	double shiftSuperior = pelvisInfo.getCupShiftSuperior();
-	double shiftAnterior = pelvisInfo.getCupShiftAnterior();
-	double shiftLateral = pelvisInfo.getCupShiftLateral();
+	//double shiftSuperior = pelvisInfo.getCupShiftSuperior();
+	//double shiftAnterior = pelvisInfo.getCupShiftAnterior();
+	//double shiftLateral = pelvisInfo.getCupShiftLateral();
 
 
 	/*HipFemurStemImplant objImplantStem;
@@ -2949,8 +2949,8 @@ void PelvisImplantMatch()
 
 	 }*/
 
-	std::cout << "Incination: " << inclination << ", Version: " << antVersion << std::endl;
-	std::cout << "Superior: " << shiftSuperior << ", Anterior: " << shiftAnterior << ", Lateral: " << shiftLateral << std::endl;
+	//std::cout << "Incination: " << inclination << ", Version: " << antVersion << std::endl;
+	//std::cout << "Superior: " << shiftSuperior << ", Anterior: " << shiftAnterior << ", Lateral: " << shiftLateral << std::endl;
 
 	TestVTK::show(objPelvis.getPelvisVTK(), polyList);
 

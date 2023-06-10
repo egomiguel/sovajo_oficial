@@ -1784,6 +1784,37 @@ cv::Mat ImplantTools::Rigid3DTransformToCVTranslation(const itk::Rigid3DTransfor
 	return temp.ToMatPoint();
 }
 
+
+itk::Matrix< double, 3, 3 > ImplantTools::CVRotationToITKMatrix(const cv::Mat& rotationMatrix)
+{
+	itk::Matrix< double, 3, 3 > rotation;
+
+	rotation[0][0] = rotationMatrix.at <double>(0, 0);
+	rotation[0][1] = rotationMatrix.at <double>(0, 1);
+	rotation[0][2] = rotationMatrix.at <double>(0, 2);
+
+	rotation[1][0] = rotationMatrix.at <double>(1, 0);
+	rotation[1][1] = rotationMatrix.at <double>(1, 1);
+	rotation[1][2] = rotationMatrix.at <double>(1, 2);
+
+	rotation[2][0] = rotationMatrix.at <double>(2, 0);
+	rotation[2][1] = rotationMatrix.at <double>(2, 1);
+	rotation[2][2] = rotationMatrix.at <double>(2, 2);
+
+	return rotation;
+}
+
+itk::Vector< double, 3 > ImplantTools::CVTranslationToITKVector(const cv::Mat& translationMatrix)
+{
+	itk::Vector< double, 3 > translation;
+
+	translation[0] = translationMatrix.at <double>(0, 0);
+	translation[1] = translationMatrix.at <double>(1, 0);
+	translation[2] = translationMatrix.at <double>(2, 0);
+
+	return translation;
+}
+
 cv::Mat ImplantTools::Rigid3DTransformToCV(const itk::Rigid3DTransform<>::Pointer transform)
 {
 	itk::Matrix< double, 3, 3 > rotation = transform->GetMatrix();

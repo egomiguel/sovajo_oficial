@@ -5,11 +5,15 @@
 
 using namespace THA::IMPLANTS;
 
-HipPelvisImplantsMatchInfo::HipPelvisImplantsMatchInfo(const HipPelvis& pPelvis, const HipPelvisCupImplant& pImplantCup, const Point& pHipCenterOfRotation, const itk::Rigid3DTransform<>::Pointer pImplantToBoneCupTransform)
+HipPelvisImplantsMatchInfo::HipPelvisImplantsMatchInfo(const HipPelvis& pPelvis, const Point& pHipCenterOfRotation, const HipPelvisCupImplant& pImplantCup,
+	const HipFemurStemImplant& pImplantStem, const itk::Rigid3DTransform<>::Pointer pImplantToBoneCupTransform,
+	const itk::Rigid3DTransform<>::Pointer pImplantToBoneStemTransform)
 {
 	this->mPelvis = pPelvis;
 	this->mImplantCup = pImplantCup;
 	this->mHipCenterOfRotation = pHipCenterOfRotation;
+	this->mImplantStem = pImplantStem;
+	setStemTransform(pImplantToBoneStemTransform);
 	setCupTransform(pImplantToBoneCupTransform);
 }
 
@@ -219,6 +223,165 @@ double HipPelvisImplantsMatchInfo::getCupShiftAnterior() const
 	{
 		return -distance;
 	}
+}
+
+void HipPelvisImplantsMatchInfo::setStemTransform(const itk::Rigid3DTransform<>::Pointer pImplantToBoneStemTransform)
+{
+	mRotationStem = Rigid3DTransformToCVRotation(pImplantToBoneStemTransform);
+	mTranslationStem = Rigid3DTransformToCVTranslation(pImplantToBoneStemTransform);
+}
+
+itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::getITKStemTransform() const
+{
+	itk::Matrix< double, 3, 3 > rotation;
+	itk::Vector< double, 3 > translate;
+
+	rotation[0][0] = mRotationStem.at<double>(0, 0);
+	rotation[0][1] = mRotationStem.at<double>(0, 1);
+	rotation[0][2] = mRotationStem.at<double>(0, 2);
+
+	rotation[1][0] = mRotationStem.at<double>(1, 0);
+	rotation[1][1] = mRotationStem.at<double>(1, 1);
+	rotation[1][2] = mRotationStem.at<double>(1, 2);
+
+	rotation[2][0] = mRotationStem.at<double>(2, 0);
+	rotation[2][1] = mRotationStem.at<double>(2, 1);
+	rotation[2][2] = mRotationStem.at<double>(2, 2);
+
+	translate[0] = mTranslationStem.at<double>(0, 0);
+	translate[1] = mTranslationStem.at<double>(1, 0);
+	translate[2] = mTranslationStem.at<double>(2, 0);
+
+	itk::Rigid3DTransform<double>::Pointer transform = itk::VersorRigid3DTransform<double>::New();
+	transform->SetMatrix(rotation);
+	transform->SetOffset(translate);
+
+	return transform;
+}
+
+double HipPelvisImplantsMatchInfo::getStemVersion() const
+{
+	cv::Mat neckAxisMat = mRotationStem * mImplantStem.getVectorNeckToHead().ToMatPoint();
+	Point neckAxis = Point(neckAxisMat);
+
+	return mPelvis.getFemurVersion(neckAxis);
+}
+
+double HipPelvisImplantsMatchInfo::getCombinedOffsetDistance() const
+{
+	auto canalAxisTopPointMat = mRotationStem * mImplantStem.getCanalAxisTopPoint().ToMatPoint() + mTranslationStem;
+	Point canalAxisTopPoint = Point(canalAxisTopPointMat);
+
+	Point canalAxisVector = canalAxisTopPoint - mPelvis.getFemurOperationSide().getKneeCenter();
+
+	return mPelvis.getCombinedOffsetDistance(canalAxisVector, canalAxisTopPoint);
+}
+
+double HipPelvisImplantsMatchInfo::getHipLengthDistance() const
+{
+	auto headCenterPointMat = mRotationStem * mImplantStem.getHeadCenter().ToMatPoint() + mTranslationStem;
+	Point headCenterPoint = Point(headCenterPointMat);
+
+	Point mechanicalAxisVector = headCenterPoint - mPelvis.getFemurOperationSide().getKneeCenter();
+
+	return mPelvis.getHipLengthDistance(mechanicalAxisVector);
+}
+
+itk::Matrix< double, 3, 3 > HipPelvisImplantsMatchInfo::setCupAngles(double pAbductionAngle, double pAnteversionAngle)
+{
+	std::vector<cv::Point3d> implantVectors;
+	std::vector<cv::Point3d> pelvisVectors;
+
+	Point implantX = mImplantCup.getVectorX();
+	Point implantZ = mImplantCup.getVectorZ();
+	Point implantY = implantX.cross(implantZ);
+	implantY.normalice();
+
+	implantVectors.push_back(implantX.ToCVPoint());
+	implantVectors.push_back(implantZ.ToCVPoint());
+	implantVectors.push_back(implantY.ToCVPoint());
+
+	auto abdAnt = mPelvis.getAbductionAnteversionVectorsZX(mHipCenterOfRotation, pAbductionAngle, pAnteversionAngle);
+
+	Point pelvisX = abdAnt.second;
+	Point pelvisZ = abdAnt.first;
+	Point pelvisY = pelvisX.cross(pelvisZ);
+	pelvisY.normalice();
+
+	pelvisVectors.push_back(pelvisX.ToCVPoint());
+	pelvisVectors.push_back(pelvisZ.ToCVPoint());
+	pelvisVectors.push_back(pelvisY.ToCVPoint());
+
+	cv::Mat implantMatrix = cv::Mat(implantVectors.size(), 3, CV_64F, implantVectors.data());
+	cv::Mat pelvisMatrix = cv::Mat(pelvisVectors.size(), 3, CV_64F, pelvisVectors.data());
+
+	cv::Mat inverse = (implantMatrix.t()).inv();
+	cv::Mat mRotationCup = (pelvisMatrix.t()) * inverse;
+
+	return ImplantTools::CVRotationToITKMatrix(mRotationCup);
+}
+
+itk::Vector< double, 3 > HipPelvisImplantsMatchInfo::setCupTranslation(double pShifSuperior, double pShifLateral, double pShiftAnterior)
+{
+	cv::Mat cupCenterMat = (mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint()) + mTranslationCup;
+	Point cupCenter = Point(cupCenterMat);
+
+	Point newCenterCup = mHipCenterOfRotation + pShifSuperior * mPelvis.getPelvisVectorInfSup();
+	newCenterCup = newCenterCup + pShifLateral * mPelvis.getPelvisVectorLateralASIS();
+	newCenterCup = newCenterCup + pShiftAnterior * mPelvis.getPelvisVectorAP();
+
+	Point diff = newCenterCup - cupCenter;
+	mTranslationCup = mTranslationCup + diff.ToMatPoint();
+
+	return ImplantTools::CVTranslationToITKVector(mTranslationCup);
+}
+
+itk::Matrix< double, 3, 3 > HipPelvisImplantsMatchInfo::setStemVersionAngle(double pStemVersionAngleDegree)
+{
+	cv::Mat neckAxisMat = mRotationStem * mImplantStem.getVectorNeckToHead().ToMatPoint();
+	Point neckAxis = Point(neckAxisMat);
+
+	double angle = mPelvis.getFemurVersion(neckAxis);
+
+	double refAngle = (pStemVersionAngleDegree * PI) / 180.;
+
+	cv::Mat transformation;
+	Point canalAxis = mPelvis.getFemurOperationSide().getCanalAxisVectorInfSup();
+
+	if (refAngle == angle)
+	{
+		return ImplantTools::CVRotationToITKMatrix(mRotationStem);
+	}
+	else if (refAngle > angle)
+	{
+		double temp = refAngle - angle;
+
+		if (mPelvis.getSide() == PelvisSide::RIGHT_SIDE)
+		{
+			transformation = ImplantTools::getRotateMatrix(-canalAxis, temp);
+		}
+		else
+		{
+			transformation = ImplantTools::getRotateMatrix(canalAxis, temp);
+		}
+	}
+	else
+	{
+		double temp = angle - refAngle;
+
+		if (mPelvis.getSide() == PelvisSide::RIGHT_SIDE)
+		{
+			transformation = ImplantTools::getRotateMatrix(canalAxis, temp);
+		}
+		else
+		{
+			transformation = ImplantTools::getRotateMatrix(-canalAxis, temp);
+		}
+	}
+
+	mRotationStem = transformation * mRotationStem;
+
+	return ImplantTools::CVRotationToITKMatrix(mRotationStem);
 }
 
 

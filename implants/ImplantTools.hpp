@@ -126,6 +126,10 @@ namespace TKA
 
 			cv::Mat Rigid3DTransformToCVTranslation(const itk::Rigid3DTransform<>::Pointer transform);
 
+			itk::Matrix< double, 3, 3 > CVRotationToITKMatrix(const cv::Mat& rotationMatrix);
+
+			itk::Vector< double, 3 > CVTranslationToITKVector(const cv::Mat& translationMatrix);
+
 			cv::Mat JoinRigidTransform(const cv::Mat& rotation, const cv::Mat& translation);
 
 			itk::Rigid3DTransform<>::Pointer getITKTransformFromCV(const cv::Mat& fullTransform);
