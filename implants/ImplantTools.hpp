@@ -41,6 +41,8 @@ namespace TKA
 
 			cv::Mat getRotateMatrix(const Point& axis, double angle);
 
+			cv::Mat getRotateMatrixDegree(const Point& axis, double angleDegree);
+
 			cv::Mat GetGeneralRotateTransformVectors(const Point pFromVector, const Point pToVector);
 
 			double getAngleBetweenVectors(const Point& a, const Point& b);
@@ -154,6 +156,16 @@ namespace TKA
 
 			std::vector<Point> removePointByCondition(const std::vector<Point>& pPoints, int beginPos, int endPos, const Plane& pCondition);
 
+			/*
+				This method solves the following problem:
+				We have a plane A and a vector X parallel to plane A. 
+				We have a plane B and an unknown vector Y that is parallel to plane B. 
+				The vector X is the result of projecting vector Y onto plane A. 
+				Who is vector Y?
+			*/
+			Point getOriginalVectorFromProjectionWithPlanes(const Plane& projectionPlaneA, const Point& projectionVectorX, 
+				const Plane& originalPlaneB);
+			
 			void show(const vtkSmartPointer<vtkPolyData> poly1, const vtkSmartPointer<vtkPolyData> poly2);
 
 			void show(vtkSmartPointer<vtkPolyData> poly, const std::vector<Point>& points, bool makePolyLine = false);

@@ -159,6 +159,11 @@ Point FemurImplant::getPointP4() const
     return P4;
 }
 
+Point FemurImplant::getMidPoint() const
+{
+	return (P3 + P4) / 2;
+}
+
 cv::Mat FemurImplant::getCortexPointMat() const
 {
 	cv::Mat mat(3, 1, CV_64FC1);

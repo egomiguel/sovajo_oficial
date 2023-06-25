@@ -378,6 +378,17 @@ void Plane::normalizeNormalVector()
 	bias = (bias / squareNorm);
 }
 
+void Plane::transformPlane(const cv::Mat& rotation, const cv::Mat& translation)
+{
+	cv::Mat transformNormalVector = rotation * normalVector.ToMatPoint();
+	cv::Mat transformPoint = (rotation * mPoint.ToMatPoint()) + translation;
+
+	mPoint = Point(transformPoint);
+	this->normalVector = Point(transformNormalVector);
+	this->bias = (-1.0) * normalVector.dot(mPoint);
+	normalizeNormalVector();
+}
+
 cv::Mat Plane::getNormalVectorMat() const
 {
 	cv::Mat mat(3, 1, CV_64F);

@@ -996,14 +996,14 @@ void MatchEasy()
 
 	FemurImplantMatch femurImplantMatch;*/
 
-	std::string femurImplantStr = "D:\\sovajo\\Errores\\Error3\\Femur_Implant";
-	std::string tibiaImplantStr = "D:\\sovajo\\Errores\\Error3\\Tibia_Implant";
+	std::string femurImplantStr = "D:\\sovajo\\Errores\\Error8\\Femur_Implant";
+	std::string tibiaImplantStr = "D:\\sovajo\\Errores\\Error8\\Tibia_Implant";
 	//std::string patellaImplantStr = "D:\\3D_DICOM_DATA\\patella_Implant";
 
 	/*Knee kneeLeftModo = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Modo\\Right_Modo");
 	Knee kneeLeft = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Right");*/
 
-	Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error3", KneeSideEnum::KLeft);
+	Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error8", KneeSideEnum::KLeft);
 
 	vtkSmartPointer<vtkPolyData> polyTibiaImplant, polyPatellaImplant;
 
@@ -1033,13 +1033,14 @@ void MatchEasy()
 										-0.1865663716487183, 0.032206411592580066, -0.981914322139241, -993.3514342643502 };
 
 	itk::Rigid3DTransform<double>::Pointer transformIn = itk::VersorRigid3DTransform<double>::New();
+	itk::Rigid3DTransform<double>::Pointer transformTibia = itk::VersorRigid3DTransform<double>::New();
 	itk::Rigid3DTransform<double>::Pointer transformInTemp = Test::MakeTransformITK(my_Transform);
 
 	transformIn->SetMatrix(femurImplantMatch.GetRotationMatrix());
 	transformIn->SetOffset(femurImplantMatch.GetTranslationMatrixByCortex());
 
-	//transformIn->SetMatrix(tibiaImplantMatch.GetRotationMatrix());
-	//transformIn->SetOffset(tibiaImplantMatch.GetTranslationMatrix());
+	transformTibia->SetMatrix(tibiaImplantMatch.GetRotationMatrix());
+	transformTibia->SetOffset(tibiaImplantMatch.GetTranslationMatrix());
 
 	/*itk::Rigid3DTransform<double>::Pointer composedTransform = itk::VersorRigid3DTransform<double>::New();
 	composedTransform->Compose(transformIn);
@@ -1072,24 +1073,56 @@ void MatchEasy()
 		Test::myPrint("Error get hull");
 		std::cout << e.what() << std::endl;
 	}
+	std::cout << std::endl;
+	std::cout << std::endl;
 
-	//PatellaImplantMatchInfo matchInfo;
-	//matchInfo.init(patellaImplant, myKnee, transformIn);
+	ImplantsMatchFinalInfo matchInfo(&myKnee, femurImplant, tibiaImplant, transformIn, transformTibia);
 
-	//std::cout << "Thickness1: " << matchInfo.getCutThickness() << std::endl;
-	//std::cout << "Thickness2: " << patellaImplant.getThickness() << std::endl;
-	//std::cout << "ML Angle: " << matchInfo.getAngleML() << std::endl;
+	/*std::cout << "Femur varus angle: " << matchInfo.GetFemurVarusAngle() << std::endl;
+	std::cout << "Femur implant PCA angle: " << matchInfo.GetFemurImplantPCAAngle() << std::endl;
+	std::cout << "Femur implant TEA angle " << matchInfo.GetFemurImplantTEAAngle() << std::endl;
+	std::cout << "Femur flexion angle: " << matchInfo.GetFemurFlexionAngle() << std::endl;
+
+	std::cout << std::endl;*/
+
+	matchInfo.setFemurVarusAngle(30);
+	matchInfo.setFemurPCAAngle(30);
+	matchInfo.setFemurTEAAngle(30);
+	matchInfo.setFemurFlexionAngle(45);
+
+	matchInfo.SetThicknessFemurAxialLateral(2);
+	matchInfo.SetThicknessFemurCoronalLateral(3);
+
+	std::cout << "Femur varus angle: " << matchInfo.GetFemurVarusAngle() << std::endl;
+	std::cout << "Femur implant PCA angle: " << matchInfo.GetFemurImplantPCAAngle() << std::endl;
+	std::cout << "Femur implant TEA angle: " << matchInfo.GetFemurImplantTEAAngle() << std::endl;
+	std::cout << "Femur flexion angle: " << matchInfo.GetFemurFlexionAngle() << std::endl;
+
+	std::cout << std::endl;
+	std::cout << "***************** After change *********************" << std::endl;
+	std::cout << std::endl;
+
+	ImplantsMatchFinalInfo matchInfo1(&myKnee, femurImplant, tibiaImplant, matchInfo.getITKFemurTransform(), transformTibia);
+
+	std::cout << "Femur varus angle: " << matchInfo1.GetFemurVarusAngle() << std::endl;
+	std::cout << "Femur implant PCA angle: " << matchInfo1.GetFemurImplantPCAAngle() << std::endl;
+	std::cout << "Femur implant TEA angle: " << matchInfo1.GetFemurImplantTEAAngle() << std::endl;
+	std::cout << "Femur flexion angle: " << matchInfo.GetFemurFlexionAngle() << std::endl;
+
+	std::cout << std::endl;
+
+
 	//std::cout << "SI Angle: " << matchInfo.getAngleSI() << std::endl;
 	//std::cout << "Cartilage before : " << myKnee.getFemurCartilage() << std::endl;
 
-	//vtkSmartPointer<vtkPolyData> polyNew1 = TestVTK::CreatePolyLine(hull1);
+	vtkSmartPointer<vtkPolyData> polyNew1 = TestVTK::CreatePolyLine(hull1);
 	//TestVTK::show(myKnee.GetFemurPoly());
 	TestVTK::show(myKnee.GetFemurPoly(), tPoints, true);
 
 	/*tPoints2.push_back(tPoints[0]);
 	tPoints2.push_back(tPoints[tPoints.size() - 1]);*/
 
-	//TestVTK::show(myKnee.GetTibiaPoly(), tPoints2);
+	//TestVTK::show(myKnee.GetFemurPoly(), tPoints2);
 }
 
 void executeBalance()
@@ -3614,15 +3647,66 @@ std::string printRoman(int num)
 	return result;
 }
 
+#include "Test_TKA_Match.h"
+
 int main()
 {
 	//std::cout << "tttttttttttttttttt" << std::endl;
 	//TestHullPoints();
 	//Test30PointsVTK();
+	Point teaX = Point(1, 0, 0);
+	Point apY = Point(0, 1, 0);
+	Point vectorZ = Point(0, 0, 1);
 
+	Plane axial, coronal, sagital;
+	axial.init(vectorZ, Point(0, 0, 0));
+	coronal.init(apY, Point(0, 0, 0));
+	sagital.init(teaX, Point(0, 0, 0));
+
+
+	auto fexionX = ImplantTools::getRotateMatrixDegree(teaX, 10);
+	auto eje = fexionX * apY.ToMatPoint();
+	auto varusY = ImplantTools::getRotateMatrixDegree(Point(eje), -8);
+	eje = varusY * fexionX * vectorZ.ToMatPoint();
+	auto rotTeaZ = ImplantTools::getRotateMatrixDegree(Point(eje), 7);
+
+	auto transX = varusY * fexionX * teaX.ToMatPoint();
+	auto transY = varusY * fexionX * apY.ToMatPoint();
+
+	Point projX = axial.getProjectionVector(Point(transX));
+	projX.normalice();
+
+	Point projY = coronal.getProjectionVector(Point(transY));
+	projY.normalice();
+
+	//std::cout << Point(result) << "; " << proj << std::endl;
 
 	//MatchEasy();
 
+	TEST_IMPLANTS::testImplant();
+
+	//Plane A, B;
+
+	//A.init(Point(0, 1, 0), Point(0, 0, 0));
+	//B.init(Point(3, 1, 2), Point(1, 2, 3));
+	//Point vectorX(-1, 3, 10);
+	//vectorX.normalice();
+
+	//Point Aproj = A.getProjectionVector(vectorX);
+	//Aproj.normalice();
+	//
+	//Point projTemp = ((Aproj.dot(B.getNormalVector()))/(B.getNormalVector().dot(B.getNormalVector()))) * B.getNormalVector();
+
+	//Point vectorY = Aproj - projTemp;
+	//vectorY.normalice();
+
+	//Point Aproj2 = A.getProjectionVector(vectorY);
+	//Aproj2.normalice();
+
+	//std::cout << "pertence: " << B.getNormalVector().dot(vectorY) <<std::endl;
+	//std::cout << "Aproj" << Aproj << std::endl;
+	//std::cout << "vectorY" << vectorY << std::endl;
+	//std::cout << "Aproj2" << Aproj2 << std::endl;
 
 	std::string path, pig, pathHoles;
 	path = "D:\\work\\Varilla\\split_image.nrrd";
@@ -3660,7 +3744,7 @@ int main()
 
 	RegistrationImageType::Pointer imageCT, imageMRI, imageOut;*/
 
-	PelvisImplantMatch();
+	//PelvisImplantMatch();
 
 	//getPelvisPoint();
 

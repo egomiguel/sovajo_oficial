@@ -24,6 +24,8 @@ namespace TKA
 
 			void normalizeNormalVector();
 
+			void transformPlane(const cv::Mat& rotation, const cv::Mat& translation);
+
 			cv::Mat getNormalVectorMat() const;
 
 			cv::Mat getPointMat() const;

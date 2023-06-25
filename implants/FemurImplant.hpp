@@ -49,6 +49,8 @@ namespace TKA
 
 			Point getPointP4() const;
 
+			Point getMidPoint() const;
+
 			vtkSmartPointer<vtkPolyData> GetImplantModel() const;
 
 			vtkSmartPointer<vtkPolyData> GetTransformImplantModel(const itk::Rigid3DTransform<>::Pointer transform) const;
