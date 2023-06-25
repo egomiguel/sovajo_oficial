@@ -321,12 +321,13 @@ namespace TEST_IMPLANTS
 		//std::vector<Point> lista = { myCenter };
 		//ImplantTools::show(knee.GetFemurPoly(), lista);
 
-		//implantFinalInfo10.setTibiaRotationAngle(6);
 		//implantFinalInfo10.setTibiaSlopeAngle(4);
+		//implantFinalInfo10.setTibiaRotationAngle(6);
+		implantFinalInfo10.setTibiaSlopeAngle(-3);
 
 		implantFinalInfo10.setTibiaVarusAngle(4);
-		implantFinalInfo10.setTibiaRotationAngle(6);
-
+		//implantFinalInfo10.setTibiaRotationAngle(6);
+		implantFinalInfo10.setTibiaVarusAngle(-5);
 		
 
 		femurVarus = implantFinalInfo10.GetFemurVarusAngle();

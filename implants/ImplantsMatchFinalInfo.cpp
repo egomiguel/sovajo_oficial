@@ -185,7 +185,7 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaSlopeAngl
 	Plane tibiaHelp;
 	tibiaHelp.init(tibiaAxis, knee->getTibiaKneeCenter());
 
-	Point boneAP = -(knee->getTibiaDirectVectorAP());
+	Point boneAP = -(knee->getTibiaTubercle() - knee->getPclCenterPoint());
 	boneAP = tibiaHelp.getProjectionVector(boneAP);
 	boneAP.normalice();
 
@@ -217,7 +217,7 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaSlopeAngl
 
 	//////////////////////////////////////////////////////////////////////
 
-    tibiaRotation = rotation * tibiaRotation;
+	tibiaRotation = rotation * tibiaRotation;
 
     knee->setTibiaSlope(angle);
 
@@ -230,7 +230,7 @@ double ImplantsMatchFinalInfo::GetTibiaImplantSlopeAngle() const
     Plane tibiaHelp;
     tibiaHelp.init(tibiaAxis, knee->getTibiaKneeCenter());
 
-    Point boneAP = -(knee->getTibiaDirectVectorAP());
+    Point boneAP = -(knee->getTibiaTubercle() - knee->getPclCenterPoint());
     boneAP = tibiaHelp.getProjectionVector(boneAP);
 
     Point implantAP = -(tibiaImplant.getTibiaVectorAP());
@@ -267,7 +267,14 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaRotationA
 {
     double myAngle = angle * PI / 180.0;
 
-    Point axisRotation = knee->getNormalVectorTibiaPlane();
+	Point tibiaAxis = knee->getTibiaKneeCenter() - knee->getAnkleCenter();
+	Plane tibiaHelp;
+	tibiaHelp.init(tibiaAxis, knee->getTibiaKneeCenter());
+
+	Point boneAP = knee->getTibiaTubercle() - knee->getPclCenterPoint();;
+	boneAP = tibiaHelp.getProjectionVector(boneAP);
+
+    Point axisRotation = tibiaHelp.getNormalVector();
 
     if (knee->getIsRight() == true)
     {
@@ -278,7 +285,7 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaRotationA
 
 	cv::Mat rotation = ImplantTools::getRotateMatrix(axisRotation, myAngle);
 
-	auto mainVectorMat = rotation * knee->getTibiaDirectVectorAP().ToMatPoint();
+	auto mainVectorMat = rotation * boneAP.ToMatPoint();
 	auto mainVector = Point(mainVectorMat);
 
 	Plane projectionPlane;
@@ -307,19 +314,30 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaRotationA
 
 double ImplantsMatchFinalInfo::GetTibiaImplantRotationAngle() const
 {
-    Plane transversal;
-    transversal.init(knee->getNormalVectorTibiaPlane(), knee->getTibiaKneeCenter());
+	Point tibiaAxis = knee->getTibiaKneeCenter() - knee->getAnkleCenter();
+	Plane transversal;
+	transversal.init(tibiaAxis, knee->getTibiaKneeCenter());
+
+	Point boneAP = knee->getTibiaTubercle() - knee->getPclCenterPoint();
+	boneAP = transversal.getProjectionVector(boneAP);
+	boneAP.normalice();
+
+	Point vectorLateralTEA = transversal.getNormalVector().cross(boneAP);
+
+	if (knee->getIsRight() == true)
+	{
+		vectorLateralTEA = -vectorLateralTEA;
+	}
 
     Plane sagital;
-    sagital.init(knee->getTibiaVectorLateralTEA(), knee->getTibiaKneeCenter());
+    sagital.init(vectorLateralTEA, knee->getTibiaKneeCenter());
 
-    Point vectorAPProj = transversal.getProjectionVector(knee->getTibiaDirectVectorAP());
     cv::Mat tibiaImplantVectorMat = tibiaRotation * (tibiaImplant.getTibiaVectorAP().ToMatPoint());
     Point tibiaImplantVector = Point(tibiaImplantVectorMat);
     tibiaImplantVector = transversal.getProjectionVector(tibiaImplantVector);
     LegAngle legAngle;
 
-    double angle = legAngle.getAngleBetweenVectors(vectorAPProj, tibiaImplantVector);
+    double angle = legAngle.getAngleBetweenVectors(boneAP, tibiaImplantVector);
 
     Point newPoint = knee->getTibiaKneeCenter() + tibiaImplantVector;
 
@@ -714,7 +732,14 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaVarusAngl
 {
 	double myAngle = angle * PI / 180.0;
 
-	Point axisRotation = knee->getTibiaDirectVectorAP();
+	Point tibiaAxis = knee->getTibiaKneeCenter() - knee->getAnkleCenter();
+	Plane tibiaHelp;
+	tibiaHelp.init(tibiaAxis, knee->getTibiaKneeCenter());
+
+	Point boneAP = knee->getTibiaTubercle() - knee->getPclCenterPoint();
+	boneAP = tibiaHelp.getProjectionVector(boneAP);
+
+	Point axisRotation = boneAP;
 
 	if (knee->getIsRight() == false)
 	{
@@ -725,7 +750,7 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaVarusAngl
 
 	cv::Mat rotation = ImplantTools::getRotateMatrix(axisRotation, myAngle);
 
-	auto mainVectorMat = rotation * knee->getNormalVectorTibiaPlane().ToMatPoint();
+	auto mainVectorMat = rotation * tibiaHelp.getNormalVector().ToMatPoint();
 	auto mainVector = Point(mainVectorMat);
 
 	Plane projectionPlane;
@@ -754,15 +779,30 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaVarusAngl
 
 double ImplantsMatchFinalInfo::GetTibiaVarusAngle() const
 {
+	Point tibiaAxis = knee->getTibiaKneeCenter() - knee->getAnkleCenter();
+	Plane tibiaHelp;
+	tibiaHelp.init(tibiaAxis, knee->getTibiaKneeCenter());
+
+	Point boneAP = knee->getTibiaTubercle() - knee->getPclCenterPoint();
+	boneAP = tibiaHelp.getProjectionVector(boneAP);
+	boneAP.normalice();
+
+	Point vectorLateralTEA = tibiaHelp.getNormalVector().cross(boneAP);
+
+	if (knee->getIsRight() == true)
+	{
+		vectorLateralTEA = -vectorLateralTEA;
+	}
+
     Plane sagital;
-    sagital.init(knee->getTibiaVectorLateralTEA(), knee->getTibiaKneeCenter());
+    sagital.init(vectorLateralTEA, knee->getTibiaKneeCenter());
 
 	Plane coronal;
-	coronal.init(knee->getTibiaDirectVectorAP(), knee->getTibiaKneeCenter());
+	coronal.init(boneAP, knee->getTibiaKneeCenter());
 
 	cv::Mat implantAxisMat = tibiaRotation * (tibiaImplant.getTibiaNormalVector().ToMatPoint());
 	Point implantAxis = Point(implantAxisMat);
-	Point boneAxis = knee->getNormalVectorTibiaPlane();
+	Point boneAxis = tibiaHelp.getNormalVector();
 
 	boneAxis = coronal.getProjectionVector(boneAxis);
 	implantAxis = coronal.getProjectionVector(implantAxis);
