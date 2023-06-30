@@ -741,7 +741,7 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaVarusAngl
 
 	Point axisRotation = boneAP;
 
-	if (knee->getIsRight() == false)
+	if (knee->getIsRight() == true)
 	{
 		axisRotation = -axisRotation;
 	}
@@ -787,15 +787,15 @@ double ImplantsMatchFinalInfo::GetTibiaVarusAngle() const
 	boneAP = tibiaHelp.getProjectionVector(boneAP);
 	boneAP.normalice();
 
-	Point vectorLateralTEA = tibiaHelp.getNormalVector().cross(boneAP);
+	Point vectorMedialTEA = tibiaHelp.getNormalVector().cross(boneAP);
 
-	if (knee->getIsRight() == true)
+	if (knee->getIsRight() == false)
 	{
-		vectorLateralTEA = -vectorLateralTEA;
+		vectorMedialTEA = -vectorMedialTEA;
 	}
 
     Plane sagital;
-    sagital.init(vectorLateralTEA, knee->getTibiaKneeCenter());
+    sagital.init(vectorMedialTEA, knee->getTibiaKneeCenter());
 
 	Plane coronal;
 	coronal.init(boneAP, knee->getTibiaKneeCenter());

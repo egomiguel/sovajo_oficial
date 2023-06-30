@@ -327,7 +327,7 @@ namespace TEST_IMPLANTS
 
 		implantFinalInfo10.setTibiaVarusAngle(4);
 		//implantFinalInfo10.setTibiaRotationAngle(6);
-		implantFinalInfo10.setTibiaVarusAngle(-5);
+		//implantFinalInfo10.setTibiaVarusAngle(-5);
 		
 
 		femurVarus = implantFinalInfo10.GetFemurVarusAngle();
