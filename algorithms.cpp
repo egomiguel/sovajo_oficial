@@ -996,14 +996,14 @@ void MatchEasy()
 
 	FemurImplantMatch femurImplantMatch;*/
 
-	std::string femurImplantStr = "D:\\sovajo\\Errores\\Error8\\Femur_Implant";
-	std::string tibiaImplantStr = "D:\\sovajo\\Errores\\Error8\\Tibia_Implant";
+	std::string femurImplantStr = "D:\\sovajo\\Errores\\Error2\\Femur_Implant";
+	std::string tibiaImplantStr = "D:\\sovajo\\Errores\\Error2\\Tibia_Implant";
 	//std::string patellaImplantStr = "D:\\3D_DICOM_DATA\\patella_Implant";
 
 	/*Knee kneeLeftModo = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Modo\\Right_Modo");
 	Knee kneeLeft = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Right");*/
 
-	Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error8", KneeSideEnum::KLeft);
+	Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error2", KneeSideEnum::KRight);
 
 	vtkSmartPointer<vtkPolyData> polyTibiaImplant, polyPatellaImplant;
 
@@ -1119,10 +1119,12 @@ void MatchEasy()
 	//TestVTK::show(myKnee.GetFemurPoly());
 	TestVTK::show(myKnee.GetFemurPoly(), tPoints, true);
 
+	std::vector<cv::Point3d> testRef = { myKnee.getMedialInferiorFemurPoint(), myKnee.getLateralInferiorFemurPoint(), myKnee.getMedialCondyle(), myKnee.getLateralCondyle() };
+
 	/*tPoints2.push_back(tPoints[0]);
 	tPoints2.push_back(tPoints[tPoints.size() - 1]);*/
 
-	//TestVTK::show(myKnee.GetFemurPoly(), tPoints2);
+	TestVTK::show(myKnee.GetFemurPoly(), testRef);
 }
 
 void executeBalance()
@@ -3681,9 +3683,9 @@ int main()
 
 	//std::cout << Point(result) << "; " << proj << std::endl;
 
-	//MatchEasy();
+	MatchEasy();
 
-	TEST_IMPLANTS::testImplant();
+	//TEST_IMPLANTS::testImplant();
 
 	//Plane A, B;
 

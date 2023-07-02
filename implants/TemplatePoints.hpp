@@ -179,10 +179,30 @@ namespace TKA
 			cv::Point3d vectorLeftTEA = cv::Point3d(0.996665, 0.0797078, 0.0175068);
 			cv::Point3d centerLeft = cv::Point3d(7.83824, 56.6279, -258.512);
 
+			cv::Point3d leftLatInferiorCondyleIn = cv::Point3d(28.6097, 57.739, -282.465);
+			cv::Point3d leftLatInferiorCondyleOut = cv::Point3d(28.6097, 57.739, -300.465);
+			cv::Point3d leftMedInferiorCondyleIn = cv::Point3d(-15.0798, 57.9019, -283.564);
+			cv::Point3d leftMedInferiorCondyleOut = cv::Point3d(-15.0798, 57.9019, -300.564);
+
+			cv::Point3d leftLatPosteriorCondyleIn = cv::Point3d(27.9759, 80.4061, -263.321);
+			cv::Point3d leftLatPosteriorCondyleOut = cv::Point3d(27.9759, 100.4061, -263.321);
+			cv::Point3d leftMedPosteriorCondyleIn = cv::Point3d(-16.0435, 82.4472, -265.139);
+			cv::Point3d leftMedPosteriorCondyleOut = cv::Point3d(-16.0435, 100.4472, -265.139);
+
 			double sizeRight = 77.6243;
 			cv::Point3d vectorRightAP = cv::Point3d(0.007312, -0.999893, 0.0126959);
 			cv::Point3d vectorRightTEA = cv::Point3d(-0.99677, -0.00627257, 0.0800638);
 			cv::Point3d centerRight = cv::Point3d(28.36, -46.36, 781.9);
+
+			cv::Point3d rightLatInferiorCondyleIn = cv::Point3d(2.56535, -48.8043, 758.802);
+			cv::Point3d rightLatInferiorCondyleOut = cv::Point3d(2.56535, -48.8043, 740.802);
+			cv::Point3d rightMedInferiorCondyleIn = cv::Point3d(50.6501, -45.9031, 751.601);
+			cv::Point3d rightMedInferiorCondyleOut = cv::Point3d(50.6501, -45.9031, 740.601);
+
+			cv::Point3d rightLatPosteriorCondyleIn = cv::Point3d(3.23118, -23.5663, 777.034);
+			cv::Point3d rightLatPosteriorCondyleOut = cv::Point3d(3.23118, -10.5663, 777.034);
+			cv::Point3d rightMedPosteriorCondyleIn = cv::Point3d(49.5736, -20.7371, 768.649);
+			cv::Point3d rightMedPosteriorCondyleOut = cv::Point3d(49.5736, -10.7371, 768.649);
 
 			std::vector<cv::Point3d> mTemplateLeft = { cv::Point3d(30.0767, 80.3611, -261.566),
 														cv::Point3d(30.1452, 80.041, -266.555),

@@ -125,10 +125,6 @@ namespace TKA
 
 			static Point getComputeAnkleCenter(const Point& lateralMalleolus, const Point& medialMalleolus);
 
-			std::vector<Point> getFemurPoints() const;
-
-			std::vector<Point> getTibiaPoints() const;
-
 			vtkSmartPointer<vtkPolyData> GetFemurPoly() const;
 
 			vtkSmartPointer<vtkPolyData> GetTibiaPoly() const;
@@ -240,6 +236,8 @@ namespace TKA
 			void makeKneeGroovePath();
 
 			void getAutomaticPlateaus();
+
+			void GetFemurReferencePoints();
 		};
 	}
 }

@@ -292,8 +292,10 @@ void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point
 
     getAutomaticPlateaus();
 
-    FillFemurPointsAndCondyles();
-    FillTibiaPoints();
+	GetFemurReferencePoints();
+
+    //FillFemurPointsAndCondyles();
+    //FillTibiaPoints();
 
     //makeKneeGroovePath();
 
@@ -994,7 +996,7 @@ void Knee::setLateralAndMedialPosteriorFemurPoints(const Point& pLateral, const 
     
     /////////////////////////////////////////////////////////////////
 
-    Point forceLine = hipCenter - femurKneeCenter;
+    /*Point forceLine = hipCenter - femurKneeCenter;
     Point tea = lateralEpicondyle - medialEpicondyle;
 
     Plane sagital, axial, transverse;
@@ -1044,7 +1046,7 @@ void Knee::setLateralAndMedialPosteriorFemurPoints(const Point& pLateral, const 
             }
 
         }
-    }
+    }*/
 
     //UpdateTopPointOnGroove();
 
@@ -2175,14 +2177,14 @@ void Knee::get2DSlice(const ImplantImageType::Pointer& imageIn, ImplantImageType
     imageOut = filter->GetOutput();
 }*/
 
-std::vector<Point> Knee::getFemurPoints() const
-{
-    return mFemur;
-}
-std::vector<Point> Knee::getTibiaPoints() const
-{
-    return mTibia;
-}
+//std::vector<Point> Knee::getFemurPoints() const
+//{
+//    return mFemur;
+//}
+//std::vector<Point> Knee::getTibiaPoints() const
+//{
+//    return mTibia;
+//}
 
 
 Point Knee::getComputeAnkleCenter(const Point& lateralMalleolus, const Point& medialMalleolus)
@@ -2810,6 +2812,167 @@ double Knee::getInitialAnglePCA(const Point& hipCenter, const Point& femurKneeCe
     Point vectorCondyle = axial.getProjectionVector(condyleLine);
 
     return ImplantTools::getAngleBetweenVectorsDegree(vectorTEA, vectorCondyle);
+}
+
+void Knee::GetFemurReferencePoints()
+{
+	vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
+	implicitPolyDataDistance->SetInput(GetFemurPoly());
+
+	TemplateFemur templateObj;
+
+	Point targetAP, targetTEA, targetAxis, targetCenter;
+	Point sourceAP, sourceTEA, sourceAxis, sourceCenter;
+	double tScale;
+
+	targetAP = getFemurDirectVectorAP();
+	targetTEA = getFemurVectorLateralTEA();
+	targetAxis = targetAP.cross(targetTEA);
+	targetAxis.normalice();
+	targetCenter = (getLateralEpicondyle() + getMedialEpicondyle()) / 2.0;
+
+	Point diff = getLateralEpicondyle() - getMedialEpicondyle();
+	double targetSize = sqrt(diff.dot(diff));
+
+	std::vector<std::vector<Point>> myOfficialPoints;
+	std::vector<cv::Point3d> myTemplatePoints;
+	std::vector<Point> myCheckPoints;
+
+	Point latInferiorCondyleIn, medInferiorCondyleIn, latPosteriorCondyleIn, medPosteriorCondyleIn;
+	Point latInferiorCondyleOut, medInferiorCondyleOut, latPosteriorCondyleOut, medPosteriorCondyleOut;
+
+	if (getIsRight() == false)
+	{
+		sourceAP = templateObj.vectorLeftAP;
+		sourceTEA = templateObj.vectorLeftTEA;
+		sourceCenter = templateObj.centerLeft;
+		tScale = (targetSize / templateObj.sizeLeft);
+		myTemplatePoints = templateObj.mTemplateLeft;
+		myOfficialPoints = templateObj.mOfficialLeftPoints;
+		myCheckPoints = templateObj.mLeftCheckPoints;
+
+		latInferiorCondyleIn = templateObj.leftLatInferiorCondyleIn;
+		medInferiorCondyleIn = templateObj.leftMedInferiorCondyleIn;
+		latPosteriorCondyleIn = templateObj.leftLatPosteriorCondyleIn;
+		medPosteriorCondyleIn = templateObj.leftMedPosteriorCondyleIn;
+
+		latInferiorCondyleOut = templateObj.leftLatInferiorCondyleOut;
+		medInferiorCondyleOut = templateObj.leftMedInferiorCondyleOut;
+		latPosteriorCondyleOut = templateObj.leftLatPosteriorCondyleOut;
+		medPosteriorCondyleOut = templateObj.leftMedPosteriorCondyleOut;
+	}
+	else
+	{
+		sourceAP = templateObj.vectorRightAP;
+		sourceTEA = templateObj.vectorRightTEA;
+		sourceCenter = templateObj.centerRight;
+		tScale = (targetSize / templateObj.sizeLeft);
+		myTemplatePoints = templateObj.mTemplateRight;
+		myOfficialPoints = templateObj.mOfficialRightPoints;
+		myCheckPoints = templateObj.mRightCheckPoints;
+
+		latInferiorCondyleIn = templateObj.rightLatInferiorCondyleIn;
+		medInferiorCondyleIn = templateObj.rightMedInferiorCondyleIn;
+		latPosteriorCondyleIn = templateObj.rightLatPosteriorCondyleIn;
+		medPosteriorCondyleIn = templateObj.rightMedPosteriorCondyleIn;
+
+		latInferiorCondyleOut = templateObj.rightLatInferiorCondyleOut;
+		medInferiorCondyleOut = templateObj.rightMedInferiorCondyleOut;
+		latPosteriorCondyleOut = templateObj.rightLatPosteriorCondyleOut;
+		medPosteriorCondyleOut = templateObj.rightMedPosteriorCondyleOut;
+	}
+
+	if (tScale < 1.0)
+	{
+		tScale = 1.0;
+	}
+
+	sourceAxis = sourceAP.cross(sourceTEA);
+	sourceAxis.normalice();
+
+	std::vector<cv::Point3d> vectorTarget = { targetAP, targetTEA, targetAxis };
+	std::vector<cv::Point3d> vectorSource = { sourceAP, sourceTEA, sourceAxis };
+
+	cv::Mat data(7, 1, CV_64F);
+
+	cv::Mat rotation = LeastSquaresScaleICP::GetRotationAnglesXYZ(vectorSource, vectorTarget, data);
+	cv::Mat translation = targetCenter.ToMatPoint() - (rotation * sourceCenter.ToMatPoint());
+
+	data.at<double>(3, 0) = data.at<double>(0, 0);
+	data.at<double>(4, 0) = data.at<double>(1, 0);
+	data.at<double>(5, 0) = data.at<double>(2, 0);
+
+	data.at<double>(0, 0) = translation.at<double>(0, 0);
+	data.at<double>(1, 0) = translation.at<double>(1, 0);
+	data.at<double>(2, 0) = translation.at<double>(2, 0);
+
+	data.at<double>(6, 0) = tScale;
+
+	LeastSquaresScaleICP registerObj(myTemplatePoints);
+
+	registerObj.LeastSquaresScale(GetFemurPoly(), data);
+
+	////////////////////////////////////////////////////////////////////
+
+	cv::Mat myTranslation(3, 1, CV_64F);
+	myTranslation.at<double>(0, 0) = data.at<double>(0, 0);
+	myTranslation.at<double>(1, 0) = data.at<double>(1, 0);
+	myTranslation.at<double>(2, 0) = data.at<double>(2, 0);
+
+	double angleX = data.at<double>(3, 0);
+	double angleY = data.at<double>(4, 0);
+	double angleZ = data.at<double>(5, 0);
+
+	double scale = data.at<double>(6, 0);
+
+	cv::Mat myRotation = registerObj.GetRotationMatrix(angleX, angleY, angleZ);
+
+	std::vector<cv::Mat> pointsIn, pointsOut;
+
+	pointsIn.push_back(scale * (myRotation * latInferiorCondyleIn.ToMatPoint()) + myTranslation);
+	pointsIn.push_back(scale * (myRotation * medInferiorCondyleIn.ToMatPoint()) + myTranslation);
+	pointsIn.push_back(scale * (myRotation * latPosteriorCondyleIn.ToMatPoint()) + myTranslation);
+	pointsIn.push_back(scale * (myRotation * medPosteriorCondyleIn.ToMatPoint()) + myTranslation);
+
+	pointsOut.push_back(scale * (myRotation * latInferiorCondyleOut.ToMatPoint()) + myTranslation);
+	pointsOut.push_back(scale * (myRotation * medInferiorCondyleOut.ToMatPoint()) + myTranslation);
+	pointsOut.push_back(scale * (myRotation * latPosteriorCondyleOut.ToMatPoint()) + myTranslation);
+	pointsOut.push_back(scale * (myRotation * medPosteriorCondyleOut.ToMatPoint()) + myTranslation);
+
+	for (int i = 0; i < 4; i++)
+	{
+		Point temp;
+		ImplantTools::GetInterceptionWithLine(implicitPolyDataDistance, pointsIn[i], pointsOut[i], temp);
+		double pnt[3] = { temp.x, temp.y, temp.z };
+		double closest[3];
+		implicitPolyDataDistance->EvaluateFunctionAndGetClosestPoint(pnt, closest);
+
+		if (i == 0)
+		{
+			lateralInferiorFemurPoint.x = closest[0];
+			lateralInferiorFemurPoint.y = closest[1];
+			lateralInferiorFemurPoint.z = closest[2];
+		}
+		else if (i == 1)
+		{
+			medialInferiorFemurPoint.x = closest[0];
+			medialInferiorFemurPoint.y = closest[1];
+			medialInferiorFemurPoint.z = closest[2];
+		}
+		else if (i == 2)
+		{
+			lateralCondyle.x = closest[0];
+			lateralCondyle.y = closest[1];
+			lateralCondyle.z = closest[2];
+		}
+		else
+		{
+			medialCondyle.x = closest[0];
+			medialCondyle.y = closest[1];
+			medialCondyle.z = closest[2];
+		}
+	}
+
 }
 
 

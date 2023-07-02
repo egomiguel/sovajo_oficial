@@ -228,24 +228,22 @@ std::vector<Point> TibiaImplantMatch::getPointsNearImplant(double distance) cons
 	else
 		transverseSign = 1.0;
 
-	if (distance == 0)
+	vtkSmartPointer<vtkPolyData> contour = getContour(knee.GetTibiaPoly(), myPlane.getNormalVector(), myPlane.getPoint());
+	vtkSmartPointer<vtkPoints> pointsCut = contour->GetPoints();
+	int tSize = pointsCut->GetNumberOfPoints();
+	for (int i = 0; i < tSize; i++)
 	{
-		vtkSmartPointer<vtkPolyData> contour = getContour(knee.GetTibiaPoly(), myPlane.getNormalVector(), myPlane.getPoint());
-		vtkSmartPointer<vtkPoints> pointsCut = contour->GetPoints();
-		int tSize = pointsCut->GetNumberOfPoints();
-		for (int i = 0; i < tSize; i++)
-		{
-			double pnt[3];
-			pointsCut->GetPoint(i, pnt);
-			Point myPoint(pnt[0], pnt[1], pnt[2]);
+		double pnt[3];
+		pointsCut->GetPoint(i, pnt);
+		Point myPoint(pnt[0], pnt[1], pnt[2]);
 
-			if (transverseSign * Transverse.eval(myPoint) > 0)
-			{
-				temp.push_back(myPoint);
-			}
+		if (transverseSign * Transverse.eval(myPoint) > 0)
+		{
+			temp.push_back(myPoint);
 		}
 	}
-	else
+
+	/*else
 	{
 		auto it1 = knee.getTibiaPoints().begin();
 		auto it2 = knee.getTibiaPoints().end();
@@ -258,7 +256,7 @@ std::vector<Point> TibiaImplantMatch::getPointsNearImplant(double distance) cons
 
 			}
 		}
-	}
+	}*/
 
 	return temp;
 }
@@ -630,7 +628,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	std::vector<Point> hullConcaveTemp;
 	double step = (maxX - minX) / 100;
 	//double average = 20.;
-	for (double i = minX; i < maxX + (step / 2.) ; i += step)
+	for (double i = minX; i < maxX + (step / 2.); i += step)
 	{
 		double y = tPoly.eval(i);
 		Point temp(i, y, tPoly.Z);

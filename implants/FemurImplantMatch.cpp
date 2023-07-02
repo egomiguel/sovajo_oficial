@@ -548,38 +548,36 @@ Point FemurImplantMatch::getNearPointUnderCortex(const Plane& myPlane, std::vect
 	else
 		transverseSign = 1.0;
 
-	std::vector<Point> femurPoints = knee.getFemurPoints();
+	//std::vector<Point> femurPoints = knee.getFemurPoints();
 
-	auto it1 = femurPoints.begin();
-	auto it2 = femurPoints.end();
+	//auto it1 = femurPoints.begin();
+	//auto it2 = femurPoints.end();
 
 	Point midPoint, tempPoint;
 	points.clear();
 
-	if (distance == 0)
+	vtkSmartPointer<vtkPolyData> contour = getContour(knee.GetFemurPoly(), myPlane.getNormalVector(), myPlane.getPoint());
+	vtkSmartPointer<vtkPoints> pointsCut = contour->GetPoints();
+	int tSize = pointsCut->GetNumberOfPoints();
+	for (int i = 0; i < tSize; i++)
 	{
-		vtkSmartPointer<vtkPolyData> contour = getContour(knee.GetFemurPoly(), myPlane.getNormalVector(), myPlane.getPoint());
-		vtkSmartPointer<vtkPoints> pointsCut = contour->GetPoints();
-		int tSize = pointsCut->GetNumberOfPoints();
-		for (int i = 0; i < tSize; i++)
-		{
-			double pnt[3];
-			pointsCut->GetPoint(i, pnt);
-			Point myPoint(pnt[0], pnt[1], pnt[2]);
+		double pnt[3];
+		pointsCut->GetPoint(i, pnt);
+		Point myPoint(pnt[0], pnt[1], pnt[2]);
 
-			if (transverseSign * Transverse.eval(myPoint) > 0)
-			{
-				midPoint = midPoint + myPoint;
-				points.push_back(myPoint);
-			}
-		}
-
-		if (points.size() > 0)
+		if (transverseSign * Transverse.eval(myPoint) > 0)
 		{
-			midPoint = midPoint / double(points.size());
+			midPoint = midPoint + myPoint;
+			points.push_back(myPoint);
 		}
 	}
-	else
+
+	if (points.size() > 0)
+	{
+		midPoint = midPoint / double(points.size());
+	}
+
+	/*else
 	{
 		for (; it1 != it2; ++it1)
 		{
@@ -595,7 +593,7 @@ Point FemurImplantMatch::getNearPointUnderCortex(const Plane& myPlane, std::vect
 		{
 			midPoint = midPoint / double(points.size());
 		}
-	}
+	}*/
 
 	return midPoint;
 }
@@ -1341,7 +1339,7 @@ void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const
 	std::pair<int, float> baseLat = ImplantTools::GetNearestPointToLine(pointsLat, baseLine, Plane());
 	std::pair<int, float> baseMed = ImplantTools::GetNearestPointToLine(pointsMed, baseLine, Plane());
 
-	if (baseLat.first < 0 )
+	if (baseLat.first < 0)
 	{
 		throw ImplantExceptionCode::CAN_NOT_DETERMINE_BORDER_CURVE_ON_LATERAL;
 	}
@@ -1431,7 +1429,7 @@ void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const
 	Point basePointMed = baseLine.getProjectPoint(convexMed[sideMed.first]);
 	Point basePointMid = (basePointLat + basePointMed) / 2.;
 	//Point basePointMidFix = basePointMid;// planeID == kPlaneA ? basePointMid : (((convexLat[sideLat.first] + convexMed[sideMed.first]) / 2.) + basePointMid) / 2.;
-	
+
 	basePointLat = basePointLat + 0.2 * (basePointMed - basePointLat);
 	basePointMed = basePointMed + 0.2 * (basePointLat - basePointMed);
 
@@ -1477,7 +1475,7 @@ void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const
 		{
 			int hightPos = ImplantTools::GetFarestPositivePoint(convexLatNew, basePlane);
 			basePlane.movePlaneOnNormal(middleCurveHight);
-			convexLatNew = ImplantTools::removePointByCondition(convexLatNew, hightPos, convexLatNew.size()-1, basePlane);
+			convexLatNew = ImplantTools::removePointByCondition(convexLatNew, hightPos, convexLatNew.size() - 1, basePlane);
 		}
 	}
 
@@ -1490,7 +1488,7 @@ void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const
 		{
 			convexMedNew.push_back(convexMed[i]);
 		}
-		
+
 		beginPos = 0;
 		endPos = beginPos + 1;
 		convexMedNew = ImplantTools::increaseVectorPoints(convexMedNew, beginPos, endPos);
@@ -1521,7 +1519,7 @@ void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const
 			convexMedNew = ImplantTools::removePointByCondition(convexMedNew, hightPos, convexMedNew.size() - 1, basePlane);
 		}
 	}
-	
+
 	/*if ((knee.getIsRight() && planeID == kPlaneA) || (knee.getIsRight() == false && planeID == kPlaneB))
 	{
 		for (int i = 0; i < convexLatNew.size(); i++)
