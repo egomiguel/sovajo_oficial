@@ -454,7 +454,10 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	}
 
 	Point obliquePointLat = tibiaCenter + vectorAP + 2.0 * closeAngle * vectorTrans;
-	Point obliquePointMed = tibiaCenter + vectorAP - 3.0 * vectorTrans;
+	//Point obliquePointMed = tibiaCenter + vectorAP - 3.0 * vectorTrans;
+
+	Point refvectorMed = (tibiaCenter - vectorTrans) - (tibiaCenter + vectorAP);
+	Point obliquePointMed = tibiaCenter + vectorAP + (closeAngle + 0.5) * refvectorMed;
 	obliqueLatPlaneDown = myPlane.getPerpendicularPlane(tibiaCenter, obliquePointLat);
 	obliqueMedPlaneDown = myPlane.getPerpendicularPlane(tibiaCenter, obliquePointMed);
 
