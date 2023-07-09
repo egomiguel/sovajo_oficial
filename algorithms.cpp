@@ -259,8 +259,8 @@ Knee CreateKneeFromFile(const std::string& sourcePath)
 	myPatella.init(kneeCap, patellaLat, patellaMed, patellaInf, patellaPoly);
 
 	Knee knee;
-	knee.init(hipCenter, anteriorCortex, femurKneeCenter, lateralEpicondyle, medialEpicondyle, lateralCondyle, medialCondyle,
-		lateralPlateau, medialPlateau, tibiaKneeCenter, tibiaTubercle, tibiaPCL, ankleCenter, myPatella, femurPoly, tibiaPoly);
+	knee.init(hipCenter, anteriorCortex, femurKneeCenter, lateralEpicondyle, medialEpicondyle, tibiaKneeCenter,
+		tibiaTubercle, tibiaPCL, ankleCenter, myPatella, femurPoly, tibiaPoly, KneeSideEnum::KRight);
 
 	return knee;
 }
@@ -855,8 +855,8 @@ void executeImplantsMatch()
 	myPatella.init(kneeCap, lateralEpicondyle, medialEpicondyle, femurKneeCenter, patellaPoly); // Just for avoid problem with patella
 
 	Knee knee;
-	knee.init(hipCenter, anteriorCortex, femurKneeCenter, lateralEpicondyle, medialEpicondyle, lateralCondyle, medialCondyle,
-		lateralPlateau, medialPlateau, tibiaKneeCenter, tibiaTubercle, tibiaPCL, ankleCenter, myPatella, femurPoly, tibiaPoly);
+	knee.init(hipCenter, anteriorCortex, femurKneeCenter, lateralEpicondyle, medialEpicondyle, tibiaKneeCenter, 
+		tibiaTubercle, tibiaPCL, ankleCenter, myPatella, femurPoly, tibiaPoly, KneeSideEnum::KRight);
 	FemurImplantMatch femurImplantMatch;
 	TibiaImplantMatch tibiaImplantMatch;
 
@@ -996,14 +996,14 @@ void MatchEasy()
 
 	FemurImplantMatch femurImplantMatch;*/
 
-	std::string femurImplantStr = "D:\\sovajo\\Errores\\Error7\\Femur_Implant";
-	std::string tibiaImplantStr = "D:\\sovajo\\Errores\\Error7\\Tibia_Implant";
+	std::string femurImplantStr = "D:\\sovajo\\Errores\\Error5\\Femur_Implant";
+	std::string tibiaImplantStr = "D:\\sovajo\\Errores\\Error5\\Tibia_Implant";
 	//std::string patellaImplantStr = "D:\\3D_DICOM_DATA\\patella_Implant";
 
 	/*Knee kneeLeftModo = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Modo\\Right_Modo");
 	Knee kneeLeft = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Right");*/
 
-	Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error7", KneeSideEnum::KLeft);
+	Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error5", KneeSideEnum::KRight);
 
 	vtkSmartPointer<vtkPolyData> polyTibiaImplant, polyPatellaImplant;
 
@@ -1272,8 +1272,8 @@ void executeBalance()
 	myPatella.init(kneeCap, lateralEpicondyle, medialEpicondyle, femurKneeCenter, femurPoly); // Just for avoid problem with patella
 
 	Knee knee;
-	knee.init(hipCenter, anteriorCortex, femurKneeCenter, lateralEpicondyle, medialEpicondyle, lateralCondyle, medialCondyle,
-		lateralPlateau, medialPlateau, tibiaKneeCenter, tibiaTubercle, tibiaPCL, ankleCenter, myPatella, femurPoly, tibiaPoly, 0);
+	knee.init(hipCenter, anteriorCortex, femurKneeCenter, lateralEpicondyle, medialEpicondyle, 
+		tibiaKneeCenter, tibiaTubercle, tibiaPCL, ankleCenter, myPatella, femurPoly, tibiaPoly, KneeSideEnum::KRight);
 
 	auto femurImplantMatch = new FemurImplantMatch();
 	auto tibiaImplantMatch = new TibiaImplantMatch();
@@ -1466,8 +1466,8 @@ void ExecuteKneeCap()
 	myPatella.init(kneeCap, lateralEpicondyle, medialEpicondyle, femurKneeCenter, femurPoly); // Just for avoid problem with patella
 
 	Knee knee;
-	knee.init(hipCenter, anteriorCortex, femurKneeCenter, lateralEpicondyle, medialEpicondyle, lateralCondyle, medialCondyle,
-		lateralPlateau, medialPlateau, tibiaKneeCenter, tibiaTubercle, tibiaPCL, ankleCenter, myPatella, femurPoly, tibiaPoly);
+	knee.init(hipCenter, anteriorCortex, femurKneeCenter, lateralEpicondyle, medialEpicondyle, 
+		tibiaKneeCenter, tibiaTubercle, tibiaPCL, ankleCenter, myPatella, femurPoly, tibiaPoly, KneeSideEnum::KRight);
 
 	auto endTime = std::chrono::system_clock::now();
 

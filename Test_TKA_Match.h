@@ -248,9 +248,6 @@ namespace TEST_IMPLANTS
 			anno[Landmarks::kFemurKneeCenter],
 			anno[Landmarks::kLateralEpicondyle],
 			anno[Landmarks::kMedialEpicondyle],
-
-			anno[Landmarks::kTibiaLateralPlatformPoint],
-			anno[Landmarks::kTibiaMedialPlatformPoint],
 			anno[Landmarks::kTibiaKneeCenter],
 			anno[Landmarks::kTibiaTuberosity],
 			anno[Landmarks::kPCLInsertionPoint], ankleCenter, patella,

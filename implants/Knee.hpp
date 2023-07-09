@@ -33,22 +33,22 @@ namespace TKA
 			Knee();
 
 			void init(const Point& hipCenter, const Point& anteriorCortex, const Point& femurKneeCenter, const Point& lateralEpicondyle,
-				const Point& medialEpicondyle, const Point& lateralCondyle, const Point& medialCondyle, const Point& lateralPlateau,
-				const Point& medialPlateau, const Point& tibiaKneeCenter, const Point& tibiaTubercle, const Point& pclCenter,
-				const Point& ankleCenter, const Patella& pPatella, const vtkSmartPointer<vtkPolyData> femurPoly,
-				const vtkSmartPointer<vtkPolyData> tibiaPoly, double cartilage = 2.0, uint8_t imageValueMax = 1);
-
-			void init(const Point& hipCenter, const Point& anteriorCortex, const Point& femurKneeCenter, const Point& lateralEpicondyle,
-				const Point& medialEpicondyle, const Point& lateralPlateau, const Point& medialPlateau, const Point& tibiaKneeCenter,
-				const Point& tibiaTubercle, const Point& pclCenter, const Point& ankleCenter, const Patella& pPatella,
-				const vtkSmartPointer<vtkPolyData> femurPoly, const vtkSmartPointer<vtkPolyData> tibiaPoly, KneeSideEnum pSide,
-				double cartilage = 2.0, uint8_t imageValueMax = 1);
-
-			void init(const Point& hipCenter, const Point& anteriorCortex, const Point& femurKneeCenter, const Point& lateralEpicondyle,
 				const Point& medialEpicondyle, const Point& tibiaKneeCenter, const Point& tibiaTubercle, const Point& pclCenter,
 				const Point& ankleCenter, const Patella& pPatella, const vtkSmartPointer<vtkPolyData> femurPoly,
-				const vtkSmartPointer<vtkPolyData> tibiaPoly, KneeSideEnum pSide, double cartilage = 2.0, uint8_t imageValueMax = 1);
+				const vtkSmartPointer<vtkPolyData> tibiaPoly, KneeSideEnum pSide, bool findCondyles = true, double cartilage = 2.0, uint8_t imageValueMax = 1);
 
+			///////////////////////////////////////////////////
+			/*
+				Be very careful with these functions, if the "findCondyles" parameter of the init function is false, 
+				then one of these two methods must be called immediately after the init. By default if init is True 
+				then it uses the function based on least squares.
+			*/
+
+			void FindFemurCondylesUsingDistalPoints();
+
+			void FindFemurCondylesUsingLeastSquare();
+			//////////////////////////////////////////////////
+			
 			Point getFemurVectorTEA() const;
 
 			Point getTibiaVectorTEA() const;
@@ -213,8 +213,6 @@ namespace TKA
 
 			void FillFemurPoints();
 
-			void FillFemurPointsAndCondyles();
-
 			void FillTibiaPoints();
 
 			void UpdateTopPointOnGroove();
@@ -236,8 +234,6 @@ namespace TKA
 			void makeKneeGroovePath();
 
 			void getAutomaticPlateaus();
-
-			void GetFemurReferencePoints();
 		};
 	}
 }

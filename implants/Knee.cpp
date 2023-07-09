@@ -17,15 +17,12 @@
 
 using namespace TKA::IMPLANTS;
 
-const Point UnitVectorSagital(1, 0, 0);
-const Point UnitVectorCoronal(0, 1, 0);
-const Point UnitVectorAxial(0, 0, 1);
-
 Knee::Knee()
 {
     isInit = false;
 }
 
+/*
 void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point& femurKneeCenter, const Point& lateralEpicondyle,
     const Point& medialEpicondyle, const Point& lateralCondyle, const Point& medialCondyle, const Point& lateralPlateau,
     const Point& medialPlateau, const Point& tibiaKneeCenter, const Point& tibiaTubercle, const Point& pclCenter, const Point& ankleCenter,
@@ -127,15 +124,6 @@ void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point
         mPatellaPlane = mPatella.getPatellaPlane(isRight, mPatellaDistalPosteriorPoint);
     }
 
-    /*Plane axial, tibiaHelp, coronal;
-    axial.init((hipCenter - femurKneeCenter), inferiorLateralPoint);
-    tibiaHelp.init(tibiaNormalPlaneVector, medialPlateau);
-    coronal.init(this->femurDirectVectorAP, lateralCondyle);
-
-    femurLatMedDiffDistal = abs(axial.eval(medialInferiorFemurPoint));
-    femurLatMedDiffPosterior = abs(coronal.eval(medialCondyle));
-    tibiaLatMedDiff = abs(tibiaHelp.eval(lateralPlateau));*/
-
     isInit = true;
 }
 
@@ -229,11 +217,12 @@ void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point
 
     isInit = true;
 }
+*/
 
 void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point& femurKneeCenter, const Point& lateralEpicondyle,
     const Point& medialEpicondyle, const Point& tibiaKneeCenter, const Point& tibiaTubercle, const Point& pclCenter, 
     const Point& ankleCenter, const Patella& pPatella, const vtkSmartPointer<vtkPolyData> femurPoly, 
-    const vtkSmartPointer<vtkPolyData> tibiaPoly, KneeSideEnum pSide, double cartilage, uint8_t imageValueMax)
+    const vtkSmartPointer<vtkPolyData> tibiaPoly, KneeSideEnum pSide, bool findCondyles, double cartilage, uint8_t imageValueMax)
 {
     if (isInit == true)
     {
@@ -292,9 +281,11 @@ void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point
 
     getAutomaticPlateaus();
 
-	GetFemurReferencePoints();
+	if (findCondyles == true)
+	{
+		FindFemurCondylesUsingLeastSquare();
+	}
 
-    //FillFemurPointsAndCondyles();
     //FillTibiaPoints();
 
     //makeKneeGroovePath();
@@ -389,7 +380,7 @@ void Knee::FillFemurPoints()
     }
 }
 
-void Knee::FillFemurPointsAndCondyles()
+void Knee::FindFemurCondylesUsingDistalPoints()
 {
     Point forceLine = hipCenter - femurKneeCenter;
     Point tea = lateralEpicondyle - medialEpicondyle;
@@ -458,7 +449,7 @@ void Knee::FillFemurPointsAndCondyles()
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////
-
+	/*
     Plane coronalBase = axial.getPerpendicularPlane(lateralCondyle, medialCondyle);
     Point refPoint = medialCondyle + 1000 * femurDirectVectorAP;
     coronalBase.reverseByPoint(refPoint);
@@ -495,6 +486,7 @@ void Knee::FillFemurPointsAndCondyles()
 
         }
     }
+	*/
 
     //UpdateTopPointOnGroove();********************************************************************************************************
 }
@@ -2814,7 +2806,7 @@ double Knee::getInitialAnglePCA(const Point& hipCenter, const Point& femurKneeCe
     return ImplantTools::getAngleBetweenVectorsDegree(vectorTEA, vectorCondyle);
 }
 
-void Knee::GetFemurReferencePoints()
+void Knee::FindFemurCondylesUsingLeastSquare()
 {
 	vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
 	implicitPolyDataDistance->SetInput(GetFemurPoly());
