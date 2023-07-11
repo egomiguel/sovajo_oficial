@@ -35,18 +35,20 @@ namespace TKA
 			void init(const Point& hipCenter, const Point& anteriorCortex, const Point& femurKneeCenter, const Point& lateralEpicondyle,
 				const Point& medialEpicondyle, const Point& tibiaKneeCenter, const Point& tibiaTubercle, const Point& pclCenter,
 				const Point& ankleCenter, const Patella& pPatella, const vtkSmartPointer<vtkPolyData> femurPoly,
-				const vtkSmartPointer<vtkPolyData> tibiaPoly, KneeSideEnum pSide, bool findCondyles = true, double cartilage = 2.0, uint8_t imageValueMax = 1);
+				const vtkSmartPointer<vtkPolyData> tibiaPoly, KneeSideEnum pSide, bool findRefPoints = true, double cartilage = 2.0, uint8_t imageValueMax = 1);
 
 			///////////////////////////////////////////////////
 			/*
-				Be very careful with these functions, if the "findCondyles" parameter of the init function is false, 
-				then one of these two methods must be called immediately after the init. By default if init is True 
-				then it uses the function based on least squares.
+				Be very careful with these functions, if the "findRefPoints" parameter of the init function is false, 
+				then two of these methods, one for femur and one for tibia, must be called immediately after the init. 
+				By default if init is True then it uses the function based on least squares for femur.
 			*/
 
-			void FindFemurCondylesUsingDistalPoints();
+			void findFemurCondylesUsingDistalPoints();
 
-			void FindFemurCondylesUsingLeastSquare();
+			void findFemurCondylesUsingLeastSquare();
+
+			void findAutomaticPlateaus();
 			//////////////////////////////////////////////////
 			
 			Point getFemurVectorTEA() const;
@@ -232,8 +234,6 @@ namespace TKA
 			Side getGoodSide(const Point& hipCenter, const Point& kneeCenter, const Point& latEpi, const Point& medEpi, const Point& ankle) const;
 
 			void makeKneeGroovePath();
-
-			void getAutomaticPlateaus();
 		};
 	}
 }

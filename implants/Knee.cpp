@@ -222,7 +222,7 @@ void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point
 void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point& femurKneeCenter, const Point& lateralEpicondyle,
     const Point& medialEpicondyle, const Point& tibiaKneeCenter, const Point& tibiaTubercle, const Point& pclCenter, 
     const Point& ankleCenter, const Patella& pPatella, const vtkSmartPointer<vtkPolyData> femurPoly, 
-    const vtkSmartPointer<vtkPolyData> tibiaPoly, KneeSideEnum pSide, bool findCondyles, double cartilage, uint8_t imageValueMax)
+    const vtkSmartPointer<vtkPolyData> tibiaPoly, KneeSideEnum pSide, bool findRefPoints, double cartilage, uint8_t imageValueMax)
 {
     if (isInit == true)
     {
@@ -279,11 +279,10 @@ void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point
         this->femurDirectVectorAP = TEA.cross(forceLineVector);
     }
 
-    getAutomaticPlateaus();
-
-	if (findCondyles == true)
+	if (findRefPoints == true)
 	{
-		FindFemurCondylesUsingLeastSquare();
+		findAutomaticPlateaus();
+		findFemurCondylesUsingLeastSquare();
 	}
 
     //FillTibiaPoints();
@@ -380,7 +379,7 @@ void Knee::FillFemurPoints()
     }
 }
 
-void Knee::FindFemurCondylesUsingDistalPoints()
+void Knee::findFemurCondylesUsingDistalPoints()
 {
     Point forceLine = hipCenter - femurKneeCenter;
     Point tea = lateralEpicondyle - medialEpicondyle;
@@ -2420,7 +2419,7 @@ bool Knee::getIsVarus() const
 //    return topPointOnPatellaPath;
 //}
 
-void Knee::getAutomaticPlateaus()
+void Knee::findAutomaticPlateaus()
 {
     Point axis = tibiaKneeCenter - ankleCenter;
     Plane axial;
@@ -2806,7 +2805,7 @@ double Knee::getInitialAnglePCA(const Point& hipCenter, const Point& femurKneeCe
     return ImplantTools::getAngleBetweenVectorsDegree(vectorTEA, vectorCondyle);
 }
 
-void Knee::FindFemurCondylesUsingLeastSquare()
+void Knee::findFemurCondylesUsingLeastSquare()
 {
 	vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
 	implicitPolyDataDistance->SetInput(GetFemurPoly());
