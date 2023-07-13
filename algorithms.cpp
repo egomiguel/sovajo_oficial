@@ -1056,7 +1056,7 @@ void MatchEasy()
 	{
 
 		//hull1 = femurImplantMatch.GetHullPoints(transformIn, transformOut, FemurImplantMatch::kPlaneB, 1, 2, 10, 15, 200);
-		hull1 = tibiaImplantMatch.GetHullPoints(transformTibia, transformOut, 1, 1, 0);
+		hull1 = tibiaImplantMatch.GetHullPoints(transformTibia, transformOut, 1, 1, 0.8, 0.8);
 		std::cout << transformIn << std::endl;
 
 		for (int i = 0; i < hull1.size(); i++)
