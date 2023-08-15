@@ -1,0 +1,3 @@
+@PACKAGE_INIT@
+include("${CMAKE_CURRENT_LIST_DIR}/THA_HipTargets.cmake")
+check_required_components(THA_Hip)
