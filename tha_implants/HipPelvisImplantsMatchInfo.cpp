@@ -316,7 +316,7 @@ itk::Matrix< double, 3, 3 > HipPelvisImplantsMatchInfo::setCupAngles(double pAbd
 	cv::Mat pelvisMatrix = cv::Mat(pelvisVectors.size(), 3, CV_64F, pelvisVectors.data());
 
 	cv::Mat inverse = (implantMatrix.t()).inv();
-	cv::Mat mRotationCup = (pelvisMatrix.t()) * inverse;
+	mRotationCup = (pelvisMatrix.t()) * inverse;
 
 	return ImplantTools::CVRotationToITKMatrix(mRotationCup);
 }
