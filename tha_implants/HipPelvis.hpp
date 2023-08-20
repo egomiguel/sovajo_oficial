@@ -41,9 +41,13 @@ namespace THA
 			double getHipLengthDistance(const Point& pMechanicalAxis) const;
 			double getCombinedOffsetDistance(const Point& pCanalAxis, const Point& pCanalAxisPoint) const;
 
-			double getFemurVersion() const;
+			double getFemurVersionRadian() const;
 
-			double getFemurVersion(const Point& pNeckAxisVectorToHead) const;
+			double getFemurVersionDegree() const;
+
+			double getFemurVersionRadian(const Point& pNeckAxisVectorToHead) const;
+
+			double getFemurVersionDegree(const Point& pNeckAxisVectorToHead) const;
 
 			std::pair<Point, Point> getAbductionAnteversionVectorsZX(const Point& pCenterOfRotation, double pAbductionAngle, double pAnteversionAngle) const;
 			Point getPubicJoin() const;

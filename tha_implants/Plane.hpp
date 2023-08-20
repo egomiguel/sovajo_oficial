@@ -83,6 +83,8 @@ namespace THA
 
 			bool getIsInit() const;
 
+			void transformPlane(const cv::Mat& rotation, const cv::Mat& translation);
+
 			void show() const;
 
 			void deletePlane();

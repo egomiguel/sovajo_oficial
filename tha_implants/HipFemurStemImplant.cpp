@@ -36,6 +36,15 @@ Point HipFemurStemImplant::getVectorNeckToHead() const
 	return neckAxis;
 }
 
+Point HipFemurStemImplant::getVectorNeckToHeadPerpendicularToInfSup() const
+{
+	Plane base;
+	base.init(getVectorInfSup(), mTopPoint);
+	Point result = base.getProjectionVector(getVectorNeckToHead());
+	result.normalice();
+	return result;
+}
+
 Point HipFemurStemImplant::getVectorLatMed() const
 {
     Line myLine(getVectorInfSup(), mTopPoint);

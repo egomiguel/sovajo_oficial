@@ -288,14 +288,26 @@ PelvisSide HipPelvis::getSide() const
 	return mSide;
 }
 
-double HipPelvis::getFemurVersion(const Point& pNeckAxisVectorToHead) const
+double HipPelvis::getFemurVersionRadian(const Point& pNeckAxisVectorToHead) const
 {
 	return mFemurOperationSide.getFemurVersion(pNeckAxisVectorToHead, mSide);
 }
 
-double HipPelvis::getFemurVersion() const
+double HipPelvis::getFemurVersionDegree(const Point& pNeckAxisVectorToHead) const
+{
+	double rad = mFemurOperationSide.getFemurVersion(pNeckAxisVectorToHead, mSide);
+	return (rad * 180.) / PI;
+}
+
+double HipPelvis::getFemurVersionRadian() const
 {
 	return mFemurOperationSide.getFemurVersion(mFemurOperationSide.getNeckAxisVectorToHead(), mSide);
+}
+
+double HipPelvis::getFemurVersionDegree() const
+{
+	double rad = mFemurOperationSide.getFemurVersion(mFemurOperationSide.getNeckAxisVectorToHead(), mSide);
+	return (rad * 180.) / PI;
 }
 
 HipFemur HipPelvis::getFemurOperationSide() const

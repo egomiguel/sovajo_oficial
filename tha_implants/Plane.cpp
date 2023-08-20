@@ -631,6 +631,17 @@ void Plane::countPositiveAndNegativePoints(const vtkSmartPointer<vtkPoints>& vtk
 	}
 }
 
+void Plane::transformPlane(const cv::Mat& rotation, const cv::Mat& translation)
+{
+	cv::Mat transformNormalVector = rotation * normalVector.ToMatPoint();
+	cv::Mat transformPoint = (rotation * mPoint.ToMatPoint()) + translation;
+
+	mPoint = Point(transformPoint);
+	this->normalVector = Point(transformNormalVector);
+	this->bias = (-1.0) * normalVector.dot(mPoint);
+	normalizeNormalVector();
+}
+
 void Plane::show() const
 {
 	std::cout << "Normal: " << std::setprecision(15) << normalVector.x << ", " << normalVector.y << ", " << normalVector.z << std::endl;

@@ -261,10 +261,10 @@ itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::getITKStemTransform
 
 double HipPelvisImplantsMatchInfo::getStemVersion() const
 {
-	cv::Mat neckAxisMat = mRotationStem * mImplantStem.getVectorNeckToHead().ToMatPoint();
+	cv::Mat neckAxisMat = mRotationStem * mImplantStem.getVectorNeckToHeadPerpendicularToInfSup().ToMatPoint();
 	Point neckAxis = Point(neckAxisMat);
-
-	return mPelvis.getFemurVersion(neckAxis);
+	double degree = mPelvis.getFemurVersionDegree(neckAxis);
+	return degree;
 }
 
 double HipPelvisImplantsMatchInfo::getCombinedOffsetDistance() const
@@ -338,15 +338,15 @@ itk::Vector< double, 3 > HipPelvisImplantsMatchInfo::setCupTranslation(double pS
 
 itk::Matrix< double, 3, 3 > HipPelvisImplantsMatchInfo::setStemVersionAngle(double pStemVersionAngleDegree)
 {
-	cv::Mat neckAxisMat = mRotationStem * mImplantStem.getVectorNeckToHead().ToMatPoint();
+	cv::Mat neckAxisMat = mRotationStem * mImplantStem.getVectorNeckToHeadPerpendicularToInfSup().ToMatPoint();
 	Point neckAxis = Point(neckAxisMat);
 
-	double angle = mPelvis.getFemurVersion(neckAxis);
-
+	double angle = mPelvis.getFemurVersionRadian(neckAxis);
 	double refAngle = (pStemVersionAngleDegree * PI) / 180.;
 
-	cv::Mat transformation;
 	Point canalAxis = mPelvis.getFemurOperationSide().getCanalAxisVectorInfSup();
+
+	cv::Mat transformation;
 
 	if (refAngle == angle)
 	{
@@ -379,7 +379,20 @@ itk::Matrix< double, 3, 3 > HipPelvisImplantsMatchInfo::setStemVersionAngle(doub
 		}
 	}
 
-	mRotationStem = transformation * mRotationStem;
+	Plane planeProj, planeSource;
+	planeProj.init(canalAxis, mPelvis.getFemurOperationSide().getCanalAxisPoint());
+	planeSource.init(mImplantStem.getVectorInfSup(), mImplantStem.getCanalAxisTopPoint());
+	planeSource.transformPlane(mRotationStem, mTranslationStem);
+	auto mainVectorMat = transformation * (planeProj.getProjectionVector(neckAxis).ToMatPoint());
+	Point mainVector = Point(mainVectorMat);
+
+	Point newVectorFromImplant = ImplantTools::getOriginalVectorFromProjectionWithPlanes(planeProj, mainVector, planeSource);
+
+	double myAngle = ImplantTools::getAngleBetweenVectors(newVectorFromImplant, neckAxis);
+
+	auto newRotation = ImplantTools::getRotateMatrix(neckAxis.cross(newVectorFromImplant), myAngle);
+
+	mRotationStem = newRotation * mRotationStem;
 
 	return ImplantTools::CVRotationToITKMatrix(mRotationStem);
 }

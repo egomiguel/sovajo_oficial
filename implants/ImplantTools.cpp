@@ -2649,6 +2649,12 @@ std::vector<Point> ImplantTools::removePointByCondition(const std::vector<Point>
 Point ImplantTools::getOriginalVectorFromProjectionWithPlanes(const Plane& projectionPlaneA, const Point& projectionVectorX,
 	const Plane& originalPlaneB)
 {
+	/*
+		El vector "projectionVectorX" está proyectado sobre el plano "projectionPlaneA" pero 
+		puede que anteriormente fuera paralelo al plano "originalPlaneB". 
+		Este método busca la versión anterior del vector "projectionVectorX" que era paralela al plano "originalPlaneB".
+	*/
+
 	Point normalA = projectionPlaneA.getNormalVector();
 	Point normalB = originalPlaneB.getNormalVector();
 	Point vectorX = projectionVectorX;

@@ -2632,6 +2632,49 @@ bool ImplantTools::areBothSetOfPointsSeparated(const std::vector<Point>& pPoints
 	return !areIntersection;
 }
 
+Point ImplantTools::getOriginalVectorFromProjectionWithPlanes(const Plane& projectionPlaneA, const Point& projectionVectorX,
+	const Plane& originalPlaneB)
+{
+	/*
+		El vector "projectionVectorX" está proyectado sobre el plano "projectionPlaneA" pero
+		puede que anteriormente fuera paralelo al plano "originalPlaneB".
+		Este método busca la versión anterior del vector "projectionVectorX" que era paralela al plano "originalPlaneB".
+	*/
+
+	Point normalA = projectionPlaneA.getNormalVector();
+	Point normalB = originalPlaneB.getNormalVector();
+	Point vectorX = projectionVectorX;
+	vectorX.normalice();
+
+	if (vectorX.dot(normalB) == 0)
+	{
+		return vectorX;
+	}
+
+	Point originalVectorTemp = normalA + vectorX;
+	originalVectorTemp.normalice();
+
+	Point rotationAxis = normalA.cross(originalVectorTemp);
+	rotationAxis.normalice();
+
+	Point interceptionVector = rotationAxis.cross(normalB);
+	interceptionVector.normalice();
+
+	Point vector1 = projectionPlaneA.getProjectionVector(interceptionVector);
+	vector1.normalice();
+
+	if (vector1.dot(vectorX) >= 0)
+	{
+		return interceptionVector;
+	}
+	else
+	{
+		return -interceptionVector;
+	}
+
+}
+
+
 std::vector<Point> ImplantTools::increaseVectorPoints(const std::vector<Point>& pPoints, int beginPos, int endPos, float distance)
 {
 	std::vector<Point> result;

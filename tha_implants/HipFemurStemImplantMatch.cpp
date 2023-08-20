@@ -90,7 +90,7 @@ itk::Rigid3DTransform<>::Pointer HipFemurStemImplantMatch::getStemTransform(doub
 	cv::Mat neckAxisMat = rotationMatrix * mImplant.getVectorNeckToHead().ToMatPoint();
 	Point neckAxis = Point(neckAxisMat);
 
-	double angle = mPelvis.getFemurVersion(neckAxis);
+	double angle = mPelvis.getFemurVersionRadian(neckAxis);
 
 	double refAngle = (pStemVersionAngleDegree * PI) / 180.;
 
