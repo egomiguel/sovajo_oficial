@@ -270,9 +270,9 @@ double HipPelvisImplantsMatchInfo::getStemVersion() const
 double HipPelvisImplantsMatchInfo::getCombinedOffsetDistance() const
 {
 	auto canalAxisTopPointMat = mRotationStem * mImplantStem.getCanalAxisTopPoint().ToMatPoint() + mTranslationStem;
+	auto canalAxisVectortMat = mRotationStem * mImplantStem.getVectorInfSup().ToMatPoint();
 	Point canalAxisTopPoint = Point(canalAxisTopPointMat);
-
-	Point canalAxisVector = canalAxisTopPoint - mPelvis.getFemurOperationSide().getKneeCenter();
+	Point canalAxisVector = Point(canalAxisVectortMat);
 
 	return mPelvis.getCombinedOffsetDistance(canalAxisVector, canalAxisTopPoint);
 }
