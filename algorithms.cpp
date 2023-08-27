@@ -3650,38 +3650,92 @@ std::string printRoman(int num)
 }
 
 #include "Test_TKA_Match.h"
+#include <vtkMassProperties.h>
+#include <vtkIntersectionPolyDataFilter.h>
+#include <vtkPolygon.h>
+#include <vtkTriangle.h>
+
+
+double getOverlappingArea(const vtkSmartPointer<vtkPolyData> containedPoly, const vtkSmartPointer<vtkPolyData> containerPoly, const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitContainerDistance)
+{
+	double area = 0;
+
+	for (vtkIdType cellId = 0; cellId < containedPoly->GetNumberOfCells(); ++cellId) {
+		vtkCell* cell = containedPoly->GetCell(cellId);
+		vtkPoints* points = cell->GetPoints();
+
+		bool isContained = true;
+
+		for (vtkIdType pointId = 0; pointId < points->GetNumberOfPoints(); ++pointId) {
+			double point[3];
+			points->GetPoint(pointId, point);
+
+			if (implicitContainerDistance->FunctionValue(point) > 0)
+			{
+				isContained = false;
+				break;
+			}
+		}
+
+		if (isContained && points->GetNumberOfPoints() == 3) {
+
+			double p0[3], p1[3], p2[3];
+			points->GetPoint(0, p0);
+			points->GetPoint(1, p1);
+			points->GetPoint(2, p2);
+
+			area += vtkTriangle::TriangleArea(p0, p1, p2);
+		}
+	}
+
+	return area;
+}
+
+#include <vtkCubeSource.h>
+
+void PolydataInterception()
+{
+	vtkSmartPointer<vtkPolyData> sphere1 = TestVTK::CreateSphereTest(cv::Point3d(0.0001,0,0), 2);
+	vtkSmartPointer<vtkPolyData> sphere2 = TestVTK::CreateSphereTest(cv::Point3d(0, 0, 0), 2);
+
+	vtkNew<vtkCubeSource> cubeSource;
+	cubeSource->SetCenter(0, 0, 0);
+	cubeSource->SetXLength(1);
+	cubeSource->SetYLength(1);
+	cubeSource->SetZLength(1);
+	cubeSource->Update();
+
+	auto pelvis = TestVTK::ReadPolyData("D:\\Mega_Trabajo\\Pelvis\\Segmentation.vtk");
+	auto sphere3 = TestVTK::CreateSphereTest(cv::Point3d(87, 6, 320), 20);
+
+	vtkSmartPointer<vtkMassProperties> massProperties = vtkSmartPointer<vtkMassProperties>::New();
+	massProperties->SetInputData(sphere3);
+	massProperties->Update();
+	double area = massProperties->GetSurfaceArea();
+
+	vtkNew<vtkImplicitPolyDataDistance> implicitContainerDistance;
+	implicitContainerDistance->SetInput(pelvis);
+
+	double intersection = getOverlappingArea(sphere3, pelvis, implicitContainerDistance);
+
+	std::cout << "Area " << area << std::endl;
+	std::cout << "Subarea " << intersection << std::endl;
+
+	TestVTK::show_join(pelvis, sphere3);
+
+
+}
+
 
 int main()
 {
 	//std::cout << "tttttttttttttttttt" << std::endl;
 	//TestHullPoints();
 	//Test30PointsVTK();
-	Point teaX = Point(1, 0, 0);
-	Point apY = Point(0, 1, 0);
-	Point vectorZ = Point(0, 0, 1);
-
-	Plane axial, coronal, sagital;
-	axial.init(vectorZ, Point(0, 0, 0));
-	coronal.init(apY, Point(0, 0, 0));
-	sagital.init(teaX, Point(0, 0, 0));
-
-
-	auto fexionX = ImplantTools::getRotateMatrixDegree(teaX, 10);
-	auto eje = fexionX * apY.ToMatPoint();
-	auto varusY = ImplantTools::getRotateMatrixDegree(Point(eje), -8);
-	eje = varusY * fexionX * vectorZ.ToMatPoint();
-	auto rotTeaZ = ImplantTools::getRotateMatrixDegree(Point(eje), 7);
-
-	auto transX = varusY * fexionX * teaX.ToMatPoint();
-	auto transY = varusY * fexionX * apY.ToMatPoint();
-
-	Point projX = axial.getProjectionVector(Point(transX));
-	projX.normalice();
-
-	Point projY = coronal.getProjectionVector(Point(transY));
-	projY.normalice();
 
 	//std::cout << Point(result) << "; " << proj << std::endl;
+
+	PolydataInterception();
 
 	MatchEasy();
 

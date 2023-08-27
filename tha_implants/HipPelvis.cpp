@@ -9,7 +9,7 @@
 #include "ImplantTools.hpp"
 #include "ImplantsException.hpp"
 #include <opencv2/opencv.hpp>
-
+#include "vtkMassProperties.h"
 #include "vtkSphereSource.h"
 
 using namespace THA::IMPLANTS;
@@ -55,6 +55,9 @@ void HipPelvis::init(const Point& pLeftASIS, const Point& pRightASIS, const Poin
 
 	mFemurOperationSide = pFemur;
 	mFemurOppsite = pFemurOppside;
+
+	mImplicitPelvisDistance = vtkSmartPointer<vtkImplicitPolyDataDistance>::New();
+	mImplicitPelvisDistance->SetInput(pPelvis);
 
     isInit = true;
 }
@@ -314,6 +317,24 @@ HipFemur HipPelvis::getFemurOperationSide() const
 HipFemurOppside HipPelvis::getFemurOppsite() const
 {
 	return mFemurOppsite;
+}
+
+double HipPelvis::getCoverageFraction(const vtkSmartPointer<vtkPolyData> pAcetabularCup) const
+{
+	vtkSmartPointer<vtkMassProperties> massProperties = vtkSmartPointer<vtkMassProperties>::New();
+	massProperties->SetInputData(pAcetabularCup);
+	massProperties->Update();
+
+	double area = massProperties->GetSurfaceArea();
+
+	double overlappingArea = ImplantTools::getOverlappingArea(pAcetabularCup, mPelvis, mImplicitPelvisDistance);
+
+	if (area > 0)
+	{
+		return overlappingArea / area;
+	}
+	
+	return 0;
 }
 
 /*

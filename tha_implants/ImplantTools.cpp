@@ -23,6 +23,10 @@
 #include "vtkSelection.h"
 #include "vtkExtractSelectedIds.h"
 #include "ConvexHull.hpp"
+#include "vtkTriangle.h"
+#include "vtkMatrix4x4.h"
+#include "vtkTransform.h"
+#include "vtkTransformPolyDataFilter.h"
 
 using namespace THA::IMPLANTS;
 
@@ -2736,6 +2740,78 @@ vtkSmartPointer<vtkPolyData> ImplantTools::getPolyLine(const std::vector<Point>&
 	polyData->SetPoints(points);
 	polyData->SetLines(cells);
 	return polyData;
+}
+
+vtkSmartPointer<vtkPolyData> ImplantTools::transformPolydata(const vtkSmartPointer<vtkPolyData> pPoly, const cv::Mat& pRotation, const cv::Mat& pTranslation)
+{
+	vtkNew<vtkTransform> vtkTransform;
+	vtkNew<vtkMatrix4x4> m;
+
+	m->SetElement(0, 0, pRotation.at<double>(0, 0));
+	m->SetElement(1, 0, pRotation.at<double>(1, 0));
+	m->SetElement(2, 0, pRotation.at<double>(2, 0));
+	m->SetElement(3, 0, 0);
+
+	m->SetElement(0, 1, pRotation.at<double>(0, 1));
+	m->SetElement(1, 1, pRotation.at<double>(1, 1));
+	m->SetElement(2, 1, pRotation.at<double>(2, 1));
+	m->SetElement(3, 1, 0);
+
+	m->SetElement(0, 2, pRotation.at<double>(0, 2));
+	m->SetElement(1, 2, pRotation.at<double>(1, 2));
+	m->SetElement(2, 2, pRotation.at<double>(2, 2));
+	m->SetElement(3, 2, 0);
+
+	m->SetElement(0, 3, pTranslation.at<double>(0, 0));
+	m->SetElement(1, 3, pTranslation.at<double>(1, 0));
+	m->SetElement(2, 3, pTranslation.at<double>(2, 0));
+	m->SetElement(3, 3, 1);
+
+	vtkTransform->SetMatrix(m);
+
+	vtkNew<vtkTransformPolyDataFilter> transformFilter;
+	transformFilter->SetInputData(pPoly);
+	transformFilter->SetTransform(vtkTransform);
+	transformFilter->Update();
+
+	auto resultTransform = transformFilter->GetOutput();
+
+	return resultTransform;
+}
+
+double ImplantTools::getOverlappingArea(const vtkSmartPointer<vtkPolyData> containedPoly, const vtkSmartPointer<vtkPolyData> containerPoly, const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitContainerDistance)
+{
+	double area = 0;
+
+	for (vtkIdType cellId = 0; cellId < containedPoly->GetNumberOfCells(); ++cellId) {
+		vtkCell* cell = containedPoly->GetCell(cellId);
+		vtkPoints* points = cell->GetPoints();
+
+		bool isContained = true;
+
+		for (vtkIdType pointId = 0; pointId < points->GetNumberOfPoints(); ++pointId) {
+			double point[3];
+			points->GetPoint(pointId, point);
+
+			if (implicitContainerDistance->FunctionValue(point) > 0)
+			{
+				isContained = false;
+				break;
+			}
+		}
+
+		if (isContained && points->GetNumberOfPoints() == 3) {
+
+			double p0[3], p1[3], p2[3];
+			points->GetPoint(0, p0);
+			points->GetPoint(1, p1);
+			points->GetPoint(2, p2);
+
+			area += vtkTriangle::TriangleArea(p0, p1, p2);
+		}
+	}
+
+	return area;
 }
 
 void ImplantTools::show(const vtkSmartPointer<vtkPolyData> poly1, const vtkSmartPointer<vtkPolyData> poly2)

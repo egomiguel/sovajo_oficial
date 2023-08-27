@@ -46,6 +46,8 @@ namespace THA
 
 			double getHipLengthDistance() const;
 
+			double getCoverageFraction(const vtkSmartPointer<vtkPolyData> pAcetabularCup) const;
+
 			itk::Rigid3DTransform<>::Pointer getITKStemTransform() const;
 
 			itk::Rigid3DTransform<>::Pointer getITKCupTransform() const;

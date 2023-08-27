@@ -155,6 +155,10 @@ namespace THA
 
 			Point getOriginalVectorFromProjectionWithPlanes(const Plane& projectionPlaneA, const Point& projectionVectorX, const Plane& originalPlaneB);
 			
+			vtkSmartPointer<vtkPolyData> transformPolydata(const vtkSmartPointer<vtkPolyData> pPoly, const cv::Mat& pRotation, const cv::Mat& pTranslation);
+			
+			double getOverlappingArea(const vtkSmartPointer<vtkPolyData> containedPoly, const vtkSmartPointer<vtkPolyData> containerPoly, const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitContainerDistance);
+			
 			void show(const vtkSmartPointer<vtkPolyData> poly1, const vtkSmartPointer<vtkPolyData> poly2);
 
 			void show(vtkSmartPointer<vtkPolyData> poly, const std::vector<Point>& points, bool makePolyLine = false);

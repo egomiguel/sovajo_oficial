@@ -287,6 +287,12 @@ double HipPelvisImplantsMatchInfo::getHipLengthDistance() const
 	return mPelvis.getHipLengthDistance(mechanicalAxisVector);
 }
 
+double HipPelvisImplantsMatchInfo::getCoverageFraction(const vtkSmartPointer<vtkPolyData> pAcetabularCup) const
+{
+	auto cup = ImplantTools::transformPolydata(pAcetabularCup, mRotationCup, mTranslationCup);
+	return mPelvis.getCoverageFraction(cup);
+}
+
 itk::Matrix< double, 3, 3 > HipPelvisImplantsMatchInfo::setCupAngles(double pAbductionAngle, double pAnteversionAngle)
 {
 	std::vector<cv::Point3d> implantVectors;

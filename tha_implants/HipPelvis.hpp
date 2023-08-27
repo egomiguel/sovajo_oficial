@@ -9,6 +9,7 @@
 #include "vtkSmartPointer.h"
 #include "HipFemur.hpp"
 #include "HipFemurOppside.hpp"
+#include "vtkImplicitPolyDataDistance.h"
 
 namespace THA
 {
@@ -49,6 +50,8 @@ namespace THA
 
 			double getFemurVersionDegree(const Point& pNeckAxisVectorToHead) const;
 
+			double getCoverageFraction(const vtkSmartPointer<vtkPolyData> pAcetabularCup) const;
+
 			std::pair<Point, Point> getAbductionAnteversionVectorsZX(const Point& pCenterOfRotation, double pAbductionAngle, double pAnteversionAngle) const;
 			Point getPubicJoin() const;
 			PelvisSide getSide() const;
@@ -70,6 +73,7 @@ namespace THA
 			Plane mPlaneAPP;
 			PelvisSide mSide;
 			vtkSmartPointer<vtkPolyData> mPelvis;
+			vtkSmartPointer<vtkImplicitPolyDataDistance> mImplicitPelvisDistance;
 			HipFemur mFemurOperationSide;
 			HipFemurOppside mFemurOppsite;
 			bool isInit;
