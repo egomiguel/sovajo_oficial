@@ -2,6 +2,10 @@
 #include "ImplantsException.hpp"
 #include "ImplantTools.hpp"
 #include <itkVersorRigid3DTransform.h>
+#include "vtkSphereSource.h"
+#include "vtkPlane.h"
+#include "vtkPlaneCollection.h"
+#include "vtkClipClosedSurface.h"
 
 using namespace THA::IMPLANTS;
 
@@ -287,10 +291,21 @@ double HipPelvisImplantsMatchInfo::getHipLengthDistance() const
 	return mPelvis.getHipLengthDistance(mechanicalAxisVector);
 }
 
-double HipPelvisImplantsMatchInfo::getCoverageFraction(const vtkSmartPointer<vtkPolyData> pAcetabularCup) const
+double HipPelvisImplantsMatchInfo::getCoverageFraction() const
 {
-	auto cup = ImplantTools::transformPolydata(pAcetabularCup, mRotationCup, mTranslationCup);
-	return mPelvis.getCoverageFraction(cup);
+	double area = mImplantCup.getHemiSphereSurfaceArea();
+	auto hemiSphere = mImplantCup.getHemiSphereCup();
+
+	auto cup = ImplantTools::transformPolydata(hemiSphere, mRotationCup, mTranslationCup);
+
+	double overlappingArea = ImplantTools::getOverlappingArea(cup, mPelvis.getPelvisVTK(), mPelvis.getImplicitPelvisDistance());
+
+	if (area > 0)
+	{
+		return overlappingArea / area;
+	}
+
+	return 0;
 }
 
 itk::Matrix< double, 3, 3 > HipPelvisImplantsMatchInfo::setCupAngles(double pAbductionAngle, double pAnteversionAngle)

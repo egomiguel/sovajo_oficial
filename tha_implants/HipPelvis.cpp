@@ -319,23 +319,11 @@ HipFemurOppside HipPelvis::getFemurOppsite() const
 	return mFemurOppsite;
 }
 
-double HipPelvis::getCoverageFraction(const vtkSmartPointer<vtkPolyData> pAcetabularCup) const
+vtkSmartPointer<vtkImplicitPolyDataDistance> HipPelvis::getImplicitPelvisDistance() const
 {
-	vtkSmartPointer<vtkMassProperties> massProperties = vtkSmartPointer<vtkMassProperties>::New();
-	massProperties->SetInputData(pAcetabularCup);
-	massProperties->Update();
-
-	double area = massProperties->GetSurfaceArea();
-
-	double overlappingArea = ImplantTools::getOverlappingArea(pAcetabularCup, mPelvis, mImplicitPelvisDistance);
-
-	if (area > 0)
-	{
-		return overlappingArea / area;
-	}
-	
-	return 0;
+	return mImplicitPelvisDistance;
 }
+
 
 /*
 void HipPelvis::extractFemurAxisVector(bool surgerySide)

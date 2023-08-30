@@ -3,6 +3,8 @@
 
 #include "tha_implants_export.h"
 #include "Plane.hpp"
+#include "vtkPolyData.h"
+#include "vtkSmartPointer.h"
 
 namespace THA
 {
@@ -13,16 +15,20 @@ namespace THA
 		{
 		public:
 			HipPelvisCupImplant();
-			void init(const Point& pTopPoint, const Point& pBasePoint1, const Point& pBasePoint2, const Point& pBasePoint3);
+			void init(const Point& pTopPoint, const Point& pBasePoint1, const Point& pBasePoint2, const Point& pBasePoint3, const std::vector<Point>& pExternalPoints);
 			Point getVectorX() const;
 			Point getVectorZ() const;
 			Point getTopPoint() const;
 			Point getCenterOfRotationImplant() const;
 			Plane getBasePlane() const;
+			vtkSmartPointer<vtkPolyData> getHemiSphereCup() const;
+			double getHemiSphereSurfaceArea() const;
 
 		private:
 			Point mTopPoint;
 			Point mBasePoint1, mBasePoint2, mBasePoint3;
+			vtkSmartPointer<vtkPolyData> mHemiSphereCup;
+			double mHemiSphereSurfaceArea;
 			bool isInit;
 		};
 	}

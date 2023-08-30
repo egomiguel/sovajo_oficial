@@ -2917,7 +2917,7 @@ void PelvisImplantMatch()
 	objPelvis.init(pLeftASIS, pRightASIS, pLeftPubicTubercle, pRightPubicTubercle, pelvis3D_Real, pFemur, pFemurOppside, THA::IMPLANTS::PelvisSide::RIGHT_SIDE);
 
 	THA::IMPLANTS::HipPelvisCupImplant objImplant;
-	objImplant.init(implantTop, implantCup1, implantCup2, implantCup3);
+	//objImplant.init(implantTop, implantCup1, implantCup2, implantCup3);
 
 	THA::IMPLANTS::HipPelvisCupImplantMatch objMatch;
 	objMatch.init(objPelvis, objImplant, centerOfRotation);
@@ -3735,9 +3735,41 @@ int main()
 
 	//std::cout << Point(result) << "; " << proj << std::endl;
 
-	PolydataInterception();
+	//PolydataInterception();
 
-	MatchEasy();
+	//MatchEasy();
+
+	double pnt[3] = { 0, 0, 0 };
+	Plane planeTemp;
+	planeTemp.init(Point(1, 0, 0), Point(1, 0, 0));
+
+	vtkNew<vtkSphereSource> sphere;
+	sphere->SetCenter(pnt);
+	sphere->SetRadius(2);
+	sphere->Update();
+
+	vtkNew<vtkPlane> vtkPlaneA;
+
+	auto planeNormal = planeTemp.getNormalVector();
+	auto planePoint = planeTemp.getPoint();
+	vtkPlaneA->SetOrigin(planePoint.x, planePoint.y, planePoint.z);
+	vtkPlaneA->SetNormal(planeNormal.x, planeNormal.y, planeNormal.z);
+
+	vtkNew<vtkPlaneCollection> cutPlanes;
+	cutPlanes->AddItem(vtkPlaneA);
+
+	vtkNew<vtkClipClosedSurface> Clipper;
+	Clipper->SetInputData(sphere->GetOutput());
+	Clipper->SetClippingPlanes(cutPlanes);
+	Clipper->Update();
+
+	auto hemiSphere = Clipper->GetOutput();
+
+	TestVTK::show(hemiSphere, hemiSphere);
+
+
+
+
 
 	//TEST_IMPLANTS::testImplant();
 

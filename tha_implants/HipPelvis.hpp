@@ -50,8 +50,6 @@ namespace THA
 
 			double getFemurVersionDegree(const Point& pNeckAxisVectorToHead) const;
 
-			double getCoverageFraction(const vtkSmartPointer<vtkPolyData> pAcetabularCup) const;
-
 			std::pair<Point, Point> getAbductionAnteversionVectorsZX(const Point& pCenterOfRotation, double pAbductionAngle, double pAnteversionAngle) const;
 			Point getPubicJoin() const;
 			PelvisSide getSide() const;
@@ -60,6 +58,9 @@ namespace THA
 			HipFemurOppside getFemurOppsite() const;
 
 			vtkSmartPointer<vtkPolyData> getPelvisVTK() const;
+
+			vtkSmartPointer<vtkImplicitPolyDataDistance> getImplicitPelvisDistance() const;
+
 			static Point getNativeCenterOfRotation(const std::vector<Point>& pPoints);
 
 			///////////////////////////////Test
