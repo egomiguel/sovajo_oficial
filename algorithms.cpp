@@ -3692,10 +3692,11 @@ double getOverlappingArea(const vtkSmartPointer<vtkPolyData> containedPoly, cons
 }
 
 #include <vtkCubeSource.h>
+#include <vtkTriangleFilter.h>
 
 void PolydataInterception()
 {
-	vtkSmartPointer<vtkPolyData> sphere1 = TestVTK::CreateSphereTest(cv::Point3d(0.0001,0,0), 2);
+	vtkSmartPointer<vtkPolyData> sphere1 = TestVTK::CreateSphereTest(cv::Point3d(1,0,0), 2);
 	vtkSmartPointer<vtkPolyData> sphere2 = TestVTK::CreateSphereTest(cv::Point3d(0, 0, 0), 2);
 
 	vtkNew<vtkCubeSource> cubeSource;
@@ -3706,23 +3707,42 @@ void PolydataInterception()
 	cubeSource->Update();
 
 	auto pelvis = TestVTK::ReadPolyData("D:\\Mega_Trabajo\\Pelvis\\Segmentation.vtk");
-	auto sphere3 = TestVTK::CreateSphereTest(cv::Point3d(87, 6, 320), 20);
 
-	vtkSmartPointer<vtkMassProperties> massProperties = vtkSmartPointer<vtkMassProperties>::New();
-	massProperties->SetInputData(sphere3);
+	double pnt[3] = { 87, 6, 320 };
+	double radius = 20;
+	vtkNew<vtkSphereSource> sphere;
+	sphere->SetCenter(pnt);
+	sphere->SetRadius(radius);
+	sphere->SetThetaResolution(sphere->GetThetaResolutionMaxValue() / 10);
+	sphere->SetPhiResolution(sphere->GetPhiResolutionMaxValue() / 10);
+	sphere->Update();
+
+	/*vtkSmartPointer<vtkMassProperties> massProperties = vtkSmartPointer<vtkMassProperties>::New();
+	massProperties->SetInputData(sphere->GetOutput());
 	massProperties->Update();
-	double area = massProperties->GetSurfaceArea();
+	double area = massProperties->GetSurfaceArea();*/
 
 	vtkNew<vtkImplicitPolyDataDistance> implicitContainerDistance;
 	implicitContainerDistance->SetInput(pelvis);
 
-	double intersection = getOverlappingArea(sphere3, pelvis, implicitContainerDistance);
+	double intersection = getOverlappingArea(sphere->GetOutput(), pelvis, implicitContainerDistance);
 
-	std::cout << "Area " << area << std::endl;
+	std::cout << "Area " << 0.5 * 4. * PI * radius * radius << std::endl;
 	std::cout << "Subarea " << intersection << std::endl;
 
-	TestVTK::show_join(pelvis, sphere3);
+	//vtkSmartPointer<vtkTriangleFilter> triangleFilter = vtkSmartPointer<vtkTriangleFilter>::New();
+	//triangleFilter->SetInputData(pelvis);
+	//triangleFilter->Update();
 
+	//vtkSmartPointer<vtkIntersectionPolyDataFilter> intersectionFilter = vtkSmartPointer<vtkIntersectionPolyDataFilter>::New();
+	//intersectionFilter->SetInputData(0, sphere->GetOutput());
+	//intersectionFilter->SetInputData(1, triangleFilter->GetOutput());
+	//intersectionFilter->Update();
+	//vtkSmartPointer<vtkPolyData> intersectionOutput = intersectionFilter->GetOutput();
+
+
+	TestVTK::show_join(pelvis, sphere->GetOutput());
+	//TestVTK::show(pelvis, intersectionOutput);
 
 }
 
@@ -3735,7 +3755,7 @@ int main()
 
 	//std::cout << Point(result) << "; " << proj << std::endl;
 
-	//PolydataInterception();
+	PolydataInterception();
 
 	//MatchEasy();
 
@@ -3746,6 +3766,8 @@ int main()
 	vtkNew<vtkSphereSource> sphere;
 	sphere->SetCenter(pnt);
 	sphere->SetRadius(2);
+	sphere->SetThetaResolution(sphere->GetThetaResolutionMaxValue() / 2);
+	sphere->SetPhiResolution(sphere->GetPhiResolutionMaxValue() / 2);
 	sphere->Update();
 
 	vtkNew<vtkPlane> vtkPlaneA;
@@ -3765,7 +3787,9 @@ int main()
 
 	auto hemiSphere = Clipper->GetOutput();
 
-	TestVTK::show(hemiSphere, hemiSphere);
+	//std::cout << sphere->GetThetaResolution() << ", " << sphere->GetThetaResolutionMaxValue() << ", "<< sphere->GetPhiResolution() << std::endl;
+
+	//TestVTK::show(sphere->GetOutput(), hemiSphere);
 
 
 
