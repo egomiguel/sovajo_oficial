@@ -3749,43 +3749,77 @@ void PolydataInterception()
 
 int main()
 {
+
+	THA::IMPLANTS::HipPelvisCupImplant obj;
+	std::vector<THA::IMPLANTS::Point> lista = { THA::IMPLANTS::Point(-40.9593, 5.45499, -2.34841),
+								THA::IMPLANTS::Point(-42.0049, -3.78043, -0.852399),
+								THA::IMPLANTS::Point(-37.9301, -16.3819, -0.981695),
+								THA::IMPLANTS::Point(-34.9257, 12.463, 9.43053),
+								THA::IMPLANTS::Point(-30.3933, 10.53, 16.7991),
+								THA::IMPLANTS::Point(-19.9779, 5.70671, 23.9203),
+								THA::IMPLANTS::Point(-18.7144, 25.5155, -3.38413),
+								THA::IMPLANTS::Point(-10.8978, 25.7494, -3.63091),
+								THA::IMPLANTS::Point(-1.30734, 22.1749, -5.11265),
+								THA::IMPLANTS::Point(-35.0329, 13.3092, -12.3922),
+								THA::IMPLANTS::Point(-30.6564, 12.8642, -19.0591),
+								THA::IMPLANTS::Point(-25.0837, 10.8927, -24.4404),
+								THA::IMPLANTS::Point(-17.6099, 6.46335, -28.2828),
+								THA::IMPLANTS::Point(-33.6451, -19.9882, -8.94415),
+								THA::IMPLANTS::Point(-26.2778, -9.09016, -25.7382),
+								THA::IMPLANTS::Point(-22.0243, -3.46486, 24.2365),
+								THA::IMPLANTS::Point(-31.9971, -16.9889, 12.3388),
+								THA::IMPLANTS::Point(-0.976846, 20.7329, 5.91769),
+								THA::IMPLANTS::Point(-8.24434, 11.8036, 20.8212),
+								THA::IMPLANTS::Point(-3.25545, 19.1637, -15.9353),
+								THA::IMPLANTS::Point(-9.39303, 11.6907, -25.5516) };
+
+	obj.init(THA::IMPLANTS::Point(-32.4228, 18.774, -4.26978), THA::IMPLANTS::Point(-28.74, -20.0914, 5.82389), 
+		THA::IMPLANTS::Point(-9.80986, 2.46698, -25.6888),
+		THA::IMPLANTS::Point(0.215048, 14.4147, 10.4032), lista);
+
+	for (float i = 0; i <= 1; i+=0.05)
+	{
+		TestVTK::show(obj.getHemiSphereCup(), obj.getHemiSphereCup());
+		obj.setHemisphereResolution(i);
+	}
+
 	//std::cout << "tttttttttttttttttt" << std::endl;
 	//TestHullPoints();
 	//Test30PointsVTK();
 
 	//std::cout << Point(result) << "; " << proj << std::endl;
 
-	PolydataInterception();
+	//PolydataInterception();
 
 	//MatchEasy();
 
-	double pnt[3] = { 0, 0, 0 };
-	Plane planeTemp;
-	planeTemp.init(Point(1, 0, 0), Point(1, 0, 0));
+	//double pnt[3] = { 0, 0, 0 };
+	//Plane planeTemp;
+	//planeTemp.init(Point(1, 0, 0), Point(1, 0, 0));
 
-	vtkNew<vtkSphereSource> sphere;
-	sphere->SetCenter(pnt);
-	sphere->SetRadius(2);
-	sphere->SetThetaResolution(sphere->GetThetaResolutionMaxValue() / 2);
-	sphere->SetPhiResolution(sphere->GetPhiResolutionMaxValue() / 2);
-	sphere->Update();
+	//vtkNew<vtkSphereSource> sphere;
+	//sphere->SetCenter(pnt);
+	//sphere->SetRadius(2);
+	//sphere->SetThetaResolution(sphere->GetThetaResolutionMaxValue() / 2);
+	//sphere->SetPhiResolution(sphere->GetPhiResolutionMaxValue() / 2);
+	//sphere->Update();
 
-	vtkNew<vtkPlane> vtkPlaneA;
+	//vtkNew<vtkPlane> vtkPlaneA;
 
-	auto planeNormal = planeTemp.getNormalVector();
-	auto planePoint = planeTemp.getPoint();
-	vtkPlaneA->SetOrigin(planePoint.x, planePoint.y, planePoint.z);
-	vtkPlaneA->SetNormal(planeNormal.x, planeNormal.y, planeNormal.z);
+	//auto planeNormal = planeTemp.getNormalVector();
+	//auto planePoint = planeTemp.getPoint();
+	//vtkPlaneA->SetOrigin(planePoint.x, planePoint.y, planePoint.z);
+	//vtkPlaneA->SetNormal(planeNormal.x, planeNormal.y, planeNormal.z);
 
-	vtkNew<vtkPlaneCollection> cutPlanes;
-	cutPlanes->AddItem(vtkPlaneA);
+	//vtkNew<vtkPlaneCollection> cutPlanes;
+	//cutPlanes->AddItem(vtkPlaneA);
 
-	vtkNew<vtkClipClosedSurface> Clipper;
-	Clipper->SetInputData(sphere->GetOutput());
-	Clipper->SetClippingPlanes(cutPlanes);
-	Clipper->Update();
+	//vtkNew<vtkClipClosedSurface> Clipper;
+	//Clipper->SetInputData(sphere->GetOutput());
+	//Clipper->SetClippingPlanes(cutPlanes);
+	//Clipper->Update();
 
-	auto hemiSphere = Clipper->GetOutput();
+	//auto hemiSphere = Clipper->GetOutput();
 
 	//std::cout << sphere->GetThetaResolution() << ", " << sphere->GetThetaResolutionMaxValue() << ", "<< sphere->GetPhiResolution() << std::endl;
 
