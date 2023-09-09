@@ -122,16 +122,16 @@ double HipPelvis::getHipLengthDistance() const
 {
 	auto femurObj = mFemurOperationSide;
 
-	Point mechanicalAxis = femurObj.getHeadCenter() - femurObj.getKneeCenter();
+	/*Point mechanicalAxis = femurObj.getHeadCenter() - femurObj.getKneeCenter();
 	mechanicalAxis.normalice();
 	mechanicalAxis = mPlaneAPP.getProjectionVector(mechanicalAxis);
 	mechanicalAxis.normalice();
 	Point refVector = getPelvisVectorInfSup();
-	cv::Mat rotation = ImplantTools::GetGeneralRotateTransformVectors(mechanicalAxis, refVector);
+	cv::Mat rotation = ImplantTools::GetGeneralRotateTransformVectors(mechanicalAxis, refVector);*/
 
 	Point ref = mPlaneAPP.getProjectionPoint(femurObj.getLesserTrochanter());
-	auto refMat = rotation * ref.ToMatPoint();
-	ref = Point(refMat);
+	/*auto refMat = rotation * ref.ToMatPoint();
+	ref = Point(refMat);*/
 
 	Line lineASIS = Line::makeLineWithPoints(mRightASIS, mLeftASIS);
 	return lineASIS.getDistanceFromPoint(ref);
@@ -141,16 +141,16 @@ double HipPelvis::getHipLengthDistanceOppsite() const
 {
 	auto femurObj = mFemurOppsite;
 
-	Point mechanicalAxis = femurObj.getHeadCenter() - femurObj.getKneeCenter();
+	/*Point mechanicalAxis = femurObj.getHeadCenter() - femurObj.getKneeCenter();
 	mechanicalAxis.normalice();
 	mechanicalAxis = mPlaneAPP.getProjectionVector(mechanicalAxis);
 	mechanicalAxis.normalice();
 	Point refVector = getPelvisVectorInfSup();
-	cv::Mat rotation = ImplantTools::GetGeneralRotateTransformVectors(mechanicalAxis, refVector);
+	cv::Mat rotation = ImplantTools::GetGeneralRotateTransformVectors(mechanicalAxis, refVector);*/
 
 	Point ref = mPlaneAPP.getProjectionPoint(femurObj.getLesserTrochanter());
-	auto refMat = rotation * ref.ToMatPoint();
-	ref = Point(refMat);
+	/*auto refMat = rotation * ref.ToMatPoint();
+	ref = Point(refMat);*/
 
 	Line lineASIS = Line::makeLineWithPoints(mRightASIS, mLeftASIS);
 	return lineASIS.getDistanceFromPoint(ref);
@@ -186,7 +186,7 @@ double HipPelvis::getCombinedOffsetDistanceOppsite() const
 
 double HipPelvis::getHipLengthDistance(const Point& pMechanicalAxis) const
 {
-	auto femurObj = mFemurOperationSide;
+	/*auto femurObj = mFemurOperationSide;
 
 	Point mechanicalAxis = pMechanicalAxis;
 	mechanicalAxis.normalice();
@@ -200,7 +200,9 @@ double HipPelvis::getHipLengthDistance(const Point& pMechanicalAxis) const
 	ref = Point(refMat);
 
 	Line lineASIS = Line::makeLineWithPoints(mRightASIS, mLeftASIS);
-	return lineASIS.getDistanceFromPoint(ref);
+	return lineASIS.getDistanceFromPoint(ref);*/
+
+	return getHipLengthDistance();
 }
 
 double HipPelvis::getCombinedOffsetDistance(const Point& pCanalAxis, const Point& pCanalAxisPoint) const
@@ -322,6 +324,17 @@ HipFemurOppside HipPelvis::getFemurOppsite() const
 vtkSmartPointer<vtkImplicitPolyDataDistance> HipPelvis::getImplicitPelvisDistance() const
 {
 	return mImplicitPelvisDistance;
+}
+
+double HipPelvis::getNeckShaftAngle() const
+{
+	Point neckVector = mFemurOperationSide.getNeckAxisVectorToHead();
+	Point canalVector = -mFemurOperationSide.getCanalAxisVectorInfSup();
+	
+	neckVector = mPlaneAPP.getProjectionVector(neckVector);
+	canalVector = mPlaneAPP.getProjectionVector(canalVector);
+
+	return ImplantTools::getAngleBetweenVectorsDegree(neckVector, canalVector);
 }
 
 

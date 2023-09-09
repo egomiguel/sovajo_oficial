@@ -42,9 +42,9 @@ namespace THA
 
 			double getStemVersion() const;
 
-			double getCombinedOffsetDistance() const;
+			double getCombinedOffsetDistance() const;//Need to fix. Waiting for requirements
 
-			double getHipLengthDistance() const;
+			double getHipLengthDistance() const;//Nedd to fix. Waiting for requirements
 
 			double getCoverageFraction() const;
 
