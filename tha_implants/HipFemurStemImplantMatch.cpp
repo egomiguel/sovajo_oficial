@@ -83,6 +83,17 @@ void HipFemurStemImplantMatch::getRigidTransform()
     cv::Mat inverse = (implantMatrix.t()).inv();
     rotationMatrix = (pelvisMatrix.t()) * inverse;
     translationMatrix = mHipCenterOfRotation.ToMatPoint() - (rotationMatrix * mImplant.getHeadCenter().ToMatPoint());
+
+	//Alignment with the anatomical axis
+
+	Point ref = mImplant.getCanalAxisTopPoint();
+	cv::Mat refMat = rotationMatrix * ref.ToMatPoint() + translationMatrix;
+	ref = Point(refMat);
+
+	Line anatomical(mPelvis.getFemurOperationSide().getCanalAxisVectorInfSup(), mPelvis.getFemurOperationSide().getCanalAxisPoint());
+	Point refProj = anatomical.getProjectPoint(ref);
+	Point translationDiff = ref - refProj;
+	translationMatrix = translationMatrix - translationDiff.ToMatPoint();
 }
 
 itk::Rigid3DTransform<>::Pointer HipFemurStemImplantMatch::getStemTransform(double pStemVersionAngleDegree) const
