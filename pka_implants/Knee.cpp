@@ -1,7 +1,4 @@
-//#include <itkImageFileReader.h>
-//#include <itkDirectory.h>
-//#include <itkGDCMImageIO.h>
-//#include "itkImageToVTKImageFilter.h"
+
 #include "vtkFlyingEdges3D.h"
 #include <itkExtractImageFilter.h>
 #include <itkBinaryMask3DMeshSource.h>
@@ -13,6 +10,7 @@
 #include "ImplantTools.hpp"
 #include "vtkImplicitPolyDataDistance.h"
 #include "LeastSquaresScaleICP.hpp"
+#include "TemplatePoints.hpp"
 
 using namespace PKA::IMPLANTS;
 
@@ -21,206 +19,9 @@ Knee::Knee()
     isInit = false;
 }
 
-/*
-void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point& femurKneeCenter, const Point& lateralEpicondyle,
-    const Point& medialEpicondyle, const Point& lateralCondyle, const Point& medialCondyle, const Point& lateralPlateau,
-    const Point& medialPlateau, const Point& tibiaKneeCenter, const Point& tibiaTubercle, const Point& pclCenter, const Point& ankleCenter,
-    const Patella& pPatella, const vtkSmartPointer<vtkPolyData> femurPoly, const vtkSmartPointer<vtkPolyData> tibiaPoly,
-    double cartilage, uint8_t imageValueMax)
-{
-    if (isInit == true)
-    {
-        throw ImplantExceptionCode::ALREADY_INITIALIZED_KNEE;
-    }
-
-    vtkNew<vtkPolyDataConnectivityFilter> femurConnectivityFilter;
-    femurConnectivityFilter->SetInputData(femurPoly);
-    femurConnectivityFilter->SetExtractionModeToLargestRegion();
-    femurConnectivityFilter->Update();
-
-    vtkNew<vtkCleanPolyData> CleanFemur, CleanTibia;
-    CleanFemur->SetInputData(femurConnectivityFilter->GetOutput());
-    CleanFemur->Update();
-
-    vtkNew<vtkPolyDataConnectivityFilter> tibiaConnectivityFilter;
-    tibiaConnectivityFilter->SetInputData(tibiaPoly);
-    tibiaConnectivityFilter->SetExtractionModeToLargestRegion();
-    tibiaConnectivityFilter->Update();
-
-    CleanTibia->SetInputData(tibiaConnectivityFilter->GetOutput());
-    CleanTibia->Update();
-
-    Plane epiHelp;
-    epiHelp.init((hipCenter - femurKneeCenter), lateralEpicondyle);
-
-    this->hipCenter = hipCenter;
-    this->femurKneeCenter = femurKneeCenter;
-    this->lateralEpicondyle = lateralEpicondyle;
-    this->medialEpicondyle = medialEpicondyle;
-    this->medialEpicondylePerp = epiHelp.getProjectionPoint(medialEpicondyle);
-    this->ankleCenter = ankleCenter;
-    this->lateralCondyle = lateralCondyle;
-    this->medialCondyle = medialCondyle;
-    this->lateralPlateau = lateralPlateau;
-    this->medialPlateau = medialPlateau;
-    this->pclCenter = pclCenter;
-    this->femurPoly = CleanFemur->GetOutput();
-    this->tibiaPoly = CleanTibia->GetOutput();
-    this->femurCartilage = cartilage;
-    this->tibiaCartilage = cartilage;
-    this->mPatella = pPatella;
-    this->anteriorCortex = anteriorCortex;
-    this->tibiaKneeCenter = tibiaKneeCenter;
-    this->tibiaTubercle = tibiaTubercle;
-
-    FillFemurPoints();
-    FillTibiaPoints();
-
-    Point inferiorLateralPoint, inferiorMedialPoint;
-    getDistalInferiorCondyle(inferiorLateralPoint, inferiorMedialPoint);
-    this->lateralInferiorFemurPoint = inferiorLateralPoint;
-    this->medialInferiorFemurPoint = inferiorMedialPoint;
-
-    makeKneeGroovePath();
-
-    goodSide = getGoodSide(hipCenter, femurKneeCenter, lateralEpicondyle, medialEpicondylePerp, ankleCenter);
-
-    if (goodSide == MedialSide)
-    {
-        isVarus = false;
-    }
-    else
-    {
-        isVarus = true;
-    }
-    Point femurDirectVector = hipCenter - femurKneeCenter;
-    Point directVectorEpicondyle = lateralEpicondyle - medialEpicondylePerp;
-    Point tFemurDirectVectorAP = femurDirectVector.cross(directVectorEpicondyle);
-
-    Line tempAP(tFemurDirectVectorAP, femurKneeCenter);
-    Point condyleProj = tempAP.getProjectPoint(medialCondyle);
-
-    this->femurDirectVectorAP = femurKneeCenter - condyleProj;
-    findTibiaPlaneNormalVector();
-
-    Point rightVector = medialEpicondylePerp - lateralEpicondyle;
-    Point crossVector = getDirectVectorFemurAxis().cross(femurDirectVectorAP);
-
-    double angle = ImplantTools::getAngleBetweenVectorsDegree(rightVector, crossVector);
-    if (angle < 90)
-    {
-        isRight = true;
-    }
-    else
-    {
-        isRight = false;
-    }
-
-    getAutomaticPlateaus();/////////////////////////////////
-
-    if (mPatella.getIsInit() == true)
-    {
-        mPatellaPlane = mPatella.getPatellaPlane(isRight, mPatellaDistalPosteriorPoint);
-    }
-
-    isInit = true;
-}
-
-void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point& femurKneeCenter, const Point& lateralEpicondyle,
-    const Point& medialEpicondyle, const Point& lateralPlateau, const Point& medialPlateau, const Point& tibiaKneeCenter,
-    const Point& tibiaTubercle, const Point& pclCenter, const Point& ankleCenter, const Patella& pPatella,
-    const vtkSmartPointer<vtkPolyData> femurPoly, const vtkSmartPointer<vtkPolyData> tibiaPoly, KneeSideEnum pSide,
-    double cartilage, uint8_t imageValueMax)
-{
-    if (isInit == true)
-    {
-        throw ImplantExceptionCode::ALREADY_INITIALIZED_KNEE;
-    }
-
-    vtkNew<vtkPolyDataConnectivityFilter> femurConnectivityFilter;
-    femurConnectivityFilter->SetInputData(femurPoly);
-    femurConnectivityFilter->SetExtractionModeToLargestRegion();
-    femurConnectivityFilter->Update();
-
-    vtkNew<vtkCleanPolyData> CleanFemur, CleanTibia;
-    CleanFemur->SetInputData(femurConnectivityFilter->GetOutput());
-    CleanFemur->Update();
-
-    vtkNew<vtkPolyDataConnectivityFilter> tibiaConnectivityFilter;
-    tibiaConnectivityFilter->SetInputData(tibiaPoly);
-    tibiaConnectivityFilter->SetExtractionModeToLargestRegion();
-    tibiaConnectivityFilter->Update();
-
-    CleanTibia->SetInputData(tibiaConnectivityFilter->GetOutput());
-    CleanTibia->Update();
-
-    Plane epiHelp;
-    epiHelp.init((hipCenter - femurKneeCenter), lateralEpicondyle);
-
-    this->hipCenter = hipCenter;
-    this->femurKneeCenter = femurKneeCenter;
-    this->lateralEpicondyle = lateralEpicondyle;
-    this->medialEpicondyle = medialEpicondyle;
-    this->medialEpicondylePerp = epiHelp.getProjectionPoint(medialEpicondyle);
-    this->ankleCenter = ankleCenter;
-    this->lateralPlateau = lateralPlateau;
-    this->medialPlateau = medialPlateau;
-    this->pclCenter = pclCenter;
-    this->femurPoly = CleanFemur->GetOutput();
-    this->tibiaPoly = CleanTibia->GetOutput();
-    this->femurCartilage = cartilage;
-    this->tibiaCartilage = cartilage;
-    this->mPatella = pPatella;
-    this->anteriorCortex = anteriorCortex;
-    this->tibiaKneeCenter = tibiaKneeCenter;
-    this->tibiaTubercle = tibiaTubercle;
-
-    Point forceLineVector = hipCenter - femurKneeCenter;
-    Point TEA = lateralEpicondyle - medialEpicondylePerp;
-
-    if (pSide == KneeSideEnum::KRight)
-    {
-        isRight = true;
-        this->femurDirectVectorAP = forceLineVector.cross(TEA);
-    }
-    else
-    {
-        isRight = false;
-        this->femurDirectVectorAP = TEA.cross(forceLineVector);
-    }
-
-    getAutomaticPlateaus();//////////////////////
-
-    FillFemurPointsAndCondyles();
-    FillTibiaPoints();
-
-    makeKneeGroovePath();
-
-    goodSide = getGoodSide(hipCenter, femurKneeCenter, lateralEpicondyle, medialEpicondylePerp, ankleCenter);
-
-    if (goodSide == MedialSide)
-    {
-        isVarus = false;
-    }
-    else
-    {
-        isVarus = true;
-    }
-
-    findTibiaPlaneNormalVector();
-
-    if (mPatella.getIsInit() == true)
-    {
-        mPatellaPlane = mPatella.getPatellaPlane(isRight, mPatellaDistalPosteriorPoint);
-    }
-
-    isInit = true;
-}
-*/
-
 void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point& femurKneeCenter, const Point& lateralEpicondyle,
     const Point& medialEpicondyle, const Point& tibiaKneeCenter, const Point& tibiaTubercle, const Point& pclCenter, 
-    const Point& ankleCenter, const Patella& pPatella, const vtkSmartPointer<vtkPolyData> femurPoly, 
+    const Point& ankleCenter, const vtkSmartPointer<vtkPolyData> femurPoly, 
     const vtkSmartPointer<vtkPolyData> tibiaPoly, KneeSideEnum pSide, bool findRefPoints, double cartilage, uint8_t imageValueMax)
 {
     if (isInit == true)
@@ -259,7 +60,6 @@ void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point
     this->tibiaPoly = CleanTibia->GetOutput();
     this->femurCartilage = cartilage;
     this->tibiaCartilage = cartilage;
-    this->mPatella = pPatella;
     this->anteriorCortex = anteriorCortex;
     this->tibiaKneeCenter = tibiaKneeCenter;
     this->tibiaTubercle = tibiaTubercle;
@@ -284,10 +84,6 @@ void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point
 		findFemurCondylesUsingLeastSquare();
 	}
 
-    //FillTibiaPoints();
-
-    //makeKneeGroovePath();
-
     goodSide = getGoodSide(hipCenter, femurKneeCenter, lateralEpicondyle, medialEpicondylePerp, ankleCenter);
 
     if (goodSide == MedialSide)
@@ -301,65 +97,9 @@ void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point
 
     findTibiaPlaneNormalVector();
 
-    if (mPatella.getIsInit() == true)
-    {
-        mPatellaPlane = mPatella.getPatellaPlane(isRight, mPatellaDistalPosteriorPoint);
-    }
-
     isInit = true;
 }
 
-//void Knee::setImplantInfo(const ImplantInfo pImplant)
-//{
-//    implant = pImplant;
-//
-//    if (isVarus == false)
-//    {
-//        condyleResectionThickness = implant.femurPosteriorMedialThickness;// -cartilage;
-//        moveCondyle = medialCondyle;
-//    }
-//    else
-//    {
-//        condyleResectionThickness = implant.femurPosteriorLateralThickness;// -cartilage;
-//        moveCondyle = lateralCondyle;
-//    }
-//
-//    Point normaliceFemurDirectVectorAP = femurDirectVectorAP;
-//    normaliceFemurDirectVectorAP.normalice();
-//
-//    this->moveCondyle = moveCondyle + condyleResectionThickness * normaliceFemurDirectVectorAP; //getPointAtDistance(tFemurDirectVectorAP, moveCondyle, tempAP.getProjectPoint(femurKneeCenter), condyleResectionThickness);
-//
-//    if (isVarus == false)
-//    {
-//        plateauResectionThickness = implant.tibiaMedialThickness;// -cartilage;
-//        movePlateau = medialPlateau;
-//    }
-//    else
-//    {
-//        plateauResectionThickness = implant.tibiaLateralThickness;// -cartilage;
-//        movePlateau = lateralPlateau;
-//    }
-//
-//    Point tibiaLineDirectVector = tibiaNormalPlaneVector;//ankleCenter - tibiaKneeCenter;
-//    tibiaLineDirectVector.normalice();
-//    this->movePlateau = movePlateau - plateauResectionThickness * tibiaLineDirectVector;//getPointAtDistance(tibiaLineDirectVector, movePlateau, ankleCenter, plateauResectionThickness);
-//
-//    if (isVarus == false)
-//    {
-//        inferiorMoveFemurPoint = medialInferiorFemurPoint;
-//        distalCondyleResectionThickness = implant.femurDistalMedialThickness;// -cartilage;
-//    }
-//    else
-//    {
-//        inferiorMoveFemurPoint = lateralInferiorFemurPoint;
-//        distalCondyleResectionThickness = implant.femurDistalLateralThickness;// -cartilage;
-//    }
-//
-//    Point femurLineDirectVector = hipCenter - femurKneeCenter;
-//    femurLineDirectVector.normalice();
-//
-//    this->inferiorMoveFemurPoint = inferiorMoveFemurPoint + distalCondyleResectionThickness * femurLineDirectVector;
-//}
 
 bool Knee::getIsRight() const
 {
@@ -446,171 +186,8 @@ void Knee::findFemurCondylesUsingDistalPoints()
         }
     }
 
-    /////////////////////////////////////////////////////////////////////////////////////////////////
-	/*
-    Plane coronalBase = axial.getPerpendicularPlane(lateralCondyle, medialCondyle);
-    Point refPoint = medialCondyle + 1000 * femurDirectVectorAP;
-    coronalBase.reverseByPoint(refPoint);
-
-    double coronalLatDistance = -1, coronalMedDistance = -1;
-
-    auto it1 = mFemur.begin();
-    auto it2 = mFemur.end();
-
-    for ( ; it1 != it2; ++it1 )
-    {
-        if (coronalBase.eval(*it1) > 0 && transverse.eval(*it1) > 0)
-        {
-            if (sagital.eval(*it1) > 2)
-            {
-                temp = coronalBase.eval(*it1);
-
-                if (temp > coronalLatDistance)
-                {
-                    coronalLatDistance = temp;
-                    coronalDistalLat = (*it1);
-                }
-            }
-            else if (sagital.eval(*it1) < -2)
-            {
-                temp = coronalBase.eval(*it1);
-
-                if (temp > coronalMedDistance)
-                {
-                    coronalMedDistance = temp;
-                    coronalDistalMed = (*it1);
-                }
-            }
-
-        }
-    }
-	*/
-
-    //UpdateTopPointOnGroove();********************************************************************************************************
 }
 
-void Knee::UpdateTopPointOnGroove()
-{
-    Point forceLine = hipCenter - femurKneeCenter;
-    Point tea = lateralEpicondyle - medialEpicondyle;
-
-    Plane coronal, transverse;
-
-    coronal.init(femurDirectVectorAP, femurKneeCenter);
-    transverse.init(forceLine, anteriorCortex);
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////
-
-    Plane lateralPlane, medialPlane, cutPlane;
-    medialPlane.init(tea, coronalDistalMed);
-    lateralPlane.init(tea, coronalDistalLat);
-    cutPlane = coronal.getPerpendicularPlane(coronalDistalLat, coronalDistalMed);
-
-    if (lateralPlane.eval(medialEpicondylePerp) < 0)
-    {
-        lateralPlane.reverse();
-    }
-
-    if (medialPlane.eval(lateralEpicondyle) < 0)
-    {
-        medialPlane.reverse();
-    }
-
-    vtkSmartPointer<vtkPolyData> contour = ImplantTools::getMaxContour(femurPoly, cutPlane.getNormalVector(), cutPlane.getPoint());
-
-    ////////////////////////////////////////////////////////////////
-
-    Point vectorAP = femurDirectVectorAP;
-    vectorAP.normalice();
-
-    vtkNew<vtkImplicitPolyDataDistance> polyDistance;
-    polyDistance->SetInput(femurPoly);
-
-    Point refPoint = (coronalDistalLat + coronalDistalMed) / 2.;
-    Point extPoint = refPoint + 10. * vectorAP;
-    Point midGroovePoint;
-
-    ImplantTools::GetInterceptionWithLine(polyDistance, refPoint, extPoint, midGroovePoint);
-
-    vtkIdType refMid = ImplantTools::GetNearestPoints(contour, midGroovePoint);
-    vtkIdType refLat = ImplantTools::GetNearestPoints(contour, coronalDistalLat);
-    vtkIdType refMed = ImplantTools::GetNearestPoints(contour, coronalDistalMed);
-
-    std::list<std::pair<vtkIdType, vtkIdType>> lines;
-    ImplantTools::ExtractSortLines(contour, lines);
-
-    int cont = lines.size();
-
-    while (cont > -1 && lines.front().first != refMid)
-    {
-        lines.push_back(lines.front());
-        lines.pop_front();
-        cont--;
-    }
-
-    if (cont < 0)
-    {
-        throw ImplantExceptionCode::CHECK_LANDMARKS_CAN_NOT_DETERMINE_BEGIN_POINT_OF_KNEE_GROOVE;
-    }
-
-    std::vector<Point> curve;
-
-    auto it1 = lines.begin();
-    auto it2 = lines.end();
-
-    for (; it1 != it2; ++it1)
-    {
-        if (it1->first != refLat && it1->first != refMed)
-        {
-            double pnt[3];
-            contour->GetPoint((it1)->first, pnt);
-            curve.push_back(Point(pnt[0], pnt[1], pnt[2]));
-        }
-        else
-        {
-            break;
-        }
-    }
-
-    auto rit1 = lines.rbegin();
-    auto rit2 = lines.rend();
-
-    for (; rit1 != rit2; ++rit1)
-    {
-        if (rit1->first != refLat && rit1->first != refMed)
-        {
-            double pnt[3];
-            contour->GetPoint((rit1)->first, pnt);
-            curve.push_back(Point(pnt[0], pnt[1], pnt[2]));
-        }
-        else
-        {
-            break;
-        }
-    }
-
-    ///////////////////////////////////////////////////////////////
-
-    Plane basePlane = transverse.getPerpendicularPlane(lateralCondyle, medialCondyle);
-    basePlane.reverseByPoint(femurKneeCenter);
-
-    Point topPointTemp;
-
-    try
-    {
-        topPointTemp = ImplantTools::getLocalMinimum(curve, cutPlane, cutPlane.getProjectionVector(basePlane.getNormalVector()));
-    }
-    catch (...)
-    {
-        throw ImplantExceptionCode::CHECK_LANDMARKS_CAN_NOT_DETERMINE_BEGIN_POINT_OF_KNEE_GROOVE;
-    }
-
-    double myClosest[3];
-    double pnt[3] = { topPointTemp.x, topPointTemp.y, topPointTemp.z };
-
-    polyDistance->EvaluateFunctionAndGetClosestPoint(pnt, myClosest);
-    topPointOnPatellaPath = Point(myClosest[0], myClosest[1], myClosest[2]);
-}
 
 void Knee::FillTibiaPoints()
 {
@@ -624,10 +201,6 @@ void Knee::FillTibiaPoints()
     }
 }
 
-Point Knee::getPatellaRotationPoint() const
-{
-    return mPatella.getPatellaRotationPoint();
-}
 
 void Knee::setTibiaSlope(double angleInDegrees)
 {
@@ -665,55 +238,6 @@ void Knee::findTibiaPlaneNormalVector(double degreeAngle)
     tibiaNormalPlaneVector = tibiaRotatePoint - ankleCenter;
 }
 
-/*
-void Knee::findTibiaDirectVectorAP()
-{
-    Point directVector = tibiaTubercle - pclCenter;
-    Point tibiaAxisVector = (tibiaKneeCenter - ankleCenter);
-    Plane tibiaHelpPlane;
-    tibiaHelpPlane.init(tibiaAxisVector, tibiaKneeCenter);
-    Point directVectorAP = tibiaHelpPlane.getProjectionVector(directVector);
-
-    tibiaFixedDirectVectorAP = directVectorAP;//Line::getFixDirectVector(directVectorAP, tibiaKneeCenter, tibiaTubercle);
-}*/
-/*
-void Knee::readImagePoints(const ImplantImageType::Pointer& image, uint8_t imageValueMax, std::vector<Point>& meshPoints) const
-{
-    using MeshType = itk::Mesh<double, 3>;
-    auto meshSource = itk::BinaryMask3DMeshSource<ImplantImageType, MeshType>::New();
-    meshSource->SetObjectValue(imageValueMax);
-    meshSource->SetInput(image);
-
-    try
-    {
-        meshSource->Update();
-    }
-    catch (itk::ExceptionObject & exp)
-    {
-        std::string msg = exp.what();
-        throw ImplantsException(msg);
-    }
-
-    itk::Mesh<double, 3>::ConstPointer mesh = meshSource->GetOutput();
-    MeshType::PointsContainer::ConstPointer points;
-    points = mesh->GetPoints();
-
-    if (points->size() == 0)
-    {
-        throw ImplantsException("Could not get the list of surface points.");
-    }
-
-    itk::Point<double, 3> myPoint;
-    auto pointsBegin = points->Begin();
-    auto pointsEnd = points->End();
-    while (pointsBegin != pointsEnd)
-    {
-        myPoint = pointsBegin.Value();
-        meshPoints.push_back(Point(myPoint[0], myPoint[1], myPoint[2]));
-        ++pointsBegin;
-    }
-}
-*/
 Point Knee::getFemurVectorTEA() const
 {
     Point directVector = (getDirectVectorFemurAxis()).cross(getFemurDirectVectorAP());
@@ -1756,31 +1280,6 @@ void Knee::getDistalInferiorCondyle(Point& lateralPoint, Point& medialPoint)
         allPoints->GetPoint(i, pnt);
         Point it1(pnt[0], pnt[1], pnt[2]);
 
-        /*if (transversePlane.eval(it1)*transverseSign > 0)
-        {
-            if (sagitalLateral.isPointNearToPlane(it1, 0.2))
-            {
-                projP = sagitalLateral.getProjectionPoint(it1);
-
-                latDistance = transversePlane.getDistanceFromPoint(projP);
-                if (latDistance > latDistanceTemp)
-                {
-                    latDistanceTemp = latDistance;
-                    lateralPoint = projP;
-                }
-            }
-            else if (sagitalMedial.isPointNearToPlane(it1, 0.2))
-            {
-                projP = sagitalMedial.getProjectionPoint(it1);
-
-                medDistance = transversePlane.getDistanceFromPoint(projP);
-                if (medDistance > medDistanceTemp)
-                {
-                    medDistanceTemp = medDistance;
-                    medialPoint = projP;
-                }
-            }
-        }*/
         if (coronal.eval(it1) > 0 && transverseCoronal.eval(it1) > 0)
         {
             if (sagital.eval(it1) > 2)
@@ -1897,26 +1396,6 @@ void Knee::getDistalInferiorCondyle(Point& lateralPoint, Point& medialPoint)
         }
     }
 
-
-    ///////////////////////////////////////////////////////////////
-
-    /*std::list<std::pair<vtkIdType, vtkIdType>> lines;
-    ImplantTools::ExtractSortLines(contour, lines);
-    auto it1 = lines.begin();
-    auto it2 = lines.end();
-
-    std::vector<Point> curve;
-
-    for (; it1 != it2; ++it1)
-    {
-        double pnt[3];
-        contour->GetPoint((it1)->first, pnt);
-        if (coronal.eval(pnt) >= 0 && lateralPlane.eval(pnt) > 0 && medialPlane.eval(pnt) > 0)
-        {
-            curve.push_back(Point(pnt[0], pnt[1], pnt[2]));
-        }
-    }*/
-
     Plane basePlane = transversePlane.getPerpendicularPlane(lateralCondyle, medialCondyle);
     basePlane.reverseByPoint(femurKneeCenter);
 
@@ -1930,252 +1409,7 @@ void Knee::getDistalInferiorCondyle(Point& lateralPoint, Point& medialPoint)
     {
         throw ImplantExceptionCode::CHECK_LANDMARKS_CAN_NOT_DETERMINE_BEGIN_POINT_OF_KNEE_GROOVE;
     }
-
-    double myClosest[3];
-    double pnt[3] = { topPointTemp.x, topPointTemp.y, topPointTemp.z };
-
-    polyDistance->EvaluateFunctionAndGetClosestPoint(pnt, myClosest);
-    topPointOnPatellaPath = Point(myClosest[0], myClosest[1], myClosest[2]);
 }
-
-/*
-void Knee::getDistalInferiorCondyleOld(Point& lateralPoint, Point& medialPoint) const
-{
-    Point directVectorAxis = hipCenter - femurKneeCenter;
-    Point directVectorTEA = lateralEpicondyle - medialEpicondylePerp;
-    Point vectorAP = directVectorAxis.cross(directVectorTEA);
-
-    Plane sagitalLateral;
-    Plane sagitalMedial;
-    Plane transversePlane;
-
-    sagitalLateral.init(directVectorTEA, lateralCondyle);
-    sagitalMedial.init(directVectorTEA, medialCondyle);
-    transversePlane.init(directVectorAxis, femurKneeCenter + (2.0 * directVectorAxis / sqrt(directVectorAxis.dot(directVectorAxis))));
-
-    int transverseSign;
-
-    if (transversePlane.eval(hipCenter) > 0)
-    {
-        transverseSign = -1;
-    }
-    else
-    {
-        transverseSign = 1;
-    }
-
-    cv::Mat normalPlaneMat(3, 1, CV_64F);
-    normalPlaneMat.at <double>(0, 0) = directVectorTEA.x;
-    normalPlaneMat.at <double>(1, 0) = directVectorTEA.y;
-    normalPlaneMat.at <double>(2, 0) = directVectorTEA.z;
-
-    Point normalXY(0.0, 0.0, 1.0);
-    Point rotationAxis = normalXY.cross(directVectorTEA);
-    rotationAxis = rotationAxis / sqrt(rotationAxis.dot(rotationAxis));
-    double rotationAngle = Line::getAngleBetweenVectors(normalXY, directVectorTEA);
-    cv::Mat rotation_1 = Line::getRotateMatrix(rotationAxis, -rotationAngle);
-    cv::Mat rotation_2 = Line::getRotateMatrix(rotationAxis, rotationAngle);
-
-    cv::Mat rotateVector_1 = rotation_1 * normalPlaneMat;
-    cv::Mat rotateVector_2 = rotation_2 * normalPlaneMat;
-
-    cv::Mat rotate;
-
-    double distance_1 = Line::getAngleBetweenVectors(Point(rotateVector_1), normalXY);
-    double distance_2 = Line::getAngleBetweenVectors(Point(rotateVector_2), normalXY);
-
-    if (distance_1 < distance_2)
-    {
-        rotate = rotation_1;
-    }
-    else
-    {
-        rotate = rotation_2;
-    }
-
-    std::vector<cv::Point2f> coplanarLateral2d, coplanarMedial2d;
-    std::vector<Point> lateral3d, medial3d;
-    double axisLateralZ = 0.0;
-    double axisMedialZ = 0.0;
-    auto it1 = mFemur.begin();
-    auto it2 = mFemur.end();
-    Point projP, rotatePoint;
-    cv::Mat rotatePointMat;
-
-    while (it1 != it2)
-    {
-        if (transversePlane.eval(*it1)*transverseSign > 0)
-        {
-            if (sagitalLateral.isPointNearToPlane(*it1, 0.2))
-            {
-                projP = sagitalLateral.getProjectionPoint(*it1);
-                lateral3d.push_back(projP);
-                rotatePointMat = rotate * projP.ToMatPoint();
-                rotatePoint = Point(rotatePointMat);
-                coplanarLateral2d.push_back(cv::Point2f(float(rotatePoint.x), float(rotatePoint.y)));
-                axisLateralZ += rotatePoint.z;
-            }
-            else if (sagitalMedial.isPointNearToPlane(*it1, 0.2))
-            {
-                projP = sagitalMedial.getProjectionPoint(*it1);
-                medial3d.push_back(projP);
-                rotatePointMat = rotate * projP.ToMatPoint();
-                rotatePoint = Point(rotatePointMat);
-                coplanarMedial2d.push_back(cv::Point2f(float(rotatePoint.x), float(rotatePoint.y)));
-                axisMedialZ += rotatePoint.z;
-            }
-        }
-
-        ++it1;
-    }
-
-    if (coplanarLateral2d.size() * coplanarMedial2d.size() == 0)
-    {
-        throw ImplantsException("There are no matches between landmarks and the bone surface.");
-    }
-
-    axisLateralZ = axisLateralZ / (double(coplanarLateral2d.size()));
-    axisMedialZ = axisMedialZ / (double(coplanarMedial2d.size()));
-
-    //cv::RotatedRect boxlateral = cv::minAreaRect(coplanarLateral2d);
-    //cv::RotatedRect boxMedial = cv::minAreaRect(coplanarMedial2d);
-
-    cv::RotatedRect boxlateral = cv::fitEllipse(coplanarLateral2d);
-    cv::RotatedRect boxMedial = cv::fitEllipse(coplanarMedial2d);
-
-    Line lineAP(vectorAP, femurKneeCenter);
-    Point condyleProj = lineAP.getProjectPoint(lateralCondyle);
-    Point rightAP = condyleProj - femurKneeCenter;
-    rightAP.normalice();
-    Point tempLatPoint, tempMedPoint;
-
-    tempLatPoint = getDistalInferiorCondylePoint(boxlateral, rotate, (lateralEpicondyle + 2.0 * rightAP), axisLateralZ);
-    tempMedPoint = getDistalInferiorCondylePoint(boxMedial, rotate, (medialEpicondylePerp + 3.0 * rightAP), axisMedialZ);
-    directVectorAxis.normalice();
-
-    tempLatPoint = tempLatPoint - 2.0 * directVectorAxis;
-    tempMedPoint = tempMedPoint - 2.0 * directVectorAxis;
-
-    it1 = lateral3d.begin();
-    it2 = lateral3d.end();
-
-    double maxDistance = Line::getDistanceBetweenPoints(*it1, tempLatPoint, true);
-    double tempDistance;
-    for (; it1 != it2; ++it1)
-    {
-        tempDistance = Line::getDistanceBetweenPoints(*it1, tempLatPoint, true);
-        if (tempDistance < maxDistance)
-        {
-            maxDistance = tempDistance;
-            lateralPoint = *it1;
-        }
-    }
-
-    it1 = medial3d.begin();
-    it2 = medial3d.end();
-
-    maxDistance = Line::getDistanceBetweenPoints(*it1, tempMedPoint, true);
-    for (; it1 != it2; ++it1)
-    {
-        tempDistance = Line::getDistanceBetweenPoints(*it1, tempMedPoint, true);
-        if (tempDistance < maxDistance)
-        {
-            maxDistance = tempDistance;
-            medialPoint = *it1;
-        }
-    }
-}
-
-
-Point Knee::getDistalInferiorCondylePoint(const cv::RotatedRect& box, const cv::Mat& rotate, const Point& epicondyle, const double axisZ) const
-{
-    Point directVectorAxis = hipCenter - femurKneeCenter;
-    cv::Point2f vertices[4];
-    box.points(vertices);
-
-    cv::Mat Va = rotate.inv() * (Point(vertices[0].x, vertices[0].y, axisZ)).ToMatPoint();
-    cv::Mat Vb = rotate.inv() * (Point(vertices[1].x, vertices[1].y, axisZ)).ToMatPoint();
-    cv::Mat Vc = rotate.inv() * (Point(vertices[2].x, vertices[2].y, axisZ)).ToMatPoint();
-    cv::Mat Vd = rotate.inv() * (Point(vertices[3].x, vertices[3].y, axisZ)).ToMatPoint();
-
-    cv::Mat vectorMat1 = Va - Vb;
-    cv::Mat vectorMat2 = Vb - Vc;
-
-    Point squareSide1 = Point(vectorMat1);
-    Point squareSide2 = Point(vectorMat2);
-
-    double angle1 = (Line::getAngleBetweenVectors(squareSide1, directVectorAxis))*180.0 / PI;
-    double angle2 = (Line::getAngleBetweenVectors(squareSide2, directVectorAxis))*180.0 / PI;
-
-    cv::Point3d point1;
-    cv::Point3d point2;
-
-    if (abs(90.0 - abs(angle1)) < 50.0 && abs(90.0 - abs(angle1)) > 40.0)
-    {
-        throw ImplantsException("The lowest condyle cannot be determined automatically.");
-    }
-    else
-    {
-        if (abs(90.0 - abs(angle1)) < abs(90.0 - abs(angle2)))
-        {
-            point1 = Line::getProjectPoint(cv::Point3d(Va), cv::Point3d(Vb), epicondyle);
-            point2 = Line::getProjectPoint(cv::Point3d(Vc), cv::Point3d(Vd), epicondyle);
-        }
-        else
-        {
-            point1 = Line::getProjectPoint(cv::Point3d(Vb), cv::Point3d(Vc), epicondyle);
-            point2 = Line::getProjectPoint(cv::Point3d(Vd), cv::Point3d(Va), epicondyle);
-        }
-
-        if (Line::getDistanceBetweenPoints(point1, hipCenter) > Line::getDistanceBetweenPoints(point2, hipCenter))
-        {
-            return point1;
-        }
-        else
-        {
-            return point2;
-        }
-    }
-}
-
-void Knee::get2DSlice(const ImplantImageType::Pointer& imageIn, ImplantImageType::Pointer& imageOut, const int sliceNumber) const
-{
-    typedef ImplantImageType InputImageType;
-    typedef ImplantImageType SliceImageType;
-    typedef itk::ExtractImageFilter< InputImageType, SliceImageType > FilterType;
-    FilterType::Pointer filter = FilterType::New();
-    filter->SetDirectionCollapseToSubmatrix();
-    InputImageType::RegionType inputRegion = imageIn->GetLargestPossibleRegion();
-    InputImageType::SizeType size = inputRegion.GetSize();
-    size[2] = 1;
-    InputImageType::IndexType start = inputRegion.GetIndex();
-    start[2] = sliceNumber;
-
-    InputImageType::RegionType desiredRegion;
-    desiredRegion.SetSize(size);
-    desiredRegion.SetIndex(start);
-    filter->SetExtractionRegion(desiredRegion);
-    filter->SetInput(imageIn);
-    try
-    {
-        filter->Update();
-    }
-    catch (const itk::ExceptionObject & ex)
-    {
-        std::cout << ex.GetDescription() << std::endl;
-    }
-    imageOut = filter->GetOutput();
-}*/
-
-//std::vector<Point> Knee::getFemurPoints() const
-//{
-//    return mFemur;
-//}
-//std::vector<Point> Knee::getTibiaPoints() const
-//{
-//    return mTibia;
-//}
-
 
 Point Knee::getComputeAnkleCenter(const Point& lateralMalleolus, const Point& medialMalleolus)
 {
@@ -2276,28 +1510,6 @@ TibiaImplantDimensions Knee::getEstimateTibiaImplantsDimensions() const
         coplanar2d.push_back(cv::Point2f(float(x), float(y)));
     }
 
-    /*auto it1 = mTibia.begin();
-    auto it2 = mTibia.end();
-    double x, y;
-
-    for (; it1 != it2; ++it1)
-    {
-        if (tibiaCutPlane.isPointNearToPlane(*it1, 1.0) == true)
-        {
-            Point pointProj = tibiaCutPlane.getProjectionPoint(*it1);
-            cv::Mat point(3, 1, CV_64F);
-            point.at <double>(0, 0) = pointProj.x;
-            point.at <double>(1, 0) = pointProj.y;
-            point.at <double>(2, 0) = pointProj.z;
-            cv::Mat rotatePointMat = rotate * point;
-            x = rotatePointMat.at <double>(0, 0);
-            y = rotatePointMat.at <double>(1, 0);
-            coplanar2d.push_back(cv::Point2f(float(x), float(y)));
-        }
-    }*/
-
-    //cv::RotatedRect box = cv::fitEllipse(coplanar2d);
-
     cv::RotatedRect box = cv::minAreaRect(coplanar2d);
 
     double with = box.size.width;
@@ -2343,34 +1555,6 @@ Side Knee::getGoodSide(const Point& hipCenter, const Point& kneeCenter, const Po
     {
         return LateralSide;
     }
-
-    /*Point femurAxis = hipCenter - kneeCenter;
-    Point legAxis = hipCenter - ankle;
-    Plane transverse, coronal;
-    transverse.init(femurAxis, kneeCenter);
-    coronal = transverse.getPerpendicularPlane(latEpi, medEpi);
-
-    Point hipProj = coronal.getProjectionPoint(hipCenter);
-    Point latProj = coronal.getProjectionPoint(latEpi);
-    Point medProj = coronal.getProjectionPoint(medEpi);
-    Point kneeProj = coronal.getProjectionPoint(kneeCenter);
-    Point legAxisProj = coronal.getProjectionVector(legAxis);
-
-    Line lineRef = Line(legAxisProj, hipProj);
-    Point epiVector = latProj - medProj;
-    epiVector.normalice();
-
-    Point latRef = kneeProj + epiVector;
-    Point medRef = kneeProj - epiVector;
-
-    if (lineRef.getDistanceFromPoint(latRef) > lineRef.getDistanceFromPoint(medRef))
-    {
-        return LateralSide;
-    }
-    else
-    {
-        return MedialSide;
-    }*/
 }
 
 vtkSmartPointer<vtkPolyData> Knee::GetFemurPoly() const
@@ -2381,11 +1565,6 @@ vtkSmartPointer<vtkPolyData> Knee::GetFemurPoly() const
 vtkSmartPointer<vtkPolyData> Knee::GetTibiaPoly() const
 {
     return tibiaPoly;
-}
-
-vtkSmartPointer<vtkPolyData> Knee::GetPatellaPoly() const
-{
-    return mPatella.getPatellaPoly();
 }
 
 double Knee::getFemurCartilage() const
@@ -2402,21 +1581,6 @@ bool Knee::getIsVarus() const
 {
     return isVarus;
 }
-
-//Point Knee::getLateralCoronalDistalPoint() const
-//{
-//    return coronalDistalLat;
-//}
-//
-//Point Knee::getMedialCoronalDistalPoint() const
-//{
-//    return coronalDistalMed;
-//}
-//
-//Point Knee::getTopPointOnPatellaPath() const
-//{
-//    return topPointOnPatellaPath;
-//}
 
 void Knee::findAutomaticPlateaus()
 {
@@ -2546,237 +1710,6 @@ void Knee::findAutomaticPlateaus()
     this->medialPlateau.z = myClosestMed[2];
 }
 
-void Knee::makeKneeGroovePath()
-{
-    Point vectorAxis = hipCenter - femurKneeCenter;
-    Point vectorTEA = lateralEpicondyle - medialEpicondylePerp;
-    Point vectorAP = vectorAxis.cross(vectorTEA);
-
-    Point distalCenter = (coronalDistalLat + coronalDistalMed) / 2.0;
-
-    std::vector<Point> points;
-    Plane coronal, sagital, axial;
-
-    coronal.init(vectorAP, femurKneeCenter);
-    coronal.reverseByPoint(medialCondyle, false);
-    axial.init(vectorAxis, coronalDistalLat);
-    axial.reverseByPoint(hipCenter, false);
-
-    sagital = coronal.getPerpendicularPlane(femurKneeCenter, distalCenter);
-
-    vtkSmartPointer<vtkPolyData> contour = ImplantTools::getMaxContour(femurPoly, sagital.getNormalVector(), sagital.getPoint());
-
-    if (contour->GetNumberOfPoints() == 0)
-    {
-        throw ImplantExceptionCode::CAN_NOT_DETERMINE_PATELLA_GROOVE;
-    }
-
-    std::list<std::pair<vtkIdType, vtkIdType>> lines;
-    ImplantTools::ExtractSortLines(contour, lines);
-    auto it1 = lines.begin();
-    auto it2 = lines.end();
-    for (; it1 != it2; ++it1)
-    {
-        double pnt[3];
-        contour->GetPoint((it1)->first, pnt);
-        if (coronal.eval(pnt) >= 0 && axial.eval(pnt) > 0)
-        {
-            points.push_back(Point(pnt[0], pnt[1], pnt[2]));
-        }
-    }
-
-    ////////////////////////////////////////////////////////////////////////
-
-    Plane basePlane = axial.getPerpendicularPlane(lateralCondyle, medialCondyle);
-    basePlane.reverseByPoint(femurKneeCenter);
-
-    std::vector<Point> resultTemp;
-
-    Plane latPlane, medPlane;
-    latPlane = axial.getPerpendicularPlane(lateralCondyle, coronalDistalLat);
-    medPlane = axial.getPerpendicularPlane(medialCondyle, coronalDistalMed);
-    latPlane.reverseByPoint(medialEpicondylePerp);
-    medPlane.reverseByPoint(lateralEpicondyle);
-
-    int step = points.size() / 30;
-    if (step == 0)
-    {
-        step = 1;
-    }
-
-    Plane axialTemp;
-    Point axialTempPoint = femurKneeCenter + 0.3 * (hipCenter - femurKneeCenter);
-
-    axialTemp.init(vectorAxis, axialTempPoint);
-    Point pointFit1 = axialTemp.getProjectionPoint(medialCondyle);
-    Point pointFit2 = axialTemp.getProjectionPoint(lateralCondyle);
-
-    int contTemp = 0;
-    for (int i = step; i < points.size(); i += step)
-    {
-        Plane tempPlane;
-        std::list<Point> parabola;
-        tempPlane.init(pointFit1, pointFit2, points[i]);
-
-        vtkSmartPointer<vtkPolyData> contour = ImplantTools::getMaxContour(femurPoly, tempPlane.getNormalVector(), tempPlane.getPoint());
-
-        if (contour->GetNumberOfPoints() == 0)
-        {
-            continue;
-        }
-
-        vtkIdType pointRef = ImplantTools::GetNearestPoints(contour, points[i]);
-
-        std::list<std::pair<vtkIdType, vtkIdType>> lines;
-        ImplantTools::ExtractSortLines(contour, lines);
-
-        int cont = lines.size();
-
-        while (cont > -1 && lines.front().first != pointRef)
-        {
-            lines.push_back(lines.front());
-            lines.pop_front();
-            cont--;
-        }
-
-        if (cont < 0)
-        {
-            continue;
-        }
-
-        auto it1 = lines.begin();
-        auto it2 = lines.end();
-
-        for (; it1 != it2; ++it1)
-        {
-            double pnt[3];
-            contour->GetPoint((it1)->first, pnt);
-
-            if (latPlane.eval(pnt) > 0 && medPlane.eval(pnt) > 0)
-            {
-                parabola.push_back(Point(pnt[0], pnt[1], pnt[2]));
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        auto rit1 = lines.rbegin();
-        auto rit2 = lines.rend();
-
-        for (; rit1 != rit2; ++rit1)
-        {
-            double pnt[3];
-            contour->GetPoint((rit1)->first, pnt);
-
-            if (latPlane.eval(pnt) > 0 && medPlane.eval(pnt) > 0)
-            {
-                parabola.push_front(Point(pnt[0], pnt[1], pnt[2]));
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        Point myVertex;
-
-        try
-        {
-            myVertex = ImplantTools::getLocalMinimum(parabola, tempPlane, tempPlane.getProjectionVector(basePlane.getNormalVector()));
-        }
-        catch (...)
-        {
-            throw ImplantExceptionCode::CHECK_LANDMARKS_CAN_NOT_DETERMINE_WHITESIDE_LINE;
-        }
-
-        resultTemp.push_back(myVertex);
-    }
-
-    bool resultOk;
-    Plane fixPlane = Plane::getBestPlaneOutliers(resultTemp, mKneeGrooveOutLiers, resultOk, 0.4);
-
-    if (resultOk == false)
-    {
-        throw ImplantExceptionCode::CAN_NOT_DETERMINE_PATELLA_GROOVE;
-    }
-
-    fixPlane.reverseByPoint(medialEpicondyle);
-    Point condyleVector = medialCondyle - lateralCondyle;
-    Plane helpPlane;
-    helpPlane.init(vectorAxis, femurKneeCenter);
-    condyleVector = helpPlane.getProjectionVector(condyleVector);
-    Point vectorEpi = medialEpicondylePerp - lateralEpicondyle;
-    Point vectorGroove = fixPlane.getNormalVector();
-    vectorGroove = helpPlane.getProjectionVector(vectorGroove);
-
-    double angleEpi = ImplantTools::getAngleBetweenVectorsDegree(condyleVector, vectorEpi);
-    double angleGroove = ImplantTools::getAngleBetweenVectorsDegree(condyleVector, vectorGroove);
-
-    // Fixing medialEpicondylePerp attribute
-    if (abs(angleGroove - 3.0) < abs(angleEpi - 3.0))
-    {
-        Line Epi(vectorGroove, lateralEpicondyle);
-        this->medialEpicondylePerp = Epi.getProjectPoint(medialEpicondyle);
-    }
-
-    vtkSmartPointer<vtkPolyData> lastContour = ImplantTools::getMaxContour(femurPoly, fixPlane.getNormalVector(), fixPlane.getPoint());
-    mKneeGroovePath.clear();
-    std::list<std::pair<vtkIdType, vtkIdType>> lastLines;
-    ImplantTools::ExtractSortLines(lastContour, lastLines);
-    it1 = lastLines.begin();
-    it2 = lastLines.end();
-    for (; it1 != it2; ++it1)
-    {
-        double pnt[3];
-        lastContour->GetPoint((it1)->first, pnt);
-        if (coronal.eval(pnt) >= 0 && axial.eval(pnt) > 0)
-        {
-            mKneeGroovePath.push_back(Point(pnt[0], pnt[1], pnt[2]));
-        }
-    }
-}
-
-Plane Knee::getPatellaFrontPlane() const
-{
-    return mPatellaPlane;
-}
-
-Point Knee::getPatellaCenter() const
-{
-    return mPatella.getPatellaCenter();
-}
-
-Point Knee::getPatellaDistalPosteriorPoint() const
-{
-    return mPatellaDistalPosteriorPoint;
-}
-
-std::vector<Point> Knee::getKneeGroovePath() const
-{
-    return mKneeGroovePath;
-}
-
-//std::vector<Point> Knee::getKneeGrooveOutLiers() const
-//{
-//    return mKneeGrooveOutLiers;
-//}
-
-double Knee::getPatellaThickness() const
-{
-    return mPatella.getPatellaThickness();
-}
-
-double Knee::getPatellaDiameter() const
-{
-    return mPatella.getPatellaDiameter();
-}
-
-Patella Knee::getPatella() const
-{
-    return mPatella;
-}
 
 void Knee::setFemurCartilage(double pCartilage)
 {
