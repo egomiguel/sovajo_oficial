@@ -17,9 +17,9 @@ void HipFemurStemHeadImplant::init(const Point& pHeadBasePoint1, const Point& pH
 	
 	Plane headPlaneBase;
 	headPlaneBase.init(pHeadBasePoint1, pHeadBasePoint2, pHeadBasePoint3);
+	headPlaneBase.reverseByPoint(pHeadInsideCenterTopPoint);
 
-	mHeadInfSupVector = pHeadInsideCenterTopPoint - headPlaneBase.getProjectionPoint(pHeadInsideCenterTopPoint);
-	mHeadInfSupVector.normalice();
+	mHeadInfSupVector = headPlaneBase.getNormalVector();
 	mHeadInsideCenterTopPoint = pHeadInsideCenterTopPoint;
 
     isInit = true;

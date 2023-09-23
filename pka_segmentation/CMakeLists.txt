@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(THA_Implants VERSION 1.0.1 LANGUAGES CXX)
+project(PKA_Segmentation VERSION 1.0.1 LANGUAGES CXX)
 include(GenerateExportHeader)
 include(CMakePackageConfigHelpers)
 #find_package(ITK COMPONENTS ITKTransform REQUIRED)
@@ -8,41 +8,36 @@ include(${ITK_USE_FILE})
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(eigen3 eigen3/unsupported)
+include_directories(surface)
 find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
-set(Boost_COMPILER "-vc142")
-#find_package(PCL 1.10 REQUIRED COMPONENTS io filters)
-#include_directories(${PCL_INCLUDE_DIRS})
-#link_directories(${PCL_LIBRARY_DIRS})
-#add_definitions(${PCL_DEFINITIONS})
 file(GLOB_RECURSE _HDRS "*.hpp")
 file(GLOB_RECURSE _SRCS "*.cpp")
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-add_library(THA_Implants SHARED ${_HDRS} ${_SRCS})
-#target_link_libraries(THA_Implants PRIVATE ${ITK_LIBRARIES} ${OpenCV_LIBS} ${VTK_LIBRARIES} ${PCL_LIBRARIES})
-target_link_libraries(THA_Implants PRIVATE ${ITK_LIBRARIES} ${OpenCV_LIBS} ${VTK_LIBRARIES})
-
-generate_export_header(THA_Implants)
+add_library(PKA_Segmentation SHARED ${_HDRS} ${_SRCS})
+target_link_libraries(PKA_Segmentation PRIVATE ${ITK_LIBRARIES} ${OpenCV_LIBS} ${VTK_LIBRARIES})
+generate_export_header(PKA_Segmentation)
 target_include_directories(${PROJECT_NAME} PUBLIC 
 							"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>" 
 							"$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>" )
-install(TARGETS THA_Implants
-	EXPORT THA_ImplantsTargets
+
+							install(TARGETS PKA_Segmentation
+	EXPORT PKA_SegmentationTargets
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib
 	INCLUDES DESTINATION include)
 install(FILES ${_HDRS} DESTINATION include)
-install(FILES ${PROJECT_BINARY_DIR}/tha_implants_export.h DESTINATION include)
-install(EXPORT THA_ImplantsTargets
-        FILE THA_ImplantsTargets.cmake
-        DESTINATION lib/cmake/THA_Implants)
-configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/THA_ImplantsConfig.cmake.in
-	"${CMAKE_CURRENT_BINARY_DIR}/THA_ImplantsConfig.cmake"
-	INSTALL_DESTINATION lib/cmake/THA_Implants)
+install(FILES ${PROJECT_BINARY_DIR}/pka_segmentation_export.h DESTINATION include)
+install(EXPORT PKA_SegmentationTargets
+        FILE PKA_SegmentationTargets.cmake
+        DESTINATION lib/cmake/PKA_Segmentation)
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/PKA_SegmentationConfig.cmake.in
+	"${CMAKE_CURRENT_BINARY_DIR}/PKA_SegmentationConfig.cmake"
+	INSTALL_DESTINATION lib/cmake/PKA_Segmentation)
 install(FILES
-	"${CMAKE_CURRENT_BINARY_DIR}/THA_ImplantsConfig.cmake"
-	DESTINATION lib/cmake/THA_Implants)
+	"${CMAKE_CURRENT_BINARY_DIR}/PKA_SegmentationConfig.cmake"
+	DESTINATION lib/cmake/PKA_Segmentation)
 set(CPACK_GENERATOR NSIS)
 set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}")
 set(CPACK_PACKAGE_VENDOR "CMake.org")

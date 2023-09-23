@@ -25,6 +25,9 @@ void HipPelvisCupImplant::init(const Point& pTopPoint, const Point& pBasePoint1,
     this->mBasePoint2 = pBasePoint2;
     this->mBasePoint3 = pBasePoint3;
 
+	mBasePlane.init(pBasePoint1, pBasePoint2, pBasePoint3);
+	mBasePlane.reverseByPoint(pTopPoint);
+
 	if (pExternalPoints.size() > 0)
 	{
 		auto fitSphere = ImplantTools::fitSphere(pExternalPoints);
@@ -36,9 +39,6 @@ void HipPelvisCupImplant::init(const Point& pTopPoint, const Point& pBasePoint1,
 		{
 			throw ImplantExceptionCode::CAN_NOT_FIT_SPHERE_TO_CUP_POINTS;
 		}
-
-		mBasePlane.init(pBasePoint1, pBasePoint2, pBasePoint3);
-		mBasePlane.reverseByPoint(pTopPoint);
 
 		double distance = mBasePlane.getDistanceFromPoint(mCenter);
 		if (distance < mRadius)
@@ -99,6 +99,7 @@ void HipPelvisCupImplant::init(const Point& pTopPoint, const Point& pBasePoint1,
 	else
 	{
 		mHemiSphereSurfaceArea = 0;
+		mRadius = -1;
 	}
 
     isInit = true;
@@ -175,16 +176,21 @@ Point HipPelvisCupImplant::getTopPoint() const
 
 Point HipPelvisCupImplant::getCenterOfRotationImplant() const
 {
-    Plane myPlane;
-    myPlane.init(mBasePoint1, mBasePoint2, mBasePoint3);
-    return myPlane.getProjectionPoint(mTopPoint);
+	if (mRadius <= 0)
+	{
+		Plane myPlane;
+		myPlane.init(mBasePoint1, mBasePoint2, mBasePoint3);
+		return myPlane.getProjectionPoint(mTopPoint);
+	}
+	else
+	{
+		return mCenter;
+	}
 }
 
 Plane HipPelvisCupImplant::getBasePlane() const
 {
-    Plane myPlane;
-    myPlane.init(mBasePoint1, mBasePoint2, mBasePoint3);
-    return myPlane;
+	return mBasePlane;
 }
 
 vtkSmartPointer<vtkPolyData> HipPelvisCupImplant::getHemiSphereCup() const
