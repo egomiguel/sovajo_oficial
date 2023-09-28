@@ -30,6 +30,8 @@ namespace THA
 
 			itk::Vector< double, 3 > setCupTranslation(double pShifSuperior, double pShifLateral, double pShiftAnterior);
 
+			itk::Vector< double, 3 > setStemTranslation(double pShifSuperior, double pShifLateral, double pShiftAnterior);
+
 			double getCupInclination() const;
 
 			double getCupAntversion() const;
@@ -39,6 +41,12 @@ namespace THA
 			double getCupShiftLateral() const;
 
 			double getCupShiftAnterior() const;
+
+			double getStemShiftSuperior() const;
+
+			double getStemShiftLateral() const;
+
+			double getStemShiftAnterior() const;
 
 			double getStemVersion() const;
 
