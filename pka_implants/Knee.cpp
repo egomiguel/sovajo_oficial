@@ -1757,9 +1757,7 @@ void Knee::findFemurCondylesUsingLeastSquare()
 	Point diff = getLateralEpicondyle() - getMedialEpicondyle();
 	double targetSize = sqrt(diff.dot(diff));
 
-	std::vector<std::vector<Point>> myOfficialPoints;
 	std::vector<cv::Point3d> myTemplatePoints;
-	std::vector<Point> myCheckPoints;
 
 	Point latInferiorCondyleIn, medInferiorCondyleIn, latPosteriorCondyleIn, medPosteriorCondyleIn;
 	Point latInferiorCondyleOut, medInferiorCondyleOut, latPosteriorCondyleOut, medPosteriorCondyleOut;
@@ -1771,8 +1769,6 @@ void Knee::findFemurCondylesUsingLeastSquare()
 		sourceCenter = templateObj.centerLeft;
 		tScale = (targetSize / templateObj.sizeLeft);
 		myTemplatePoints = templateObj.mTemplateLeft;
-		myOfficialPoints = templateObj.mOfficialLeftPoints;
-		myCheckPoints = templateObj.mLeftCheckPoints;
 
 		latInferiorCondyleIn = templateObj.leftLatInferiorCondyleIn;
 		medInferiorCondyleIn = templateObj.leftMedInferiorCondyleIn;
@@ -1791,8 +1787,6 @@ void Knee::findFemurCondylesUsingLeastSquare()
 		sourceCenter = templateObj.centerRight;
 		tScale = (targetSize / templateObj.sizeLeft);
 		myTemplatePoints = templateObj.mTemplateRight;
-		myOfficialPoints = templateObj.mOfficialRightPoints;
-		myCheckPoints = templateObj.mRightCheckPoints;
 
 		latInferiorCondyleIn = templateObj.rightLatInferiorCondyleIn;
 		medInferiorCondyleIn = templateObj.rightMedInferiorCondyleIn;
