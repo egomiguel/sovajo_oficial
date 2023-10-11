@@ -377,7 +377,7 @@ double HipPelvisImplantsMatchInfo::getCoverageFraction() const
 	return 0;
 }
 
-itk::Matrix< double, 3, 3 > HipPelvisImplantsMatchInfo::setCupAngles(double pAbductionAngle, double pAnteversionAngle)
+itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::setCupAngles(double pAbductionAngle, double pAnteversionAngle)
 {
 	std::vector<cv::Point3d> implantVectors;
 	std::vector<cv::Point3d> pelvisVectors;
@@ -405,10 +405,18 @@ itk::Matrix< double, 3, 3 > HipPelvisImplantsMatchInfo::setCupAngles(double pAbd
 	cv::Mat implantMatrix = cv::Mat(implantVectors.size(), 3, CV_64F, implantVectors.data());
 	cv::Mat pelvisMatrix = cv::Mat(pelvisVectors.size(), 3, CV_64F, pelvisVectors.data());
 
+	cv::Mat CenterBefore = mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint() + mTranslationCup;
+
 	cv::Mat inverse = (implantMatrix.t()).inv();
 	mRotationCup = (pelvisMatrix.t()) * inverse;
 
-	return ImplantTools::CVRotationToITKMatrix(mRotationCup);
+	cv::Mat CenterAfter = mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint() + mTranslationCup;
+
+	cv::Mat diff = CenterAfter - CenterBefore;
+	
+	mTranslationCup = mTranslationCup - diff;
+
+	return getITKCupTransform();
 }
 
 itk::Vector< double, 3 > HipPelvisImplantsMatchInfo::setCupTranslation(double pShifSuperior, double pShifLateral, double pShiftAnterior)

@@ -26,7 +26,7 @@ namespace THA
 
 			itk::Matrix< double, 3, 3 > setStemVersionAngle(double pStemVersionAngleDegree);
 
-			itk::Matrix< double, 3, 3 > setCupAngles(double pAbductionAngle, double pAnteversionAngle);
+			itk::Rigid3DTransform<>::Pointer setCupAngles(double pAbductionAngle, double pAnteversionAngle);
 
 			itk::Vector< double, 3 > setCupTranslation(double pShifSuperior, double pShifLateral, double pShiftAnterior);
 
