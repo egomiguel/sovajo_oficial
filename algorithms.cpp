@@ -2932,8 +2932,9 @@ void PelvisImplantMatch()
 
 	itk::Rigid3DTransform<>::Pointer transformMatch = objMatch.getTransform(50, 30, 1, 1, 1);
 	THA::IMPLANTS::HipFemurStemImplant pImplantStem;
-	auto pelvisInfo = THA::IMPLANTS::HipPelvisImplantsMatchInfo(objPelvis, centerOfRotation, objImplant, pImplantStem, 
-																transformMatch, transformMatch);
+	THA::IMPLANTS::HipFemurStemHeadImplant pImplantHead;
+	auto pelvisInfo = THA::IMPLANTS::HipPelvisImplantsMatchInfo(objPelvis, centerOfRotation, objImplant, pImplantStem, pImplantHead,
+																transformMatch, transformMatch, transformMatch);
 
 	double antVersion = pelvisInfo.getCupAntversion();
 	double inclination = pelvisInfo.getCupInclination();

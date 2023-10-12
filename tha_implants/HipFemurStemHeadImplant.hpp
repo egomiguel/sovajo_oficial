@@ -12,13 +12,17 @@ namespace THA
 		{
 		public:
 			HipFemurStemHeadImplant();
-			void init(const Point& pHeadBasePoint1, const Point& pHeadBasePoint2, const Point& pHeadBasePoint3, const Point& pHeadInsideCenterTopPoint);
+			void init(const Point& pHeadBasePoint1, const Point& pHeadBasePoint2, const Point& pHeadBasePoint3, 
+					  const Point& pHeadInsideCenterTopPoint, const std::vector<Point>& pExternalPoints);
 			Point getVectorInfSup() const;
 			Point getInsideCenterTopPoint() const;
+			Point getCenterOfSphere() const;
 
 		private:
 			Point mHeadInfSupVector;
 			Point mHeadInsideCenterTopPoint;
+			Point mSphereCenter;
+			double mRadius;
 			bool isInit;
 		};
 

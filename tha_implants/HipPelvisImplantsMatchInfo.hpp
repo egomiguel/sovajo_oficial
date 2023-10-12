@@ -3,6 +3,7 @@
 
 #include "HipPelvisCupImplant.hpp"
 #include "HipFemurStemImplant.hpp"
+#include "HipFemurStemHeadImplant.hpp"
 #include "HipPelvis.hpp"
 #include <itkRigid3DTransform.h>
 #include "tha_implants_export.h"
@@ -15,14 +16,18 @@ namespace THA
 		{
 		public:
 			HipPelvisImplantsMatchInfo(const HipPelvis& pPelvis, const Point& pHipCenterOfRotation, const HipPelvisCupImplant& pImplantCup, 
-				const HipFemurStemImplant& pImplantStem, const itk::Rigid3DTransform<>::Pointer pImplantToBoneCupTransform, 
-				const itk::Rigid3DTransform<>::Pointer pImplantToBoneStemTransform);
+				const HipFemurStemImplant& pImplantStem, const HipFemurStemHeadImplant& pImplantStemHead,
+				const itk::Rigid3DTransform<>::Pointer pImplantToBoneCupTransform, 
+				const itk::Rigid3DTransform<>::Pointer pImplantToBoneStemTransform,
+				const itk::Rigid3DTransform<>::Pointer pImplantHeadToStemTransform);
 			
 			~HipPelvisImplantsMatchInfo();
 
 			void setCupTransform(const itk::Rigid3DTransform<>::Pointer pImplantToBoneCupTransform);
 
 			void setStemTransform(const itk::Rigid3DTransform<>::Pointer pImplantToBoneStemTransform);
+
+			void setStemHeadTransform(const itk::Rigid3DTransform<>::Pointer pImplantHeadToStemTransform);
 
 			itk::Matrix< double, 3, 3 > setStemVersionAngle(double pStemVersionAngleDegree);
 
@@ -31,6 +36,8 @@ namespace THA
 			itk::Vector< double, 3 > setCupTranslation(double pShifSuperior, double pShifLateral, double pShiftAnterior);
 
 			itk::Vector< double, 3 > setStemTranslation(double pShifSuperior, double pShifLateral, double pShiftAnterior);
+
+			itk::Vector< double, 3 > matchStemToHipRotationCenter();
 
 			double getCupInclination() const;
 
@@ -68,9 +75,13 @@ namespace THA
 
 			HipFemurStemImplant mImplantStem;
 
+			HipFemurStemHeadImplant mImplantStemHead;
+
 			HipPelvis mPelvis;
 
 			cv::Mat mRotationStem, mTranslationStem;
+
+			cv::Mat mRotationStemHead, mTranslationStemHead;
 
 			cv::Mat mRotationCup, mTranslationCup;
 

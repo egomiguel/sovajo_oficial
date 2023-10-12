@@ -10,15 +10,19 @@
 using namespace THA::IMPLANTS;
 
 HipPelvisImplantsMatchInfo::HipPelvisImplantsMatchInfo(const HipPelvis& pPelvis, const Point& pHipCenterOfRotation, const HipPelvisCupImplant& pImplantCup,
-	const HipFemurStemImplant& pImplantStem, const itk::Rigid3DTransform<>::Pointer pImplantToBoneCupTransform,
-	const itk::Rigid3DTransform<>::Pointer pImplantToBoneStemTransform)
+	const HipFemurStemImplant& pImplantStem, const HipFemurStemHeadImplant& pImplantStemHead,
+	const itk::Rigid3DTransform<>::Pointer pImplantToBoneCupTransform,
+	const itk::Rigid3DTransform<>::Pointer pImplantToBoneStemTransform,
+	const itk::Rigid3DTransform<>::Pointer pImplantHeadToStemTransform)
 {
 	this->mPelvis = pPelvis;
 	this->mImplantCup = pImplantCup;
 	this->mHipCenterOfRotation = pHipCenterOfRotation;
 	this->mImplantStem = pImplantStem;
+	this->mImplantStemHead = pImplantStemHead;
 	setStemTransform(pImplantToBoneStemTransform);
 	setCupTransform(pImplantToBoneCupTransform);
+	setStemHeadTransform(pImplantHeadToStemTransform);
 }
 
 HipPelvisImplantsMatchInfo::~HipPelvisImplantsMatchInfo()
@@ -231,14 +235,15 @@ double HipPelvisImplantsMatchInfo::getCupShiftAnterior() const
 
 double HipPelvisImplantsMatchInfo::getStemShiftSuperior() const
 {
-	cv::Mat stemCenterMat = (mRotationStem * mImplantStem.getHeadCenter().ToMatPoint()) + mTranslationStem;
+	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
+	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
+	Point stemCenter = Point(stemHeadCenter);
 
 	Line superiorLine(mPelvis.getPelvisVectorInfSup(), mHipCenterOfRotation);
 
 	Plane axial;
 	axial.init(mPelvis.getPelvisVectorInfSup(), mHipCenterOfRotation);
 
-	Point stemCenter = Point(stemCenterMat);
 	stemCenter = superiorLine.getProjectPoint(stemCenter);
 	double distance = ImplantTools::getDistanceBetweenPoints(stemCenter, mHipCenterOfRotation);
 
@@ -254,14 +259,15 @@ double HipPelvisImplantsMatchInfo::getStemShiftSuperior() const
 
 double HipPelvisImplantsMatchInfo::getStemShiftLateral() const
 {
-	cv::Mat stemCenterMat = (mRotationStem * mImplantStem.getHeadCenter().ToMatPoint()) + mTranslationStem;
+	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
+	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
+	Point stemCenter = Point(stemHeadCenter);
 
 	Line lateralLine(mPelvis.getPelvisVectorLateralASIS(), mHipCenterOfRotation);
 
 	Plane sagital;
 	sagital.init(mPelvis.getPelvisVectorLateralASIS(), mHipCenterOfRotation);
 
-	Point stemCenter = Point(stemCenterMat);
 	stemCenter = lateralLine.getProjectPoint(stemCenter);
 	double distance = ImplantTools::getDistanceBetweenPoints(stemCenter, mHipCenterOfRotation);
 
@@ -277,14 +283,15 @@ double HipPelvisImplantsMatchInfo::getStemShiftLateral() const
 
 double HipPelvisImplantsMatchInfo::getStemShiftAnterior() const
 {
-	cv::Mat stemCenterMat = (mRotationStem * mImplantStem.getHeadCenter().ToMatPoint()) + mTranslationStem;
+	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
+	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
+	Point stemCenter = Point(stemHeadCenter);
 
 	Line anteriorLine(mPelvis.getPelvisVectorAP(), mHipCenterOfRotation);
 
 	Plane coronal;
 	coronal.init(mPelvis.getPelvisVectorAP(), mHipCenterOfRotation);
 
-	Point stemCenter = Point(stemCenterMat);
 	stemCenter = anteriorLine.getProjectPoint(stemCenter);
 	double distance = ImplantTools::getDistanceBetweenPoints(stemCenter, mHipCenterOfRotation);
 
@@ -302,6 +309,12 @@ void HipPelvisImplantsMatchInfo::setStemTransform(const itk::Rigid3DTransform<>:
 {
 	mRotationStem = Rigid3DTransformToCVRotation(pImplantToBoneStemTransform);
 	mTranslationStem = Rigid3DTransformToCVTranslation(pImplantToBoneStemTransform);
+}
+
+void HipPelvisImplantsMatchInfo::setStemHeadTransform(const itk::Rigid3DTransform<>::Pointer pImplantHeadToStemTransform)
+{
+	mRotationStemHead = Rigid3DTransformToCVRotation(pImplantHeadToStemTransform);
+	mTranslationStemHead = Rigid3DTransformToCVTranslation(pImplantHeadToStemTransform);
 }
 
 itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::getITKStemTransform() const
@@ -436,14 +449,27 @@ itk::Vector< double, 3 > HipPelvisImplantsMatchInfo::setCupTranslation(double pS
 
 itk::Vector< double, 3 > HipPelvisImplantsMatchInfo::setStemTranslation(double pShifSuperior, double pShifLateral, double pShiftAnterior)
 {
-	cv::Mat stemCenterMat = (mRotationStem * mImplantStem.getHeadCenter().ToMatPoint()) + mTranslationStem;
-	Point stemCenter = Point(stemCenterMat);
+	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
+	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
+	Point stemCenter = Point(stemHeadCenter);
 
 	Point newCenterStem = stemCenter + pShifSuperior * mPelvis.getPelvisVectorInfSup();
 	newCenterStem = newCenterStem + pShifLateral * mPelvis.getPelvisVectorLateralASIS();
 	newCenterStem = newCenterStem + pShiftAnterior * mPelvis.getPelvisVectorAP();
 
 	Point diff = newCenterStem - stemCenter;
+	mTranslationStem = mTranslationStem + diff.ToMatPoint();
+
+	return ImplantTools::CVTranslationToITKVector(mTranslationStem);
+}
+
+itk::Vector< double, 3 > HipPelvisImplantsMatchInfo::matchStemToHipRotationCenter()
+{
+	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
+	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
+	Point stemCenter = Point(stemHeadCenter);
+
+	Point diff = mHipCenterOfRotation - stemCenter;
 	mTranslationStem = mTranslationStem + diff.ToMatPoint();
 
 	return ImplantTools::CVTranslationToITKVector(mTranslationStem);
