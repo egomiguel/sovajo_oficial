@@ -10,16 +10,15 @@ HipFemurStemHeadImplantMatch::HipFemurStemHeadImplantMatch()
     isInit = false;
 }
 
-void HipFemurStemHeadImplantMatch::init(const HipFemurStemHeadImplant& pImplant, const Point& pStemHeadCenter, const Point& pStemNeckCenter)
+void HipFemurStemHeadImplantMatch::init(const HipFemurStemHeadImplant& pImplantHead, const HipFemurStemImplant& pImplantStem)
 {
     if (isInit == true)
     {
         throw ImplantExceptionCode::ALREADY_INITIALIZED_HIP_FEMUR_STEM_IMPLANT_MATCH;
     }
 
-    this->mImplant = pImplant;
-	this->mStemHeadCenter = pStemHeadCenter;
-	this->mStemNeckCenter = pStemNeckCenter;
+    this->mImplantStem = pImplantStem;
+	this->mImplantHead = pImplantHead;
     getRigidTransform();
     isInit = true;
 }
@@ -56,10 +55,9 @@ itk::Vector< double, 3 > HipFemurStemHeadImplantMatch::GetTranslationMatrix() co
 
 void HipFemurStemHeadImplantMatch::getRigidTransform()
 {
-	Point stemNeckVector = mStemHeadCenter - mStemNeckCenter;
-	stemNeckVector.normalice();
+	Point stemNeckVector = mImplantStem.getVectorNeckToHead();
 
-	Point stemHeadVector = mImplant.getVectorInfSup();
+	Point stemHeadVector = mImplantHead.getVectorInfSup();
 
 	double angle = ImplantTools::getAngleBetweenVectors(stemNeckVector, stemHeadVector);
 
@@ -67,7 +65,7 @@ void HipFemurStemHeadImplantMatch::getRigidTransform()
 	rotationAxisVector.normalice();
 
 	rotationMatrix = ImplantTools::getRotateMatrix(rotationAxisVector, angle);
-    translationMatrix = mStemHeadCenter.ToMatPoint() - (rotationMatrix * mImplant.getInsideCenterTopPoint().ToMatPoint());
+    translationMatrix = mImplantStem.getHeadCenter().ToMatPoint() - (rotationMatrix * mImplantHead.getInsideCenterTopPoint().ToMatPoint());
 }
 
 itk::Rigid3DTransform<>::Pointer HipFemurStemHeadImplantMatch::getStemHeadTransform() const

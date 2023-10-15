@@ -233,7 +233,7 @@ double HipPelvisImplantsMatchInfo::getCupShiftAnterior() const
 	}
 }
 
-double HipPelvisImplantsMatchInfo::getStemShiftSuperior() const
+double HipPelvisImplantsMatchInfo::getStemShiftSuperiorHip() const
 {
 	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
 	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
@@ -243,7 +243,7 @@ double HipPelvisImplantsMatchInfo::getStemShiftSuperior() const
 
 	Plane axial;
 	axial.init(mPelvis.getPelvisVectorInfSup(), mHipCenterOfRotation);
-
+	
 	stemCenter = superiorLine.getProjectPoint(stemCenter);
 	double distance = ImplantTools::getDistanceBetweenPoints(stemCenter, mHipCenterOfRotation);
 
@@ -257,7 +257,7 @@ double HipPelvisImplantsMatchInfo::getStemShiftSuperior() const
 	}
 }
 
-double HipPelvisImplantsMatchInfo::getStemShiftLateral() const
+double HipPelvisImplantsMatchInfo::getStemShiftLateralHip() const
 {
 	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
 	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
@@ -281,7 +281,7 @@ double HipPelvisImplantsMatchInfo::getStemShiftLateral() const
 	}
 }
 
-double HipPelvisImplantsMatchInfo::getStemShiftAnterior() const
+double HipPelvisImplantsMatchInfo::getStemShiftAnteriorHip() const
 {
 	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
 	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
@@ -294,6 +294,87 @@ double HipPelvisImplantsMatchInfo::getStemShiftAnterior() const
 
 	stemCenter = anteriorLine.getProjectPoint(stemCenter);
 	double distance = ImplantTools::getDistanceBetweenPoints(stemCenter, mHipCenterOfRotation);
+
+	if (coronal.eval(stemCenter) >= 0)
+	{
+		return distance;
+	}
+	else
+	{
+		return -distance;
+	}
+}
+
+double HipPelvisImplantsMatchInfo::getStemShiftSuperiorCup() const
+{
+	cv::Mat cupCenterMat = (mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint()) + mTranslationCup;
+	Point cupCenter = Point(cupCenterMat);
+
+	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
+	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
+	Point stemCenter = Point(stemHeadCenter);
+
+	Line superiorLine(mPelvis.getPelvisVectorInfSup(), cupCenter);
+
+	Plane axial;
+	axial.init(mPelvis.getPelvisVectorInfSup(), cupCenter);
+
+	stemCenter = superiorLine.getProjectPoint(stemCenter);
+	double distance = ImplantTools::getDistanceBetweenPoints(stemCenter, cupCenter);
+
+	if (axial.eval(stemCenter) >= 0)
+	{
+		return distance;
+	}
+	else
+	{
+		return -distance;
+	}
+}
+
+double HipPelvisImplantsMatchInfo::getStemShiftLateralCup() const
+{
+	cv::Mat cupCenterMat = (mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint()) + mTranslationCup;
+	Point cupCenter = Point(cupCenterMat);
+
+	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
+	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
+	Point stemCenter = Point(stemHeadCenter);
+
+	Line lateralLine(mPelvis.getPelvisVectorLateralASIS(), cupCenter);
+
+	Plane sagital;
+	sagital.init(mPelvis.getPelvisVectorLateralASIS(), cupCenter);
+
+	stemCenter = lateralLine.getProjectPoint(stemCenter);
+	double distance = ImplantTools::getDistanceBetweenPoints(stemCenter, cupCenter);
+
+	if (sagital.eval(stemCenter) >= 0)
+	{
+		return distance;
+	}
+	else
+	{
+		return -distance;
+	}
+}
+
+double HipPelvisImplantsMatchInfo::getStemShiftAnteriorCup() const
+{
+	cv::Mat cupCenterMat = (mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint()) + mTranslationCup;
+	Point cupCenter = Point(cupCenterMat);
+
+	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
+	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
+	Point stemCenter = Point(stemHeadCenter);
+
+	Line anteriorLine(mPelvis.getPelvisVectorAP(), cupCenter);
+
+	Plane coronal;
+	coronal.init(mPelvis.getPelvisVectorAP(), cupCenter);
+
+	stemCenter = anteriorLine.getProjectPoint(stemCenter);
+	double distance = ImplantTools::getDistanceBetweenPoints(stemCenter, cupCenter);
 
 	if (coronal.eval(stemCenter) >= 0)
 	{
@@ -470,6 +551,21 @@ itk::Vector< double, 3 > HipPelvisImplantsMatchInfo::matchStemToHipRotationCente
 	Point stemCenter = Point(stemHeadCenter);
 
 	Point diff = mHipCenterOfRotation - stemCenter;
+	mTranslationStem = mTranslationStem + diff.ToMatPoint();
+
+	return ImplantTools::CVTranslationToITKVector(mTranslationStem);
+}
+
+itk::Vector< double, 3 > HipPelvisImplantsMatchInfo::matchStemToCupRotationCenter()
+{
+	cv::Mat cupCenterMat = (mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint()) + mTranslationCup;
+	Point cupCenter = Point(cupCenterMat);
+
+	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
+	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
+	Point stemCenter = Point(stemHeadCenter);
+
+	Point diff = cupCenter - stemCenter;
 	mTranslationStem = mTranslationStem + diff.ToMatPoint();
 
 	return ImplantTools::CVTranslationToITKVector(mTranslationStem);

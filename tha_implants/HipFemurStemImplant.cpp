@@ -8,7 +8,7 @@ HipFemurStemImplant::HipFemurStemImplant()
     isInit = false;
 }
 
-void HipFemurStemImplant::init(const Point& pTopPoint, const Point& pBasePoint, const Point& pHeadCenter, const Point& pNeckCenter)
+void HipFemurStemImplant::init(const Point& pTopPoint, const Point& pBasePoint, const Point& pHeadCenter, const std::vector<Point>& pHeadPoints)
 {
     if (isInit == true)
     {
@@ -18,7 +18,13 @@ void HipFemurStemImplant::init(const Point& pTopPoint, const Point& pBasePoint, 
     this->mTopPoint = pTopPoint;
     this->mBasePoint = pBasePoint;
     this->mHeadCenter = pHeadCenter;
-	this->mNeckCenter = pNeckCenter;
+	bool result;
+	this->mStemHeadPlane = Plane::getBestPlane(pHeadPoints, result);
+	if (result == false)
+	{
+		throw ImplantExceptionCode::CAN_NOT_FIT_PLANE_TO_STEM_HEAD;
+	}
+	this->mStemHeadPlane.reverseByPoint(mTopPoint, false);
     isInit = true;
 }
 
@@ -31,9 +37,7 @@ Point HipFemurStemImplant::getVectorInfSup() const
 
 Point HipFemurStemImplant::getVectorNeckToHead() const
 {
-	Point neckAxis = mHeadCenter - mNeckCenter;
-	neckAxis.normalice();
-	return neckAxis;
+	return mStemHeadPlane.getNormalVector();
 }
 
 Point HipFemurStemImplant::getVectorNeckToHeadPerpendicularToInfSup() const

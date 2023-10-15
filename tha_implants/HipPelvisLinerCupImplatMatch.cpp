@@ -58,12 +58,9 @@ void HipPelvisLinerCupImplantMatch::getRigidTransform()
 	auto cupBase = mCupImplant.getBasePlane();
 	cupBase.reverseByPoint(mCupImplant.getTopPoint());
 
-	auto linerBase = mLinerImplant.getBasePlane();
-	linerBase.reverseByPoint(mLinerImplant.getTopPoint());
-
 	Point cupVector = cupBase.getNormalVector();
 
-	Point linerVector = linerBase.getNormalVector();
+	Point linerVector = mLinerImplant.getCenterToTopVector();
 
 	double angle = ImplantTools::getAngleBetweenVectors(cupVector, linerVector);
 

@@ -2,6 +2,7 @@
 #define THA_HIP_FEMUR_STEM_HEAD_IMPLANT_MATCH_H
 
 #include "HipFemurStemHeadImplant.hpp"
+#include "HipFemurStemImplant.hpp"
 #include <itkRigid3DTransform.h>
 #include "tha_implants_export.h"
 
@@ -14,7 +15,7 @@ namespace THA
 		public:
 			HipFemurStemHeadImplantMatch();
 
-			void init(const HipFemurStemHeadImplant& pImplant, const Point& pStemHeadCenter, const Point& pStemNeckCenter);
+			void init(const HipFemurStemHeadImplant& pImplantHead, const HipFemurStemImplant& pImplantStem);
 
 			itk::Matrix< double, 3, 3 > GetRotationMatrix() const;
 
@@ -23,12 +24,11 @@ namespace THA
 			itk::Rigid3DTransform<>::Pointer getStemHeadTransform() const;
 
 		private:
-			HipFemurStemHeadImplant mImplant;
+			HipFemurStemImplant mImplantStem;
+			HipFemurStemHeadImplant mImplantHead;
+
 			cv::Mat rotationMatrix;
 			cv::Mat translationMatrix;
-
-			Point mStemHeadCenter;
-			Point mStemNeckCenter;
 
 			void getRigidTransform();
 

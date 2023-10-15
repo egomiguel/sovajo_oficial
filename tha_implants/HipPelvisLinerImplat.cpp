@@ -13,7 +13,7 @@ HipPelvisLinerImplant::HipPelvisLinerImplant()
 	isInit = false;
 }
 
-void HipPelvisLinerImplant::init(const Point& pTopPoint, const Point& pBasePoint1, const Point& pBasePoint2, const Point& pBasePoint3, const std::vector<Point>& pInternalSpherePoints)
+void HipPelvisLinerImplant::init(const Point& pTopPoint, const std::vector<Point>& pInternalSpherePoints)
 {
 	if (isInit == true)
 	{
@@ -21,9 +21,6 @@ void HipPelvisLinerImplant::init(const Point& pTopPoint, const Point& pBasePoint
 	}
 
 	this->mTopPoint = pTopPoint;
-	this->mBasePoint1 = pBasePoint1;
-	this->mBasePoint2 = pBasePoint2;
-	this->mBasePoint3 = pBasePoint3;
 
 	auto fitSphere = ImplantTools::fitSphere(pInternalSpherePoints);
 	mCenter = fitSphere.first;
@@ -33,9 +30,6 @@ void HipPelvisLinerImplant::init(const Point& pTopPoint, const Point& pBasePoint
 	{
 		throw ImplantExceptionCode::CAN_NOT_FIT_SPHERE_TO_CUP_POINTS;
 	}
-
-	mBasePlane.init(pBasePoint1, pBasePoint2, pBasePoint3);
-	mBasePlane.reverseByPoint(pTopPoint);
 
 	isInit = true;
 }
@@ -50,7 +44,9 @@ Point HipPelvisLinerImplant::getCenterOfRotationImplant() const
 	return mCenter;
 }
 
-Plane HipPelvisLinerImplant::getBasePlane() const
+Point HipPelvisLinerImplant::getCenterToTopVector() const
 {
-	return mBasePlane;
+	Point vector = mTopPoint - mCenter;
+	vector.normalice();
+	return vector;
 }

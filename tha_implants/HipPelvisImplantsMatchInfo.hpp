@@ -39,6 +39,8 @@ namespace THA
 
 			itk::Vector< double, 3 > matchStemToHipRotationCenter();
 
+			itk::Vector< double, 3 > matchStemToCupRotationCenter();
+
 			double getCupInclination() const;
 
 			double getCupAntversion() const;
@@ -49,11 +51,17 @@ namespace THA
 
 			double getCupShiftAnterior() const;
 
-			double getStemShiftSuperior() const;
+			double getStemShiftSuperiorHip() const;
 
-			double getStemShiftLateral() const;
+			double getStemShiftLateralHip() const;
 
-			double getStemShiftAnterior() const;
+			double getStemShiftAnteriorHip() const;
+
+			double getStemShiftSuperiorCup() const;
+
+			double getStemShiftLateralCup() const;
+
+			double getStemShiftAnteriorCup() const;
 
 			double getStemVersion() const;
 

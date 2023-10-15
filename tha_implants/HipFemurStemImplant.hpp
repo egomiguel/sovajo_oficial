@@ -12,7 +12,7 @@ namespace THA
 		{
 		public:
 			HipFemurStemImplant();
-			void init(const Point& pTopPoint, const Point& pBasePoint, const Point& pHeadCenter, const Point& pNeckCenter);
+			void init(const Point& pTopPoint, const Point& pBasePoint, const Point& pHeadCenter, const std::vector<Point>& pHeadPoints);
 			Point getVectorInfSup() const;
 			Point getVectorLatMed() const;
 			Point getVectorNeckToHead() const;
@@ -21,7 +21,8 @@ namespace THA
 			Point getCanalAxisTopPoint() const;
 
 		private:
-			Point mTopPoint, mBasePoint, mHeadCenter, mNeckCenter;
+			Point mTopPoint, mBasePoint, mHeadCenter;
+			Plane mStemHeadPlane;
 			bool isInit;
 		};
 
