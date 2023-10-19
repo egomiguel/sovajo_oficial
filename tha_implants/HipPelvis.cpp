@@ -184,35 +184,28 @@ double HipPelvis::getCombinedOffsetDistanceOppsite() const
 	return midLine.getDistanceFromPoint(kneeCenterOnCanalAxis);
 }
 
-double HipPelvis::getHipLengthDistance(const Point& pMechanicalAxis) const
-{
-	/*auto femurObj = mFemurOperationSide;
-
-	Point mechanicalAxis = pMechanicalAxis;
-	mechanicalAxis.normalice();
-	mechanicalAxis = mPlaneAPP.getProjectionVector(mechanicalAxis);
-	mechanicalAxis.normalice();
-	Point refVector = getPelvisVectorInfSup();
-	cv::Mat rotation = ImplantTools::GetGeneralRotateTransformVectors(mechanicalAxis, refVector);
-
-	Point ref = mPlaneAPP.getProjectionPoint(femurObj.getLesserTrochanter());
-	auto refMat = rotation * ref.ToMatPoint();
-	ref = Point(refMat);
-
-	Line lineASIS = Line::makeLineWithPoints(mRightASIS, mLeftASIS);
-	return lineASIS.getDistanceFromPoint(ref);*/
-
-	return getHipLengthDistance();
-}
-
-double HipPelvis::getCombinedOffsetDistance(const Point& pCanalAxis, const Point& pCanalAxisPoint) const
+double HipPelvis::getHipLengthDistance(const cv::Mat& pRotation, const cv::Mat& pTranslation) const
 {
 	auto femurObj = mFemurOperationSide;
+	cv::Mat trochanterMat = pRotation * femurObj.getLesserTrochanter().ToMatPoint() + pTranslation;
+	Point ref = mPlaneAPP.getProjectionPoint(Point(trochanterMat));
+
+	Line lineASIS = Line::makeLineWithPoints(mRightASIS, mLeftASIS);
+	return lineASIS.getDistanceFromPoint(ref);
+}
+
+double HipPelvis::getCombinedOffsetDistance(const cv::Mat& pRotation, const cv::Mat& pTranslation) const
+{
+	auto femurObj = mFemurOperationSide;
+
+	cv::Mat canalAxisMat = pRotation * femurObj.getCanalAxisVectorInfSup().ToMatPoint();
+	cv::Mat canalPointMat = pRotation * femurObj.getCanalAxisPoint().ToMatPoint() + pTranslation;
+	cv::Mat kneeCenterMat = pRotation * femurObj.getKneeCenter().ToMatPoint() + pTranslation;
 	
-	Point canalAxis = mPlaneAPP.getProjectionVector(pCanalAxis);
-	Point canalPoint = mPlaneAPP.getProjectionPoint(pCanalAxisPoint);
+	Point canalAxis = mPlaneAPP.getProjectionVector(canalAxisMat);
+	Point canalPoint = mPlaneAPP.getProjectionPoint(canalPointMat);
 	Line canalLine(canalAxis, canalPoint);
-	Point kneeCenterOnCanalAxis = canalLine.getProjectPoint(femurObj.getKneeCenter());
+	Point kneeCenterOnCanalAxis = canalLine.getProjectPoint(kneeCenterMat);
 
 	Point centerASIS = (getRightASIS() + getLeftASIS()) / 2.;
 	Line midLine(getPelvisVectorInfSup(), centerASIS);

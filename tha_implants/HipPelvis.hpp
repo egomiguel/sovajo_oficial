@@ -39,8 +39,8 @@ namespace THA
 			double getCombinedOffsetDistance() const;
 			double getCombinedOffsetDistanceOppsite() const;
 
-			double getHipLengthDistance(const Point& pMechanicalAxis) const;
-			double getCombinedOffsetDistance(const Point& pCanalAxis, const Point& pCanalAxisPoint) const;
+			double getHipLengthDistance(const cv::Mat& pRotation, const cv::Mat& pTranslation) const;
+			double getCombinedOffsetDistance(const cv::Mat& pRotation, const cv::Mat& pTranslation) const;
 
 			double getFemurVersionRadian() const;
 

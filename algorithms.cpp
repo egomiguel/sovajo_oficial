@@ -3013,6 +3013,7 @@ void PelvisImplantMatch()
 		{
 			std::cout << " ***************** Matching Stem with Hip Center: " <<std::endl;
 			pelvisInfo.matchStemToHipRotationCenter();
+			//pelvisInfo.matchStemToCupRotationCenter();
 		}
 		else
 		{
@@ -3025,10 +3026,31 @@ void PelvisImplantMatch()
 		auto transformImplantStem = TestVTK::TransformPoly(implant_stem_3d, stemTransformMatch->GetMatrix(), stemTransformMatch->GetTranslation());
 		auto transformImplantHead = TestVTK::TransformPoly(transformImplantHeadToStemTemp, stemTransformMatch->GetMatrix(), stemTransformMatch->GetTranslation());
 
-		std::cout <<"Stem version Angle: "<< pelvisInfo.getStemVersion() << ", Stem Superior Distance: " << pelvisInfo.getStemShiftSuperiorHip() << ", Stem Lateral Distance: " << pelvisInfo.getStemShiftLateralHip() <<", Stem Anterior Distance: " << pelvisInfo.getStemShiftAnteriorHip()<< std::endl;
+		//std::cout <<"Stem version Angle: "<< pelvisInfo.getStemVersion() << ", Stem Superior Distance: " << pelvisInfo.getStemShiftSuperiorHip() << ", Stem Lateral Distance: " << pelvisInfo.getStemShiftLateralHip() <<", Stem Anterior Distance: " << pelvisInfo.getStemShiftAnteriorHip()<< std::endl;
 		
-		std::cout << "Stem version Angle: " << pelvisInfo.getStemVersion() << ", Stem Superior Distance: " << pelvisInfo.getStemShiftSuperiorCup() << ", Stem Lateral Distance: " << pelvisInfo.getStemShiftLateralCup() << ", Stem Anterior Distance: " << pelvisInfo.getStemShiftAnteriorCup() << std::endl;
+		//pelvisInfo.setStemTranslation(i, i, i);
 
+		std::cout <<i << " Stem version Angle: " << pelvisInfo.getStemVersion() << ", Stem Superior Distance: " << pelvisInfo.getStemShiftSuperiorCup() << ", Stem Lateral Distance: " << pelvisInfo.getStemShiftLateralCup() << ", Stem Anterior Distance: " << pelvisInfo.getStemShiftAnteriorCup() << std::endl;
+
+		double abductionCup = 40 + i / 20;
+		double versionCup = 20 + i / 20;
+		
+		//pelvisInfo.setCupAngles(abductionCup, versionCup);
+
+		
+		pelvisInfo.setCupTranslation(i, i, i);
+
+		/*
+		std::cout << "Cup new abduction: " << abductionCup << ", Cup new version: " << versionCup << std::endl;
+		std::cout << "Cup abduction: " << pelvisInfo.getCupInclination() << ", Cup version: " << pelvisInfo.getCupAntversion() << std::endl;
+
+		*/
+
+		std::cout << i << " Cup: " << pelvisInfo.getCupShiftAnterior() << ", Cup: " << pelvisInfo.getCupShiftLateral() << ", Cup: " << pelvisInfo.getCupShiftSuperior() <<std::endl;
+		
+		std::cout << " Hip lenght: " << objPelvis.getHipLengthDistance() << ", new lenght: " << pelvisInfo.getHipLengthDistance() << ", Hip Offset: " << objPelvis.getCombinedOffsetDistance() << ", Hip New Offset: " << pelvisInfo.getCombinedOffsetDistance() << std::endl;
+
+		
 		vtkNew<vtkAppendPolyData> appendFilter;
 		appendFilter->AddInputData(transformImplantCup);
 		appendFilter->AddInputData(transformImplantStem);

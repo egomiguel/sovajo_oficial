@@ -436,22 +436,32 @@ double HipPelvisImplantsMatchInfo::getStemVersion() const
 
 double HipPelvisImplantsMatchInfo::getCombinedOffsetDistance() const
 {
-	auto canalAxisTopPointMat = mRotationStem * mImplantStem.getCanalAxisTopPoint().ToMatPoint() + mTranslationStem;
-	auto canalAxisVectortMat = mRotationStem * mImplantStem.getVectorInfSup().ToMatPoint();
-	Point canalAxisTopPoint = Point(canalAxisTopPointMat);
-	Point canalAxisVector = Point(canalAxisVectortMat);
+	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
+	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
+	Point stemCenter = Point(stemHeadCenter);
 
-	return mPelvis.getCombinedOffsetDistance(canalAxisVector, canalAxisTopPoint);
+	cv::Mat identity = cv::Mat::eye(3, 3, CV_64F);
+	Point firstTranslation = mHipCenterOfRotation - mPelvis.getFemurOperationSide().getHeadCenter();
+	Point secondTranslation = mHipCenterOfRotation - stemCenter;
+	Point officialTranslation = secondTranslation - firstTranslation;
+	officialTranslation = -officialTranslation;
+
+	return mPelvis.getCombinedOffsetDistance(identity, officialTranslation.ToMatPoint());
 }
 
 double HipPelvisImplantsMatchInfo::getHipLengthDistance() const
 {
-	auto headCenterPointMat = mRotationStem * mImplantStem.getHeadCenter().ToMatPoint() + mTranslationStem;
-	Point headCenterPoint = Point(headCenterPointMat);
+	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
+	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
+	Point stemCenter = Point(stemHeadCenter);
 
-	Point mechanicalAxisVector = headCenterPoint - mPelvis.getFemurOperationSide().getKneeCenter();
+	cv::Mat identity = cv::Mat::eye(3, 3, CV_64F);
+	Point firstTranslation = mHipCenterOfRotation - mPelvis.getFemurOperationSide().getHeadCenter();
+	Point secondTranslation = mHipCenterOfRotation - stemCenter;
+	Point officialTranslation = secondTranslation - firstTranslation;
+	officialTranslation = -officialTranslation;
 
-	return mPelvis.getHipLengthDistance(mechanicalAxisVector);
+	return mPelvis.getHipLengthDistance(identity, officialTranslation.ToMatPoint());
 }
 
 double HipPelvisImplantsMatchInfo::getCoverageFraction() const
@@ -518,7 +528,7 @@ itk::Vector< double, 3 > HipPelvisImplantsMatchInfo::setCupTranslation(double pS
 	cv::Mat cupCenterMat = (mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint()) + mTranslationCup;
 	Point cupCenter = Point(cupCenterMat);
 
-	Point newCenterCup = cupCenter + pShifSuperior * mPelvis.getPelvisVectorInfSup();
+	Point newCenterCup = mHipCenterOfRotation + pShifSuperior * mPelvis.getPelvisVectorInfSup();
 	newCenterCup = newCenterCup + pShifLateral * mPelvis.getPelvisVectorLateralASIS();
 	newCenterCup = newCenterCup + pShiftAnterior * mPelvis.getPelvisVectorAP();
 
@@ -534,7 +544,10 @@ itk::Vector< double, 3 > HipPelvisImplantsMatchInfo::setStemTranslation(double p
 	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
 	Point stemCenter = Point(stemHeadCenter);
 
-	Point newCenterStem = stemCenter + pShifSuperior * mPelvis.getPelvisVectorInfSup();
+	cv::Mat cupCenterMat = (mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint()) + mTranslationCup;
+	Point cupCenter = Point(cupCenterMat);
+
+	Point newCenterStem = cupCenter + pShifSuperior * mPelvis.getPelvisVectorInfSup();
 	newCenterStem = newCenterStem + pShifLateral * mPelvis.getPelvisVectorLateralASIS();
 	newCenterStem = newCenterStem + pShiftAnterior * mPelvis.getPelvisVectorAP();
 
