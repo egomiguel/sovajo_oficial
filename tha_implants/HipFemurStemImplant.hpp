@@ -19,6 +19,7 @@ namespace THA
 			Point getVectorNeckToHeadPerpendicularToInfSup() const;
 			Point getHeadCenter() const;
 			Point getCanalAxisTopPoint() const;
+			Point getBasePoint() const;
 
 		private:
 			Point mTopPoint, mBasePoint, mHeadCenter;

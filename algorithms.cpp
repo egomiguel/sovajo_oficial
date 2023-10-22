@@ -3012,12 +3012,12 @@ void PelvisImplantMatch()
 		if (i == 20)
 		{
 			std::cout << " ***************** Matching Stem with Hip Center: " <<std::endl;
-			pelvisInfo.matchStemToHipRotationCenter();
-			//pelvisInfo.matchStemToCupRotationCenter();
+			//pelvisInfo.matchStemToHipRotationCenter();
+			pelvisInfo.matchStemToCupRotationCenter();
 		}
 		else
 		{
-			pelvisInfo.setStemVersionAngle(i);
+			//pelvisInfo.setStemVersionAngle(i);
 		}
 
 		auto stemTransformMatch = pelvisInfo.getITKStemTransform();
@@ -3046,7 +3046,7 @@ void PelvisImplantMatch()
 
 		*/
 
-		std::cout << i << " Cup: " << pelvisInfo.getCupShiftAnterior() << ", Cup: " << pelvisInfo.getCupShiftLateral() << ", Cup: " << pelvisInfo.getCupShiftSuperior() <<std::endl;
+		//std::cout << i << " Cup: " << pelvisInfo.getCupShiftAnterior() << ", Cup: " << pelvisInfo.getCupShiftLateral() << ", Cup: " << pelvisInfo.getCupShiftSuperior() <<std::endl;
 		
 		std::cout << " Hip lenght: " << objPelvis.getHipLengthDistance() << ", new lenght: " << pelvisInfo.getHipLengthDistance() << ", Hip Offset: " << objPelvis.getCombinedOffsetDistance() << ", Hip New Offset: " << pelvisInfo.getCombinedOffsetDistance() << std::endl;
 

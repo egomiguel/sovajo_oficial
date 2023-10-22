@@ -28,6 +28,11 @@ void HipFemurStemImplant::init(const Point& pTopPoint, const Point& pBasePoint, 
     isInit = true;
 }
 
+Point HipFemurStemImplant::getBasePoint() const
+{
+	return mBasePoint;
+}
+
 Point HipFemurStemImplant::getVectorInfSup() const
 {
     Point vector = mTopPoint - mBasePoint;
