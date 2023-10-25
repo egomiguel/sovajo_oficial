@@ -3017,7 +3017,7 @@ void PelvisImplantMatch()
 		}
 		else
 		{
-			//pelvisInfo.setStemVersionAngle(i);
+			pelvisInfo.setStemVersionAngle(i);
 		}
 
 		auto stemTransformMatch = pelvisInfo.getITKStemTransform();
@@ -3026,11 +3026,11 @@ void PelvisImplantMatch()
 		auto transformImplantStem = TestVTK::TransformPoly(implant_stem_3d, stemTransformMatch->GetMatrix(), stemTransformMatch->GetTranslation());
 		auto transformImplantHead = TestVTK::TransformPoly(transformImplantHeadToStemTemp, stemTransformMatch->GetMatrix(), stemTransformMatch->GetTranslation());
 
-		//std::cout <<"Stem version Angle: "<< pelvisInfo.getStemVersion() << ", Stem Superior Distance: " << pelvisInfo.getStemShiftSuperiorHip() << ", Stem Lateral Distance: " << pelvisInfo.getStemShiftLateralHip() <<", Stem Anterior Distance: " << pelvisInfo.getStemShiftAnteriorHip()<< std::endl;
+		std::cout <<"Stem version Angle: "<< pelvisInfo.getStemVersion() << ", Stem Superior Distance: " << pelvisInfo.getStemAxisShiftSuperiorHip() << ", Stem Lateral Distance: " << pelvisInfo.getStemAxisShiftLateralHip() <<", Stem Anterior Distance: " << pelvisInfo.getStemAxisShiftAnteriorHip()<< std::endl;
 		
 		//pelvisInfo.setStemTranslation(i, i, i);
 
-		std::cout <<i << " Stem version Angle: " << pelvisInfo.getStemVersion() << ", Stem Superior Distance: " << pelvisInfo.getStemShiftSuperiorCup() << ", Stem Lateral Distance: " << pelvisInfo.getStemShiftLateralCup() << ", Stem Anterior Distance: " << pelvisInfo.getStemShiftAnteriorCup() << std::endl;
+		std::cout << "Set stem version: " << i << " gest Stem version Angle: " << pelvisInfo.getStemVersion() << ", Stem Superior Distance: " << pelvisInfo.getStemAxisShiftSuperiorCup() << ", Stem Lateral Distance: " << pelvisInfo.getStemAxisShiftLateralCup() << ", Stem Anterior Distance: " << pelvisInfo.getStemAxisShiftAnteriorCup() << std::endl;
 
 		double abductionCup = 40 + i / 20;
 		double versionCup = 20 + i / 20;

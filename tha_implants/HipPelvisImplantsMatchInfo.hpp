@@ -29,13 +29,13 @@ namespace THA
 
 			void setStemHeadTransform(const itk::Rigid3DTransform<>::Pointer pImplantHeadToStemTransform);
 
-			itk::Matrix< double, 3, 3 > setStemVersionAngle(double pStemVersionAngleDegree);
+			itk::Rigid3DTransform<>::Pointer setStemVersionAngle(double pStemVersionAngleDegree);
 
 			itk::Rigid3DTransform<>::Pointer setCupAngles(double pAbductionAngle, double pAnteversionAngle);
 
 			itk::Vector< double, 3 > setCupTranslation(double pShifSuperior, double pShifLateral, double pShiftAnterior);
 
-			itk::Vector< double, 3 > setStemTranslation(double pShifSuperior, double pShifLateral, double pShiftAnterior);
+			itk::Vector< double, 3 > setStemHeadTranslation(double pShifSuperior, double pShifLateral, double pShiftAnterior);
 
 			itk::Vector< double, 3 > matchStemToHipRotationCenter();
 
@@ -51,17 +51,23 @@ namespace THA
 
 			double getCupShiftAnterior() const;
 
-			double getStemShiftSuperiorHip() const;
+			double getStemAxisShiftSuperiorHip() const;
 
-			double getStemShiftLateralHip() const;
+			double getStemAxisShiftLateralHip() const;
 
-			double getStemShiftAnteriorHip() const;
+			double getStemAxisShiftAnteriorHip() const;
 
-			double getStemShiftSuperiorCup() const;
+			double getStemAxisShiftSuperiorCup() const;
 
-			double getStemShiftLateralCup() const;
+			double getStemAxisShiftLateralCup() const;
 
-			double getStemShiftAnteriorCup() const;
+			double getStemAxisShiftAnteriorCup() const;
+
+			double getStemHeadShiftSuperiorCup() const;
+
+			double getStemHeadShiftLateralCup() const;
+
+			double getStemHeadShiftAnteriorCup() const;
 
 			double getStemVersion() const;
 
