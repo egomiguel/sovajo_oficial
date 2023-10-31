@@ -635,7 +635,7 @@ itk::Vector< double, 3 > HipPelvisImplantsMatchInfo::setCupTranslation(double pS
 	cv::Mat cupCenterMat = (mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint()) + mTranslationCup;
 	Point cupCenter = Point(cupCenterMat);
 
-	Point newCenterCup = mHipCenterOfRotation + pShifSuperior * mPelvis.getPelvisVectorInfSup();
+	Point newCenterCup = cupCenter + pShifSuperior * mPelvis.getPelvisVectorInfSup();
 	newCenterCup = newCenterCup + pShifLateral * mPelvis.getPelvisVectorLateralASIS();
 	newCenterCup = newCenterCup + pShiftAnterior * mPelvis.getPelvisVectorAP();
 
@@ -651,10 +651,10 @@ itk::Vector< double, 3 > HipPelvisImplantsMatchInfo::setStemHeadTranslation(doub
 	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
 	Point stemCenter = Point(stemHeadCenter);
 
-	cv::Mat cupCenterMat = (mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint()) + mTranslationCup;
-	Point cupCenter = Point(cupCenterMat);
+	//cv::Mat cupCenterMat = (mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint()) + mTranslationCup;
+	//Point cupCenter = Point(cupCenterMat);
 
-	Point newCenterStem = cupCenter + pShifSuperior * mPelvis.getPelvisVectorInfSup();
+	Point newCenterStem = stemCenter + pShifSuperior * mPelvis.getPelvisVectorInfSup();
 	newCenterStem = newCenterStem + pShifLateral * mPelvis.getPelvisVectorLateralASIS();
 	newCenterStem = newCenterStem + pShiftAnterior * mPelvis.getPelvisVectorAP();
 
