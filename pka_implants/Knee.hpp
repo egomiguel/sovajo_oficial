@@ -25,6 +25,12 @@ namespace PKA
 			KLeft
 		};
 
+		enum SurgerySideEnum
+		{
+			KLateral,
+			KMedial
+		};
+
 		class PKA_IMPLANTS_EXPORT Knee
 		{
 		public:
@@ -33,7 +39,7 @@ namespace PKA
 			void init(const Point& hipCenter, const Point& anteriorCortex, const Point& femurKneeCenter, const Point& lateralEpicondyle,
 				const Point& medialEpicondyle, const Point& tibiaKneeCenter, const Point& tibiaTubercle, const Point& pclCenter,
 				const Point& ankleCenter, const vtkSmartPointer<vtkPolyData> femurPoly,
-				const vtkSmartPointer<vtkPolyData> tibiaPoly, KneeSideEnum pSide, bool findRefPoints = true, double cartilage = 2.0, uint8_t imageValueMax = 1);
+				const vtkSmartPointer<vtkPolyData> tibiaPoly, KneeSideEnum pSide, SurgerySideEnum pSurgery, bool findRefPoints = true, double cartilage = 2.0, uint8_t imageValueMax = 1);
 
 			///////////////////////////////////////////////////
 			/*
@@ -48,6 +54,8 @@ namespace PKA
 
 			void findAutomaticPlateaus();
 			//////////////////////////////////////////////////
+
+			SurgerySideEnum getSurgerySide() const;
 			
 			Point getFemurVectorTEA() const;
 
@@ -162,6 +170,7 @@ namespace PKA
 			Point femurDirectVectorAP;
 			Point coronalDistalLat, coronalDistalMed;
 			Side goodSide;
+			SurgerySideEnum mSurgerySize;
 			double femurCartilage, tibiaCartilage; // , femurLatMedDiffDistal, femurLatMedDiffPosterior, tibiaLatMedDiff;
 			Point tibiaNormalPlaneVector;
 			std::vector<Point> mFemur, mTibia, mKneeGroovePath, mKneeGrooveOutLiers;

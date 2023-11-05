@@ -12,16 +12,13 @@ namespace PKA
 
 		struct FemurImplantInfo
 		{
-			double femurPosteriorLateralThickness;
-			double femurPosteriorMedialThickness;
-			double femurDistalLateralThickness;
-			double femurDistalMedialThickness;
+			double femurPosteriorThickness;
+			double femurDistalThickness;
 		};
 
 		struct TibiaImplantInfo
 		{
-			double tibiaLateralThickness;
-			double tibiaMedialThickness;
+			double tibiaThickness;
 			//double slope;
 		};
 	}

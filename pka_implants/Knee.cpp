@@ -22,7 +22,7 @@ Knee::Knee()
 void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point& femurKneeCenter, const Point& lateralEpicondyle,
     const Point& medialEpicondyle, const Point& tibiaKneeCenter, const Point& tibiaTubercle, const Point& pclCenter, 
     const Point& ankleCenter, const vtkSmartPointer<vtkPolyData> femurPoly, 
-    const vtkSmartPointer<vtkPolyData> tibiaPoly, KneeSideEnum pSide, bool findRefPoints, double cartilage, uint8_t imageValueMax)
+    const vtkSmartPointer<vtkPolyData> tibiaPoly, KneeSideEnum pSide, SurgerySideEnum pSurgery, bool findRefPoints, double cartilage, uint8_t imageValueMax)
 {
     if (isInit == true)
     {
@@ -63,6 +63,7 @@ void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point
     this->anteriorCortex = anteriorCortex;
     this->tibiaKneeCenter = tibiaKneeCenter;
     this->tibiaTubercle = tibiaTubercle;
+	this->mSurgerySize = pSurgery;
 
     Point forceLineVector = hipCenter - femurKneeCenter;
     Point TEA = lateralEpicondyle - medialEpicondylePerp;
@@ -238,6 +239,11 @@ void Knee::findTibiaPlaneNormalVector(double degreeAngle)
     tibiaNormalPlaneVector = tibiaRotatePoint - ankleCenter;
 }
 
+SurgerySideEnum Knee::getSurgerySide() const
+{
+	return mSurgerySize;
+}
+
 Point Knee::getFemurVectorTEA() const
 {
     Point directVector = (getDirectVectorFemurAxis()).cross(getFemurDirectVectorAP());
@@ -347,18 +353,16 @@ Point Knee::getMoveCondyle(const FemurImplantInfo& pImplant) const
     normaliceFemurDirectVectorAP.normalice();
 
     ///////////////////////////////////////////////////////////////////
-    Plane helpPlane;
-    helpPlane.init(normaliceFemurDirectVectorAP, femurKneeCenter);
 
-    if (abs(helpPlane.eval(medialCondyle)) > abs(helpPlane.eval(lateralCondyle)))
+    if (mSurgerySize == SurgerySideEnum::KMedial)
     {
         myMoveCondyle = medialCondyle;
-        resectionThickness = pImplant.femurPosteriorMedialThickness - femurCartilage;
+		resectionThickness = pImplant.femurPosteriorThickness - femurCartilage;
     }
     else
     {
         myMoveCondyle = lateralCondyle;
-        resectionThickness = pImplant.femurPosteriorLateralThickness - femurCartilage;
+        resectionThickness = pImplant.femurPosteriorThickness - femurCartilage;
     }
     //////////////////////////////////////////////////////////////////////
 
@@ -431,18 +435,16 @@ Point Knee::getMovePlateau(const TibiaImplantInfo& pImplant) const
     tibiaLineDirectVector.normalice();
 
     ///////////////////////////////////////////////////////////////////
-    Plane helpPlane;
-    helpPlane.init(tibiaLineDirectVector, tibiaTubercle);
 
-    if (abs(helpPlane.eval(medialPlateau)) > abs(helpPlane.eval(lateralPlateau)))
+    if (mSurgerySize == SurgerySideEnum::KMedial)
     {
         myMovePlateau = medialPlateau;
-        resectionThickness = pImplant.tibiaMedialThickness - tibiaCartilage;
+		resectionThickness = pImplant.tibiaThickness - tibiaCartilage;
     }
     else
     {
         myMovePlateau = lateralPlateau;
-        resectionThickness = pImplant.tibiaLateralThickness - tibiaCartilage;
+        resectionThickness = pImplant.tibiaThickness - tibiaCartilage;
     }
     //////////////////////////////////////////////////////////////////////
 
@@ -601,18 +603,16 @@ Point Knee::getInferiorMoveFemurPoint(const FemurImplantInfo& pImplant) const
     femurLineDirectVector.normalice();
 
     ///////////////////////////////////////////////////////////////////
-    Plane helpPlane;
-    helpPlane.init(femurLineDirectVector, anteriorCortex);
 
-    if (abs(helpPlane.eval(medialInferiorFemurPoint)) > abs(helpPlane.eval(lateralInferiorFemurPoint)))
+    if (mSurgerySize == SurgerySideEnum::KMedial)
     {
         myInferiorMoveFemurPoint = medialInferiorFemurPoint;
-        resectionThickness = pImplant.femurDistalMedialThickness - femurCartilage;
+        resectionThickness = pImplant.femurDistalThickness - femurCartilage;
     }
     else
     {
         myInferiorMoveFemurPoint = lateralInferiorFemurPoint;
-        resectionThickness = pImplant.femurDistalLateralThickness - femurCartilage;
+        resectionThickness = pImplant.femurDistalThickness - femurCartilage;
     }
     //////////////////////////////////////////////////////////////////////
 
@@ -673,15 +673,15 @@ Point Knee::getMoveTibiaKneeCenter(const TibiaImplantInfo& pImplant) const
     Plane helpPlane;
     helpPlane.init(tibiaLineDirectVector, tibiaTubercle);
 
-    if (abs(helpPlane.eval(medialPlateau)) > abs(helpPlane.eval(lateralPlateau)))
+    if (mSurgerySize == SurgerySideEnum::KMedial)
     {
         myMovePlateau = medialPlateau;
-        resectionThickness = pImplant.tibiaMedialThickness - tibiaCartilage;
+        resectionThickness = pImplant.tibiaThickness - tibiaCartilage;
     }
     else
     {
         myMovePlateau = lateralPlateau;
-        resectionThickness = pImplant.tibiaLateralThickness - tibiaCartilage;
+        resectionThickness = pImplant.tibiaThickness - tibiaCartilage;
     }
     //////////////////////////////////////////////////////////////////////
 
@@ -1117,15 +1117,15 @@ Point Knee::getMoveFemurKneeCenter(const FemurImplantInfo& pImplant) const
     Plane helpPlane;
     helpPlane.init(femurLineDirectVector, anteriorCortex);
 
-    if (abs(helpPlane.eval(medialInferiorFemurPoint)) > abs(helpPlane.eval(lateralInferiorFemurPoint)))
+    if (mSurgerySize == SurgerySideEnum::KMedial)
     {
         myInferiorMoveFemurPoint = medialInferiorFemurPoint;
-        resectionThickness = pImplant.femurDistalMedialThickness - femurCartilage;
+        resectionThickness = pImplant.femurDistalThickness - femurCartilage;
     }
     else
     {
         myInferiorMoveFemurPoint = lateralInferiorFemurPoint;
-        resectionThickness = pImplant.femurDistalLateralThickness - femurCartilage;
+        resectionThickness = pImplant.femurDistalThickness - femurCartilage;
     }
     //////////////////////////////////////////////////////////////////////
 
