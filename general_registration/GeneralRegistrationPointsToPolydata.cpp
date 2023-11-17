@@ -18,6 +18,8 @@ GeneralRegistrationPointsToPolydata::GeneralRegistrationPointsToPolydata(const v
 {
     mPoly = pPoly;
 
+	mTransform = cv::Mat(6, 1, CV_64F);
+
     if (pSourceExternalPoints.size() != pTargetPointsOnPoly.size() || pSourceExternalPoints.size() == 0)
     {
         mTransform.at<double>(0, 0) = 0;
@@ -35,6 +37,7 @@ GeneralRegistrationPointsToPolydata::GeneralRegistrationPointsToPolydata(const v
     int tSize = pSourceExternalPoints.size();
 
     ////////////////////////////////////////////////////////////// Find Centroid
+
     Eigen::Matrix<double, 4, 1> centroid_src, centroid_tgt;
 
     centroid_src.setZero();
@@ -147,7 +150,6 @@ GeneralRegistrationPointsToPolydata::GeneralRegistrationPointsToPolydata(const v
     mTransform.at<double>(3, 0) = rot(0);
     mTransform.at<double>(4, 0) = rot(1);
     mTransform.at<double>(5, 0) = rot(2);
-
 }
 
 itk::Rigid3DTransform<double>::Pointer GeneralRegistrationPointsToPolydata::MakeFinalAlignment(const std::vector<PointTypeITK>& pAlignmentPoints, double& pError)

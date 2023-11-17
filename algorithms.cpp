@@ -40,6 +40,8 @@
 #include "registration/RPlane.hpp"
 #include "registration/RegistrationException.hpp"
 #include "registration/KneeCapRegistration.hpp"
+#include "general_registration/GeneralRegistrationPointsToPolydata.hpp"
+#include "general_registration/Types.hpp"
 //#include "registration/HipPelvisRegistration.hpp"
 //#include "registration/HipFemurRegistration.hpp"
 #include "registration/LeastSquaresICP.hpp"
@@ -141,6 +143,15 @@ using namespace TKA::HIP;
 using namespace TKA::IMPLANTS;
 using namespace TKA::REGISTRATION;
 using namespace IMAGE_ROD;
+
+itk::Point<double, 3> makeItkPoint(double x, double y, double z)
+{
+	itk::Point<double, 3> point;
+	point[0] = x;
+	point[1] = y;
+	point[2] = z;
+	return point;
+}
 
 
 vtkSmartPointer<vtkPolyData> SplitPoly(vtkSmartPointer<vtkPolyData> poly, Plane pPlane, Point ref)
@@ -997,14 +1008,14 @@ void MatchEasy()
 
 	FemurImplantMatch femurImplantMatch;*/
 
-	std::string femurImplantStr = "D:\\sovajo\\Errores\\Error5\\Femur_Implant";
-	std::string tibiaImplantStr = "D:\\sovajo\\Errores\\Error5\\Tibia_Implant";
+	std::string femurImplantStr = "D:\\sovajo\\Errores\\Error6\\Femur_Implant";
+	std::string tibiaImplantStr = "D:\\sovajo\\Errores\\Error6\\Tibia_Implant";
 	//std::string patellaImplantStr = "D:\\3D_DICOM_DATA\\patella_Implant";
 
 	/*Knee kneeLeftModo = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Modo\\Right_Modo");
 	Knee kneeLeft = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Right");*/
 
-	Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error5", KneeSideEnum::KRight);
+	Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error6", KneeSideEnum::KRight);
 
 	vtkSmartPointer<vtkPolyData> polyTibiaImplant, polyPatellaImplant;
 
@@ -1057,7 +1068,7 @@ void MatchEasy()
 	{
 
 		//hull1 = femurImplantMatch.GetHullPoints(transformIn, transformOut, FemurImplantMatch::kPlaneB, 1, 2, 10, 15, 200);
-		hull1 = tibiaImplantMatch.GetHullPoints(transformTibia, transformOut, 1, 1, 0.8, 0.8);
+		hull1 = tibiaImplantMatch.GetHullPoints(transformTibia, transformOut);
 		std::cout << transformIn << std::endl;
 
 		for (int i = 0; i < hull1.size(); i++)
@@ -1074,10 +1085,10 @@ void MatchEasy()
 		Test::myPrint("Error get hull");
 		std::cout << e.what() << std::endl;
 	}
-	std::cout << std::endl;
-	std::cout << std::endl;
+	//std::cout << std::endl;
+	//std::cout << std::endl;
 
-	ImplantsMatchFinalInfo matchInfo(&myKnee, femurImplant, tibiaImplant, transformIn, transformTibia);
+	//ImplantsMatchFinalInfo matchInfo(&myKnee, femurImplant, tibiaImplant, transformIn, transformTibia);
 
 	/*std::cout << "Femur varus angle: " << matchInfo.GetFemurVarusAngle() << std::endl;
 	std::cout << "Femur implant PCA angle: " << matchInfo.GetFemurImplantPCAAngle() << std::endl;
@@ -1085,7 +1096,7 @@ void MatchEasy()
 	std::cout << "Femur flexion angle: " << matchInfo.GetFemurFlexionAngle() << std::endl;
 
 	std::cout << std::endl;*/
-
+	/*
 	matchInfo.setFemurVarusAngle(30);
 	matchInfo.setFemurPCAAngle(30);
 	matchInfo.setFemurTEAAngle(30);
@@ -1111,21 +1122,22 @@ void MatchEasy()
 	std::cout << "Femur flexion angle: " << matchInfo.GetFemurFlexionAngle() << std::endl;
 
 	std::cout << std::endl;
+	*/
 
 
 	//std::cout << "SI Angle: " << matchInfo.getAngleSI() << std::endl;
 	//std::cout << "Cartilage before : " << myKnee.getFemurCartilage() << std::endl;
 
-	vtkSmartPointer<vtkPolyData> polyNew1 = TestVTK::CreatePolyLine(hull1);
+	//vtkSmartPointer<vtkPolyData> polyNew1 = TestVTK::CreatePolyLine(hull1);
 	//TestVTK::show(myKnee.GetFemurPoly());
 	TestVTK::show(myKnee.GetTibiaPoly(), tPoints, true);
 
-	std::vector<cv::Point3d> testRef = { myKnee.getMedialInferiorFemurPoint(), myKnee.getLateralInferiorFemurPoint(), myKnee.getMedialCondyle(), myKnee.getLateralCondyle() };
+	//std::vector<cv::Point3d> testRef = { myKnee.getMedialInferiorFemurPoint(), myKnee.getLateralInferiorFemurPoint(), myKnee.getMedialCondyle(), myKnee.getLateralCondyle() };
 
 	/*tPoints2.push_back(tPoints[0]);
 	tPoints2.push_back(tPoints[tPoints.size() - 1]);*/
 
-	TestVTK::show(myKnee.GetFemurPoly(), testRef);
+	//TestVTK::show(myKnee.GetFemurPoly(), testRef);
 }
 
 void executeBalance()
@@ -3855,11 +3867,40 @@ void PolydataInterception()
 
 }
 
+void Resgistration_General_test()
+{
+	
+	Knee myKneeSource = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error5", KneeSideEnum::KRight);
+
+	Knee myKneeTarget = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error2", KneeSideEnum::KLeft);
+
+
+	std::vector<itk::Point<double, 3>> source = { myKneeSource.getHipCenter().ToITKPoint(),
+												  myKneeSource.getLateralEpicondyle().ToITKPoint(),
+												  myKneeSource.getMedialEpicondyle().ToITKPoint()};
+
+	std::vector<itk::Point<double, 3>> target = { myKneeTarget.getHipCenter().ToITKPoint(), 
+													myKneeTarget.getLateralEpicondyle().ToITKPoint(), 
+													myKneeTarget.getMedialEpicondyle().ToITKPoint()};
+
+
+	std::vector<itk::Point<double, 3>> rest_points = {myKneeSource.getLateralEpicondyle().ToITKPoint(),
+													myKneeSource.getMedialEpicondyle().ToITKPoint(),
+													myKneeSource.getMedialCondyle().ToITKPoint(), 
+													myKneeSource.getLateralCondyle().ToITKPoint(), 
+													myKneeSource.getFemurKneeCenter().ToITKPoint()};
+
+	double error;
+	auto regis = GENERAL::REGISTRATION::GeneralRegistrationPointsToPolydata(myKneeTarget.GetFemurPoly(), target, source);
+	auto result = regis.MakeFinalAlignment(rest_points, error);
+	std::cout << error << std::endl;
+}
+
 
 int main()
 {
-
-	PelvisImplantMatch();
+	Resgistration_General_test();
+	//PelvisImplantMatch();
 	//std::cout << "tttttttttttttttttt" << std::endl;
 	//TestHullPoints();
 	//Test30PointsVTK();

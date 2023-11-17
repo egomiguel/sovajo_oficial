@@ -764,10 +764,14 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkPolyData>& surface
     int step = source.size() / batch;
 
     cv::Mat dataTemp(6, 1, CV_64F);
-    double bestError = -1;
+    //double bestError = -1;
+
+	double totalErrorTemp = -1, localErrorTemp = -1;
 
     for (int i = 0; i < iterations && finish == false; i++)
     {
+		totalErrorTemp = -1, localErrorTemp = -1;
+
         for (int j = 0; j < batch; j++)
         {
             int posA, posB;
@@ -817,7 +821,7 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkPolyData>& surface
             data.at<double>(4, 0) = atan2(sin(angleY), cos(angleY));
             data.at<double>(5, 0) = atan2(sin(angleZ), cos(angleZ));
 
-            if (bestError < 0 || currentError < bestError)
+            /*if (bestError < 0 || currentError < bestError)
             {
                 bestError = currentError;
 
@@ -827,19 +831,30 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkPolyData>& surface
                 dataTemp.at<double>(3, 0) = data.at<double>(3, 0);
                 dataTemp.at<double>(4, 0) = data.at<double>(4, 0);
                 dataTemp.at<double>(5, 0) = data.at<double>(5, 0);
-            }
+            }*/
 
-            if (resultInfo.totalError < chi2 && resultInfo.localError < maxError)
+			if (totalErrorTemp < resultInfo.totalError)
+			{
+				totalErrorTemp = resultInfo.totalError;
+			}
+
+			if (localErrorTemp < resultInfo.localError)
+			{
+				localErrorTemp = resultInfo.localError;
+			}
+
+            /*if (resultInfo.totalError < chi2 && resultInfo.localError < maxError)
             {
                 finish = true;
                 break;
-            }
+            }*/
         }
 
-        if (finish == true)
-        {
-            continue;
-        }
+		if (totalErrorTemp < chi2 && localErrorTemp < maxError)
+		{
+			finish = true;
+			continue;
+		}
 
         shuffleSource();
         target.clear();
@@ -872,14 +887,14 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkPolyData>& surface
          ClosestPoint(surface, pnt);
      }*/
 
-    data.at<double>(0, 0) = dataTemp.at<double>(0, 0);
-    data.at<double>(1, 0) = dataTemp.at<double>(1, 0);
-    data.at<double>(2, 0) = dataTemp.at<double>(2, 0);
-    data.at<double>(3, 0) = dataTemp.at<double>(3, 0);
-    data.at<double>(4, 0) = dataTemp.at<double>(4, 0);
-    data.at<double>(5, 0) = dataTemp.at<double>(5, 0);
+    //data.at<double>(0, 0) = dataTemp.at<double>(0, 0);
+    //data.at<double>(1, 0) = dataTemp.at<double>(1, 0);
+    //data.at<double>(2, 0) = dataTemp.at<double>(2, 0);
+    //data.at<double>(3, 0) = dataTemp.at<double>(3, 0);
+    //data.at<double>(4, 0) = dataTemp.at<double>(4, 0);
+    //data.at<double>(5, 0) = dataTemp.at<double>(5, 0);
 
-    return bestError;
+    return localErrorTemp;
 }
 
 double LeastSquaresICP::LeastSquaresTest(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)
@@ -899,8 +914,12 @@ double LeastSquaresICP::LeastSquaresTest(const vtkSmartPointer<vtkPolyData>& sur
     int batch = 3;
     int step = source.size() / batch;
 
+	double totalErrorTemp = -1, localErrorTemp = -1;
+
     for (int i = 0; i < iterations && finish == false; i++)
     {
+		totalErrorTemp = -1, localErrorTemp = -1;
+
         for (int k = 0; k < batch; k++)
         {
 
@@ -918,8 +937,8 @@ double LeastSquaresICP::LeastSquaresTest(const vtkSmartPointer<vtkPolyData>& sur
             }
 
             showProcess(surface, mySource);
-            std::cout << "Iteration " << std::to_string(i) << " error: " << currentError << std::endl;
-
+			std::cout << "Iteration " << std::to_string(i) << " error: " << currentError << std::endl;
+            
             int posA, posB;
             posA = step * k;
             posB = posA + step;
@@ -967,13 +986,22 @@ double LeastSquaresICP::LeastSquaresTest(const vtkSmartPointer<vtkPolyData>& sur
             data.at<double>(4, 0) = atan2(sin(angleY), cos(angleY));
             data.at<double>(5, 0) = atan2(sin(angleZ), cos(angleZ));
 
-            if (resultInfo.totalError < chi2 && resultInfo.localError < maxError)
-            {
-                finish = true;
-                break;
-            }
+			if (totalErrorTemp < resultInfo.totalError)
+			{
+				totalErrorTemp = resultInfo.totalError;
+			}
 
+			if (localErrorTemp < resultInfo.localError)
+			{
+				localErrorTemp = resultInfo.localError;
+			}
         }
+
+		if (totalErrorTemp < chi2 && localErrorTemp < maxError)
+		{
+			finish = true;
+			break;
+		}
 
         if (finish == true)
         {
@@ -985,7 +1013,7 @@ double LeastSquaresICP::LeastSquaresTest(const vtkSmartPointer<vtkPolyData>& sur
         target = GetCorrespondence(implicitPolyDataDistance, data);
     }
 
-    return currentError;
+    return localErrorTemp;
 }
 
 double LeastSquaresICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)

@@ -17,6 +17,7 @@ using namespace TKA::REGISTRATION;
 
 GeneralRegistrationPointsToPolydata::GeneralRegistrationPointsToPolydata(const vtkSmartPointer<vtkPolyData>& pPoly, const std::vector<PointTypeITK>& pTargetPointsOnPoly, const std::vector<PointTypeITK>& pSourceExternalPoints)
 {
+	mTransform = cv::Mat(6, 1, CV_64F);
     mPoly = pPoly;
 
     if (pSourceExternalPoints.size() != pTargetPointsOnPoly.size() || pSourceExternalPoints.size() == 0)
