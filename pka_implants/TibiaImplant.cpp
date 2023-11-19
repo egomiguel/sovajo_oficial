@@ -24,6 +24,7 @@ void TibiaImplant::init(const Point& apLinePclPoint, const Point& apLineTuberPoi
     this->exteriorPoint = exteriorPoint;
 	this->pclPoint = apLinePclPoint;
 	this->tuberPoint = apLineTuberPoint;
+	this->sidePoint = sidePoint;
 
     centralPoint = (apLinePclPoint + apLineTuberPoint) / 2;
 
@@ -94,3 +95,17 @@ TibiaImplantInfo TibiaImplant::getImplantInfo() const
     return mImplantInfo;
 }
 
+Point TibiaImplant::getPointPCL() const
+{
+	return pclPoint;
+}
+
+Point TibiaImplant::getPointTuber() const
+{
+	return tuberPoint;
+}
+
+Point TibiaImplant::getPointSide() const
+{
+	return sidePoint;
+}

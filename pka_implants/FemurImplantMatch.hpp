@@ -1,5 +1,5 @@
-#ifndef FEMUR_IMPLANT_MATCH_H
-#define FEMUR_IMPLANT_MATCH_H
+#ifndef FEMUR_IMPLANT_PKA_MATCH_H
+#define FEMUR_IMPLANT_PKA_MATCH_H
 
 #include <itkRigid3DTransform.h>
 #include "FemurImplant.hpp"

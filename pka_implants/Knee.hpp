@@ -1,5 +1,5 @@
-#ifndef IMPLANT_KNEE_H
-#define IMPLANT_KNEE_H
+#ifndef IMPLANT_PKA_KNEE_H
+#define IMPLANT_PKA_KNEE_H
 
 #include "Plane.hpp"
 #include "Utils.hpp"

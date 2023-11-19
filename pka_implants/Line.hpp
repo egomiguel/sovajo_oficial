@@ -1,5 +1,5 @@
-#ifndef LINE_H
-#define LINE_H
+#ifndef LINE_PKA_H
+#define LINE_PKA_H
 
 #include "Point.hpp"
 #include "pka_implants_export.h"

@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef UTILS_PKA_H
+#define UTILS_PKA_H
 
 namespace PKA
 {

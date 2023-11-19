@@ -1,5 +1,5 @@
-#ifndef TIBIA_IMPLANT_MATCH_H
-#define TIBIA_IMPLANT_MATCH_H
+#ifndef TIBIA_IMPLANT_PKA_MATCH_H
+#define TIBIA_IMPLANT_PKA_MATCH_H
 
 #include <itkRigid3DTransform.h>
 #include "TibiaImplant.hpp"
@@ -23,7 +23,7 @@ namespace PKA
 
 			Point transformImplantPoint(const Point& point) const;
 
-			//std::vector<PointTypeITK> GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, double distance = 1., double distancePcl = 1., double closeCurveLateral = 0.8, double closeCurveMedial = 0.8, int amount = 200) const;
+			std::vector<PointTypeITK> GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, double distance = 1., double distancePcl = 1., double closeCurveLateral = 0.8, double closeCurveMedial = 0.8, int amount = 200) const;
 
 			itk::Matrix< double, 3, 3 > GetRotationMatrix() const;
 
@@ -47,6 +47,8 @@ namespace PKA
 			Plane transformPlane(const Plane& plane) const;
 
 			Plane finalTransformPlane(const Plane& plane, const itk::Rigid3DTransform<>::Pointer pTransform) const;
+
+			Point finalTransformPoint(const Point& pPoint, const itk::Rigid3DTransform<>::Pointer pTransform) const;
 
 			Knee getKnee() const;
 

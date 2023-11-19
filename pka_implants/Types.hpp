@@ -1,5 +1,5 @@
-#ifndef IMPLANTS_TYPES_H
-#define IMPLANTS_TYPES_H
+#ifndef IMPLANTS_PKA_TYPES_H
+#define IMPLANTS_PKA_TYPES_H
 
 #include "itkImage.h"
 

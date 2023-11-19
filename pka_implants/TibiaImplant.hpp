@@ -1,5 +1,5 @@
-#ifndef TIBIA_IMPLANT_H
-#define TIBIA_IMPLANT_H
+#ifndef TIBIA_IMPLANT_PKA_H
+#define TIBIA_IMPLANT_PKA_H
 
 #include "vtkPolyData.h"
 #include "vtkSmartPointer.h"
@@ -35,11 +35,17 @@ namespace PKA
 
 			Point getExteriorPoint() const;
 
+			Point getPointPCL() const;
+
+			Point getPointTuber() const;
+
+			Point getPointSide() const;
+
 			TibiaImplantInfo getImplantInfo() const;
 
 		private:
 			Plane tibiaPlane;
-			Point centralPoint, exteriorPoint, pclPoint, tuberPoint;
+			Point centralPoint, exteriorPoint, pclPoint, tuberPoint, sidePoint;
 			TibiaImplantInfo mImplantInfo;
 			bool isInit;
 			//void fixNormalVectorTibia(const Point& fixPoint, const Point& referencePoint);

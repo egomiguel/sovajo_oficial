@@ -1,5 +1,5 @@
-#ifndef TKA_POINT_H
-#define TKA_POINT_H
+#ifndef PKA_POINT_H
+#define PKA_POINT_H
 
 #include <opencv2/calib3d/calib3d.hpp>
 #include "pka_implants_export.h"

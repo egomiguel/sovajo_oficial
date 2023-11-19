@@ -1,5 +1,5 @@
-#ifndef IMPLANT_BALANCE_H
-#define IMPLANT_BALANCE_H
+#ifndef IMPLANT_PKA_BALANCE_H
+#define IMPLANT_PKA_BALANCE_H
 
 #include "Knee.hpp"
 #include "LegAngle.hpp"

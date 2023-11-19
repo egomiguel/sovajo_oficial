@@ -1,5 +1,5 @@
-#ifndef IMPLANT_TEMPLATE_TIBIA_H
-#define IMPLANT_TEMPLATE_TIBIA_H
+#ifndef IMPLANT_PKA_TEMPLATE_TIBIA_H
+#define IMPLANT_PKA_TEMPLATE_TIBIA_H
 
 #include <opencv2/calib3d/calib3d.hpp>
 #include "Point.hpp"

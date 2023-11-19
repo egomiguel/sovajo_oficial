@@ -1,5 +1,5 @@
-#ifndef FEMUR_IMPLANT_H
-#define FEMUR_IMPLANT_H
+#ifndef FEMUR_IMPLANT_PKA_H
+#define FEMUR_IMPLANT_PKA_H
 
 #include "vtkPolyData.h"
 #include "vtkSmartPointer.h"

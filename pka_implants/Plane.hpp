@@ -1,5 +1,5 @@
-#ifndef PLANE_H
-#define PLANE_H
+#ifndef PLANE_PKA_H
+#define PLANE_PKA_H
 
 #include "Line.hpp"
 #include <vtkSmartPointer.h>
