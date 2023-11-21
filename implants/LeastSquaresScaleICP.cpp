@@ -540,8 +540,12 @@ double LeastSquaresScaleICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData
 
     ///////////////////////////////////////
 
+	double totalErrorTemp = -1, localErrorTemp = -1;
+
     for (int i = 0; i < iterations && finish == false; i++)
     {
+		totalErrorTemp = -1, localErrorTemp = -1;
+
         for (int j = 0; j < batch; j++)
         {
             int posA, posB;
@@ -602,7 +606,7 @@ double LeastSquaresScaleICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData
 
             GetScale(target, data);
 
-            if (bestError < 0 || currentError < bestError)
+            /*if (bestError < 0 || currentError < bestError)
             {
                 bestError = currentError;
 
@@ -619,8 +623,23 @@ double LeastSquaresScaleICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData
             {
                 finish = true;
                 break;
-            }
+            }*/
+
+			if (totalErrorTemp < resultInfo.totalError)
+			{
+				totalErrorTemp = resultInfo.totalError;
+			}
+
+			if (localErrorTemp < resultInfo.localError)
+			{
+				localErrorTemp = resultInfo.localError;
+			}
         }
+
+		if (totalErrorTemp < chi2 && localErrorTemp < maxError)
+		{
+			finish = true;
+		}
 
         if (finish == true)
         {
@@ -632,13 +651,13 @@ double LeastSquaresScaleICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData
         target = GetCorrespondenceScale(implicitPolyDataDistance, data);
     }
 
-    data.at<double>(0, 0) = dataTemp.at<double>(0, 0);
+    /*data.at<double>(0, 0) = dataTemp.at<double>(0, 0);
     data.at<double>(1, 0) = dataTemp.at<double>(1, 0);
     data.at<double>(2, 0) = dataTemp.at<double>(2, 0);
     data.at<double>(3, 0) = dataTemp.at<double>(3, 0);
     data.at<double>(4, 0) = dataTemp.at<double>(4, 0);
     data.at<double>(5, 0) = dataTemp.at<double>(5, 0);
-    data.at<double>(6, 0) = dataTemp.at<double>(6, 0);
+    data.at<double>(6, 0) = dataTemp.at<double>(6, 0);*/
 
     double myScale = data.at<double>(6, 0);
 
@@ -668,5 +687,6 @@ double LeastSquaresScaleICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData
 */
     ///////////////////////////////////////
 
-    return bestError;
+    //return bestError;
+	return localErrorTemp;
 }
