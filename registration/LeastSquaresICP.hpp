@@ -31,6 +31,13 @@ namespace TKA
 				}
 			};
 
+			struct BatchResult
+			{
+				cv::Mat data;
+				double error;
+
+			};
+
 			double chi2;
 
 			double maxError;

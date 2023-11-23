@@ -766,11 +766,10 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkPolyData>& surface
     cv::Mat dataTemp(6, 1, CV_64F);
     double bestError = -1;
 
-	double totalErrorTemp = -1, localErrorTemp = -1;
+	std::vector<BatchResult> tempResult;
 
     for (int i = 0; i < iterations && finish == false; i++)
     {
-		totalErrorTemp = -1, localErrorTemp = -1;
 
         for (int j = 0; j < batch; j++)
         {
@@ -785,6 +784,12 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkPolyData>& surface
 
             GaussNewton resultInfo = GetSystem(target, data, posA, posB, lambda);
             currentError = resultInfo.localError;
+
+			BatchResult batchResult;
+			batchResult.data = data.clone();
+			batchResult.error = currentError;
+			tempResult.push_back(batchResult);
+
             //std::cout << currentError << std::endl;
             if (beforeError < 0)
             {
@@ -839,18 +844,25 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkPolyData>& surface
                 break;
             }*/
 
-			if (totalErrorTemp < resultInfo.totalError)
-			{
-				totalErrorTemp = resultInfo.totalError;
-			}
-
-			if (localErrorTemp < resultInfo.localError)
-			{
-				localErrorTemp = resultInfo.localError;
-			}
         }
 
-		if (totalErrorTemp < chi2 && localErrorTemp < maxError)
+		std::sort(tempResult.begin(), tempResult.end(), [](const BatchResult &a, const BatchResult &b) { return (a.error < b.error); });
+		int pos = batch - 2;
+		if (bestError < 0 || tempResult[pos].error < bestError)
+		{
+			bestError = tempResult[pos].error;
+
+			dataTemp.at<double>(0, 0) = tempResult[pos].data.at<double>(0, 0);
+			dataTemp.at<double>(1, 0) = tempResult[pos].data.at<double>(1, 0);
+			dataTemp.at<double>(2, 0) = tempResult[pos].data.at<double>(2, 0);
+			dataTemp.at<double>(3, 0) = tempResult[pos].data.at<double>(3, 0);
+			dataTemp.at<double>(4, 0) = tempResult[pos].data.at<double>(4, 0);
+			dataTemp.at<double>(5, 0) = tempResult[pos].data.at<double>(5, 0);
+		}
+
+		tempResult.clear();
+
+		if (bestError < maxError)
 		{
 			finish = true;
 		}
@@ -891,16 +903,14 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkPolyData>& surface
          ClosestPoint(surface, pnt);
      }*/
 
-    /*data.at<double>(0, 0) = dataTemp.at<double>(0, 0);
+    data.at<double>(0, 0) = dataTemp.at<double>(0, 0);
     data.at<double>(1, 0) = dataTemp.at<double>(1, 0);
     data.at<double>(2, 0) = dataTemp.at<double>(2, 0);
     data.at<double>(3, 0) = dataTemp.at<double>(3, 0);
     data.at<double>(4, 0) = dataTemp.at<double>(4, 0);
-    data.at<double>(5, 0) = dataTemp.at<double>(5, 0);*/
+    data.at<double>(5, 0) = dataTemp.at<double>(5, 0);
 
-	return localErrorTemp;
-
-    //return bestError;
+    return bestError;
 }
 
 double LeastSquaresICP::LeastSquaresTest(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)
@@ -1056,12 +1066,10 @@ double LeastSquaresICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData>& su
     cv::Mat dataTemp(7, 1, CV_64F);
     double bestError = -1;
 
-	double totalErrorTemp = -1, localErrorTemp = -1;
+	std::vector<BatchResult> tempResult;
 
     for (int i = 0; i < iterations && finish == false; i++)
     {
-		totalErrorTemp = -1, localErrorTemp = -1;
-
         for (int j = 0; j < batch; j++)
         {
             int posA, posB;
@@ -1075,6 +1083,11 @@ double LeastSquaresICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData>& su
 
             GaussNewton resultInfo = GetSystemScale(target, data, posA, posB, lambda);
             currentError = resultInfo.localError;
+
+			BatchResult batchResult;
+			batchResult.data = data.clone();
+			batchResult.error = currentError;
+			tempResult.push_back(batchResult);
 
             if (beforeError < 0)
             {
@@ -1140,40 +1153,46 @@ double LeastSquaresICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData>& su
                 finish = true;
                 break;
             }*/
-
-			if (totalErrorTemp < resultInfo.totalError)
-			{
-				totalErrorTemp = resultInfo.totalError;
-			}
-
-			if (localErrorTemp < resultInfo.localError)
-			{
-				localErrorTemp = resultInfo.localError;
-			}
         }
 
-		if (totalErrorTemp < chi2 && localErrorTemp < maxError)
+		std::sort(tempResult.begin(), tempResult.end(), [](const BatchResult &a, const BatchResult &b) { return (a.error < b.error); });
+		int pos = batch - 2;
+		if (bestError < 0 || tempResult[pos].error < bestError)
+		{
+			bestError = tempResult[pos].error;
+
+			dataTemp.at<double>(0, 0) = tempResult[pos].data.at<double>(0, 0);
+			dataTemp.at<double>(1, 0) = tempResult[pos].data.at<double>(1, 0);
+			dataTemp.at<double>(2, 0) = tempResult[pos].data.at<double>(2, 0);
+			dataTemp.at<double>(3, 0) = tempResult[pos].data.at<double>(3, 0);
+			dataTemp.at<double>(4, 0) = tempResult[pos].data.at<double>(4, 0);
+			dataTemp.at<double>(5, 0) = tempResult[pos].data.at<double>(5, 0);
+		}
+
+		tempResult.clear();
+
+		if (bestError < maxError)
 		{
 			finish = true;
 		}
 
-        if (finish == true)
-        {
-            continue;
-        }
+		if (finish == true)
+		{
+			continue;
+		}
 
         shuffleCenterSource();
         target.clear();
         target = GetCorrespondenceScale(implicitPolyDataDistance, data);
     }
 
-    //data.at<double>(0, 0) = dataTemp.at<double>(0, 0);
-    //data.at<double>(1, 0) = dataTemp.at<double>(1, 0);
-    //data.at<double>(2, 0) = dataTemp.at<double>(2, 0);
-    //data.at<double>(3, 0) = dataTemp.at<double>(3, 0);
-    //data.at<double>(4, 0) = dataTemp.at<double>(4, 0);
-    //data.at<double>(5, 0) = dataTemp.at<double>(5, 0);
-    //data.at<double>(6, 0) = dataTemp.at<double>(6, 0);
+    data.at<double>(0, 0) = dataTemp.at<double>(0, 0);
+    data.at<double>(1, 0) = dataTemp.at<double>(1, 0);
+    data.at<double>(2, 0) = dataTemp.at<double>(2, 0);
+    data.at<double>(3, 0) = dataTemp.at<double>(3, 0);
+    data.at<double>(4, 0) = dataTemp.at<double>(4, 0);
+    data.at<double>(5, 0) = dataTemp.at<double>(5, 0);
+    data.at<double>(6, 0) = dataTemp.at<double>(6, 0);
 
     double myScale = data.at<double>(6, 0);
 
@@ -1202,8 +1221,7 @@ double LeastSquaresICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData>& su
 
     ///////////////////////////////////////
 
-    //return bestError;
-	return localErrorTemp;
+    return bestError;
 }
 
 /*

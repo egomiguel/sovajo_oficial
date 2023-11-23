@@ -28,6 +28,13 @@ namespace GENERAL
 				}
 			};
 
+			struct BatchResult
+			{
+				cv::Mat data;
+				double error;
+
+			};
+
 			double chi2;
 
 			double maxError;
@@ -96,13 +103,9 @@ namespace GENERAL
 
 			//double LeastSquares(const pcl::PointCloud<pcl::PointXYZ>::Ptr surface, cv::Mat& data, int iterations = 200);
 
-			double LeastSquaresScale(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 200);
-
 			double LeastSquaresRandomInit(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 200);
 
 			//double LeastSquaresRandomInit(const pcl::PointCloud<pcl::PointXYZ>::Ptr surface, cv::Mat& data, int iterations = 200);
-
-			double LeastSquaresScaleRandomInit(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 200);
 
 			double LeastSquaresTest(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 100);
 

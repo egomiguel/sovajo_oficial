@@ -225,14 +225,29 @@ bool FemurImplantMatch::getTranslationMatrix()
 	Plane planeSideRef;
 	planeSideRef.init(Point(normalRef), tCenter);
 	planeSideRef.reverseByPoint(knee.getFemurKneeCenter());
+
 	double distanceToCenterKnee = planeSideRef.getDistanceFromPoint(knee.getFemurKneeCenter());
-	double moveDist = distanceToCenterKnee - (implant.getWidthSize() / 2.);
-	Point moveVector = tCenter + moveDist * planeSideRef.getNormalVector();
+	//double moveDist = distanceToCenterKnee - (implant.getWidthSize() / 2.);
+	double moveDist = distanceToCenterKnee - (implant.getWidthSize()); // usando esta distancia temporal ****************
 
-	translationMatrix = translationMatrix + moveVector.ToMatPoint();
+	translationMatrix = translationMatrix + moveDist * planeSideRef.getNormalVector().ToMatPoint();
 
-	//std::cout << "Translation: " << translationMatrix << std::endl;
 	return result;
+
+	/////////////////////////////////////////////////////////////// Temporal para probar *******************
+
+	/*if (knee.getSurgerySide() == SurgerySideEnum::KMedial)
+	{
+		tCenter = knee.getMedialInferiorFemurPoint();
+	}
+	else
+	{
+		tCenter = knee.getLateralInferiorFemurPoint();
+	}
+
+	translationMatrix = tCenter.ToMatPoint() - rotationMatrix * implant.getRodBasePoint().ToMatPoint();
+
+	return true;*/
 }
 
 itk::Matrix< double, 3, 3 > FemurImplantMatch::GetRotationMatrix() const

@@ -764,14 +764,12 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkPolyData>& surface
     int step = source.size() / batch;
 
     cv::Mat dataTemp(6, 1, CV_64F);
-    //double bestError = -1;
+    double bestError = -1;
 
-	double totalErrorTemp = -1, localErrorTemp = -1;
+	std::vector<BatchResult> tempResult;
 
     for (int i = 0; i < iterations && finish == false; i++)
     {
-		totalErrorTemp = -1, localErrorTemp = -1;
-
         for (int j = 0; j < batch; j++)
         {
             int posA, posB;
@@ -785,6 +783,12 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkPolyData>& surface
 
             GaussNewton resultInfo = GetSystem(target, data, posA, posB, lambda);
             currentError = resultInfo.localError;
+
+			BatchResult batchResult;
+			batchResult.data = data.clone();
+			batchResult.error = currentError;
+			tempResult.push_back(batchResult);
+
             //std::cout << currentError << std::endl;
             if (beforeError < 0)
             {
@@ -821,6 +825,7 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkPolyData>& surface
             data.at<double>(4, 0) = atan2(sin(angleY), cos(angleY));
             data.at<double>(5, 0) = atan2(sin(angleZ), cos(angleZ));
 
+			
             /*if (bestError < 0 || currentError < bestError)
             {
                 bestError = currentError;
@@ -831,28 +836,39 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkPolyData>& surface
                 dataTemp.at<double>(3, 0) = data.at<double>(3, 0);
                 dataTemp.at<double>(4, 0) = data.at<double>(4, 0);
                 dataTemp.at<double>(5, 0) = data.at<double>(5, 0);
-            }*/
-
-			if (totalErrorTemp < resultInfo.totalError)
-			{
-				totalErrorTemp = resultInfo.totalError;
-			}
-
-			if (localErrorTemp < resultInfo.localError)
-			{
-				localErrorTemp = resultInfo.localError;
-			}
-
-            /*if (resultInfo.totalError < chi2 && resultInfo.localError < maxError)
+            }
+			
+            if (resultInfo.totalError < chi2 && resultInfo.localError < maxError)
             {
                 finish = true;
                 break;
             }*/
         }
 
-		if (totalErrorTemp < chi2 && localErrorTemp < maxError)
+		//Taking the second biggest error, for a batch of 3 it is the median
+		std::sort(tempResult.begin(), tempResult.end(), [](const BatchResult &a, const BatchResult &b) { return (a.error < b.error); });
+		int pos = batch - 2;
+		if (bestError < 0 || tempResult[pos].error < bestError)
+		{
+			bestError = tempResult[pos].error;
+
+			dataTemp.at<double>(0, 0) = tempResult[pos].data.at<double>(0, 0);
+			dataTemp.at<double>(1, 0) = tempResult[pos].data.at<double>(1, 0);
+			dataTemp.at<double>(2, 0) = tempResult[pos].data.at<double>(2, 0);
+			dataTemp.at<double>(3, 0) = tempResult[pos].data.at<double>(3, 0);
+			dataTemp.at<double>(4, 0) = tempResult[pos].data.at<double>(4, 0);
+			dataTemp.at<double>(5, 0) = tempResult[pos].data.at<double>(5, 0);
+		}
+
+		tempResult.clear();
+
+		if (bestError < maxError)
 		{
 			finish = true;
+		}
+
+		if (finish == true)
+		{
 			continue;
 		}
 
@@ -887,14 +903,14 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkPolyData>& surface
          ClosestPoint(surface, pnt);
      }*/
 
-    //data.at<double>(0, 0) = dataTemp.at<double>(0, 0);
-    //data.at<double>(1, 0) = dataTemp.at<double>(1, 0);
-    //data.at<double>(2, 0) = dataTemp.at<double>(2, 0);
-    //data.at<double>(3, 0) = dataTemp.at<double>(3, 0);
-    //data.at<double>(4, 0) = dataTemp.at<double>(4, 0);
-    //data.at<double>(5, 0) = dataTemp.at<double>(5, 0);
+    data.at<double>(0, 0) = dataTemp.at<double>(0, 0);
+    data.at<double>(1, 0) = dataTemp.at<double>(1, 0);
+    data.at<double>(2, 0) = dataTemp.at<double>(2, 0);
+    data.at<double>(3, 0) = dataTemp.at<double>(3, 0);
+    data.at<double>(4, 0) = dataTemp.at<double>(4, 0);
+    data.at<double>(5, 0) = dataTemp.at<double>(5, 0);
 
-    return localErrorTemp;
+    return bestError;
 }
 
 double LeastSquaresICP::LeastSquaresTest(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)
@@ -914,12 +930,8 @@ double LeastSquaresICP::LeastSquaresTest(const vtkSmartPointer<vtkPolyData>& sur
     int batch = 3;
     int step = source.size() / batch;
 
-	double totalErrorTemp = -1, localErrorTemp = -1;
-
     for (int i = 0; i < iterations && finish == false; i++)
     {
-		totalErrorTemp = -1, localErrorTemp = -1;
-
         for (int k = 0; k < batch; k++)
         {
 
@@ -985,212 +997,21 @@ double LeastSquaresICP::LeastSquaresTest(const vtkSmartPointer<vtkPolyData>& sur
             data.at<double>(3, 0) = atan2(sin(angleX), cos(angleX));
             data.at<double>(4, 0) = atan2(sin(angleY), cos(angleY));
             data.at<double>(5, 0) = atan2(sin(angleZ), cos(angleZ));
-
-			if (totalErrorTemp < resultInfo.totalError)
-			{
-				totalErrorTemp = resultInfo.totalError;
-			}
-
-			if (localErrorTemp < resultInfo.localError)
-			{
-				localErrorTemp = resultInfo.localError;
-			}
         }
 
-		if (totalErrorTemp < chi2 && localErrorTemp < maxError)
+
+		if (currentError < maxError)
 		{
 			finish = true;
-			break;
+			continue;
 		}
-
-        if (finish == true)
-        {
-            continue;
-        }
 
         shuffleSource();
         target.clear();
         target = GetCorrespondence(implicitPolyDataDistance, data);
     }
 
-    return localErrorTemp;
-}
-
-double LeastSquaresICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)
-{
-    vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
-    implicitPolyDataDistance->SetInput(surface);
-
-    cv::Mat myRotation = Rx(data.at<double>(3, 0)) * Ry(data.at<double>(4, 0)) * Rz(data.at<double>(5, 0));
-    cv::Mat myRest = myRotation * CreatePoint(aveSource);
-
-    data.at<double>(0, 0) = data.at<double>(0, 0) + myRest.at<double>(0, 0);
-    data.at<double>(1, 0) = data.at<double>(1, 0) + myRest.at<double>(1, 0);
-    data.at<double>(2, 0) = data.at<double>(2, 0) + myRest.at<double>(2, 0);
-
-    std::vector<cv::Point3d> target = GetCorrespondenceScale(implicitPolyDataDistance, data);
-    double angleX, angleY, angleZ;
-
-    bool finish = false;
-    double lambda = 0.01;
-    double maxLambda = 1000.0;
-    double currentError, beforeError = -1;
-
-    //////////////////////////////////////////////////////////
-
-    /*cv::Mat translation1(3, 1, CV_64F);
-    translation1.at<double>(0, 0) = data.at<double>(0, 0);
-    translation1.at<double>(1, 0) = data.at<double>(1, 0);
-    translation1.at<double>(2, 0) = data.at<double>(2, 0);
-
-    cv::Mat finalRest1 = data.at<double>(6, 0) * ((Rx(data.at<double>(3, 0)) * Ry(data.at<double>(4, 0)) * Rz(data.at<double>(5, 0))) * CreatePoint(aveSource));
-    translation1 = translation1 - finalRest1;
-    std::vector<cv::Point3d> mySource1;
-    for (int j = 0; j < source.size(); j++)
-    {
-        cv::Mat myPoint = CreatePoint(source[j]);
-        cv::Mat eval = data.at<double>(6, 0) * ((Rx(data.at<double>(3, 0)) * Ry(data.at<double>(4, 0)) * Rz(data.at<double>(5, 0))) * myPoint) + translation1;
-        mySource1.push_back(cv::Point3d(eval));
-    }
-
-    showProcess(surface, mySource1);*/
-
-    ///////////////////////////////////////
-
-    int batch = 3;
-    int step = source.size() / batch;
-
-    cv::Mat dataTemp(7, 1, CV_64F);
-    double bestError = -1;
-
-    for (int i = 0; i < iterations && finish == false; i++)
-    {
-        for (int j = 0; j < batch; j++)
-        {
-            int posA, posB;
-            posA = step * j;
-            posB = posA + step;
-
-            if (j == batch - 1)
-            {
-                posB = source.size();
-            }
-
-            GaussNewton resultInfo = GetSystemScale(target, data, posA, posB, lambda);
-            currentError = resultInfo.localError;
-
-            if (beforeError < 0)
-            {
-                beforeError = currentError;
-            }
-            else
-            {
-                if (currentError < beforeError)
-                {
-                    lambda = lambda / 3.0;
-                }
-                else if (currentError > beforeError)
-                {
-                    lambda = lambda * 2.0;
-                    if (lambda > maxLambda)
-                    {
-                        lambda = maxLambda;
-                    }
-                }
-                beforeError = currentError;
-            }
-
-            cv::Mat dx;
-
-            bool result = cv::solve(resultInfo.A, resultInfo.B, dx);
-
-            data.at<double>(0, 0) = data.at<double>(0, 0) + dx.at<double>(0, 0);
-            data.at<double>(1, 0) = data.at<double>(1, 0) + dx.at<double>(1, 0);
-            data.at<double>(2, 0) = data.at<double>(2, 0) + dx.at<double>(2, 0);
-
-            data.at<double>(3, 0) = data.at<double>(3, 0) + dx.at<double>(3, 0);
-            data.at<double>(4, 0) = data.at<double>(4, 0) + dx.at<double>(4, 0);
-            data.at<double>(5, 0) = data.at<double>(5, 0) + dx.at<double>(5, 0);
-
-            angleX = data.at<double>(3, 0);
-            angleY = data.at<double>(4, 0);
-            angleZ = data.at<double>(5, 0);
-
-            data.at<double>(3, 0) = atan2(sin(angleX), cos(angleX));
-            data.at<double>(4, 0) = atan2(sin(angleY), cos(angleY));
-            data.at<double>(5, 0) = atan2(sin(angleZ), cos(angleZ));
-
-            target.clear();
-            target = GetCorrespondenceScale(implicitPolyDataDistance, data);
-
-            GetScale(target, data);
-
-            if (bestError < 0 || currentError < bestError)
-            {
-                bestError = currentError;
-
-                dataTemp.at<double>(0, 0) = data.at<double>(0, 0);
-                dataTemp.at<double>(1, 0) = data.at<double>(1, 0);
-                dataTemp.at<double>(2, 0) = data.at<double>(2, 0);
-                dataTemp.at<double>(3, 0) = data.at<double>(3, 0);
-                dataTemp.at<double>(4, 0) = data.at<double>(4, 0);
-                dataTemp.at<double>(5, 0) = data.at<double>(5, 0);
-                dataTemp.at<double>(6, 0) = data.at<double>(6, 0);
-            }
-
-            if (resultInfo.totalError < chi2 && resultInfo.localError < maxError)
-            {
-                finish = true;
-                break;
-            }
-        }
-
-        if (finish == true)
-        {
-            continue;
-        }
-
-        shuffleCenterSource();
-        target.clear();
-        target = GetCorrespondenceScale(implicitPolyDataDistance, data);
-    }
-
-    data.at<double>(0, 0) = dataTemp.at<double>(0, 0);
-    data.at<double>(1, 0) = dataTemp.at<double>(1, 0);
-    data.at<double>(2, 0) = dataTemp.at<double>(2, 0);
-    data.at<double>(3, 0) = dataTemp.at<double>(3, 0);
-    data.at<double>(4, 0) = dataTemp.at<double>(4, 0);
-    data.at<double>(5, 0) = dataTemp.at<double>(5, 0);
-    data.at<double>(6, 0) = dataTemp.at<double>(6, 0);
-
-    double myScale = data.at<double>(6, 0);
-
-    cv::Mat finalRest = myScale * ((Rx(data.at<double>(3, 0)) * Ry(data.at<double>(4, 0)) * Rz(data.at<double>(5, 0))) * CreatePoint(aveSource));
-
-    data.at<double>(0, 0) = data.at<double>(0, 0) - finalRest.at<double>(0, 0);
-    data.at<double>(1, 0) = data.at<double>(1, 0) - finalRest.at<double>(1, 0);
-    data.at<double>(2, 0) = data.at<double>(2, 0) - finalRest.at<double>(2, 0);
-
-    //////////////////////////////////////////////////////////
-
-    /*cv::Mat translation(3, 1, CV_64F);
-    translation.at<double>(0, 0) = data.at<double>(0, 0);
-    translation.at<double>(1, 0) = data.at<double>(1, 0);
-    translation.at<double>(2, 0) = data.at<double>(2, 0);
-
-    std::vector<cv::Point3d> mySource;
-    for (int j = 0; j < source.size(); j++)
-    {
-        cv::Mat myPoint = CreatePoint(source[j]);
-        cv::Mat eval = myScale * ((Rx(data.at<double>(3, 0)) * Ry(data.at<double>(4, 0)) * Rz(data.at<double>(5, 0))) * myPoint) + translation;
-        mySource.push_back(cv::Point3d(eval));
-    }
-
-    showProcess(surface, mySource);*/
-
-    ///////////////////////////////////////
-
-    return bestError;
+    return currentError;
 }
 
 /*
@@ -1521,69 +1342,6 @@ double LeastSquaresICP::LeastSquaresRandomInit(const pcl::PointCloud<pcl::PointX
 }
 
 */
-
-double LeastSquaresICP::LeastSquaresScaleRandomInit(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)
-{
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> distr_translation(-1, 1);
-    std::uniform_real_distribution<> distr_rotation(-0.06, 0.06);
-
-    cv::Mat dataTemp(7, 1, CV_64F);
-    cv::Mat dataInit(7, 1, CV_64F);
-    cv::Mat randomValues(7, 1, CV_64F);
-
-    dataInit.at<double>(0, 0) = data.at<double>(0, 0);
-    dataInit.at<double>(1, 0) = data.at<double>(1, 0);
-    dataInit.at<double>(2, 0) = data.at<double>(2, 0);
-    dataInit.at<double>(3, 0) = data.at<double>(3, 0);
-    dataInit.at<double>(4, 0) = data.at<double>(4, 0);
-    dataInit.at<double>(5, 0) = data.at<double>(5, 0);
-    dataInit.at<double>(6, 0) = data.at<double>(6, 0);
-
-    double error = LeastSquaresScale(surface, data, iterations);
-
-    for (int i = 0; i < 10; i++)
-    {
-
-        dataTemp.at<double>(0, 0) = dataInit.at<double>(0, 0);
-        dataTemp.at<double>(1, 0) = dataInit.at<double>(1, 0);
-        dataTemp.at<double>(2, 0) = dataInit.at<double>(2, 0);
-        dataTemp.at<double>(3, 0) = dataInit.at<double>(3, 0);
-        dataTemp.at<double>(4, 0) = dataInit.at<double>(4, 0);
-        dataTemp.at<double>(5, 0) = dataInit.at<double>(5, 0);
-        dataTemp.at<double>(6, 0) = dataInit.at<double>(6, 0);
-
-        randomValues.at<double>(0, 0) = distr_translation(gen);
-        randomValues.at<double>(1, 0) = distr_translation(gen);
-        randomValues.at<double>(2, 0) = distr_translation(gen);
-
-        randomValues.at<double>(3, 0) = distr_rotation(gen);
-        randomValues.at<double>(4, 0) = distr_rotation(gen);
-        randomValues.at<double>(5, 0) = distr_rotation(gen);
-
-        randomValues.at<double>(6, 0) = 0;
-
-        dataTemp += randomValues;
-
-        double errorTemp = LeastSquaresScale(surface, dataTemp, iterations);
-
-        if (errorTemp < error)
-        {
-            error = errorTemp;
-
-            data.at<double>(0, 0) = dataTemp.at<double>(0, 0);
-            data.at<double>(1, 0) = dataTemp.at<double>(1, 0);
-            data.at<double>(2, 0) = dataTemp.at<double>(2, 0);
-            data.at<double>(3, 0) = dataTemp.at<double>(3, 0);
-            data.at<double>(4, 0) = dataTemp.at<double>(4, 0);
-            data.at<double>(5, 0) = dataTemp.at<double>(5, 0);
-            data.at<double>(6, 0) = dataTemp.at<double>(6, 0);
-        }
-    }
-
-    return error;
-}
 
 cv::Mat LeastSquaresICP::GetRotationAnglesXYZ(const std::vector<cv::Point3d>& threeVectorsSource, const std::vector<cv::Point3d>& threeVectorstarget, cv::Mat& data)
 {

@@ -1221,7 +1221,8 @@ void MatchEasy()
 
 void MatchEasyPKA()
 {
-	PKA::IMPLANTS::Knee myKnee = CreateKneeFromFile_NumbersPKA("D:\\sovajo\\Errores\\Error4", PKA::IMPLANTS::KLeft, PKA::IMPLANTS::KLateral);
+	// Error 4 is right
+	PKA::IMPLANTS::Knee myKnee = CreateKneeFromFile_NumbersPKA("D:\\sovajo\\Errores\\Error4", PKA::IMPLANTS::KRight, PKA::IMPLANTS::KMedial);
 
 	vtkSmartPointer<vtkPolyData> polyTibiaImplant, polyPatellaImplant;
 
@@ -1312,12 +1313,12 @@ void MatchEasyPKA()
 	vtkSmartPointer<vtkPolyData> newImplantTibia = TestVTK::TransformPoly(tibiaModel, tibiaImplantMatch.GetRotationMatrix(), tibiaImplantMatch.GetTranslationMatrix());
 
 	std::vector<vtkSmartPointer<vtkPolyData>> polyList;
-	//polyList.push_back(newImplantFemur);
+	polyList.push_back(newImplantFemur);
 	polyList.push_back(newImplantTibia);
-	//TestVTK::show(myKnee.GetTibiaPoly(), polyList);
+	TestVTK::show(myKnee.GetFemurPoly(), polyList);
 
 	
-	TestVTK::show(myKnee.GetTibiaPoly(), tPoints, true);
+	//TestVTK::show(myKnee.GetTibiaPoly(), tPoints, true);
 
 }
 
@@ -4081,8 +4082,8 @@ void Resgistration_General_test()
 
 int main()
 {
-	MatchEasyPKA();
-	//Resgistration_General_test();
+	//MatchEasyPKA();
+	Resgistration_General_test();
 	//PelvisImplantMatch();
 	//std::cout << "tttttttttttttttttt" << std::endl;
 	//TestHullPoints();
