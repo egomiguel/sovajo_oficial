@@ -1236,20 +1236,18 @@ void MatchEasyPKA()
 	pPosterior.init(PKA::IMPLANTS::Point(-7.36697, 16.0254, -8.73743), PKA::IMPLANTS::Point(-7.85389, 16.0254, 8.8855), PKA::IMPLANTS::Point(-14.8693, 16.0254, 0.351634));
 	PKA::IMPLANTS::Point pRodBasePoint(17.1906, -2.90042, -1.59991);
 	PKA::IMPLANTS::Point pRodTopPoint(-1.58235, 0.0278676, -0.0651274);
-	std::vector<PKA::IMPLANTS::Point> pSideBorder1 = { PKA::IMPLANTS::Point(12.8517, -9.39071, 9.63172), PKA::IMPLANTS::Point(15.0674, -4.16829, 9.63524),
-														PKA::IMPLANTS::Point(15.1303, 2.29367, 9.63526), PKA::IMPLANTS::Point(12.5544, 9.43863, 9.63519),
-														PKA::IMPLANTS::Point(6.98929, 15.4167, 9.63499), PKA::IMPLANTS::Point(-2.67621, 17.2139, 9.63468) };
+	std::vector<PKA::IMPLANTS::Point> pSideBorder1 = { PKA::IMPLANTS::Point(6.1356, 14.2949, 9.61137), PKA::IMPLANTS::Point(14.2886, 1.29773, 9.60394),
+													   PKA::IMPLANTS::Point(11.6988, -9.03007, 9.62781)};
 
-	std::vector<PKA::IMPLANTS::Point> pSideBorder2 = { PKA::IMPLANTS::Point(13.8253, -7.85449, -9.63642), PKA::IMPLANTS::Point(15.5117, 0.0822173, -9.63656),
-														PKA::IMPLANTS::Point(14.2155, 6.88745, -9.63663), PKA::IMPLANTS::Point(9.68713, 13.1344, -9.63664),
-														PKA::IMPLANTS::Point(3.74163, 16.8969, -9.63682), PKA::IMPLANTS::Point(-3.88318, 17.5376, -9.63646) };
+	std::vector<PKA::IMPLANTS::Point> pSideBorder2 = { PKA::IMPLANTS::Point(6.1543, 14.2949, -9.63153), PKA::IMPLANTS::Point(14.3147, 1.53173, -9.65267),
+													   PKA::IMPLANTS::Point(11.5081, -9.33871, -9.64367)};
 
 	auto femurModel = TestVTK::ReadPolyDataSTL("D:\\sovajo\\Implants\\pka\\femoral.STL");
 	auto tibiaModel = TestVTK::ReadPolyDataSTL("D:\\sovajo\\Implants\\pka\\tibia.STL");
 
 	PKA::IMPLANTS::FemurImplantInfo femurInfo;
-	femurInfo.femurDistalThickness = 2.0;
-	femurInfo.femurPosteriorThickness = 2.0;
+	femurInfo.femurDistalThickness = 1.0;
+	femurInfo.femurPosteriorThickness = 5.0;
 
 	femurImplant.init(pPosterior, pRodBasePoint, pRodTopPoint, pSideBorder1, pSideBorder2, femurModel, femurInfo);
 
@@ -1258,7 +1256,7 @@ void MatchEasyPKA()
 	PKA::IMPLANTS::Point sidePoint(-14.4372, -11.9011, 4.40877);
 	PKA::IMPLANTS::Point exteriorPoint(0.441555, -12.1707, 1.17444);
 	PKA::IMPLANTS::TibiaImplantInfo tibiaInfo;
-	tibiaInfo.tibiaThickness = 12.0;
+	tibiaInfo.tibiaThickness = 10.0;
 
 	tibiaImplant.init(apLinePclPoint, apLineTuberPoint, sidePoint, exteriorPoint, tibiaInfo);
 
@@ -1290,8 +1288,8 @@ void MatchEasyPKA()
 	try
 	{
 
-		//hull1 = femurImplantMatch.GetHullPoints(transformIn, transformOut, FemurImplantMatch::kPlaneB, 1, 2, 10, 15, 200);
-		hull1 = tibiaImplantMatch.GetHullPoints(transformTibia, transformOut, 1, 1, 1.0, 0.8);
+		hull1 = femurImplantMatch.GetHullPoints(transformFemur, transformOut, PKA::IMPLANTS::FemurImplantMatch::KAnteriorAndDistalCurve, 1, 2, 10, 15, 200);
+		//hull1 = tibiaImplantMatch.GetHullPoints(transformTibia, transformOut, 1, 1, 1.0, 0.8);
 		//std::cout << transformOut << std::endl;
 
 		for (int i = 0; i < hull1.size(); i++)
@@ -1314,11 +1312,11 @@ void MatchEasyPKA()
 
 	std::vector<vtkSmartPointer<vtkPolyData>> polyList;
 	polyList.push_back(newImplantFemur);
-	polyList.push_back(newImplantTibia);
-	TestVTK::show(myKnee.GetFemurPoly(), polyList);
+	//polyList.push_back(newImplantTibia);
+	//TestVTK::show(myKnee.GetFemurPoly(), polyList);
 
 	
-	//TestVTK::show(myKnee.GetTibiaPoly(), tPoints, true);
+	TestVTK::show(myKnee.GetFemurPoly(), tPoints, true);
 
 }
 
@@ -4082,8 +4080,8 @@ void Resgistration_General_test()
 
 int main()
 {
-	//MatchEasyPKA();
-	Resgistration_General_test();
+	MatchEasyPKA();
+	//Resgistration_General_test();
 	//PelvisImplantMatch();
 	//std::cout << "tttttttttttttttttt" << std::endl;
 	//TestHullPoints();

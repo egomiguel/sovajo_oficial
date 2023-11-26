@@ -15,7 +15,7 @@ FemurImplant::FemurImplant()
 }
 
 void FemurImplant::init(const Plane& pPosterior, const Point& pRodBasePoint, const Point& pRodTopPoint,
-						const std::vector<Point>& pSideBorder1, const std::vector<Point>& pSideBorder2,
+						const std::vector<Point>& pSortPointsSide1, const std::vector<Point>& pSortPointsSide2,
 						const vtkSmartPointer<vtkPolyData> implantModel, const FemurImplantInfo& pImplantInfo)
 {
     if (isInit == true)
@@ -23,19 +23,34 @@ void FemurImplant::init(const Plane& pPosterior, const Point& pRodBasePoint, con
         throw ImplantExceptionCode::ALREADY_INITIALIZED_FEMUR_IMPLANT;
     }
 
+	if (pSortPointsSide1.size() < 3 || pSortPointsSide2.size() < 3)
+	{
+		throw ImplantExceptionCode::FEMUR_IMPLANT_MUST_HAVE_ENOUGH_SIDE_POINTS;
+	}
+
     this->mPosterior = pPosterior;
     this->mRodBasePoint = pRodBasePoint;
     this->mRodTopPoint = pRodTopPoint;
-    this->mSideBorder1 = pSideBorder1;
-	this->mSideBorder2 = pSideBorder2;
+    this->mSideBorder1 = pSortPointsSide1;
+	this->mSideBorder2 = pSortPointsSide2;
     this->mImplantModel = implantModel;
     this->mImplantInfo = pImplantInfo;
 
 	mPosterior.reverseByPoint(mRodTopPoint);
 
+	if (mPosterior.getDistanceFromPoint(*mSideBorder1.begin()) > mPosterior.getDistanceFromPoint(*mSideBorder1.rbegin()))
+	{
+		std::reverse(mSideBorder1.begin(), mSideBorder1.end());
+	}
+
+	if (mPosterior.getDistanceFromPoint(*mSideBorder2.begin()) > mPosterior.getDistanceFromPoint(*mSideBorder2.rbegin()))
+	{
+		std::reverse(mSideBorder2.begin(), mSideBorder2.end());
+	}
+
 	bool tResult;
-	Plane side1 = Plane::getBestPlane(pSideBorder1, tResult);
-	Plane side2 = Plane::getBestPlane(pSideBorder2, tResult);
+	Plane side1 = Plane::getBestPlane(pSortPointsSide1, tResult);
+	Plane side2 = Plane::getBestPlane(pSortPointsSide2, tResult);
 	/*
 		Both vectors must have the same direction to calculate an average vector with best precision.
 	*/
@@ -164,14 +179,89 @@ Point FemurImplant::getRodBasePoint() const
 	return mRodBasePoint;
 }
 
-std::vector<Point> FemurImplant::getSideBorder1() const
+std::vector<Point> FemurImplant::getSortPointsSide1() const
 {
 	return mSideBorder1;
 }
 
-std::vector<Point> FemurImplant::getSideBorder2() const
+std::vector<Point> FemurImplant::getSortPointsSide2() const
 {
 	return mSideBorder2;
+}
+
+std::vector<Point> FemurImplant::getAllSidePointsInOrder(double pOffset) const
+{
+	std::vector<Point> result;
+
+	Point move1, move2;
+
+	if (pOffset != 0)
+	{
+		bool error;
+		Plane sidePlane1 = Plane::getBestPlane(mSideBorder1, error);
+		sidePlane1.reverseByPoint(mRodBasePoint, false);
+		move1 = sidePlane1.getNormalVector();
+
+		Plane sidePlane2 = Plane::getBestPlane(mSideBorder2, error);
+		sidePlane2.reverseByPoint(mRodBasePoint, false);
+		move2 = sidePlane2.getNormalVector();
+	}
+
+	for (auto it = mSideBorder1.rbegin(); it != mSideBorder1.rend(); ++it)
+	{
+		Point temp = (*it) + pOffset * move1;
+		result.push_back(temp);
+	}
+
+	for (auto& it : mSideBorder2)
+	{
+		Point temp = it + pOffset * move2;
+		result.push_back(temp);
+	}
+
+	return result;
+}
+
+std::vector<Point> FemurImplant::getAllSidePointsInOrder(cv::Mat& pRotation, cv::Mat& pTranslation, double pOffset) const
+{
+	std::vector<Point> result;
+
+	Point move1, move2;
+
+	if (pOffset != 0)
+	{
+		bool error;
+		Plane sidePlane1 = Plane::getBestPlane(mSideBorder1, error);
+		sidePlane1.reverseByPoint(mRodBasePoint, false);
+		move1 = sidePlane1.getNormalVector();
+
+		Plane sidePlane2 = Plane::getBestPlane(mSideBorder2, error);
+		sidePlane2.reverseByPoint(mRodBasePoint, false);
+		move2 = sidePlane2.getNormalVector();
+	}
+
+	for (auto it = mSideBorder1.rbegin(); it != mSideBorder1.rend(); ++it)
+	{
+		Point temp = (*it) + pOffset * move1;
+		cv::Mat tempMat = pRotation * temp.ToMatPoint() + pTranslation;
+		result.push_back(Point(tempMat));
+	}
+
+	for (auto& it : mSideBorder2)
+	{
+		Point temp = it + pOffset * move2;
+		cv::Mat tempMat = pRotation * temp.ToMatPoint() + pTranslation;
+		result.push_back(Point(tempMat));
+	}
+
+	return result;
+}
+
+Plane FemurImplant::getBestPlaneToCurvePoints() const
+{
+	std::vector<Point> points = getAllSidePointsInOrder();
+	bool error;
+	return Plane::getBestPlane(points, error);
 }
 
 Point FemurImplant::getDirectVectorFemurAxis() const

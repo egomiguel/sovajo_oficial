@@ -20,7 +20,7 @@ namespace PKA
 			FemurImplant(const FemurImplant& pImplant);
 
 			void init(const Plane& pPosterior, const Point& pRodBasePoint, const Point& pRodTopPoint,
-					  const std::vector<Point>& pSideBorder1, const std::vector<Point>& pSideBorder2, 
+					  const std::vector<Point>& pSortPointsSide1, const std::vector<Point>& pSortPointsSide2, 
 					  const vtkSmartPointer<vtkPolyData> implantModel, const FemurImplantInfo& pImplantInfo);
 
 			Plane getPosterior() const;
@@ -35,9 +35,15 @@ namespace PKA
 
 			Point getRodBasePoint() const;
 
-			std::vector<Point> getSideBorder1() const;
+			std::vector<Point> getSortPointsSide1() const;
 
-			std::vector<Point> getSideBorder2() const;
+			std::vector<Point> getSortPointsSide2() const;
+
+			std::vector<Point> getAllSidePointsInOrder(double pOffset = 0) const;
+
+			std::vector<Point> getAllSidePointsInOrder(cv::Mat& pRotation, cv::Mat& pTranslation, double pOffset = 0) const;
+
+			Plane getBestPlaneToCurvePoints() const;
 
 			Point getDirectVectorFemurAxis() const;
 
