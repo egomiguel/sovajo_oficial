@@ -22,4 +22,5 @@ find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
 add_executable(${PROJECT_NAME} algorithms.cpp Test_TKA_Match.h)
 #target_link_libraries(${PROJECT_NAME} TKA_Hip THA_Hip TKA_Implants TKA_Registration PKA_Registration TKA_Segmentation THA_Implants THA_Registration THA_Segmentation LoadFiles test CheckImageRod)
+
 target_link_libraries(${PROJECT_NAME} TKA_Hip THA_Hip TKA_Implants PKA_Implants TKA_Registration PKA_Registration TKA_Segmentation PKA_Segmentation THA_Implants THA_Registration THA_Segmentation General_Registration LoadFiles test CheckImageRod)

@@ -1288,7 +1288,7 @@ void MatchEasyPKA()
 	try
 	{
 
-		hull1 = femurImplantMatch.GetHullPoints(transformFemur, transformOut, PKA::IMPLANTS::FemurImplantMatch::KAnteriorAndDistalCurve, 1, 2, 10, 15, 200);
+		hull1 = femurImplantMatch.GetHullPoints(transformFemur, transformOut, PKA::IMPLANTS::FemurImplantMatch::KAnteriorAndDistalCurve, 10, 2, 10, 15, 200);
 		//hull1 = tibiaImplantMatch.GetHullPoints(transformTibia, transformOut, 1, 1, 1.0, 0.8);
 		//std::cout << transformOut << std::endl;
 

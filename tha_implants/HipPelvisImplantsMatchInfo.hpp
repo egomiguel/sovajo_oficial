@@ -4,6 +4,7 @@
 #include "HipPelvisCupImplant.hpp"
 #include "HipFemurStemImplant.hpp"
 #include "HipFemurStemHeadImplant.hpp"
+#include "HipPelvisCupImplantSimple.hpp"
 #include "HipPelvis.hpp"
 #include <itkRigid3DTransform.h>
 #include "tha_implants_export.h"
@@ -50,6 +51,16 @@ namespace THA
 			double getCupShiftLateral() const;
 
 			double getCupShiftAnterior() const;
+
+			double getCupInclination(const HipPelvisCupImplantSimple& pSimpleCup, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
+
+			double getCupAntversion(const HipPelvisCupImplantSimple& pSimpleCup, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
+
+			double getCupShiftSuperior(const HipPelvisCupImplantSimple& pSimpleCup, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
+
+			double getCupShiftLateral(const HipPelvisCupImplantSimple& pSimpleCup, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
+
+			double getCupShiftAnterior(const HipPelvisCupImplantSimple& pSimpleCup, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
 
 			double getStemAxisShiftSuperiorHip() const;
 

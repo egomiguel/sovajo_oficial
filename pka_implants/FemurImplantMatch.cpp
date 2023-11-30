@@ -228,7 +228,7 @@ bool FemurImplantMatch::getTranslationMatrix()
 
 	double distanceToCenterKnee = planeSideRef.getDistanceFromPoint(knee.getFemurKneeCenter());
 	//double moveDist = distanceToCenterKnee - (implant.getWidthSize() / 2.);
-	double moveDist = distanceToCenterKnee - (implant.getWidthSize()); // usando esta distancia temporal ****************
+	double moveDist = distanceToCenterKnee - (implant.getWidthSize() /*+ (implant.getWidthSize() / 2.)*/); // usando esta distancia temporal ****************
 
 	translationMatrix = translationMatrix + moveDist * planeSideRef.getNormalVector().ToMatPoint();
 
@@ -440,7 +440,8 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	{
 		cv::Mat rotation = Rigid3DTransformToCVRotation(pTransformIn);
 		cv::Mat translation = Rigid3DTransformToCVTranslation(pTransformIn);
-		vertices = ConvexHull::interpolateSpline(implant.getAllSidePointsInOrder(rotation, translation), amount);
+		// No esta actualizado aun en la nube de china
+		vertices = ConvexHull::interpolateSpline(implant.getAllSidePointsInOrder(rotation, translation, distanceSide), amount);
 	}
 
 	Point initExtreme, endExtreme;
