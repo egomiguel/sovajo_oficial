@@ -1285,6 +1285,10 @@ void MatchEasyPKA()
 
 	std::vector<cv::Point3d> tPoints, tPoints2;
 
+	std::cout << transformFemur << std::endl;
+
+	std::cout << "base: " << transformFemur->GetMatrix().GetVnlMatrix().get_column(0) << std::endl;
+
 	try
 	{
 
@@ -1316,7 +1320,7 @@ void MatchEasyPKA()
 	//TestVTK::show(myKnee.GetFemurPoly(), polyList);
 
 	
-	TestVTK::show(myKnee.GetFemurPoly(), tPoints, true);
+	//TestVTK::show(myKnee.GetFemurPoly(), tPoints, true);
 
 }
 

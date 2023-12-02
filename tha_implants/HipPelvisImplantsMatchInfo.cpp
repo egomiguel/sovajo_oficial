@@ -102,6 +102,7 @@ double HipPelvisImplantsMatchInfo::getCupInclination() const
 
 	cv::Mat implantVectorMat = mRotationCup * mImplantCup.getVectorZ().ToMatPoint();
 	Point implantVector = Point(implantVectorMat);
+	implantVector.normalice();
 
 	Plane coronal;
 	coronal.init(rotationAxis, mHipCenterOfRotation);
@@ -233,15 +234,164 @@ double HipPelvisImplantsMatchInfo::getCupShiftAnterior() const
 	}
 }
 
-double HipPelvisImplantsMatchInfo::getCupInclination(const HipPelvisCupImplantSimple& pSimpleCup, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const
+double HipPelvisImplantsMatchInfo::getCupInclination(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const
 {
 	Point rotationAxis = mPelvis.getPelvisVectorAP();
 	Point referenceVector = mPelvis.getPelvisVectorInfSup();
 
-	auto rotation = Rigid3DTransformToCVRotation(pImplantToBoneTransform);
+	/*
+		This vectorX represent the vector perpendicular to the base of the cup, 
+		which should point towards the center of the hip and not outwards, 
+		hence the change in sign. This transform is that of the robot when it uses the reamer.
+	*/
 
-	cv::Mat implantVectorMat = rotation * pSimpleCup.getVectorZ().ToMatPoint();
-	Point implantVector = Point(implantVectorMat);
+	auto vectorX = pImplantToBoneTransform->GetMatrix().GetVnlMatrix().get_column(0);
+	Point implantVectorZ = -Point(vectorX[0], vectorX[1], vectorX[2]);
+	implantVectorZ.normalice();
+
+	Plane coronal;
+	coronal.init(rotationAxis, mHipCenterOfRotation);
+
+	Point vectorImplantProj = coronal.getProjectionVector(implantVectorZ);
+	Point vectorBoneProj = coronal.getProjectionVector(referenceVector);
+	vectorImplantProj.normalice();
+	vectorBoneProj.normalice();
+
+	double angle = ImplantTools::getAngleBetweenVectorsDegree(vectorImplantProj, vectorBoneProj);
+
+	Plane sagital;
+	Point ref = mPelvis.getPubicJoin();
+	sagital.init(mPelvis.getPelvisVectorLateralASIS(), ref);
+	sagital.reverseByPoint(mHipCenterOfRotation, false);
+
+	ref = ref + 1000. * vectorImplantProj;
+
+	if (sagital.eval(ref) < 0)
+	{
+		return -angle;
+	}
+	else
+	{
+		return angle;
+	}
+}
+
+double HipPelvisImplantsMatchInfo::getCupAntversion(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const
+{
+	/*
+		This vectorX represent the vector perpendicular to the base of the cup,
+		which should point towards the center of the hip and not outwards,
+		hence the change in sign. This transform is that of the robot when it uses the reamer.
+	*/
+
+	auto vectorX = pImplantToBoneTransform->GetMatrix().GetVnlMatrix().get_column(0);
+	Point implantVectorZ = -Point(vectorX[0], vectorX[1], vectorX[2]);
+	implantVectorZ.normalice();
+
+	Point refPoint = mPelvis.getCoronalPlaneAPP().getProjectionPoint(mPelvis.getPubicJoin());
+
+	Point pelvisVectorAP = mPelvis.getPelvisVectorAP();
+
+	/*
+		The plane formed by the normal of the implant and the AP vector of the pelvis is used.
+		The anteversion rotation occurs in that plane, therefore in that plane the angle is sought
+	*/
+
+	Point interceptionVector = mPelvis.getCoronalPlaneAPP().getInterceptionPlaneVector(implantVectorZ, pelvisVectorAP);
+	interceptionVector.normalice();
+
+	double angle1 = ImplantTools::getAngleBetweenVectorsDegree(interceptionVector, implantVectorZ);
+	double angle2 = ImplantTools::getAngleBetweenVectorsDegree(-interceptionVector, implantVectorZ);
+	double angle = std::min(angle1, angle2);
+
+	refPoint = refPoint + 1000. * implantVectorZ;
+
+	if (mPelvis.getCoronalPlaneAPP().eval(refPoint) < 0)
+	{
+		return angle;
+	}
+	else
+	{
+		return -angle;
+	}
+}
+
+double HipPelvisImplantsMatchInfo::getCupShiftSuperior(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const
+{
+	auto centerFromTransform = pImplantToBoneTransform->GetCenter();
+	Point cupCenter = Point(centerFromTransform[0], centerFromTransform[1], centerFromTransform[2]);
+
+	Line superiorLine(mPelvis.getPelvisVectorInfSup(), mHipCenterOfRotation);
+
+	Plane axial;
+	axial.init(mPelvis.getPelvisVectorInfSup(), mHipCenterOfRotation);
+
+	cupCenter = superiorLine.getProjectPoint(cupCenter);
+	double distance = ImplantTools::getDistanceBetweenPoints(cupCenter, mHipCenterOfRotation);
+
+	if (axial.eval(cupCenter) >= 0)
+	{
+		return distance;
+	}
+	else
+	{
+		return -distance;
+	}
+}
+
+double HipPelvisImplantsMatchInfo::getCupShiftLateral(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const
+{
+	auto centerFromTransform = pImplantToBoneTransform->GetCenter();
+	Point cupCenter = Point(centerFromTransform[0], centerFromTransform[1], centerFromTransform[2]);
+
+	Line lateralLine(mPelvis.getPelvisVectorLateralASIS(), mHipCenterOfRotation);
+
+	Plane sagital;
+	sagital.init(mPelvis.getPelvisVectorLateralASIS(), mHipCenterOfRotation);
+
+	cupCenter = lateralLine.getProjectPoint(cupCenter);
+	double distance = ImplantTools::getDistanceBetweenPoints(cupCenter, mHipCenterOfRotation);
+
+	if (sagital.eval(cupCenter) >= 0)
+	{
+		return distance;
+	}
+	else
+	{
+		return -distance;
+	}
+}
+
+double HipPelvisImplantsMatchInfo::getCupShiftAnterior(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const
+{
+	auto centerFromTransform = pImplantToBoneTransform->GetCenter();
+	Point cupCenter = Point(centerFromTransform[0], centerFromTransform[1], centerFromTransform[2]);
+
+	Line anteriorLine(mPelvis.getPelvisVectorAP(), mHipCenterOfRotation);
+
+	Plane coronal;
+	coronal.init(mPelvis.getPelvisVectorAP(), mHipCenterOfRotation);
+
+	cupCenter = anteriorLine.getProjectPoint(cupCenter);
+	double distance = ImplantTools::getDistanceBetweenPoints(cupCenter, mHipCenterOfRotation);
+
+	if (coronal.eval(cupCenter) >= 0)
+	{
+		return distance;
+	}
+	else
+	{
+		return -distance;
+	}
+}
+
+double HipPelvisImplantsMatchInfo::getCupInclination(const Point& pVectorToHipCenter) const
+{
+	Point rotationAxis = mPelvis.getPelvisVectorAP();
+	Point referenceVector = mPelvis.getPelvisVectorInfSup();
+
+	Point implantVector = pVectorToHipCenter;
+	implantVector.normalice();
 
 	Plane coronal;
 	coronal.init(rotationAxis, mHipCenterOfRotation);
@@ -270,12 +420,9 @@ double HipPelvisImplantsMatchInfo::getCupInclination(const HipPelvisCupImplantSi
 	}
 }
 
-double HipPelvisImplantsMatchInfo::getCupAntversion(const HipPelvisCupImplantSimple& pSimpleCup, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const
+double HipPelvisImplantsMatchInfo::getCupAntversion(const Point& pVectorToHipCenter) const
 {
-	auto rotation = Rigid3DTransformToCVRotation(pImplantToBoneTransform);
-
-	cv::Mat implantVectorMat = rotation * pSimpleCup.getVectorZ().ToMatPoint();
-	Point implantVector = Point(implantVectorMat);
+	Point implantVector = pVectorToHipCenter;
 	implantVector.normalice();
 
 	Point refPoint = mPelvis.getCoronalPlaneAPP().getProjectionPoint(mPelvis.getPubicJoin());
@@ -306,19 +453,14 @@ double HipPelvisImplantsMatchInfo::getCupAntversion(const HipPelvisCupImplantSim
 	}
 }
 
-double HipPelvisImplantsMatchInfo::getCupShiftSuperior(const HipPelvisCupImplantSimple& pSimpleCup, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const
+double HipPelvisImplantsMatchInfo::getCupShiftSuperior(const Point& pCenterOfRotation) const
 {
-	auto rotation = Rigid3DTransformToCVRotation(pImplantToBoneTransform);
-	auto translation = Rigid3DTransformToCVTranslation(pImplantToBoneTransform);
-
-	cv::Mat cupCenterMat = (rotation * pSimpleCup.getCenterOfRotationImplant().ToMatPoint()) + translation;
-
 	Line superiorLine(mPelvis.getPelvisVectorInfSup(), mHipCenterOfRotation);
 
 	Plane axial;
 	axial.init(mPelvis.getPelvisVectorInfSup(), mHipCenterOfRotation);
 
-	Point cupCenter = Point(cupCenterMat);
+	Point cupCenter = pCenterOfRotation;
 	cupCenter = superiorLine.getProjectPoint(cupCenter);
 	double distance = ImplantTools::getDistanceBetweenPoints(cupCenter, mHipCenterOfRotation);
 
@@ -332,19 +474,14 @@ double HipPelvisImplantsMatchInfo::getCupShiftSuperior(const HipPelvisCupImplant
 	}
 }
 
-double HipPelvisImplantsMatchInfo::getCupShiftLateral(const HipPelvisCupImplantSimple& pSimpleCup, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const
+double HipPelvisImplantsMatchInfo::getCupShiftLateral(const Point& pCenterOfRotation) const
 {
-	auto rotation = Rigid3DTransformToCVRotation(pImplantToBoneTransform);
-	auto translation = Rigid3DTransformToCVTranslation(pImplantToBoneTransform);
-
-	cv::Mat cupCenterMat = (rotation * pSimpleCup.getCenterOfRotationImplant().ToMatPoint()) + translation;
-
 	Line lateralLine(mPelvis.getPelvisVectorLateralASIS(), mHipCenterOfRotation);
 
 	Plane sagital;
 	sagital.init(mPelvis.getPelvisVectorLateralASIS(), mHipCenterOfRotation);
 
-	Point cupCenter = Point(cupCenterMat);
+	Point cupCenter = pCenterOfRotation;
 	cupCenter = lateralLine.getProjectPoint(cupCenter);
 	double distance = ImplantTools::getDistanceBetweenPoints(cupCenter, mHipCenterOfRotation);
 
@@ -358,19 +495,14 @@ double HipPelvisImplantsMatchInfo::getCupShiftLateral(const HipPelvisCupImplantS
 	}
 }
 
-double HipPelvisImplantsMatchInfo::getCupShiftAnterior(const HipPelvisCupImplantSimple& pSimpleCup, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const
+double HipPelvisImplantsMatchInfo::getCupShiftAnterior(const Point& pCenterOfRotation) const
 {
-	auto rotation = Rigid3DTransformToCVRotation(pImplantToBoneTransform);
-	auto translation = Rigid3DTransformToCVTranslation(pImplantToBoneTransform);
-
-	cv::Mat cupCenterMat = (rotation * pSimpleCup.getCenterOfRotationImplant().ToMatPoint()) + translation;
-
 	Line anteriorLine(mPelvis.getPelvisVectorAP(), mHipCenterOfRotation);
 
 	Plane coronal;
 	coronal.init(mPelvis.getPelvisVectorAP(), mHipCenterOfRotation);
 
-	Point cupCenter = Point(cupCenterMat);
+	Point cupCenter = pCenterOfRotation;
 	cupCenter = anteriorLine.getProjectPoint(cupCenter);
 	double distance = ImplantTools::getDistanceBetweenPoints(cupCenter, mHipCenterOfRotation);
 

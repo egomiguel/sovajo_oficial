@@ -52,15 +52,25 @@ namespace THA
 
 			double getCupShiftAnterior() const;
 
-			double getCupInclination(const HipPelvisCupImplantSimple& pSimpleCup, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
+			double getCupInclination(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
 
-			double getCupAntversion(const HipPelvisCupImplantSimple& pSimpleCup, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
+			double getCupAntversion(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
 
-			double getCupShiftSuperior(const HipPelvisCupImplantSimple& pSimpleCup, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
+			double getCupShiftSuperior(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
 
-			double getCupShiftLateral(const HipPelvisCupImplantSimple& pSimpleCup, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
+			double getCupShiftLateral(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
 
-			double getCupShiftAnterior(const HipPelvisCupImplantSimple& pSimpleCup, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
+			double getCupShiftAnterior(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
+
+			double getCupInclination(const Point& pVectorToHipCenter) const;
+
+			double getCupAntversion(const Point& pVectorToHipCenter) const;
+
+			double getCupShiftSuperior(const Point& pCenterOfRotation) const;
+
+			double getCupShiftLateral(const Point& pCenterOfRotation) const;
+
+			double getCupShiftAnterior(const Point& pCenterOfRotation) const;
 
 			double getStemAxisShiftSuperiorHip() const;
 
