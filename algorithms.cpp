@@ -292,7 +292,18 @@ Knee CreateKneeFromFile_Numbers(const std::string& sourcePath, KneeSideEnum pSid
 		throw ("Error there are not json file");
 	}
 
-	QString jsonPath = directory.filePath(files[0]);
+	QString jsonPath;
+
+	if (files.size() == 1)
+	{
+		jsonPath = directory.filePath(files[0]);
+	}
+	else
+	{
+		QString kneeLandmark = "landmark.json";
+		jsonPath = directory.filePath(kneeLandmark);
+	}
+
 	QString var;
 	QFile file;
 
@@ -430,6 +441,99 @@ PKA::IMPLANTS::Knee CreateKneeFromFile_NumbersPKA(const std::string& sourcePath,
 			  tibiaTubercle, tibiaPCL, ankleCenter, femurPoly, tibiaPoly, pSide, pSurgery);
 
 	return knee;
+}
+
+QJsonObject getJSONFromPath(const QString& path, const QDir& directory)
+{
+	QString jsonPath = directory.filePath(path);
+	QString var;
+	QFile file;
+
+	file.setFileName(jsonPath);
+	file.open(QIODevice::ReadOnly | QIODevice::Text);
+	var = file.readAll();
+	file.close();
+
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(var.toUtf8());
+	QJsonObject jsonObject = jsonDoc.object();
+
+	return jsonObject;
+}
+
+double FemurRegistrationFromNumbersTKA(const Knee& myKnee, const std::string& sourcePath, bool& result)
+{
+	QDir directory(QString::fromStdString(sourcePath));
+	QStringList files = directory.entryList(QStringList() << "*.json" << "*.JSON", QDir::Files);
+	if (files.size() == 0)
+	{
+		std::cout << "Error there are not json file" << std::endl;
+		throw ("Error there are not json file");
+	}
+	
+	QString femurPoints = "femur_reg_data";
+	QString femurLandmark = "femur_reg_landmarks";
+
+	bool var1 = false, var2 = false;
+
+	for (int i = 0; i < files.size(); i++)
+	{
+		if (files[i].contains(femurPoints) && var1 == false)
+		{
+			femurPoints = files[i];
+			var1 = true;
+		}
+		
+		if (files[i].contains(femurLandmark) && var2 == false)
+		{
+			femurLandmark = files[i];
+			var2 = true;
+		}
+
+	}
+
+	if (var1 == false || var2 == false)
+	{
+		std::cout << "Error there are not femur json files" << std::endl;
+		throw ("Error there are not femur json files");
+	}
+
+	QJsonObject jsonObjectLandmark = getJSONFromPath(femurLandmark, directory);
+	QJsonObject jsonObjectPoints = getJSONFromPath(femurPoints, directory);
+
+	auto femurLandmarkPoints = jsonObjectLandmark.value(QString("points")).toObject();
+	auto femurRegistrationPoints = jsonObjectPoints.value(QString("points")).toObject();
+	
+	Point hipCenter = QJsonArrayToPoint(femurLandmarkPoints.value(QString("0")).toArray());
+	Point kneeCenter = QJsonArrayToPoint(femurLandmarkPoints.value(QString("1")).toArray());
+	Point medialEpicondyle = QJsonArrayToPoint(femurLandmarkPoints.value(QString("3")).toArray());
+
+	std::vector<itk::Point<double, 3>> pBonePoints;
+
+	for (int i = 0; i < 7; i++)
+	{
+		auto obj = femurRegistrationPoints.value(QString::number(i)).toObject();
+
+		for (auto it = obj.begin(); it != obj.end(); ++it)
+		{
+			Point temp = QJsonArrayToPoint(it->toArray());
+			itk::Point<double, 3> pointITK;
+			pointITK[0] = temp.x;
+			pointITK[1] = temp.y;
+			pointITK[2] = temp.z;
+
+			pBonePoints.push_back(pointITK);
+		}
+	}
+
+	FemurRegistration registration(myKnee.GetFemurPoly(), myKnee.getHipCenter().ToITKPoint(),
+									myKnee.getFemurKneeCenter().ToITKPoint(), 
+									myKnee.getMedialEpicondyle().ToITKPoint());
+
+	result = registration.MakeRegistration(pBonePoints, Registration::makeItkPoint(hipCenter.x, hipCenter.y, hipCenter.z),
+									Registration::makeItkPoint(kneeCenter.x, kneeCenter.y, kneeCenter.z),
+									Registration::makeItkPoint(medialEpicondyle.x, medialEpicondyle.y, medialEpicondyle.z), true);
+	
+	return registration.getError();
 }
 
 FemurImplant CreateFemurImplantFromFile(const std::string& sourcePath)
@@ -4084,7 +4188,15 @@ void Resgistration_General_test()
 
 int main()
 {
-	MatchEasyPKA();
+	std::string casePlan = "D:\\sovajo\\Cases_Plan_TKA\\case1_left";
+	Knee myKnee;
+	bool result;
+	myKnee = CreateKneeFromFile_Numbers(casePlan, KneeSideEnum::KLeft);
+	double error = FemurRegistrationFromNumbersTKA(myKnee, casePlan, result);
+
+	std::cout <<"Result: "  << result << " Error: " << error << std::endl;
+
+	//MatchEasyPKA();
 	//Resgistration_General_test();
 	//PelvisImplantMatch();
 	//std::cout << "tttttttttttttttttt" << std::endl;
