@@ -72,6 +72,8 @@ namespace THA
 
 			double getCupShiftAnterior(const Point& pCenterOfRotation) const;
 
+			double getReamingDistance(const Point& pCenterOfRotation) const;
+
 			double getStemAxisShiftSuperiorHip() const;
 
 			double getStemAxisShiftLateralHip() const;

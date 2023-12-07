@@ -516,6 +516,11 @@ double HipPelvisImplantsMatchInfo::getCupShiftAnterior(const Point& pCenterOfRot
 	}
 }
 
+double HipPelvisImplantsMatchInfo::getReamingDistance(const Point& pCenterOfRotation) const
+{
+	return ImplantTools::getDistanceBetweenPoints(pCenterOfRotation, mHipCenterOfRotation);
+}
+
 double HipPelvisImplantsMatchInfo::getStemAxisShiftSuperiorHip() const
 {
 	//cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
