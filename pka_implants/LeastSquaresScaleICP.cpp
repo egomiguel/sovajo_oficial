@@ -126,7 +126,7 @@ LeastSquaresScaleICP::LeastSquaresScaleICP(const std::vector<cv::Point3d>& sourc
     }
 
     chi2 = 0.75;
-    maxError = 0.35;
+    maxError = 1.0;
 }
 
 void LeastSquaresScaleICP::shuffleCenterSource()
@@ -379,34 +379,34 @@ LeastSquaresScaleICP::GaussNewton LeastSquaresScaleICP::GetSystemScale(const std
     cv::Mat B = cv::Mat::zeros(6, 1, CV_64F);
     double chi = 0;
     double squareError;
-    double localError = -1.0;
-    int tSize = centerSource.size();
+    double localError = 0;
 
     for (int i = posBegin; i < posEnd; i++)
     {
         cv::Mat sourcePoint = CreatePoint(centerSource[i]);
         cv::Mat targetPoint = CreatePoint(target[i]);
-
         cv::Mat error = SquareErrorScale(data, sourcePoint, targetPoint);
-        cv::Mat Jac = JacobianScale(data, sourcePoint);
+		squareError = error.dot(error);
 
-        cv::Mat squareJac = (Jac.t())*Jac;
-        cv::Mat d0 = squareJac.diag(0);
-        cv::Mat diagonal = cv::Mat::diag(d0);
+		if (i >= posBegin && i < posEnd)
+		{
+			cv::Mat Jac = JacobianScale(data, sourcePoint);
 
-        A = A + (squareJac + lambda * diagonal);
-        B = B + (Jac.t())*error;
-        squareError = error.dot(error);
+			cv::Mat squareJac = (Jac.t())*Jac;
+			cv::Mat d0 = squareJac.diag(0);
+			cv::Mat diagonal = cv::Mat::diag(d0);
 
-        chi = chi + squareError;
-        if (squareError > localError)
-        {
-            localError = squareError;
-        }
+			A = A + (squareJac + lambda * diagonal);
+			B = B + (Jac.t())*error;
+
+			localError += squareError;
+		}
         
+        chi = chi + squareError;
+
     }
 
-    return GaussNewton(A, -B, chi, sqrt(localError));
+    return GaussNewton(A, -B, chi, localError);
 }
 
 cv::Point3d LeastSquaresScaleICP::ClosestPoint(const vtkSmartPointer<vtkPolyData>& surface, double point[3])
@@ -511,13 +511,14 @@ double LeastSquaresScaleICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData
     bool finish = false;
     double lambda = 0.01;
     double maxLambda = 1000.0;
-    double currentError, beforeError = -1;
+    double currentError, beforeError = -1, totalError;
 
     int batch = 3;
     int step = source.size() / batch;
 
     cv::Mat dataTemp(7, 1, CV_64F);
     double bestError = -1;
+	double tSize = source.size();
 
     //////////////////////////////////////////////////////////
     
@@ -555,6 +556,26 @@ double LeastSquaresScaleICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData
 
             GaussNewton resultInfo = GetSystemScale(target, data, posA, posB, lambda);
             currentError = resultInfo.localError;
+			totalError = sqrt(resultInfo.totalError / tSize);
+
+			if (bestError < 0 || totalError < bestError)
+			{
+				bestError = totalError;
+
+				dataTemp.at<double>(0, 0) = data.at<double>(0, 0);
+				dataTemp.at<double>(1, 0) = data.at<double>(1, 0);
+				dataTemp.at<double>(2, 0) = data.at<double>(2, 0);
+				dataTemp.at<double>(3, 0) = data.at<double>(3, 0);
+				dataTemp.at<double>(4, 0) = data.at<double>(4, 0);
+				dataTemp.at<double>(5, 0) = data.at<double>(5, 0);
+				dataTemp.at<double>(6, 0) = data.at<double>(6, 0);
+			}
+
+			if (bestError < maxError)
+			{
+				finish = true;
+				break;
+			}
 
             if (beforeError < 0)
             {
@@ -601,25 +622,6 @@ double LeastSquaresScaleICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData
             target = GetCorrespondenceScale(implicitPolyDataDistance, data);
 
             GetScale(target, data);
-
-            if (bestError < 0 || currentError < bestError)
-            {
-                bestError = currentError;
-
-                dataTemp.at<double>(0, 0) = data.at<double>(0, 0);
-                dataTemp.at<double>(1, 0) = data.at<double>(1, 0);
-                dataTemp.at<double>(2, 0) = data.at<double>(2, 0);
-                dataTemp.at<double>(3, 0) = data.at<double>(3, 0);
-                dataTemp.at<double>(4, 0) = data.at<double>(4, 0);
-                dataTemp.at<double>(5, 0) = data.at<double>(5, 0);
-                dataTemp.at<double>(6, 0) = data.at<double>(6, 0);
-            }
-
-            if (resultInfo.totalError < chi2 && resultInfo.localError < maxError)
-            {
-                finish = true;
-                break;
-            }
         }
 
         if (finish == true)
