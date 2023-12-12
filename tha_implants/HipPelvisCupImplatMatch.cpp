@@ -125,14 +125,18 @@ itk::Rigid3DTransform<>::Pointer HipPelvisCupImplantMatch::getTransform(double p
 
 void HipPelvisCupImplantMatch::GetRobotTransform(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut) const
 {
-	/*
-    Plane implantBasePlane = mImplant.getBasePlane();
-    implantBasePlane.reverseByPoint(mImplant.getTopPoint());
+	Point cupCenter = mImplant.getCenterOfRotationImplant();
+	cupCenter = ImplantTools::TransformPoint(cupCenter, pTransformIn);
 
-    Plane currentPlane = ImplantTools::TransformPlane(implantBasePlane, pTransformIn);
+	Plane base = mPelvis.getCoronalPlaneAPP();
+	base.movePlane(cupCenter);
 
-    Point vectorX = currentPlane.getNormalVector();
-    Point vectorY = currentPlane.getProjectionVector(mPelvis.getPelvisVectorInfSup());
+	Plane sagital;
+	sagital.init(mPelvis.getPelvisVectorASIS(), mPelvis.getPubicJoin());
+	sagital.reverseByPoint(mHipCenterOfRotation);
+
+    Point vectorX = base.getProjectionVector(sagital.getNormalVector());
+    Point vectorY = base.getProjectionVector(mPelvis.getPelvisVectorInfSup());
 
     cv::Mat rotationX = ImplantTools::GetRotateX(vectorX);
 
@@ -141,22 +145,10 @@ void HipPelvisCupImplantMatch::GetRobotTransform(const itk::Rigid3DTransform<>::
     cv::Mat rotationY = ImplantTools::GetRotateY(Point(tempRotationY));
 
     cv::Mat myRotation = rotationY * rotationX;
-	*/
-
-	Plane implantBasePlane = mImplant.getBasePlane();
-	implantBasePlane.reverseByPoint(mImplant.getTopPoint(), false);
-	Plane currentPlane = ImplantTools::TransformPlane(implantBasePlane, pTransformIn);
-	cv::Mat rotateZ = ImplantTools::GetRotateZ(currentPlane.getNormalVector());
-
-	Point vectorY = currentPlane.getProjectionVector(mPelvis.getPelvisVectorInfSup());
-	cv::Mat tempRotationY = rotateZ * vectorY.ToMatPoint();
-	cv::Mat rotationY = ImplantTools::GetRotateY(Point(tempRotationY));
-	cv::Mat myRotation = rotationY * rotateZ;
 
     itk::Vector< double, 3 > translate;
 
-    Point tCenter = currentPlane.getProjectionPoint(mHipCenterOfRotation);
-    Point tTemp = myRotation * (tCenter.ToMatPoint());
+    Point tTemp = myRotation * (cupCenter.ToMatPoint());
 
     translate[0] = -tTemp.x;
     translate[1] = -tTemp.y;

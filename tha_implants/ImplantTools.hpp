@@ -147,6 +147,8 @@ namespace THA
 
 			Plane TransformPlane(const Plane& plane, const itk::Rigid3DTransform<>::Pointer pTransform);
 
+			Point TransformPoint(const Point& pPoint, const itk::Rigid3DTransform<>::Pointer pTransform);
+
 			std::vector<Point> getSortPointVectorFill(const std::vector<Point>& pVector, double pDistance);
 
 			bool areBothSetOfPointsSeparated(const std::vector<Point>& pPoints1, const std::vector<Point>& pPoints2, const cv::Mat& myRotationZ, float margin = 0);
