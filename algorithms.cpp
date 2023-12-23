@@ -28,10 +28,10 @@
 #include "tha_implants/HipFemurOppside.hpp"
 #include "tha_implants/Point.hpp"
 
-#include "pka_implants/Knee.hpp"
-#include "pka_implants/FemurImplantMatch.hpp"
-#include "pka_implants/TibiaImplantMatch.hpp"
-#include "pka_implants/Point.hpp"
+#include "uka_implants/Knee.hpp"
+#include "uka_implants/FemurImplantMatch.hpp"
+#include "uka_implants/TibiaImplantMatch.hpp"
+#include "uka_implants/Point.hpp"
 
 #include "hip/HipCenter.hpp"
 #include "segmentation/AutomaticSegmentation.hpp"
@@ -369,7 +369,7 @@ Knee CreateKneeFromFile_Numbers(const std::string& sourcePath, KneeSideEnum pSid
 	return knee;
 }
 
-PKA::IMPLANTS::Knee CreateKneeFromFile_NumbersPKA(const std::string& sourcePath, PKA::IMPLANTS::KneeSideEnum pSide = PKA::IMPLANTS::KneeSideEnum::KRight, PKA::IMPLANTS::SurgerySideEnum pSurgery = PKA::IMPLANTS::SurgerySideEnum::KLateral)
+UKA::IMPLANTS::Knee CreateKneeFromFile_NumbersPKA(const std::string& sourcePath, UKA::IMPLANTS::KneeSideEnum pSide = UKA::IMPLANTS::KneeSideEnum::KRight, UKA::IMPLANTS::SurgerySideEnum pSurgery = UKA::IMPLANTS::SurgerySideEnum::KLateral)
 {
 	QDir directory(QString::fromStdString(sourcePath));
 	QStringList files = directory.entryList(QStringList() << "*.json" << "*.JSON", QDir::Files);
@@ -390,25 +390,25 @@ PKA::IMPLANTS::Knee CreateKneeFromFile_NumbersPKA(const std::string& sourcePath,
 	QJsonDocument jsonDoc = QJsonDocument::fromJson(var.toUtf8());
 	QJsonObject jsonObject = jsonDoc.object();
 
-	PKA::IMPLANTS::Point hipCenter = QJsonArrayToPoint(jsonObject.value(QString("0")).toArray());
-	PKA::IMPLANTS::Point anteriorCortex = QJsonArrayToPoint(jsonObject.value(QString("4")).toArray());
-	PKA::IMPLANTS::Point femurKneeCenter = QJsonArrayToPoint(jsonObject.value(QString("3")).toArray());
-	PKA::IMPLANTS::Point lateralEpicondyle = QJsonArrayToPoint(jsonObject.value(QString("2")).toArray());
-	PKA::IMPLANTS::Point medialEpicondyle = QJsonArrayToPoint(jsonObject.value(QString("1")).toArray());
-	PKA::IMPLANTS::Point lateralCondyle = QJsonArrayToPoint(jsonObject.value(QString("6")).toArray());
-	PKA::IMPLANTS::Point medialCondyle = QJsonArrayToPoint(jsonObject.value(QString("5")).toArray());
-	PKA::IMPLANTS::Point lateralPlateau = QJsonArrayToPoint(jsonObject.value(QString("8")).toArray());
-	PKA::IMPLANTS::Point medialPlateau = QJsonArrayToPoint(jsonObject.value(QString("7")).toArray());
-	PKA::IMPLANTS::Point tibiaKneeCenter = QJsonArrayToPoint(jsonObject.value(QString("9")).toArray());
-	PKA::IMPLANTS::Point tibiaTubercle = QJsonArrayToPoint(jsonObject.value(QString("10")).toArray());
-	PKA::IMPLANTS::Point tibiaPCL = QJsonArrayToPoint(jsonObject.value(QString("11")).toArray());
-	PKA::IMPLANTS::Point lateralAnkle = QJsonArrayToPoint(jsonObject.value(QString("13")).toArray());
-	PKA::IMPLANTS::Point medialAnkle = QJsonArrayToPoint(jsonObject.value(QString("12")).toArray());
-	PKA::IMPLANTS::Point kneeCap = QJsonArrayToPoint(jsonObject.value(QString("17")).toArray());
+	UKA::IMPLANTS::Point hipCenter = QJsonArrayToPoint(jsonObject.value(QString("0")).toArray());
+	UKA::IMPLANTS::Point anteriorCortex = QJsonArrayToPoint(jsonObject.value(QString("4")).toArray());
+	UKA::IMPLANTS::Point femurKneeCenter = QJsonArrayToPoint(jsonObject.value(QString("3")).toArray());
+	UKA::IMPLANTS::Point lateralEpicondyle = QJsonArrayToPoint(jsonObject.value(QString("2")).toArray());
+	UKA::IMPLANTS::Point medialEpicondyle = QJsonArrayToPoint(jsonObject.value(QString("1")).toArray());
+	UKA::IMPLANTS::Point lateralCondyle = QJsonArrayToPoint(jsonObject.value(QString("6")).toArray());
+	UKA::IMPLANTS::Point medialCondyle = QJsonArrayToPoint(jsonObject.value(QString("5")).toArray());
+	UKA::IMPLANTS::Point lateralPlateau = QJsonArrayToPoint(jsonObject.value(QString("8")).toArray());
+	UKA::IMPLANTS::Point medialPlateau = QJsonArrayToPoint(jsonObject.value(QString("7")).toArray());
+	UKA::IMPLANTS::Point tibiaKneeCenter = QJsonArrayToPoint(jsonObject.value(QString("9")).toArray());
+	UKA::IMPLANTS::Point tibiaTubercle = QJsonArrayToPoint(jsonObject.value(QString("10")).toArray());
+	UKA::IMPLANTS::Point tibiaPCL = QJsonArrayToPoint(jsonObject.value(QString("11")).toArray());
+	UKA::IMPLANTS::Point lateralAnkle = QJsonArrayToPoint(jsonObject.value(QString("13")).toArray());
+	UKA::IMPLANTS::Point medialAnkle = QJsonArrayToPoint(jsonObject.value(QString("12")).toArray());
+	UKA::IMPLANTS::Point kneeCap = QJsonArrayToPoint(jsonObject.value(QString("17")).toArray());
 
-	PKA::IMPLANTS::Point patellaLat = QJsonArrayToPoint(jsonObject.value(QString("14")).toArray());
-	PKA::IMPLANTS::Point patellaMed = QJsonArrayToPoint(jsonObject.value(QString("15")).toArray());
-	PKA::IMPLANTS::Point patellaInf = QJsonArrayToPoint(jsonObject.value(QString("16")).toArray());
+	UKA::IMPLANTS::Point patellaLat = QJsonArrayToPoint(jsonObject.value(QString("14")).toArray());
+	UKA::IMPLANTS::Point patellaMed = QJsonArrayToPoint(jsonObject.value(QString("15")).toArray());
+	UKA::IMPLANTS::Point patellaInf = QJsonArrayToPoint(jsonObject.value(QString("16")).toArray());
 
 	QString FemurPolyStr = jsonObject.value(QString("femur_poly")).toString();
 	QString TibiaPolyStr = jsonObject.value(QString("tibia_poly")).toString();
@@ -430,12 +430,12 @@ PKA::IMPLANTS::Knee CreateKneeFromFile_NumbersPKA(const std::string& sourcePath,
 	tibiaPoly = TestVTK::ReadPolyData(tibiaPolyPath.toStdString());
 	patellaPoly = TestVTK::ReadPolyData(patellaPolyPath.toStdString());
 
-	PKA::IMPLANTS::Point ankleCenter = Knee::getComputeAnkleCenter(lateralAnkle, medialAnkle);
+	UKA::IMPLANTS::Point ankleCenter = Knee::getComputeAnkleCenter(lateralAnkle, medialAnkle);
 
 	//Patella myPatella;
 	//myPatella.init(kneeCap, patellaLat, patellaMed, patellaInf, patellaPoly);
 
-	PKA::IMPLANTS::Knee knee;
+	UKA::IMPLANTS::Knee knee;
 	
 	knee.init(hipCenter, anteriorCortex, femurKneeCenter, lateralEpicondyle, medialEpicondyle, tibiaKneeCenter, 
 			  tibiaTubercle, tibiaPCL, ankleCenter, femurPoly, tibiaPoly, pSide, pSurgery);
@@ -1326,62 +1326,60 @@ void MatchEasy()
 void MatchEasyPKA()
 {
 	// Error 4 is right
-	PKA::IMPLANTS::Knee myKnee = CreateKneeFromFile_NumbersPKA("D:\\sovajo\\Errores\\Error4", PKA::IMPLANTS::KRight, PKA::IMPLANTS::KMedial);
+	UKA::IMPLANTS::Knee myKnee = CreateKneeFromFile_NumbersPKA("D:\\sovajo\\Errores\\Error4", UKA::IMPLANTS::KRight, UKA::IMPLANTS::KMedial);
 
 	vtkSmartPointer<vtkPolyData> polyTibiaImplant, polyPatellaImplant;
 
-	PKA::IMPLANTS::FemurImplant femurImplant;
+	UKA::IMPLANTS::FemurImplant femurImplant;
 
-	PKA::IMPLANTS::TibiaImplant tibiaImplant;
+	UKA::IMPLANTS::TibiaImplant tibiaImplant;
 
 	//////////////////////////////////////////////Implants
 
-	PKA::IMPLANTS::Plane pPosterior;
-	pPosterior.init(PKA::IMPLANTS::Point(-7.36697, 16.0254, -8.73743), PKA::IMPLANTS::Point(-7.85389, 16.0254, 8.8855), PKA::IMPLANTS::Point(-14.8693, 16.0254, 0.351634));
-	PKA::IMPLANTS::Point pRodBasePoint(17.1906, -2.90042, -1.59991);
-	PKA::IMPLANTS::Point pRodTopPoint(-1.58235, 0.0278676, -0.0651274);
-	std::vector<PKA::IMPLANTS::Point> pSideBorder1 = { PKA::IMPLANTS::Point(6.1356, 14.2949, 9.61137), PKA::IMPLANTS::Point(14.2886, 1.29773, 9.60394),
-													   PKA::IMPLANTS::Point(11.6988, -9.03007, 9.62781)};
+	UKA::IMPLANTS::Plane pPosterior;
+	pPosterior.init(UKA::IMPLANTS::Point(-7.36697, 16.0254, -8.73743), UKA::IMPLANTS::Point(-7.85389, 16.0254, 8.8855), UKA::IMPLANTS::Point(-14.8693, 16.0254, 0.351634));
+	UKA::IMPLANTS::Point pRodBasePoint(17.1906, -2.90042, -1.59991);
+	UKA::IMPLANTS::Point pRodTopPoint(-1.58235, 0.0278676, -0.0651274);
+	std::vector<UKA::IMPLANTS::Point> pSideBorder1 = { UKA::IMPLANTS::Point(6.1356, 14.2949, 9.61137), UKA::IMPLANTS::Point(14.2886, 1.29773, 9.60394),
+													   UKA::IMPLANTS::Point(11.6988, -9.03007, 9.62781)};
 
-	std::vector<PKA::IMPLANTS::Point> pSideBorder2 = { PKA::IMPLANTS::Point(6.1543, 14.2949, -9.63153), PKA::IMPLANTS::Point(14.3147, 1.53173, -9.65267),
-													   PKA::IMPLANTS::Point(11.5081, -9.33871, -9.64367)};
+	std::vector<UKA::IMPLANTS::Point> pSideBorder2 = { UKA::IMPLANTS::Point(6.1543, 14.2949, -9.63153), UKA::IMPLANTS::Point(14.3147, 1.53173, -9.65267),
+													   UKA::IMPLANTS::Point(11.5081, -9.33871, -9.64367)};
 
 	auto femurModel = TestVTK::ReadPolyDataSTL("D:\\sovajo\\Implants\\pka\\femoral.STL");
 	auto tibiaModel = TestVTK::ReadPolyDataSTL("D:\\sovajo\\Implants\\pka\\tibia.STL");
 
-	PKA::IMPLANTS::FemurImplantInfo femurInfo;
+	UKA::IMPLANTS::FemurImplantInfo femurInfo;
 	femurInfo.femurDistalThickness = 1.0;
 	femurInfo.femurPosteriorThickness = 5.0;
 
 	femurImplant.init(pPosterior, pRodBasePoint, pRodTopPoint, pSideBorder1, pSideBorder2, femurModel, femurInfo);
 
-	PKA::IMPLANTS::Point apLinePclPoint(11.5322, 10.6991, 4.39548);
-	PKA::IMPLANTS::Point apLineTuberPoint(11.4586, -39.2562, 4.42475);
-	PKA::IMPLANTS::Point sidePoint(-14.4372, -11.9011, 4.40877);
-	PKA::IMPLANTS::Point exteriorPoint(0.441555, -12.1707, 1.17444);
-	PKA::IMPLANTS::TibiaImplantInfo tibiaInfo;
-	tibiaInfo.tibiaThickness = 10.0;
+	UKA::IMPLANTS::Point apLinePclPoint(10.4801, 9.06646, 0.934849);
+	UKA::IMPLANTS::Point apLineTuberPoint(10.2438, -37.5031, 0.951554);
+	UKA::IMPLANTS::Point sidePoint(-14.6612, -11.3807, 1.15122);
+	UKA::IMPLANTS::Point exteriorPoint(-14.5152, -10.8294, 4.41175);
+	UKA::IMPLANTS::TibiaImplantInfo tibiaInfo;
+	tibiaInfo.tibiaThickness = 0.0;
 
 	tibiaImplant.init(apLinePclPoint, apLineTuberPoint, sidePoint, exteriorPoint, tibiaInfo);
 
 	////////////////////////////////////////////////////////
 
-	PKA::IMPLANTS::FemurImplantMatch femurImplantMatch;
-	PKA::IMPLANTS::TibiaImplantMatch tibiaImplantMatch;
-
-	femurImplantMatch.init(femurImplant, myKnee);
+	UKA::IMPLANTS::FemurImplantMatch femurImplantMatch;
+	UKA::IMPLANTS::TibiaImplantMatch tibiaImplantMatch;
 
 	tibiaImplantMatch.init(tibiaImplant, myKnee);
 
-
-	itk::Rigid3DTransform<double>::Pointer transformFemur = itk::VersorRigid3DTransform<double>::New();
 	itk::Rigid3DTransform<double>::Pointer transformTibia = itk::VersorRigid3DTransform<double>::New();
-
-	transformFemur->SetMatrix(femurImplantMatch.GetRotationMatrix());
-	transformFemur->SetOffset(femurImplantMatch.GetTranslationMatrix());
-
 	transformTibia->SetMatrix(tibiaImplantMatch.GetRotationMatrix());
 	transformTibia->SetOffset(tibiaImplantMatch.GetTranslationMatrix());
+	femurImplantMatch.init(femurImplant, tibiaImplant, myKnee, transformTibia);
+
+	itk::Rigid3DTransform<double>::Pointer transformFemur = itk::VersorRigid3DTransform<double>::New();
+	
+	transformFemur->SetMatrix(femurImplantMatch.GetRotationMatrix());
+	transformFemur->SetOffset(femurImplantMatch.GetTranslationMatrix());
 
 	std::vector<PointTypeITK> hull1;
 
@@ -1396,7 +1394,7 @@ void MatchEasyPKA()
 	try
 	{
 
-		hull1 = femurImplantMatch.GetHullPoints(transformFemur, transformOut, PKA::IMPLANTS::FemurImplantMatch::KAnteriorAndDistalCurve, 10, 2, 10, 15, 200);
+		hull1 = femurImplantMatch.GetHullPoints(transformFemur, transformOut, UKA::IMPLANTS::FemurImplantMatch::KAnteriorAndDistalCurve, 10, 2, 10, 15, 200);
 		//hull1 = tibiaImplantMatch.GetHullPoints(transformTibia, transformOut, 1, 1, 1.0, 0.8);
 		//std::cout << transformOut << std::endl;
 
@@ -1420,8 +1418,8 @@ void MatchEasyPKA()
 
 	std::vector<vtkSmartPointer<vtkPolyData>> polyList;
 	polyList.push_back(newImplantFemur);
-	//polyList.push_back(newImplantTibia);
-	//TestVTK::show(myKnee.GetFemurPoly(), polyList);
+	polyList.push_back(newImplantTibia);
+	TestVTK::show(myKnee.GetTibiaPoly(), polyList);
 
 	
 	//TestVTK::show(myKnee.GetFemurPoly(), tPoints, true);
@@ -4191,12 +4189,12 @@ int main()
 	std::string casePlan = "D:\\sovajo\\Cases_Plan_TKA\\case1_left";
 	Knee myKnee;
 	bool result;
-	myKnee = CreateKneeFromFile_Numbers(casePlan, KneeSideEnum::KLeft);
-	double error = FemurRegistrationFromNumbersTKA(myKnee, casePlan, result);
+	//myKnee = CreateKneeFromFile_Numbers(casePlan, KneeSideEnum::KLeft);
+	//double error = FemurRegistrationFromNumbersTKA(myKnee, casePlan, result);
 
-	std::cout <<"Result: "  << result << " Error: " << error << std::endl;
+	//std::cout <<"Result: "  << result << " Error: " << error << std::endl;
 
-	//MatchEasyPKA();
+	MatchEasyPKA();
 	//Resgistration_General_test();
 	//PelvisImplantMatch();
 	//std::cout << "tttttttttttttttttt" << std::endl;

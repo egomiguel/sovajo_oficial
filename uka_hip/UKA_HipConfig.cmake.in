@@ -1,0 +1,3 @@
+@PACKAGE_INIT@
+include("${CMAKE_CURRENT_LIST_DIR}/UKA_HipTargets.cmake")
+check_required_components(UKA_Hip)
