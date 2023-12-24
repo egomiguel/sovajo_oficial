@@ -1419,10 +1419,10 @@ void MatchEasyPKA()
 	std::vector<vtkSmartPointer<vtkPolyData>> polyList;
 	polyList.push_back(newImplantFemur);
 	polyList.push_back(newImplantTibia);
-	TestVTK::show(myKnee.GetTibiaPoly(), polyList);
+	TestVTK::show(myKnee.GetFemurPoly(), polyList);
 
 	
-	//TestVTK::show(myKnee.GetFemurPoly(), tPoints, true);
+	TestVTK::show(myKnee.GetFemurPoly(), tPoints, true);
 
 }
 
