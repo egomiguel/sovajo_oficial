@@ -194,7 +194,7 @@ bool FemurImplantMatch::getTranslationMatrix()
 
 	cv::Mat tempTuber = rotationMatrixTibiaImplant * implantTibia.getPointTuber().ToMatPoint() + translationMatrixTibiaImplant;
 	cv::Mat tempPCL = rotationMatrixTibiaImplant * implantTibia.getPointPCL().ToMatPoint() + translationMatrixTibiaImplant;
-	cv::Mat tempSide = rotationMatrixTibiaImplant * implantTibia.getPointSide().ToMatPoint() + translationMatrixTibiaImplant;
+	cv::Mat tempSide = rotationMatrixTibiaImplant * implantTibia.getPlateauRefPointDown().ToMatPoint() + translationMatrixTibiaImplant;
 
 	Plane baseTibiaImplant;
 	baseTibiaImplant.init(Point(tempTuber), Point(tempPCL), Point(tempSide));
@@ -238,6 +238,7 @@ bool FemurImplantMatch::getTranslationMatrix()
 	biasVector.push_back(bias);
 	cv::Mat B(biasVector.size(), 1, CV_64F, biasVector.data());
 	bool result = cv::solve(A, B, translationMatrix);
+	return result;
 
 	/*
 	cv::Mat normalRef = rotationMatrix * implantFemur.getMidPlane().getNormalVector().ToMatPoint();

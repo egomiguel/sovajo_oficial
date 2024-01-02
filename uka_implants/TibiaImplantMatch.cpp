@@ -165,8 +165,8 @@ void TibiaImplantMatch::makeRotationMatrix()
 
 void TibiaImplantMatch::makeTranslationMatrix()
 {
-	cv::Mat tibiaCenterPointAP = knee.getTibiaCenterPointOnImplantAP(implant.getImplantInfo());
-	translationMatrix = tibiaCenterPointAP - (rotationMatrix * implant.getTibiaKneeCenter());
+	Point tibiaPlateau = knee.getMovePlateau(implant.getImplantInfo());
+	translationMatrix = tibiaPlateau.ToMatPoint() - (rotationMatrix * implant.getPlateauRefPointDown().ToMatPoint());
 }
 
 Plane TibiaImplantMatch::transformPlane(const Plane& plane) const
@@ -1989,7 +1989,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	Point implantPCL = finalTransformPoint(implant.getPointPCL(), pTransformIn);
 	Point implantTuber = finalTransformPoint(implant.getPointTuber(), pTransformIn);
-	Point implantSide = finalTransformPoint(implant.getPointSide(), pTransformIn);
+	Point implantSide = finalTransformPoint(implant.getPlateauRefPointDown(), pTransformIn);
 
 	Plane midPlaneImplant = myPlane.getPerpendicularPlane(implantPCL, implantTuber);
 	midPlaneImplant.reverseByPoint(implantSide);

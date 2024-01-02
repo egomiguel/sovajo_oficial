@@ -395,26 +395,19 @@ UKA::IMPLANTS::Knee CreateKneeFromFile_NumbersPKA(const std::string& sourcePath,
 	UKA::IMPLANTS::Point femurKneeCenter = QJsonArrayToPoint(jsonObject.value(QString("3")).toArray());
 	UKA::IMPLANTS::Point lateralEpicondyle = QJsonArrayToPoint(jsonObject.value(QString("2")).toArray());
 	UKA::IMPLANTS::Point medialEpicondyle = QJsonArrayToPoint(jsonObject.value(QString("1")).toArray());
-	UKA::IMPLANTS::Point lateralCondyle = QJsonArrayToPoint(jsonObject.value(QString("6")).toArray());
-	UKA::IMPLANTS::Point medialCondyle = QJsonArrayToPoint(jsonObject.value(QString("5")).toArray());
-	UKA::IMPLANTS::Point lateralPlateau = QJsonArrayToPoint(jsonObject.value(QString("8")).toArray());
-	UKA::IMPLANTS::Point medialPlateau = QJsonArrayToPoint(jsonObject.value(QString("7")).toArray());
-	UKA::IMPLANTS::Point tibiaKneeCenter = QJsonArrayToPoint(jsonObject.value(QString("9")).toArray());
-	UKA::IMPLANTS::Point tibiaTubercle = QJsonArrayToPoint(jsonObject.value(QString("10")).toArray());
-	UKA::IMPLANTS::Point tibiaPCL = QJsonArrayToPoint(jsonObject.value(QString("11")).toArray());
-	UKA::IMPLANTS::Point lateralAnkle = QJsonArrayToPoint(jsonObject.value(QString("13")).toArray());
-	UKA::IMPLANTS::Point medialAnkle = QJsonArrayToPoint(jsonObject.value(QString("12")).toArray());
-	UKA::IMPLANTS::Point kneeCap = QJsonArrayToPoint(jsonObject.value(QString("17")).toArray());
 
-	UKA::IMPLANTS::Point patellaLat = QJsonArrayToPoint(jsonObject.value(QString("14")).toArray());
-	UKA::IMPLANTS::Point patellaMed = QJsonArrayToPoint(jsonObject.value(QString("15")).toArray());
-	UKA::IMPLANTS::Point patellaInf = QJsonArrayToPoint(jsonObject.value(QString("16")).toArray());
+	UKA::IMPLANTS::Point tibiaKneeCenter = QJsonArrayToPoint(jsonObject.value(QString("5")).toArray());
+	UKA::IMPLANTS::Point tibiaTubercle = QJsonArrayToPoint(jsonObject.value(QString("6")).toArray());
+	UKA::IMPLANTS::Point tibiaPCL = QJsonArrayToPoint(jsonObject.value(QString("7")).toArray());
+	UKA::IMPLANTS::Point lateralAnkle = QJsonArrayToPoint(jsonObject.value(QString("9")).toArray());
+	UKA::IMPLANTS::Point medialAnkle = QJsonArrayToPoint(jsonObject.value(QString("8")).toArray());
+
 
 	QString FemurPolyStr = jsonObject.value(QString("femur_poly")).toString();
 	QString TibiaPolyStr = jsonObject.value(QString("tibia_poly")).toString();
-	QString PatellaPolyStr = jsonObject.value(QString("patella_poly")).toString();
+	//QString PatellaPolyStr = jsonObject.value(QString("patella_poly")).toString();
 
-	if (!(directory.exists(FemurPolyStr) && directory.exists(TibiaPolyStr) && directory.exists(PatellaPolyStr)))
+	if (!(directory.exists(FemurPolyStr) && directory.exists(TibiaPolyStr)))
 	{
 		std::cout << "Error there are not vtk file" << std::endl;
 		throw ("Error there are not vtk file");
@@ -422,13 +415,12 @@ UKA::IMPLANTS::Knee CreateKneeFromFile_NumbersPKA(const std::string& sourcePath,
 
 	QString femurPolyPath = directory.filePath(FemurPolyStr);
 	QString tibiaPolyPath = directory.filePath(TibiaPolyStr);
-	QString patellaPolyPath = directory.filePath(PatellaPolyStr);
+	//QString patellaPolyPath = directory.filePath(PatellaPolyStr);
 
-	vtkSmartPointer<vtkPolyData> femurPoly, tibiaPoly, patellaPoly;
+	vtkSmartPointer<vtkPolyData> femurPoly, tibiaPoly;
 
 	femurPoly = TestVTK::ReadPolyData(femurPolyPath.toStdString());
 	tibiaPoly = TestVTK::ReadPolyData(tibiaPolyPath.toStdString());
-	patellaPoly = TestVTK::ReadPolyData(patellaPolyPath.toStdString());
 
 	UKA::IMPLANTS::Point ankleCenter = Knee::getComputeAnkleCenter(lateralAnkle, medialAnkle);
 
@@ -1326,9 +1318,10 @@ void MatchEasy()
 void MatchEasyPKA()
 {
 	// Error 4 is right
-	UKA::IMPLANTS::Knee myKnee = CreateKneeFromFile_NumbersPKA("D:\\sovajo\\Errores\\Error4", UKA::IMPLANTS::KRight, UKA::IMPLANTS::KMedial);
+	std::string folder = "D:\\sovajo\\Cases_Plan_PKA\\UKA-data"; // right
+	UKA::IMPLANTS::Knee myKnee = CreateKneeFromFile_NumbersPKA(folder, UKA::IMPLANTS::KRight, UKA::IMPLANTS::KMedial);
 
-	vtkSmartPointer<vtkPolyData> polyTibiaImplant, polyPatellaImplant;
+	//vtkSmartPointer<vtkPolyData> polyTibiaImplant, polyPatellaImplant;
 
 	UKA::IMPLANTS::FemurImplant femurImplant;
 
@@ -1337,6 +1330,8 @@ void MatchEasyPKA()
 	//////////////////////////////////////////////Implants
 
 	UKA::IMPLANTS::Plane pPosterior;
+	/*
+	"D:\\sovajo\\Implants\\pka\\femoral.STL"
 	pPosterior.init(UKA::IMPLANTS::Point(-7.36697, 16.0254, -8.73743), UKA::IMPLANTS::Point(-7.85389, 16.0254, 8.8855), UKA::IMPLANTS::Point(-14.8693, 16.0254, 0.351634));
 	UKA::IMPLANTS::Point pRodBasePoint(17.1906, -2.90042, -1.59991);
 	UKA::IMPLANTS::Point pRodTopPoint(-1.58235, 0.0278676, -0.0651274);
@@ -1344,9 +1339,22 @@ void MatchEasyPKA()
 													   UKA::IMPLANTS::Point(11.6988, -9.03007, 9.62781)};
 
 	std::vector<UKA::IMPLANTS::Point> pSideBorder2 = { UKA::IMPLANTS::Point(6.1543, 14.2949, -9.63153), UKA::IMPLANTS::Point(14.3147, 1.53173, -9.65267),
-													   UKA::IMPLANTS::Point(11.5081, -9.33871, -9.64367)};
+													   UKA::IMPLANTS::Point(11.5081, -9.33871, -9.64367)};*/
 
-	auto femurModel = TestVTK::ReadPolyDataSTL("D:\\sovajo\\Implants\\pka\\femoral.STL");
+
+	pPosterior.init(UKA::IMPLANTS::Point(-1.98705693113, 16.0609375982, 8.76559347481), UKA::IMPLANTS::Point(-2.50396500712, 16.0613293561, -8.94437729719), UKA::IMPLANTS::Point(-7.92687551969, 16.0599612205, 8.9119337399));
+	
+	UKA::IMPLANTS::Point pRodBasePoint(17.1500611935, -3.64306703195, 0.0115669254999);
+	UKA::IMPLANTS::Point pRodTopPoint(-1.57067067764, 0.0963311269987, -0.0533355484788);
+	std::vector<UKA::IMPLANTS::Point> pSideBorder1 = { UKA::IMPLANTS::Point(8.48264081644,13.1976585493,-8.74732637542), UKA::IMPLANTS::Point(10.9804957096,10.5705588957,-8.91229039377),
+													   UKA::IMPLANTS::Point(12.8703327684,7.76764520155,-8.80442944992), UKA::IMPLANTS::Point(14.1367283503,4.61611911302,-8.77980126905) };
+
+	std::vector<UKA::IMPLANTS::Point> pSideBorder2 = { UKA::IMPLANTS::Point(8.46616178139,13.336942077,8.47133670984), UKA::IMPLANTS::Point(10.8359483977,10.9111407919,8.6214219954),
+													   UKA::IMPLANTS::Point(12.9502176686,7.6594488483,8.67962746283), UKA::IMPLANTS::Point(14.174456106,4.73284273416,8.55774650189) };
+
+
+
+	auto femurModel = TestVTK::ReadPolyDataSTL("D:\\sovajo\\Cases_Plan_PKA\\UKA-data\\implants\\femur.STL");
 	auto tibiaModel = TestVTK::ReadPolyDataSTL("D:\\sovajo\\Implants\\pka\\tibia.STL");
 
 	UKA::IMPLANTS::FemurImplantInfo femurInfo;
@@ -1357,7 +1365,7 @@ void MatchEasyPKA()
 
 	UKA::IMPLANTS::Point apLinePclPoint(10.4801, 9.06646, 0.934849);
 	UKA::IMPLANTS::Point apLineTuberPoint(10.2438, -37.5031, 0.951554);
-	UKA::IMPLANTS::Point sidePoint(-14.6612, -11.3807, 1.15122);
+	UKA::IMPLANTS::Point sidePoint(-0.1021, -11.1526, 1.1545);
 	UKA::IMPLANTS::Point exteriorPoint(-14.5152, -10.8294, 4.41175);
 	UKA::IMPLANTS::TibiaImplantInfo tibiaInfo;
 	tibiaInfo.tibiaThickness = 0.0;
@@ -1422,7 +1430,7 @@ void MatchEasyPKA()
 	TestVTK::show(myKnee.GetFemurPoly(), polyList);
 
 	
-	TestVTK::show(myKnee.GetFemurPoly(), tPoints, true);
+	//TestVTK::show(myKnee.GetFemurPoly(), tPoints, true);
 
 }
 

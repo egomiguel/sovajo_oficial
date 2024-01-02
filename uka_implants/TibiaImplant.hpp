@@ -19,7 +19,7 @@ namespace UKA
 
 			TibiaImplant(const TibiaImplant& pImplant);
 
-			void init(const Point& apLinePclPoint, const Point& apLineTuberPoint, const Point& sidePoint, const Point& exteriorPointDown, const TibiaImplantInfo& pImplantInfo);
+			void init(const Point& apLinePclPoint, const Point& apLineTuberPoint, const Point& plateauRefPointUp, const Point& exteriorPointDown, const TibiaImplantInfo& pImplantInfo);
 
 			Plane getTibiaPlane() const;
 
@@ -39,13 +39,13 @@ namespace UKA
 
 			Point getPointTuber() const;
 
-			Point getPointSide() const;
+			Point getPlateauRefPointDown() const;
 
 			TibiaImplantInfo getImplantInfo() const;
 
 		private:
 			Plane tibiaPlane;
-			Point centralPoint, exteriorPoint, pclPoint, tuberPoint, sidePoint;
+			Point centralPoint, exteriorPoint, pclPoint, tuberPoint, plateauRefPointDown;
 			TibiaImplantInfo mImplantInfo;
 			bool isInit;
 			//void fixNormalVectorTibia(const Point& fixPoint, const Point& referencePoint);

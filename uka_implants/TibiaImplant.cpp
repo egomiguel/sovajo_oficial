@@ -13,14 +13,14 @@ TibiaImplant::TibiaImplant()
 	isInit = false;
 }
 
-void TibiaImplant::init(const Point& apLinePclPoint, const Point& apLineTuberPoint, const Point& sidePoint, const Point& exteriorPointDown, const TibiaImplantInfo& pImplantInfo)
+void TibiaImplant::init(const Point& apLinePclPoint, const Point& apLineTuberPoint, const Point& plateauRefPointUp, const Point& exteriorPointDown, const TibiaImplantInfo& pImplantInfo)
 {
     if (isInit == true)
     {
         throw ImplantExceptionCode::ALREADY_INITIALIZED_TIBIA_IMPLANT;
     }
     this->mImplantInfo = pImplantInfo;
-    tibiaPlane.init(apLinePclPoint, apLineTuberPoint, sidePoint);
+    tibiaPlane.init(apLinePclPoint, apLineTuberPoint, plateauRefPointUp);
 	centralPoint = (apLinePclPoint + apLineTuberPoint) / 2;
 
 	Point newNormal = tibiaPlane.getProjectionPoint(exteriorPointDown) - exteriorPointDown;
@@ -28,10 +28,10 @@ void TibiaImplant::init(const Point& apLinePclPoint, const Point& apLineTuberPoi
 	tibiaPlane.movePlane(exteriorPointDown);
 	centralPoint = tibiaPlane.getProjectionPoint(centralPoint);
 
-    this->exteriorPoint = sidePoint; // This refers to exterior up point (that is side point)
+    this->exteriorPoint = plateauRefPointUp; // This refers to exterior up point (that is side point on plateau area)
 	this->pclPoint = tibiaPlane.getProjectionPoint(apLinePclPoint);
 	this->tuberPoint = tibiaPlane.getProjectionPoint(apLineTuberPoint);
-	this->sidePoint = tibiaPlane.getProjectionPoint(sidePoint);
+	this->plateauRefPointDown = tibiaPlane.getProjectionPoint(plateauRefPointUp);
     
     isInit = true;
 }
@@ -105,7 +105,7 @@ Point TibiaImplant::getPointTuber() const
 	return tuberPoint;
 }
 
-Point TibiaImplant::getPointSide() const
+Point TibiaImplant::getPlateauRefPointDown() const
 {
-	return sidePoint;
+	return plateauRefPointDown;
 }
