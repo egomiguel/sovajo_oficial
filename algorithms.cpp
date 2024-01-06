@@ -77,7 +77,7 @@
 #include "itkAffineTransform.h"
 #include "itkNearestNeighborInterpolateImageFunction.h"
 #include "itkChangeInformationImageFilter.h"
-#include "implants/FindRegistrationPoints.hpp"
+#include "uka_implants/FindRegistrationPoints.hpp"
 //#include "segmentation/coherent/rigid.hpp"
 #include "load_files/LoadFiles.hpp"
 
@@ -2599,6 +2599,7 @@ void ChangeCoordenate()
 
 void Test30PointsVTK()
 {
+	/*
 	Knee myKnee = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error3", KneeSideEnum::KLeft);
 
 	double tError;
@@ -2639,8 +2640,8 @@ void Test30PointsVTK()
 	myPointsTibia.push_back(myKnee.getLateralPlateau());
 	myPointsTibia.push_back(myKnee.getMedialPlateau());
 
-	auto surface1 = TestVTK::MergePolyWithSphere(myKnee.GetFemurPoly(), myPointsFemur);
-	auto surface2 = TestVTK::MergePolyWithSphere(myKnee.GetTibiaPoly(), myPointsTibia);
+	//auto surface1 = TestVTK::MergePolyWithSphere(myKnee.GetFemurPoly(), myPointsFemur);
+	//auto surface2 = TestVTK::MergePolyWithSphere(myKnee.GetTibiaPoly(), myPointsTibia);
 
 	TestVTK::show(myKnee.GetFemurPoly(), PointToPoint3D(pCheckPointsFemur));
 	TestVTK::show(myKnee.GetFemurPoly(), myPointsFemur);
@@ -2650,6 +2651,7 @@ void Test30PointsVTK()
 	//writeListPoints(myPointsFemur, "Template_Official_Femur_Left.json");
 
 	//SliceBorder::ShowPolyData(myPointsObj.GetMedialSide(), myPointsObj.GetLateralSide());
+	*/
 }
 
 void TestSlice()
@@ -2766,21 +2768,22 @@ void getPelvisPoint()
 
 void RegistrationScale()
 {
-	Knee kneeRight = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Right");
-	Knee kneeLeft = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Left");
+	//Knee kneeRight = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Right");
+	//Knee kneeLeft = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Left");
+
+	std::string folder = "D:\\sovajo\\Cases_Plan_PKA\\UKA-data"; // right
+	UKA::IMPLANTS::Knee myKnee = CreateKneeFromFile_NumbersPKA(folder, UKA::IMPLANTS::KRight, UKA::IMPLANTS::KMedial);
 
 	double error;
 
-	Knee myKnee = kneeRight;
-
-	FindRegistrationPoints myPointsObj(myKnee);
-	std::vector<Point> pCheckPoints;
-	std::vector<RegistrationPoints> points = myPointsObj.GetRegistrationPointsFemur(pCheckPoints, error);
+	UKA::IMPLANTS::FindRegistrationPoints myPointsObj(myKnee);
+	std::vector<UKA::IMPLANTS::Point> pCheckPoints;
+	std::vector<UKA::IMPLANTS::RegistrationPoints> points = myPointsObj.GetRegistrationPointsTibia(pCheckPoints, error);
 	std::vector < cv::Point3d > pointsList;
 
 	for (int i = 0; i < points.size(); i++)
 	{
-		RegistrationPoints obj = points[i];
+		UKA::IMPLANTS::RegistrationPoints obj = points[i];
 
 		std::vector<Point> temp = ITKVectorToCV(obj.points);
 
@@ -2805,7 +2808,7 @@ void RegistrationScale()
 
 	std::cout << "Error: " << error << std::endl;*/
 
-	TestVTK::show(myKnee.GetFemurPoly(), pointsList);
+	TestVTK::show(myKnee.GetTibiaPoly(), pointsList);
 
 	/*auto surface = TestVTK::MergePolyWithSphere(myKnee.GetFemurPoly(), pointsList);
 
@@ -4202,7 +4205,8 @@ int main()
 
 	//std::cout <<"Result: "  << result << " Error: " << error << std::endl;
 
-	MatchEasyPKA();
+	//MatchEasyPKA();
+	RegistrationScale();
 	//Resgistration_General_test();
 	//PelvisImplantMatch();
 	//std::cout << "tttttttttttttttttt" << std::endl;

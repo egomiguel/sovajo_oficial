@@ -21,6 +21,12 @@ namespace UKA
 			double tibiaThickness;
 			//double slope;
 		};
+
+		enum SurgerySideEnum
+		{
+			KLateral,
+			KMedial
+		};
 	}
 }
 

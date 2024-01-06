@@ -25,12 +25,6 @@ namespace UKA
 			KLeft
 		};
 
-		enum SurgerySideEnum
-		{
-			KLateral,
-			KMedial
-		};
-
 		class UKA_IMPLANTS_EXPORT Knee
 		{
 		public:
