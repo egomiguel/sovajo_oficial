@@ -128,6 +128,10 @@ void HipPelvisCupImplantMatch::GetRobotTransform(const itk::Rigid3DTransform<>::
 	Point cupCenter = mImplant.getCenterOfRotationImplant();
 	cupCenter = ImplantTools::TransformPoint(cupCenter, pTransformIn);
 
+	Point cupBaseVector = -mImplant.getVectorZ();
+	cupBaseVector = ImplantTools::RotateVector(cupBaseVector, pTransformIn);
+	cupBaseVector.normalice();
+
 	Plane base = mPelvis.getCoronalPlaneAPP();
 	base.movePlane(cupCenter);
 
@@ -138,13 +142,15 @@ void HipPelvisCupImplantMatch::GetRobotTransform(const itk::Rigid3DTransform<>::
     Point vectorX = base.getProjectionVector(sagital.getNormalVector());
     Point vectorY = base.getProjectionVector(mPelvis.getPelvisVectorInfSup());
 
-    cv::Mat rotationX = ImplantTools::GetRotateX(vectorX);
+	cv::Mat firstRotationX = ImplantTools::GetGeneralRotateTransformVectors(vectorX, cupBaseVector);
 
-    cv::Mat tempRotationY = rotationX * vectorY.ToMatPoint();
+    cv::Mat secondRotationX = ImplantTools::GetRotateX(cupBaseVector);
+
+    cv::Mat tempRotationY = secondRotationX * (firstRotationX * vectorY.ToMatPoint());
 
     cv::Mat rotationY = ImplantTools::GetRotateY(Point(tempRotationY));
 
-    cv::Mat myRotation = rotationY * rotationX;
+    cv::Mat myRotation = rotationY * (secondRotationX * firstRotationX);
 
     itk::Vector< double, 3 > translate;
 

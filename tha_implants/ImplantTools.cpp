@@ -2567,6 +2567,15 @@ Point ImplantTools::TransformPoint(const Point& pPoint, const itk::Rigid3DTransf
 	return Point(pointMat);
 }
 
+Point ImplantTools::RotateVector(const Point& pVector, const itk::Rigid3DTransform<>::Pointer pTransform)
+{
+	cv::Mat rotation = Rigid3DTransformToCVRotation(pTransform);
+
+	cv::Mat pointMat = rotation * pVector.ToMatPoint();
+
+	return Point(pointMat);
+}
+
 Plane ImplantTools::TransformPlane(const Plane& plane, const itk::Rigid3DTransform<>::Pointer pTransform)
 {
 	cv::Mat rotation = Rigid3DTransformToCVRotation(pTransform);
