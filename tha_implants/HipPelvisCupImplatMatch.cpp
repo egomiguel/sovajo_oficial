@@ -132,25 +132,29 @@ void HipPelvisCupImplantMatch::GetRobotTransform(const itk::Rigid3DTransform<>::
 	cupBaseVector = ImplantTools::RotateVector(cupBaseVector, pTransformIn);
 	cupBaseVector.normalice();
 
-	Plane base = mPelvis.getCoronalPlaneAPP();
-	base.movePlane(cupCenter);
+	//Plane base = mPelvis.getCoronalPlaneAPP();
+	//base.movePlane(cupCenter);
 
-	Plane sagital;
-	sagital.init(mPelvis.getPelvisVectorASIS(), mPelvis.getPubicJoin());
-	sagital.reverseByPoint(mHipCenterOfRotation);
+	//Plane sagital;
+	//sagital.init(mPelvis.getPelvisVectorASIS(), mPelvis.getPubicJoin());
+	//sagital.reverseByPoint(mHipCenterOfRotation);
 
-    Point vectorX = base.getProjectionVector(sagital.getNormalVector());
-    Point vectorY = base.getProjectionVector(mPelvis.getPelvisVectorInfSup());
+	auto tempVectorX = pTransformIn->GetMatrix().GetVnlMatrix().get_column(0);
+
+	Point vectorX = Point(tempVectorX[0], tempVectorX[1], tempVectorX[2]);//base.getProjectionVector(sagital.getNormalVector());
+    //Point vectorY = Point(tempVectorY[0], tempVectorY[1], tempVectorY[2]);//base.getProjectionVector(mPelvis.getPelvisVectorInfSup());
 
 	cv::Mat firstRotationX = ImplantTools::GetGeneralRotateTransformVectors(vectorX, cupBaseVector);
 
     cv::Mat secondRotationX = ImplantTools::GetRotateX(cupBaseVector);
 
-    cv::Mat tempRotationY = secondRotationX * (firstRotationX * vectorY.ToMatPoint());
+    /*cv::Mat tempRotationY = secondRotationX * (firstRotationX * vectorY.ToMatPoint());
 
     cv::Mat rotationY = ImplantTools::GetRotateY(Point(tempRotationY));
 
-    cv::Mat myRotation = rotationY * (secondRotationX * firstRotationX);
+    cv::Mat myRotation = rotationY * (secondRotationX * firstRotationX);*/
+
+	cv::Mat myRotation = secondRotationX * firstRotationX;
 
     itk::Vector< double, 3 > translate;
 

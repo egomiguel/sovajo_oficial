@@ -841,6 +841,17 @@ double HipPelvisImplantsMatchInfo::getCombinedOffsetDistance() const
 	return mPelvis.getCombinedOffsetDistance(identity, officialTranslation.ToMatPoint());
 }
 
+double HipPelvisImplantsMatchInfo::getRealCombinedOffsetDistance(const Point& pFinalCupCenter) const
+{
+	cv::Mat cupCenterMat = (mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint()) + mTranslationCup;
+	Point cupCenter = Point(cupCenterMat);
+
+	cv::Mat identity = cv::Mat::eye(3, 3, CV_64F);
+	Point diff = cupCenter - pFinalCupCenter;
+
+	return mPelvis.getCombinedOffsetDistance(identity, diff.ToMatPoint());
+}
+
 double HipPelvisImplantsMatchInfo::getHipLengthDistance() const
 {
 	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;

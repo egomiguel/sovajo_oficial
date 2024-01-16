@@ -96,6 +96,8 @@ namespace THA
 
 			double getCombinedOffsetDistance() const;
 
+			double getRealCombinedOffsetDistance(const Point& pFinalCupCenter) const;
+
 			double getHipLengthDistance() const;
 
 			double getCoverageFraction() const;
