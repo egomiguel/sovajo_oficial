@@ -871,6 +871,18 @@ double HipPelvisImplantsMatchInfo::getHipLengthDistance() const
 	return mPelvis.getHipLengthDistance(identity, officialTranslation.ToMatPoint());
 }
 
+double HipPelvisImplantsMatchInfo::getRealHipLengthDistance(const Point& pFinalCupCenter) const
+{
+	cv::Mat cupCenterMat = (mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint()) + mTranslationCup;
+	Point cupCenter = Point(cupCenterMat);
+
+	cv::Mat identity = cv::Mat::eye(3, 3, CV_64F);
+	Point diff = cupCenter - pFinalCupCenter;
+
+	return mPelvis.getHipLengthDistance(identity, diff.ToMatPoint());
+}
+
+
 double HipPelvisImplantsMatchInfo::getCoverageFraction() const
 {
 	double area = mImplantCup.getHemiSphereSurfaceArea();

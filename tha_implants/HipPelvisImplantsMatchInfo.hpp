@@ -100,6 +100,8 @@ namespace THA
 
 			double getHipLengthDistance() const;
 
+			double getRealHipLengthDistance(const Point& pFinalCupCenter) const;
+
 			double getCoverageFraction() const;
 
 			itk::Rigid3DTransform<>::Pointer getITKStemTransform() const;
