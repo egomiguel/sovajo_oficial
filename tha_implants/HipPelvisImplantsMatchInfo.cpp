@@ -816,9 +816,15 @@ itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::getITKStemTransform
 
 double HipPelvisImplantsMatchInfo::getStemVersion() const
 {
-	cv::Mat neckAxisMat = mRotationStem * mImplantStem.getVectorNeckToHeadPerpendicularToInfSup().ToMatPoint();
+	cv::Mat neckAxisMat = mRotationStem * mImplantStem.getVectorNeckToHead().ToMatPoint();
 	Point neckAxis = Point(neckAxisMat);
 	double degree = mPelvis.getFemurVersionDegree(neckAxis);
+	return degree;
+}
+
+double HipPelvisImplantsMatchInfo::getRealStemVersion(const Point& pVectorNeckToHead) const
+{
+	double degree = mPelvis.getFemurVersionDegree(pVectorNeckToHead);
 	return degree;
 }
 

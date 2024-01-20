@@ -94,6 +94,8 @@ namespace THA
 
 			double getStemVersion() const;
 
+			double getRealStemVersion(const Point& pVectorNeckToHead) const;
+
 			double getCombinedOffsetDistance() const;
 
 			double getRealCombinedOffsetDistance(const Point& pFinalCupCenter) const;

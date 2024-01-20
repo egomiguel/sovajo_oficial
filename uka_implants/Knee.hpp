@@ -13,11 +13,13 @@ namespace UKA
 {
 	namespace IMPLANTS
 	{
+		/*
 		struct TibiaImplantDimensions
 		{
 			double long_axis;
 			double short_axis;
 		};
+		*/
 
 		enum KneeSideEnum
 		{
@@ -129,7 +131,7 @@ namespace UKA
 
 			double getEstimateFemurImplantsDimensions() const;
 
-			TibiaImplantDimensions getEstimateTibiaImplantsDimensions() const;
+			//TibiaImplantDimensions getEstimateTibiaImplantsDimensions() const;
 
 			double getFemurCartilage() const;
 

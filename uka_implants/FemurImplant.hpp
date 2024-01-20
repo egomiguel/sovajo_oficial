@@ -35,6 +35,8 @@ namespace UKA
 
 			Point getRodBasePoint() const;
 
+			Point getRodTopPointProjectedOnBase() const;
+
 			std::vector<Point> getSortPointsSide1() const;
 
 			std::vector<Point> getSortPointsSide2() const;
@@ -59,7 +61,7 @@ namespace UKA
 
 		private:
 			Plane mPosterior, mDistal;
-			Point mRodBasePoint, mRodTopPoint;
+			Point mRodBasePoint, mRodTopPoint, mRodTopPointProjectedOnBase;
 			Point mVectorAP, mVectorTEA, mVectorForceLine, mSizeMidVector;
 			std::vector<Point> mSideBorder1, mSideBorder2;
 			bool isInit;

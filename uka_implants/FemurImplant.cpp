@@ -68,6 +68,8 @@ void FemurImplant::init(const Plane& pPosterior, const Point& pRodBasePoint, con
 	mVectorTEA = mVectorForceLine.cross(mVectorAP);
 	mVectorTEA.normalice();
 
+	mRodTopPointProjectedOnBase = mDistal.getProjectionPoint(pRodTopPoint);
+
     isInit = true;
 }
 
@@ -86,6 +88,7 @@ FemurImplant::FemurImplant(const FemurImplant& pImplant)
 	this->mVectorTEA = pImplant.mVectorTEA;
 	this->mSizeMidVector = pImplant.mSizeMidVector;
 	this->mDistal = pImplant.mDistal;
+	this->mRodTopPointProjectedOnBase = pImplant.mRodTopPointProjectedOnBase;
 }
 
 FemurImplantInfo FemurImplant::getImplantInfo() const
@@ -177,6 +180,11 @@ Point FemurImplant::getRodTopPoint() const
 Point FemurImplant::getRodBasePoint() const
 {
 	return mRodBasePoint;
+}
+
+Point FemurImplant::getRodTopPointProjectedOnBase() const
+{
+	return mRodTopPointProjectedOnBase;
 }
 
 std::vector<Point> FemurImplant::getSortPointsSide1() const

@@ -1451,6 +1451,7 @@ double Knee::getEstimateFemurImplantsDimensions() const
     return distance;
 }
 
+/*
 TibiaImplantDimensions Knee::getEstimateTibiaImplantsDimensions() const
 {
     //Point freePoint = getTibiaCenterPointFreeAP();
@@ -1529,6 +1530,7 @@ TibiaImplantDimensions Knee::getEstimateTibiaImplantsDimensions() const
 
     return result;
 }
+*/
 
 Side Knee::getGoodSide(const Point& hipCenter, const Point& kneeCenter, const Point& latEpi, const Point& medEpi, const Point& ankle) const
 {
