@@ -8,7 +8,7 @@
 #include "vtkPlaneCollection.h"
 #include "vtkClipClosedSurface.h"
 #include "vtkExtractPolyDataGeometry.h"
-
+#include "ImplantTools.hpp"
 using namespace UKA::IMPLANTS;
 
 
@@ -165,8 +165,35 @@ void TibiaImplantMatch::makeRotationMatrix()
 
 void TibiaImplantMatch::makeTranslationMatrix()
 {
+	double refDistance = 1000;
+	Plane equisPlane = knee.getEquisPlaneTibia();
+	Point vectorToSurgicalTEA = knee.getTibiaVectorToSurgicalSideTEA();
+	
+	Point vectorToSurgicalTEAProj = equisPlane.getProjectionVector(vectorToSurgicalTEA);
+	vectorToSurgicalTEAProj.normalice();
+
 	Point tibiaPlateau = knee.getMovePlateau(implant.getImplantInfo());
+	//Point tibiaPlateau = knee.getTibiaCenterPointApAutomatic();
 	translationMatrix = tibiaPlateau.ToMatPoint() - (rotationMatrix * implant.getPlateauRefPointDown().ToMatPoint());
+
+	cv::Mat fullExtreme = rotationMatrix * implant.getExtremeSidePoint().ToMatPoint() + translationMatrix;
+	Point currentPoint = equisPlane.getProjectionPoint(Point(fullExtreme));
+	Point farPoint = currentPoint + refDistance * vectorToSurgicalTEAProj;
+
+	vtkNew<vtkImplicitPolyDataDistance> polyDistance;
+	polyDistance->SetInput(knee.GetTibiaPoly());
+
+	Point borderPoint;
+
+	double error = ImplantTools::GetInterceptionWithLine(polyDistance, currentPoint, farPoint, borderPoint);
+
+	if (error <= 0.1)
+	{
+		double distance = ImplantTools::getDistanceBetweenPoints(borderPoint, farPoint);
+		double moveDistance = refDistance - distance;
+		//std::cout << "Error: " << error << " Move distance: " << moveDistance << std::endl;
+		translationMatrix = translationMatrix + moveDistance * vectorToSurgicalTEA.ToMatPoint();
+	}
 }
 
 Plane TibiaImplantMatch::transformPlane(const Plane& plane) const

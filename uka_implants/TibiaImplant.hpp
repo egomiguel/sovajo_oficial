@@ -39,6 +39,8 @@ namespace UKA
 
 			Point getPointTuber() const;
 
+			Point getExtremeSidePoint() const;
+
 			Point getPlateauRefPointDown() const;
 
 			TibiaImplantInfo getImplantInfo() const;

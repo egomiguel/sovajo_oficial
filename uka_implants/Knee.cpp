@@ -277,7 +277,18 @@ Point Knee::getTibiaVectorLateralTEA() const
     {
         return vector;
     }
+}
 
+Point Knee::getTibiaVectorToSurgicalSideTEA() const
+{
+	if (mSurgerySize == SurgerySideEnum::KLateral)
+	{
+		return getTibiaVectorLateralTEA();
+	}
+	else
+	{
+		return -getTibiaVectorLateralTEA();
+	}
 }
 
 Point Knee::getDirectVectorFemurAxis() const

@@ -61,6 +61,8 @@ namespace UKA
 
 			Point getTibiaVectorLateralTEA() const;
 
+			Point getTibiaVectorToSurgicalSideTEA() const;
+
 			Point getDirectVectorFemurAxis() const;
 
 			Point getFemurDirectVectorAP() const;

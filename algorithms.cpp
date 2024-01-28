@@ -1368,7 +1368,7 @@ void MatchEasyPKA()
 	UKA::IMPLANTS::Point sidePoint(-0.1021, -11.1526, 1.1545);
 	UKA::IMPLANTS::Point exteriorPoint(-14.5152, -10.8294, 4.41175);
 	UKA::IMPLANTS::TibiaImplantInfo tibiaInfo;
-	tibiaInfo.tibiaThickness = 0.0;
+	tibiaInfo.tibiaThickness = 2.0;
 
 	tibiaImplant.init(apLinePclPoint, apLineTuberPoint, sidePoint, exteriorPoint, tibiaInfo);
 
@@ -1427,7 +1427,7 @@ void MatchEasyPKA()
 	std::vector<vtkSmartPointer<vtkPolyData>> polyList;
 	polyList.push_back(newImplantFemur);
 	polyList.push_back(newImplantTibia);
-	TestVTK::show(myKnee.GetFemurPoly(), polyList);
+	TestVTK::show(myKnee.GetTibiaPoly(), polyList);
 
 	
 	//TestVTK::show(myKnee.GetFemurPoly(), tPoints, true);
@@ -4205,8 +4205,8 @@ int main()
 
 	//std::cout <<"Result: "  << result << " Error: " << error << std::endl;
 
-	//MatchEasyPKA();
-	RegistrationScale();
+	MatchEasyPKA();
+	//RegistrationScale();
 	//Resgistration_General_test();
 	//PelvisImplantMatch();
 	//std::cout << "tttttttttttttttttt" << std::endl;

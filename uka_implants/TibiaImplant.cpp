@@ -109,3 +109,14 @@ Point TibiaImplant::getPlateauRefPointDown() const
 {
 	return plateauRefPointDown;
 }
+
+Point TibiaImplant::getExtremeSidePoint() const
+{
+	Line refLine = Line::makeLineWithPoints(pclPoint, tuberPoint);
+	double distance = refLine.getDistanceFromPoint(plateauRefPointDown);
+	Point tempPoint = refLine.getProjectPoint(plateauRefPointDown);
+	Point tempVector = plateauRefPointDown - tempPoint;
+	tempVector.normalice();
+	Point result = plateauRefPointDown + distance * tempVector;
+	return result;
+}
