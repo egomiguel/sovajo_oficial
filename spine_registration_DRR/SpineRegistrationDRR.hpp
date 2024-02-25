@@ -14,7 +14,8 @@ namespace SPINE
 		public:
 			SpineRegistrationDRR();
 
-			static itk::Rigid3DTransform<double>::Pointer ImageRegistration2D3D(const RegistrationImageType::Pointer& pFixedImage, const RegistrationImageType::Pointer& pMovingImage, RegistrationImageType::Pointer& pMovingImageOutput, int pDefaultPixel = 0);
+			static itk::Rigid3DTransform<double>::Pointer ImageRegistration2D3D(const ImageType3D::Pointer& pFixedImage, const ImageType3D::Pointer& pMovingImage, ImageType3D::Pointer& pMovingImageOutput, int pDefaultPixel = 0);
+			static SegmentImageType::Pointer GetDigitallyReconstructedRadiograph(const ImageType3D::Pointer& pImageCT, float pRotationX, float pRotationY, float pRotationZ, int pOutputSize, bool pVerbose = false);
 
 		private:
 			template<typename ImageTypeInput, typename ImageTypeOutput>

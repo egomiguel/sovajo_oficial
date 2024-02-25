@@ -11,6 +11,12 @@
 #include <itkResampleImageFilter.h>
 #include <itkCastImageFilter.h>
 #include <itkRescaleIntensityImageFilter.h>
+
+#include "itkResampleImageFilter.h"
+#include "itkCenteredEuler3DTransform.h"
+#include "itkNearestNeighborInterpolateImageFunction.h"
+#include "itkImageRegionIteratorWithIndex.h"
+#include "itkRayCastInterpolateImageFunction.h"
 //#include <Eigen/Dense>
 //#include "itkEuler3DTransform.h"
 //#include "itkNormalizedCorrelationTwoImageToOneImageMetric.h"
@@ -27,7 +33,7 @@ using namespace SPINE::REGISTRATION_DRR;
 SpineRegistrationDRR::SpineRegistrationDRR()
 {}
 
-itk::Rigid3DTransform<double>::Pointer SpineRegistrationDRR::ImageRegistration2D3D(const RegistrationImageType::Pointer& pFixedImage, const RegistrationImageType::Pointer& pMovingImage, RegistrationImageType::Pointer& pMovingImageOutput, int pDefaultPixel)
+itk::Rigid3DTransform<double>::Pointer SpineRegistrationDRR::ImageRegistration2D3D(const ImageType3D::Pointer& pFixedImage, const ImageType3D::Pointer& pMovingImage, ImageType3D::Pointer& pMovingImageOutput, int pDefaultPixel)
 {
 	/*
 	using TransformType = itk::Euler3DTransform<double>;
@@ -344,8 +350,8 @@ itk::Rigid3DTransform<double>::Pointer SpineRegistrationDRR::ImageRegistration2D
 
     using FloatImageType = itk::Image<float, 3>;
 
-    FloatImageType::Pointer fixedImage = castImage<RegistrationImageType, FloatImageType>(pFixedImage);
-    FloatImageType::Pointer movingImage = castImage<RegistrationImageType, FloatImageType>(pMovingImage);
+    FloatImageType::Pointer fixedImage = castImage<ImageType3D, FloatImageType>(pFixedImage);
+    FloatImageType::Pointer movingImage = castImage<ImageType3D, FloatImageType>(pMovingImage);
 
     using TransformType = itk::VersorRigid3DTransform<double>;
 
@@ -447,7 +453,7 @@ itk::Rigid3DTransform<double>::Pointer SpineRegistrationDRR::ImageRegistration2D
     resampler->Update();
     auto finalImage = resampler->GetOutput();
 
-    pMovingImageOutput = castImage<FloatImageType, RegistrationImageType>(finalImage);
+    pMovingImageOutput = castImage<FloatImageType, ImageType3D>(finalImage);
 
     itk::Rigid3DTransform<double>::Pointer result = itk::VersorRigid3DTransform<double>::New();
     result->SetMatrix(matrix);
@@ -465,3 +471,193 @@ typename ImageTypeOutput::Pointer SpineRegistrationDRR::castImage(const typename
     filter->Update();
     return filter->GetOutput();
 }
+
+SegmentImageType::Pointer SpineRegistrationDRR::GetDigitallyReconstructedRadiograph(const ImageType3D::Pointer& pImageCT, float pRotationX, float pRotationY, float pRotationZ, int pOutputSize, bool pVerbose)
+{
+	// CT volume rotation around isocenter along x,y,z axis in degrees
+	float rx = pRotationX;
+	float ry = pRotationY;
+	float rz = pRotationZ;
+
+	// Translation parameter of the isocenter in mm
+	float tx = 0.;
+	float ty = 0.;
+	float tz = 0.;
+
+	// The pixel indices of the isocenter
+	float cx = 0.;
+	float cy = 0.;
+	float cz = 0.;
+
+	// Source to isocenter distance in mm
+	float sid = 1000.;
+
+	// Default pixel spacing in the iso-center plane in mm
+	float sx = 1.;
+	float sy = 1.;
+
+	// Size of the output image in number of pixels
+	int dx = pOutputSize;
+	int dy = pOutputSize;
+
+	// The central axis positions of the 2D images in continuous indices
+	float o2Dx = 0;
+	float o2Dy = 0;
+
+	double threshold = 0;
+
+	// Creation of a \code{ResampleImageFilter} enables coordinates for
+	// each of the pixels in the DRR image to be generated. These
+	// coordinates are used by the \code{RayCastInterpolateImageFunction}
+	// to determine the equation of each corresponding ray which is cast
+	// through the input volume.
+
+	typedef itk::ResampleImageFilter<ImageType3D, ImageType3D> FilterType;
+	FilterType::Pointer filter = FilterType::New();
+	filter->SetInput(pImageCT);
+	filter->SetDefaultPixelValue(0);
+
+	// An Euler transformation is defined to position the input volume.
+	// The \code{ResampleImageFilter} uses this transform to position the
+	// output DRR image for the desired view.
+
+	typedef itk::CenteredEuler3DTransform< double >  TransformType;
+	TransformType::Pointer transform = TransformType::New();
+	transform->SetComputeZYX(true);
+	TransformType::OutputVectorType translation;
+	translation[0] = tx;
+	translation[1] = ty;
+	translation[2] = tz;
+	// constant for converting degrees into radians
+	const double dtr = (std::atan(1.0) * 4.0) / 180.0;
+	transform->SetTranslation(translation);
+	transform->SetRotation(dtr*rx, dtr*ry, dtr*rz);
+
+	ImageType3D::PointType   imOrigin = pImageCT->GetOrigin();
+	ImageType3D::SpacingType imRes = pImageCT->GetSpacing();
+
+	typedef ImageType3D::RegionType     InputImageRegionType;
+	typedef InputImageRegionType::SizeType InputImageSizeType;
+	InputImageRegionType imRegion = pImageCT->GetBufferedRegion();
+	InputImageSizeType   imSize = imRegion.GetSize();
+
+	imOrigin[0] += imRes[0] * static_cast<double>(imSize[0]) / 2.0;
+	imOrigin[1] += imRes[1] * static_cast<double>(imSize[1]) / 2.0;
+	imOrigin[2] += imRes[2] * static_cast<double>(imSize[2]) / 2.0;
+
+	TransformType::InputPointType center;
+	center[0] = cx + imOrigin[0];
+	center[1] = cy + imOrigin[1];
+	center[2] = cz + imOrigin[2];
+
+	transform->SetCenter(center);
+	if (pVerbose)
+	{
+		std::cout << "Image size: "
+			<< imSize[0] << ", " << imSize[1] << ", " << imSize[2]
+			<< std::endl << "   resolution: "
+			<< imRes[0] << ", " << imRes[1] << ", " << imRes[2]
+			<< std::endl << "   origin: "
+			<< imOrigin[0] << ", " << imOrigin[1] << ", " << imOrigin[2]
+			<< std::endl << "   center: "
+			<< center[0] << ", " << center[1] << ", " << center[2]
+			<< std::endl << "Transform: " << transform << std::endl;
+	}
+
+	// The \code{RayCastInterpolateImageFunction} is instantiated and passed the transform
+	// object. The \code{RayCastInterpolateImageFunction} uses this
+	// transform to reposition the x-ray source such that the DRR image
+	// and x-ray source move as one around the input volume. This coupling
+	// mimics the rigid geometry of the x-ray gantry.
+
+	typedef itk::RayCastInterpolateImageFunction<ImageType3D, double>
+		InterpolatorType;
+	InterpolatorType::Pointer interpolator = InterpolatorType::New();
+	interpolator->SetTransform(transform);
+
+	// We can then specify a threshold above which the volume's
+	// intensities will be integrated.
+
+	interpolator->SetThreshold(threshold);
+
+	// The ray-cast interpolator needs to know the initial position of the
+	// ray source or focal point. In this example we place the input
+	// volume at the origin and halfway between the ray source and the
+	// screen. The distance between the ray source and the screen
+	// is the "source to image distance" \code{sid} and is specified by
+	// the user.
+
+	InterpolatorType::InputPointType focalpoint;
+	focalpoint[0] = imOrigin[0];
+	focalpoint[1] = imOrigin[1];
+	focalpoint[2] = imOrigin[2] - sid / 2.;
+	interpolator->SetFocalPoint(focalpoint);
+
+	// Having initialised the interpolator we pass the object to the
+	// resample filter.
+
+	if (pVerbose)
+	{
+		interpolator->Print(std::cout);
+	}
+
+	filter->SetInterpolator(interpolator);
+	filter->SetTransform(transform);
+
+	// The size and resolution of the output DRR image is specified via the
+	// resample filter.
+
+	ImageType3D::SizeType size;
+	size[0] = dx;  // number of pixels along X of the 2D DRR image
+	size[1] = dy;  // number of pixels along Y of the 2D DRR image
+	size[2] = 1;   // only one slice
+	filter->SetSize(size);
+
+	ImageType3D::SpacingType spacing;
+	spacing[0] = sx;  // pixel spacing along X of the 2D DRR image [mm]
+	spacing[1] = sy;  // pixel spacing along Y of the 2D DRR image [mm]
+	spacing[2] = 1.0; // slice thickness of the 2D DRR image [mm]
+	filter->SetOutputSpacing(spacing);
+	// Software Guide : EndCodeSnippet
+	if (pVerbose)
+	{
+		std::cout << "Output image size: "
+			<< size[0] << ", "
+			<< size[1] << ", "
+			<< size[2] << std::endl;
+		std::cout << "Output image spacing: "
+			<< spacing[0] << ", "
+			<< spacing[1] << ", "
+			<< spacing[2] << std::endl;
+	}
+
+	// In addition the position of the DRR is specified. The default
+	// position of the input volume, prior to its transformation is
+	// half-way between the ray source and screen and unless specified
+	// otherwise the normal from the "screen" to the ray source passes
+	// directly through the centre of the DRR.
+
+	double origin[3];
+	origin[0] = imOrigin[0] + o2Dx - sx * ((double)dx - 1.) / 2.;
+	origin[1] = imOrigin[1] + o2Dy - sy * ((double)dy - 1.) / 2.;
+	origin[2] = imOrigin[2] + sid / 2.;
+	filter->SetOutputOrigin(origin);
+	// Software Guide : EndCodeSnippet
+	if (pVerbose)
+	{
+		std::cout << "Output image origin: "
+			<< origin[0] << ", "
+			<< origin[1] << ", "
+			<< origin[2] << std::endl;
+	}
+
+	filter->Update();
+	typedef itk::RescaleIntensityImageFilter<ImageType3D, SegmentImageType > RescaleFilterType;
+	RescaleFilterType::Pointer rescaler = RescaleFilterType::New();
+	rescaler->SetOutputMinimum(0);
+	rescaler->SetOutputMaximum(255);
+	rescaler->SetInput(filter->GetOutput());
+	rescaler->Update();
+	return rescaler->GetOutput();
+}
+
