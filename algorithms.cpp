@@ -109,6 +109,8 @@
 #include <vtkPlane.h>
 #include <vtkDistancePolyDataFilter.h>
 
+#include "spine_segmentation/SpineSegmentation.hpp"
+
 
 std::string dicom = "C:\\DICOM\\dcm2";
 std::string wFemoralDir = "C:\\DICOM\\femur";
@@ -4199,13 +4201,48 @@ int main()
 {
 	std::string casePlan = "D:\\sovajo\\Cases_Plan_TKA\\case1_left";
 	Knee myKnee;
-	bool result;
+	//bool result;
+
+	SPINE::SEGMENTATION::ImageType::Pointer inputImg;
+
+	std::string spine = "C:\\Users\\Miguel\\Desktop\\Algoritmos_Neuvos\\CT\\Spine_CT_17.nrrd";
+	Test::readImage<ImageType>(spine, inputImg);
+
+	
+	cv::Point3d A(-10.5, -7.9, -313.24);
+	cv::Point3d B(-10.35, -9.66, -470.24);
+	std::vector<ImageType::PointType> allPoints;
+	double distance = sqrt((A - B).dot(A - B));
+	double step = 1. / distance;
+	for (float i = 0; i < 1 + step; i += step)
+	{
+		auto tempPoint = A + i * (B - A);
+		ImageType::PointType physicalPoint;
+		physicalPoint[0] = tempPoint.x;
+		physicalPoint[1] = tempPoint.y;
+		physicalPoint[2] = tempPoint.z;
+
+		allPoints.push_back(physicalPoint);
+	}
+
+	SPINE::SEGMENTATION::SpineSegmentation segmentation(inputImg);
+	ImageType::RegionType region;
+	std::vector<SPINE::SEGMENTATION::SpineSegmentation::Plane> result = segmentation.getIntervertebralPlanes(allPoints, region);
+
+	for (auto & item : result)
+	{
+		std::cout << item.center << std::endl;
+	}
+
+	//std::vector<SpineSegmentation::Plane> getIntervertebralPlanes(const std::vector<ImageType::PointType>& physicalPoints)
+
+
 	//myKnee = CreateKneeFromFile_Numbers(casePlan, KneeSideEnum::KLeft);
 	//double error = FemurRegistrationFromNumbersTKA(myKnee, casePlan, result);
 
 	//std::cout <<"Result: "  << result << " Error: " << error << std::endl;
 
-	MatchEasyPKA();
+	//MatchEasyPKA();
 	//RegistrationScale();
 	//Resgistration_General_test();
 	//PelvisImplantMatch();
