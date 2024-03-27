@@ -3294,6 +3294,9 @@ void PelvisImplantMatch()
 	std::cout << "Incination: " << inclination << ", Version: " << antVersion << std::endl;
 	std::cout << "Superior: " << shiftSuperior << ", Anterior: " << shiftAnterior << ", Lateral: " << shiftLateral << std::endl;
 
+	std::cout << "Offset: " << objPelvis.getCombinedOffsetDistance() << " Offset Opside: " << objPelvis.getCombinedOffsetDistanceOppsite() << std::endl;
+	std::cout << "Lenght: " << objPelvis.getHipLengthDistance() << " Offset Opside: " << objPelvis.getHipLengthDistanceOppsite() << std::endl;
+
 	std::cout << "-------------------------------------------" << std::endl;
 	/*
 	double antVersionTemp = pelvisInfo.getCupAntversion();
@@ -4203,6 +4206,7 @@ int main()
 	Knee myKnee;
 	//bool result;
 
+	/*
 	SPINE::SEGMENTATION::ImageType::Pointer inputImg;
 
 	std::string spine = "C:\\Users\\Miguel\\Desktop\\Algoritmos_Neuvos\\CT\\Spine_CT_17.nrrd";
@@ -4233,7 +4237,7 @@ int main()
 	{
 		std::cout << item.center << std::endl;
 	}
-
+	*/
 	//std::vector<SpineSegmentation::Plane> getIntervertebralPlanes(const std::vector<ImageType::PointType>& physicalPoints)
 
 
@@ -4245,7 +4249,7 @@ int main()
 	//MatchEasyPKA();
 	//RegistrationScale();
 	//Resgistration_General_test();
-	//PelvisImplantMatch();
+	PelvisImplantMatch();
 	//std::cout << "tttttttttttttttttt" << std::endl;
 	//TestHullPoints();
 	//Test30PointsVTK();

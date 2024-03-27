@@ -33,7 +33,6 @@ void HipPelvisCupImplant::init(const Point& pTopPoint, const Point& pBasePoint1,
 		auto fitSphere = ImplantTools::fitSphere(pExternalPoints);
 		mCenter = fitSphere.first;
 		mRadius = fitSphere.second;
-		double proportion = 0.5;
 
 		if (mRadius <= 0)
 		{
@@ -41,14 +40,25 @@ void HipPelvisCupImplant::init(const Point& pTopPoint, const Point& pBasePoint1,
 		}
 
 		double distance = mBasePlane.getDistanceFromPoint(mCenter);
-		if (distance < mRadius)
+		double h = mRadius;
+		if (distance < mRadius && distance > 0)
 		{
-			Point distal = mCenter + mRadius * mBasePlane.getNormalVector();
-			double distance = mBasePlane.getDistanceFromPoint(distal);
-			proportion = distance / (2. * mRadius);
+			Point planeCutAndCenterVector = mCenter - mBasePlane.getProjectionPoint(mCenter);
+			planeCutAndCenterVector.normalice();
+
+			double direction = planeCutAndCenterVector.dot(mBasePlane.getNormalVector());
+			
+			if (direction > 0)
+			{
+				h = distance + mRadius;
+			}
+			else
+			{
+				h = mRadius - distance;
+			}
 		}
 
-		mHemiSphereSurfaceArea = proportion * 4. * PI * mRadius * mRadius;
+		mHemiSphereSurfaceArea = 2. * PI * mRadius * h;
 
 		double pnt[3];
 		pnt[0] = mCenter.x;

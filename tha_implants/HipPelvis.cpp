@@ -201,11 +201,12 @@ double HipPelvis::getCombinedOffsetDistance(const cv::Mat& pRotation, const cv::
 	cv::Mat canalAxisMat = pRotation * femurObj.getCanalAxisVectorInfSup().ToMatPoint();
 	cv::Mat canalPointMat = pRotation * femurObj.getCanalAxisPoint().ToMatPoint() + pTranslation;
 	cv::Mat kneeCenterMat = pRotation * femurObj.getKneeCenter().ToMatPoint() + pTranslation;
+	Point kneeCenter = Point(kneeCenterMat);
 	
 	Point canalAxis = mPlaneAPP.getProjectionVector(canalAxisMat);
 	Point canalPoint = mPlaneAPP.getProjectionPoint(canalPointMat);
 	Line canalLine(canalAxis, canalPoint);
-	Point kneeCenterOnCanalAxis = canalLine.getProjectPoint(kneeCenterMat);
+	Point kneeCenterOnCanalAxis = canalLine.getProjectPoint(kneeCenter);
 
 	Point centerASIS = (getRightASIS() + getLeftASIS()) / 2.;
 	Line midLine(getPelvisVectorInfSup(), centerASIS);
