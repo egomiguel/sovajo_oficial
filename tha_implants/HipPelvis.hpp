@@ -39,8 +39,8 @@ namespace THA
 			double getCombinedOffsetDistance() const;
 			double getCombinedOffsetDistanceOppsite() const;
 
-			//double getHipLengthDistance(const cv::Mat& pRotation, const cv::Mat& pTranslation) const;
-			//double getCombinedOffsetDistance(const cv::Mat& pRotation, const cv::Mat& pTranslation) const;
+			double getHipLengthDistance(const Point& pHipHeadCenter, const cv::Mat& pFemurTranslation) const;
+			double getCombinedOffsetDistance(const Point& pHipHeadCenter, const cv::Mat& pFemurTranslation) const;
 
 			double getHipLengthDistance(const Point& pHipHeadCenter) const;
 			double getCombinedOffsetDistance(const Point& pHipHeadCenter) const;
