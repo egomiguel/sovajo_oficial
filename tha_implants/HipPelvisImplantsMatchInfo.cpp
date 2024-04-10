@@ -866,9 +866,9 @@ double HipPelvisImplantsMatchInfo::getRealCombinedOffsetDistance(const Point& pF
 
 double HipPelvisImplantsMatchInfo::getHipLengthDistance() const
 {
-	//cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
-	//stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
-	//Point stemCenter = Point(stemHeadCenter);
+	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
+	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
+	Point stemCenter = Point(stemHeadCenter);
 
 	cv::Mat stemBasePointMat = (mRotationStem * mImplantStem.getBasePoint().ToMatPoint()) + mTranslationStem;
 	Point stemBasePoint = Point(stemBasePointMat);
@@ -878,7 +878,27 @@ double HipPelvisImplantsMatchInfo::getHipLengthDistance() const
 
 	Point axisLeg = mPelvis.getFemurOperationSide().getCanalAxisVectorInfSup();
 	Line axisLine(axisLeg, mPelvis.getFemurOperationSide().getCanalAxisPoint());
+
 	Point translation = stemBasePoint - axisLine.getProjectPoint(stemBasePoint);
+
+	Point hipOnAxis = axisLine.getProjectPoint(mPelvis.getFemurOperationSide().getHeadCenter());
+	Point kneeOnAxis = axisLine.getProjectPoint(mPelvis.getFemurOperationSide().getKneeCenter());
+	Point stemOnAxis = axisLine.getProjectPoint(stemCenter);
+
+	double distance = ImplantTools::getDistanceBetweenPoints(hipOnAxis, kneeOnAxis);
+	double distanceTemp = ImplantTools::getDistanceBetweenPoints(stemOnAxis, kneeOnAxis);
+	double diff = distanceTemp - distance;
+	axisLeg.normalice();
+
+	if (diff > 0)
+	{
+		translation = translation + diff * axisLeg;
+	}
+	else
+	{
+		translation = translation + diff * axisLeg;
+	}
+	
 
 	/*cv::Mat cupCenterMat = (mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint()) + mTranslationCup;
 	Point cupCenter = Point(cupCenterMat);
