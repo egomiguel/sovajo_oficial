@@ -839,6 +839,7 @@ double HipPelvisImplantsMatchInfo::getCombinedOffsetDistance() const
 	Point axisLeg = mPelvis.getFemurOperationSide().getCanalAxisVectorInfSup();
 	Line axisLine(axisLeg, mPelvis.getFemurOperationSide().getCanalAxisPoint());
 	Point translation = stemBasePoint - axisLine.getProjectPoint(stemBasePoint);
+	translation = translation + (cupCenter - mPelvis.getFemurOperationSide().getHeadCenter());
 
 	/*cv::Mat cupCenterMat = (mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint()) + mTranslationCup;
 	Point cupCenter = Point(cupCenterMat);
@@ -880,6 +881,7 @@ double HipPelvisImplantsMatchInfo::getHipLengthDistance() const
 	Line axisLine(axisLeg, mPelvis.getFemurOperationSide().getCanalAxisPoint());
 
 	Point translation = stemBasePoint - axisLine.getProjectPoint(stemBasePoint);
+	translation = translation + (cupCenter - mPelvis.getFemurOperationSide().getHeadCenter());
 
 	Point hipOnAxis = axisLine.getProjectPoint(mPelvis.getFemurOperationSide().getHeadCenter());
 	Point kneeOnAxis = axisLine.getProjectPoint(mPelvis.getFemurOperationSide().getKneeCenter());
