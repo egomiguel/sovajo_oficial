@@ -249,8 +249,9 @@ double HipPelvis::getCombinedOffsetDistance(const Point& pHipHeadCenter, const c
 
 	Point femurMove = Point(pFemurTranslation);
 
-	cv::Mat headCenterRotation = rotation * pHipHeadCenter.ToMatPoint();
-	Point translation = pHipHeadCenter - Point(headCenterRotation);
+	Point headCenter = mPlaneAPP.getProjectionPoint(pHipHeadCenter);
+	cv::Mat headCenterRotation = rotation * headCenter.ToMatPoint();
+	Point translation = headCenter - Point(headCenterRotation);
 
 	Point canalPoint = mPlaneAPP.getProjectionPoint(femurObj.getCanalAxisPoint() + femurMove);
 
@@ -298,8 +299,9 @@ double HipPelvis::getCombinedOffsetDistance(const Point& pHipHeadCenter) const
 
 	Point femurMove = pHipHeadCenter - femurObj.getHeadCenter();
 
-	cv::Mat headCenterRotation = rotation * pHipHeadCenter.ToMatPoint();
-	Point translation = pHipHeadCenter - Point(headCenterRotation);
+	Point headCenter = mPlaneAPP.getProjectionPoint(pHipHeadCenter);
+	cv::Mat headCenterRotation = rotation * headCenter.ToMatPoint();
+	Point translation = headCenter - Point(headCenterRotation);
 
 	Point canalPoint = mPlaneAPP.getProjectionPoint(femurObj.getCanalAxisPoint() + femurMove);
 
