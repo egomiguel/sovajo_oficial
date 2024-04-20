@@ -38,6 +38,10 @@ namespace THA
 
 			itk::Vector< double, 3 > setStemHeadTranslation(double pShifSuperior, double pShifLateral, double pShiftAnterior);
 
+			itk::Vector< double, 3 > setStemAxisShiftHip(double pShifSuperior, double pShifLateral, double pShiftAnterior);
+
+			itk::Vector< double, 3 > setStemAxisShiftCup(double pShifSuperior, double pShifLateral, double pShiftAnterior);
+			
 			itk::Vector< double, 3 > matchStemToHipRotationCenter();
 
 			itk::Vector< double, 3 > matchStemToCupRotationCenter();
