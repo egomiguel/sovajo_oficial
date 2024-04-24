@@ -9,8 +9,8 @@ HipFemur::HipFemur()
 	isInit = false;
 }
 
-void HipFemur::init(const Point& headCenter, const Point& neck, const Point& greaterTrochanter, const Point& lesserTrochanter,
-	const Point& medialEpicondyle, const Point& lateralEpicondyle, const Point& femurKneeCenter,
+void HipFemur::init(const Point& headCenter, const Point& neckCenter, const Point& canalCenter, const Point& lesserTrochanter,
+	const Point& medialEpicondyle, const Point& lateralEpicondyle, const Point& femurKneeCenter, 
 	const vtkSmartPointer<vtkPolyData>& femurPoly)
 {
 	if (isInit == true)
@@ -19,13 +19,14 @@ void HipFemur::init(const Point& headCenter, const Point& neck, const Point& gre
 	}
 
 	mHeadCenter = headCenter;
-	mNeck = neck;
-	mGreaterTrochanter = greaterTrochanter;
+	mNeckCenter = neckCenter;
+	//mGreaterTrochanter = greaterTrochanter;
 	mLesserTrochanter = lesserTrochanter;
 	mMedialEpicondyle = medialEpicondyle;
 	mLateralEpicondyle = lateralEpicondyle;
 	mFemur = femurPoly;
-	mCanalAxisVectorInfSup = greaterTrochanter - femurKneeCenter;
+	mCanalCenter = canalCenter;
+	mCanalAxisVectorInfSup = mCanalCenter - femurKneeCenter;
 	mCanalAxisVectorInfSup.normalice();
 	mCanalAxisPoint = femurKneeCenter;
 	mKneeCenter = femurKneeCenter;
@@ -38,20 +39,25 @@ vtkSmartPointer<vtkPolyData> HipFemur::getFemur() const
 	return mFemur;
 }
 
+Point HipFemur::getCanalCenter() const
+{
+	return mCanalCenter;
+}
+
 Point HipFemur::getHeadCenter() const
 {
 	return mHeadCenter;
 }
 
-Point HipFemur::getNeck() const
+Point HipFemur::getNeckCenter() const
 {
-	return mNeck;
+	return mNeckCenter;
 }
 
-Point HipFemur::getGreaterTrochanter() const
-{
-	return mGreaterTrochanter;
-}
+//Point HipFemur::getGreaterTrochanter() const
+//{
+//	return mGreaterTrochanter;
+//}
 
 Point HipFemur::getLesserTrochanter() const
 {
@@ -98,7 +104,7 @@ Point HipFemur::getKneeCenter() const
 
 void HipFemur::getNeckAxisVector()
 {
-	Point midPoint = (mLesserTrochanter + mGreaterTrochanter) / 2.;
+	/*Point midPoint = (mLesserTrochanter + mGreaterTrochanter) / 2.;
 
 	Line canalAxis(mCanalAxisVectorInfSup, mCanalAxisPoint);
 
@@ -126,9 +132,9 @@ void HipFemur::getNeckAxisVector()
 			}
 		}
 
-	}
+	}*/
 
-	mNeckAxisVectorToHead = mHeadCenter - neckCenter;
+	mNeckAxisVectorToHead = mHeadCenter - mNeckCenter;
 	mNeckAxisVectorToHead.normalice();
 }
 

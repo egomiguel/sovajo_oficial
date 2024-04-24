@@ -86,7 +86,7 @@ void HipFemurStemImplantMatch::getRigidTransform()
 
 	//Alignment with the anatomical axis
 
-	Point ref = mImplant.getCanalAxisTopPoint();
+	Point ref = mImplant.getCanalAxisRodCenter();
 	cv::Mat refMat = rotationMatrix * ref.ToMatPoint() + translationMatrix;
 	ref = Point(refMat);
 

@@ -15,11 +15,11 @@ namespace THA
 		{
 		public:
 			HipFemurOppside();
-			void init(const Point& headCenter, const Point& greaterTrochanter, const Point& lesserTrochanter,
+			void init(const Point& headCenter, const Point& canalCenter, const Point& lesserTrochanter,
 				 const Point& femurKneeCenter);
 
 			Point getHeadCenter() const;
-			Point getGreaterTrochanter() const;
+			Point getCanalCenter() const;
 			Point getLesserTrochanter() const;
 			Point getCanalAxisVectorInfSup() const;
 			Point getCanalAxisPoint() const;
@@ -27,7 +27,7 @@ namespace THA
 
 		private:
 			Point mHeadCenter;
-			Point mGreaterTrochanter;
+			Point mCanalCenter;
 			Point mLesserTrochanter;
 			Point mCanalAxisVectorInfSup;
 			Point mCanalAxisPoint;

@@ -3338,10 +3338,10 @@ void PelvisImplantMatch()
 			pelvisInfo.setStemVersionAngle(i);
 		}
 
-		std::cout << "Setting stem version angle: " << i << ": Getting Current angle: " << pelvisInfo.getStemVersion() <<std::endl;
+		//std::cout << "Setting stem version angle: " << i << ": Getting Current angle: " << pelvisInfo.getStemVersion() <<std::endl;
 
 		//std::cout << "Hip Lenght: " << pelvisInfo.getHipLengthDistance() << ": Hip offset: " << pelvisInfo.getCombinedOffsetDistance()<< std::endl;
-		//std::cout << "Set stem version: " << i << ": Current angle: " << pelvisInfo.getStemVersion() << std::endl;
+		std::cout << "Set stem version: " << i << ": Current angle: " << pelvisInfo.getStemVersion() << std::endl;
 
 		auto stemTransformMatch = pelvisInfo.getITKStemTransform();
 
@@ -3349,8 +3349,13 @@ void PelvisImplantMatch()
 		auto transformImplantStem = TestVTK::TransformPoly(implant_stem_3d, stemTransformMatch->GetMatrix(), stemTransformMatch->GetTranslation());
 		auto transformImplantHead = TestVTK::TransformPoly(transformImplantHeadToStemTemp, stemTransformMatch->GetMatrix(), stemTransformMatch->GetTranslation());
 
-		//std::cout <<"Stem version Angle: "<< pelvisInfo.getStemVersion() << ", Stem Superior Distance: " << pelvisInfo.getStemAxisShiftSuperiorHip() << ", Stem Lateral Distance: " << pelvisInfo.getStemAxisShiftLateralHip() <<", Stem Anterior Distance: " << pelvisInfo.getStemAxisShiftAnteriorHip()<< std::endl;
+		std::cout << "Stem superior distance: " << pelvisInfo.getStemAxisShiftSuperiorHip() << ", Stem Lateral Distance: " << pelvisInfo.getStemAxisShiftLateralHip() <<", Stem Anterior Distance: " << pelvisInfo.getStemAxisShiftAnteriorHip()<< std::endl;
 		
+		pelvisInfo.setStemAxisShiftHip(10, 20, 30);
+
+		std::cout << "Stem superior distance: " << pelvisInfo.getStemAxisShiftSuperiorHip() << ", Stem Lateral Distance: " << pelvisInfo.getStemAxisShiftLateralHip() << ", Stem Anterior Distance: " << pelvisInfo.getStemAxisShiftAnteriorHip() << std::endl;
+
+
 		//pelvisInfo.setStemTranslation(i, i, i);
 
 		//std::cout << "Set stem version: " << i << " gest Stem version Angle: " << pelvisInfo.getStemVersion() << ", Stem Superior Distance: " << pelvisInfo.getStemAxisShiftSuperiorCup() << ", Stem Lateral Distance: " << pelvisInfo.getStemAxisShiftLateralCup() << ", Stem Anterior Distance: " << pelvisInfo.getStemAxisShiftAnteriorCup() << std::endl;

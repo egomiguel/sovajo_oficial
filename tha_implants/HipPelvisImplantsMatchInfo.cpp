@@ -1093,7 +1093,7 @@ itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::setStemVersionAngle
 	auto rotationTemp = ImplantTools::getRotateMatrix(neckAxisTemp.cross(neckAxis), ImplantTools::getAngleBetweenVectors(neckAxisTemp, neckAxis));
 
 	Plane planeSource;
-	planeSource.init(mImplantStem.getVectorInfSup(), mImplantStem.getCanalAxisTopPoint());
+	planeSource.init(mImplantStem.getVectorInfSup(), mImplantStem.getCanalAxisRodCenter());
 	planeSource.transformPlane(mRotationStem, mTranslationStem);
 	planeSource.transformPlane(rotationTemp, Point().ToMatPoint());
 

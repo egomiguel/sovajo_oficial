@@ -8,14 +8,14 @@ HipFemurStemImplant::HipFemurStemImplant()
     isInit = false;
 }
 
-void HipFemurStemImplant::init(const Point& pTopPoint, const Point& pBasePoint, const Point& pHeadCenter, const std::vector<Point>& pHeadPoints)
+void HipFemurStemImplant::init(const Point& pRodCenter, const Point& pBasePoint, const Point& pHeadCenter, const std::vector<Point>& pHeadPoints)
 {
     if (isInit == true)
     {
         throw ImplantExceptionCode::ALREADY_INITIALIZED_HIP_FEMUR_STEM_IMPLANT;
     }
 
-    this->mTopPoint = pTopPoint;
+    this->mRodCenter = pRodCenter;
     this->mBasePoint = pBasePoint;
     this->mHeadCenter = pHeadCenter;
 	bool result;
@@ -24,7 +24,7 @@ void HipFemurStemImplant::init(const Point& pTopPoint, const Point& pBasePoint, 
 	{
 		throw ImplantExceptionCode::CAN_NOT_FIT_PLANE_TO_STEM_HEAD;
 	}
-	this->mStemHeadPlane.reverseByPoint(mTopPoint, false);
+	this->mStemHeadPlane.reverseByPoint(pRodCenter, false);
     isInit = true;
 }
 
@@ -35,7 +35,7 @@ Point HipFemurStemImplant::getBasePoint() const
 
 Point HipFemurStemImplant::getVectorInfSup() const
 {
-    Point vector = mTopPoint - mBasePoint;
+    Point vector = mRodCenter - mBasePoint;
     vector.normalice();
     return vector;
 }
@@ -48,7 +48,7 @@ Point HipFemurStemImplant::getVectorNeckToHead() const
 Point HipFemurStemImplant::getVectorNeckToHeadPerpendicularToInfSup() const
 {
 	Plane base;
-	base.init(getVectorInfSup(), mTopPoint);
+	base.init(getVectorInfSup(), mRodCenter);
 	Point result = base.getProjectionVector(getVectorNeckToHead());
 	result.normalice();
 	return result;
@@ -56,11 +56,11 @@ Point HipFemurStemImplant::getVectorNeckToHeadPerpendicularToInfSup() const
 
 Point HipFemurStemImplant::getVectorLatMed() const
 {
-    Line myLine(getVectorInfSup(), mTopPoint);
+    Line myLine(getVectorInfSup(), mRodCenter);
     Line perpendicular = myLine.getPerpendicularLine(mHeadCenter);
     Point vector = perpendicular.getDirectVector();
     Plane temp;
-    temp.init(vector, mTopPoint);
+    temp.init(vector, mRodCenter);
     temp.reverseByPoint(mHeadCenter);
     return temp.getNormalVector();
 }
@@ -70,7 +70,7 @@ Point HipFemurStemImplant::getHeadCenter() const
     return mHeadCenter;
 }
 
-Point HipFemurStemImplant::getCanalAxisTopPoint() const
+Point HipFemurStemImplant::getCanalAxisRodCenter() const
 {
-	return mTopPoint;
+	return mRodCenter;
 }

@@ -10,7 +10,7 @@ HipFemurOppside::HipFemurOppside()
 	isInit = false;
 }
 
-void HipFemurOppside::init(const Point& headCenter, const Point& greaterTrochanter, const Point& lesserTrochanter,
+void HipFemurOppside::init(const Point& headCenter, const Point& canalCenter, const Point& lesserTrochanter,
 							const Point& femurKneeCenter)
 {
 	if (isInit == true)
@@ -19,9 +19,9 @@ void HipFemurOppside::init(const Point& headCenter, const Point& greaterTrochant
 	}
 
 	mHeadCenter = headCenter;
-	mGreaterTrochanter = greaterTrochanter;
+	mCanalCenter = canalCenter;
 	mLesserTrochanter = lesserTrochanter;
-	mCanalAxisVectorInfSup = greaterTrochanter - femurKneeCenter;
+	mCanalAxisVectorInfSup = mCanalCenter - femurKneeCenter;
 	mCanalAxisVectorInfSup.normalice();
 	mCanalAxisPoint = femurKneeCenter;
 	mKneeCenter = femurKneeCenter;
@@ -33,9 +33,9 @@ Point HipFemurOppside::getHeadCenter() const
 	return mHeadCenter;
 }
 
-Point HipFemurOppside::getGreaterTrochanter() const
+Point HipFemurOppside::getCanalCenter() const
 {
-	return mGreaterTrochanter;
+	return mCanalCenter;
 }
 
 Point HipFemurOppside::getLesserTrochanter() const

@@ -13,14 +13,13 @@ namespace THA
 		{
 		public:
 			HipFemur();
-			void init(const Point& headCenter, const Point& neck, const Point& greaterTrochanter, const Point& lesserTrochanter,
-				const Point& medialEpicondyle, const Point& lateralEpicondyle, const Point& femurKneeCenter,
+			void init(const Point& headCenter, const Point& neckCenter, const Point& canalCenter, const Point& lesserTrochanter,
+				const Point& medialEpicondyle, const Point& lateralEpicondyle, const Point& femurKneeCenter, 
 				const vtkSmartPointer<vtkPolyData>& femurPoly);
-			Point getNeck() const;
+			Point getNeckCenter() const;
 			vtkSmartPointer<vtkPolyData> getFemur() const;
 			Point getHeadCenter() const;
-			
-			Point getGreaterTrochanter() const;
+			Point getCanalCenter() const;
 			Point getLesserTrochanter() const;
 			Point getMedialEpicondyle() const;
 			Point getLateralEpicondyle() const;
@@ -34,8 +33,8 @@ namespace THA
 		private:
 			vtkSmartPointer<vtkPolyData> mFemur;
 			Point mHeadCenter;
-			Point mNeck;
-			Point mGreaterTrochanter;
+			Point mNeckCenter;
+			//Point mGreaterTrochanter;
 			Point mLesserTrochanter;
 			Point mMedialEpicondyle;
 			Point mLateralEpicondyle;
@@ -43,6 +42,7 @@ namespace THA
 			Point mNeckAxisVectorToHead;
 			Point mCanalAxisPoint;
 			Point mKneeCenter;
+			Point mCanalCenter;
 			void getNeckAxisVector();
 			bool isInit;
 		};
