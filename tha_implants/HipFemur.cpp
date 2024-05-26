@@ -25,10 +25,9 @@ void HipFemur::init(const Point& headCenter, const Point& neckCenter, const Poin
 	mMedialEpicondyle = medialEpicondyle;
 	mLateralEpicondyle = lateralEpicondyle;
 	mFemur = femurPoly;
-	mCanalCenter = canalCenter;
-	mCanalAxisVectorInfSup = mCanalCenter - femurKneeCenter;
+	mCanalAxisPoint = canalCenter;
+	mCanalAxisVectorInfSup = mCanalAxisPoint - femurKneeCenter;
 	mCanalAxisVectorInfSup.normalice();
-	mCanalAxisPoint = femurKneeCenter;
 	mKneeCenter = femurKneeCenter;
 	getNeckAxisVector();
 	isInit = true;
@@ -37,11 +36,6 @@ void HipFemur::init(const Point& headCenter, const Point& neckCenter, const Poin
 vtkSmartPointer<vtkPolyData> HipFemur::getFemur() const
 {
 	return mFemur;
-}
-
-Point HipFemur::getCanalCenter() const
-{
-	return mCanalCenter;
 }
 
 Point HipFemur::getHeadCenter() const

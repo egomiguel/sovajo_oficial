@@ -19,7 +19,6 @@ namespace THA
 			Point getNeckCenter() const;
 			vtkSmartPointer<vtkPolyData> getFemur() const;
 			Point getHeadCenter() const;
-			Point getCanalCenter() const;
 			Point getLesserTrochanter() const;
 			Point getMedialEpicondyle() const;
 			Point getLateralEpicondyle() const;
@@ -42,7 +41,6 @@ namespace THA
 			Point mNeckAxisVectorToHead;
 			Point mCanalAxisPoint;
 			Point mKneeCenter;
-			Point mCanalCenter;
 			void getNeckAxisVector();
 			bool isInit;
 		};

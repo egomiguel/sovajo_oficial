@@ -19,7 +19,6 @@ namespace THA
 				 const Point& femurKneeCenter);
 
 			Point getHeadCenter() const;
-			Point getCanalCenter() const;
 			Point getLesserTrochanter() const;
 			Point getCanalAxisVectorInfSup() const;
 			Point getCanalAxisPoint() const;
@@ -27,7 +26,6 @@ namespace THA
 
 		private:
 			Point mHeadCenter;
-			Point mCanalCenter;
 			Point mLesserTrochanter;
 			Point mCanalAxisVectorInfSup;
 			Point mCanalAxisPoint;
