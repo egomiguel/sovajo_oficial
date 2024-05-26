@@ -87,6 +87,7 @@ namespace UKA
 		protected:
 			friend class FemurImplant;
 			friend class TibiaImplant;
+			friend class TibiaSpacerImplant;
 			friend class FemurImplantMatch;
 			friend class TibiaImplantMatch;
 		private:

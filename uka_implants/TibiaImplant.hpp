@@ -33,6 +33,8 @@ namespace UKA
 
 			Point getCentralPoint() const;
 
+			Point getCentralPointUp() const;
+
 			Point getExteriorPoint() const;
 
 			Point getPointPCL() const;
@@ -47,7 +49,7 @@ namespace UKA
 
 		private:
 			Plane tibiaPlane;
-			Point centralPoint, exteriorPoint, pclPoint, tuberPoint, plateauRefPointDown;
+			Point centralPoint, centralPointUp, exteriorPoint, pclPoint, tuberPoint, plateauRefPointDown;
 			TibiaImplantInfo mImplantInfo;
 			bool isInit;
 			//void fixNormalVectorTibia(const Point& fixPoint, const Point& referencePoint);
