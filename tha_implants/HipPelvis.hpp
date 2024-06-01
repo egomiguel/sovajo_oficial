@@ -35,6 +35,8 @@ namespace THA
 
 			double getHipLengthDistance() const; 
 			double getHipLengthDistanceOppsite() const;
+			double getHipLengthDistanceTest(const HipFemur& pFemurObj, const Plane& pPlaneAPP, const Point& PelvisVectorInfSup,
+				const Point& pRightASIS, const Point& pLeftASIS) const;
 
 			double getCombinedOffsetDistance() const;
 			double getCombinedOffsetDistanceOppsite() const;

@@ -32,6 +32,8 @@
 #include "uka_implants/FemurImplantMatch.hpp"
 #include "uka_implants/TibiaImplantMatch.hpp"
 #include "uka_implants/Point.hpp"
+#include "uka_implants/TibiaSpacerImplant.hpp"
+#include "uka_implants/TibiaSpacerImplantMatch.hpp"
 
 #include "hip/HipCenter.hpp"
 #include "segmentation/AutomaticSegmentation.hpp"
@@ -3376,7 +3378,7 @@ void PelvisImplantMatch()
 
 		//std::cout << i << " Cup: " << pelvisInfo.getCupShiftAnterior() << ", Cup: " << pelvisInfo.getCupShiftLateral() << ", Cup: " << pelvisInfo.getCupShiftSuperior() <<std::endl;
 		
-		//std::cout << " Hip lenght: " << objPelvis.getHipLengthDistance() << ", new lenght: " << pelvisInfo.getHipLengthDistance() << ", Hip Offset: " << objPelvis.getCombinedOffsetDistance() << ", Hip New Offset: " << pelvisInfo.getCombinedOffsetDistance() << std::endl;
+		std::cout << " Hip lenght: " << objPelvis.getHipLengthDistance() << ", new lenght: " << pelvisInfo.getHipLengthDistance() << ", Hip Offset: " << objPelvis.getCombinedOffsetDistance() << ", Hip New Offset: " << pelvisInfo.getCombinedOffsetDistance() << std::endl;
 
 		
 		//vtkNew<vtkAppendPolyData> appendFilter;
@@ -4234,6 +4236,40 @@ int main()
 {
 	std::string casePlan = "D:\\sovajo\\Cases_Plan_TKA\\case1_left";
 	Knee myKnee;
+
+	UKA::IMPLANTS::Point apLinePclPoint(10.4801, 9.06646, 0.934849);
+	UKA::IMPLANTS::Point apLineTuberPoint(10.2438, -37.5031, 0.951554);
+	UKA::IMPLANTS::Point sidePoint(-0.1021, -11.1526, 1.1545);
+	UKA::IMPLANTS::Point exteriorPoint(-14.5152, -10.8294, 4.41175);
+	UKA::IMPLANTS::TibiaImplantInfo tibiaInfo;
+	tibiaInfo.tibiaThickness = 2.0;
+
+	UKA::IMPLANTS::TibiaImplant tibiaImplant;
+	tibiaImplant.init(apLinePclPoint, apLineTuberPoint, sidePoint, exteriorPoint, tibiaInfo);
+
+	UKA::IMPLANTS::Point apLinePclPointSpacer(1.06782, -13.9567, -10.0878);
+	UKA::IMPLANTS::Point apLineTuberPointSpacer(1.0678, 14.099, -10.1435);
+	UKA::IMPLANTS::Point plateauRefPointUpSpacer(-2.50552, -0.14465, 0.412728);
+	UKA::IMPLANTS::Point exteriorPointDownSpacer(1.06831, 0.435704, 0.00826925);
+
+	UKA::IMPLANTS::TibiaSpacerImplant tibiaSpacer;
+	tibiaSpacer.init(apLineTuberPointSpacer, apLinePclPointSpacer, plateauRefPointUpSpacer, exteriorPointDownSpacer);
+
+	UKA::IMPLANTS::TibiaSpacerImplantMatch tibiaSpacerMatch;
+	tibiaSpacerMatch.init(tibiaImplant, tibiaSpacer);
+
+	auto tibiaImplant3D = TestVTK::ReadPolyDataSTL("D:\\sovajo\\Implants\\pka\\tibia.STL");
+	auto spacerImplant3D = TestVTK::ReadPolyDataSTL("D:\\sovajo\\Implants\\pka\\Tibial_spacer.STL");
+
+	auto spacerTransform = TestVTK::TransformPoly(spacerImplant3D, tibiaSpacerMatch.GetRotationMatrix(), tibiaSpacerMatch.GetTranslationMatrix());
+
+	vtkNew<vtkAppendPolyData> appendFilter;
+	appendFilter->AddInputData(tibiaImplant3D);
+	appendFilter->AddInputData(spacerTransform);
+	appendFilter->Update();
+	TestVTK::show(appendFilter->GetOutput());
+
+
 	//bool result;
 
 	/*
@@ -4279,7 +4315,7 @@ int main()
 	//MatchEasyPKA();
 	//RegistrationScale();
 	//Resgistration_General_test();
-	PelvisImplantMatch();
+	//PelvisImplantMatch();
 	//std::cout << "tttttttttttttttttt" << std::endl;
 	//TestHullPoints();
 	//Test30PointsVTK();

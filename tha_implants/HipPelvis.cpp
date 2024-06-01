@@ -141,6 +141,29 @@ double HipPelvis::getHipLengthDistance() const
 	return lineASIS.getDistanceFromPoint(ref);
 }
 
+double HipPelvis::getHipLengthDistanceTest(const HipFemur& pFemurObj, const Plane& pPlaneAPP, const Point& PelvisVectorInfSup,
+	const Point& pRightASIS, const Point& pLeftASIS) const
+{
+	auto femurObj = pFemurObj;
+	Point axialPlaneNormal = PelvisVectorInfSup;
+	Point mechanicalAxis = femurObj.getHeadCenter() - femurObj.getKneeCenter();
+	mechanicalAxis = pPlaneAPP.getProjectionVector(mechanicalAxis);
+	mechanicalAxis.normalice();
+	auto rotation = ImplantTools::GetGeneralRotateTransformVectors(mechanicalAxis, axialPlaneNormal);
+
+	Point headCenter = pPlaneAPP.getProjectionPoint(femurObj.getHeadCenter());
+
+	cv::Mat headCenterRotation = rotation * headCenter.ToMatPoint();
+	Point translation = headCenter - Point(headCenterRotation);
+
+	Point ref = pPlaneAPP.getProjectionPoint(femurObj.getLesserTrochanter());
+	cv::Mat refMat = rotation * ref.ToMatPoint() + translation.ToMatPoint();
+	ref = Point(refMat);
+
+	Line lineASIS = Line::makeLineWithPoints(pRightASIS, pLeftASIS);
+	return lineASIS.getDistanceFromPoint(ref);
+}
+
 double HipPelvis::getHipLengthDistanceOppsite() const
 {
 	auto femurObj = mFemurOppsite;
@@ -233,6 +256,25 @@ double HipPelvis::getHipLengthDistance(const Point& pHipHeadCenter, const cv::Ma
 	Point ref = mPlaneAPP.getProjectionPoint(femurObj.getLesserTrochanter() + femurMove);
 	cv::Mat refMat = rotation * ref.ToMatPoint() + translation.ToMatPoint();
 	ref = Point(refMat);
+
+	////////////////////////////////////////////////////////////////////////
+	/*
+	Point head = pHipHeadCenter;
+	Point neckCenter = femurObj.getNeckCenter() + femurMove;
+	Point canalCenter = femurObj.getCanalAxisPoint() + femurMove;
+	Point trochanter = femurObj.getLesserTrochanter() + femurMove;
+	Point medialEpi = femurObj.getMedialEpicondyle() + femurMove;
+	Point lateralEpi = femurObj.getLateralEpicondyle() + femurMove;
+	Point kneeCenter = femurObj.getKneeCenter() + femurMove;
+
+
+	HipFemur pFemurObj;
+	pFemurObj.init(head, neckCenter, canalCenter, trochanter, medialEpi, lateralEpi, kneeCenter, femurObj.getFemur());
+	double result = getHipLengthDistanceTest(pFemurObj, mPlaneAPP, axialPlaneNormal, mRightASIS, mLeftASIS);
+
+	std::cout << "Hip Lenght after move: " << result << std::endl;
+	*/
+	//////////////////////////////////////////////////////////////////////
 
 	Line lineASIS = Line::makeLineWithPoints(mRightASIS, mLeftASIS);
 	return lineASIS.getDistanceFromPoint(ref);
