@@ -4236,7 +4236,7 @@ int main()
 {
 	std::string casePlan = "D:\\sovajo\\Cases_Plan_TKA\\case1_left";
 	Knee myKnee;
-
+	/*
 	UKA::IMPLANTS::Point apLinePclPoint(10.4801, 9.06646, 0.934849);
 	UKA::IMPLANTS::Point apLineTuberPoint(10.2438, -37.5031, 0.951554);
 	UKA::IMPLANTS::Point sidePoint(-0.1021, -11.1526, 1.1545);
@@ -4268,7 +4268,7 @@ int main()
 	appendFilter->AddInputData(spacerTransform);
 	appendFilter->Update();
 	TestVTK::show(appendFilter->GetOutput());
-
+	*/
 
 	//bool result;
 
@@ -4315,7 +4315,7 @@ int main()
 	//MatchEasyPKA();
 	//RegistrationScale();
 	//Resgistration_General_test();
-	//PelvisImplantMatch();
+	PelvisImplantMatch();
 	//std::cout << "tttttttttttttttttt" << std::endl;
 	//TestHullPoints();
 	//Test30PointsVTK();

@@ -850,7 +850,7 @@ double HipPelvisImplantsMatchInfo::getCombinedOffsetDistance() const
 	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
 	Point stemCenter = Point(stemHeadCenter);
 
-	Point translation = stemCenter - cupCenter;
+	Point translation = cupCenter - stemCenter;
 
 
 	return mPelvis.getCombinedOffsetDistance(cupCenter, translation.ToMatPoint());
@@ -862,7 +862,7 @@ double HipPelvisImplantsMatchInfo::getRealCombinedOffsetDistance(const Point& pF
 	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
 	Point stemCenter = Point(stemHeadCenter);
 
-	Point translation = stemCenter - pFinalCupCenter;
+	Point translation = pFinalCupCenter - stemCenter;
 
 	return mPelvis.getCombinedOffsetDistance(pFinalCupCenter, translation.ToMatPoint());
 }
@@ -910,7 +910,7 @@ double HipPelvisImplantsMatchInfo::getHipLengthDistance() const
 	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
 	Point stemCenter = Point(stemHeadCenter);
 
-	Point translation = stemCenter - cupCenter;
+	Point translation = cupCenter - stemCenter;
 
 	return mPelvis.getHipLengthDistance(cupCenter, translation.ToMatPoint());
 }
@@ -921,7 +921,7 @@ double HipPelvisImplantsMatchInfo::getRealHipLengthDistance(const Point& pFinalC
 	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
 	Point stemCenter = Point(stemHeadCenter);
 
-	Point translation = stemCenter - pFinalCupCenter;
+	Point translation = pFinalCupCenter - stemCenter;
 
 	return mPelvis.getHipLengthDistance(pFinalCupCenter, translation.ToMatPoint());
 }
