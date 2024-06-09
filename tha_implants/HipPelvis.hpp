@@ -32,11 +32,15 @@ namespace THA
 			Point getPelvisVectorInfSup() const;
 
 			Plane getCoronalPlaneAPP() const;
+			cv::Mat getFemurMechanicalAlignmentRotation() const;
+			cv::Mat getFemurMechanicalAlignmentRotation(const Point& pCupCenter, const Point& pTranslation) const;
+			cv::Mat getFemurMechanicalAlignmentRotationOppsite() const;
+			cv::Mat getFemurCanalAlignmentRotation() const;
+			cv::Mat getFemurCanalAlignmentRotation(const Point& pCupCenter, const Point& pTranslation) const;
+			cv::Mat getFemurCanalAlignmentRotationOppsite() const;
 
 			double getHipLengthDistance() const; 
 			double getHipLengthDistanceOppsite() const;
-			double getHipLengthDistanceTest(const HipFemur& pFemurObj, const Plane& pPlaneAPP, const Point& PelvisVectorInfSup,
-				const Point& pRightASIS, const Point& pLeftASIS) const;
 
 			double getCombinedOffsetDistance() const;
 			double getCombinedOffsetDistanceOppsite() const;
@@ -73,6 +77,9 @@ namespace THA
 			///////////////////////////////Test
 
 			vtkSmartPointer<vtkPolyData> getPelvisFemurCutTest();
+
+			double getHipLengthDistanceTest(const HipFemur& pFemurObj, const Plane& pPlaneAPP, const Point& PelvisVectorInfSup,
+				const Point& pRightASIS, const Point& pLeftASIS) const;
 
 		private:
 			Point mLeftASIS, mRightASIS;
