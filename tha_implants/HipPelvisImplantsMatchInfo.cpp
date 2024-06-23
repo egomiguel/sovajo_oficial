@@ -828,7 +828,7 @@ double HipPelvisImplantsMatchInfo::getRealStemVersion(const Point& pVectorNeckTo
 	return degree;
 }
 
-double HipPelvisImplantsMatchInfo::getCombinedOffsetDistance() const
+double HipPelvisImplantsMatchInfo::getCombinedOffsetDistance(bool useLinerCenter, const Point linerCenter) const
 {
 	/*
 	cv::Mat stemBasePointMat = (mRotationStem * mImplantStem.getBasePoint().ToMatPoint()) + mTranslationStem;
@@ -843,8 +843,17 @@ double HipPelvisImplantsMatchInfo::getCombinedOffsetDistance() const
 	translation = translation + (cupCenter - mPelvis.getFemurOperationSide().getHeadCenter());
 	*/
 
-	cv::Mat cupCenterMat = (mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint()) + mTranslationCup;
-	Point cupCenter = Point(cupCenterMat);
+	Point cupCenter;
+
+	if (useLinerCenter == false)
+	{
+		cv::Mat cupCenterMat = (mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint()) + mTranslationCup;
+		cupCenter = Point(cupCenterMat);
+	}
+	else
+	{
+		cupCenter = linerCenter;
+	}
 
 	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
 	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
@@ -867,7 +876,7 @@ double HipPelvisImplantsMatchInfo::getRealCombinedOffsetDistance(const Point& pF
 	return mPelvis.getCombinedOffsetDistance(pFinalCupCenter, translation.ToMatPoint());
 }
 
-double HipPelvisImplantsMatchInfo::getHipLengthDistance() const
+double HipPelvisImplantsMatchInfo::getHipLengthDistance(bool useLinerCenter, const Point linerCenter) const
 {
 	/*cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
 	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;
@@ -902,9 +911,19 @@ double HipPelvisImplantsMatchInfo::getHipLengthDistance() const
 	{
 		translation = translation + diff * axisLeg;
 	}*/
+
+	Point cupCenter;
+
+	if (useLinerCenter = false)
+	{
+		cv::Mat cupCenterMat = (mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint()) + mTranslationCup;
+		cupCenter = Point(cupCenterMat);
+	}
+	else
+	{
+		cupCenter = linerCenter;
+	}
 	
-	cv::Mat cupCenterMat = (mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint()) + mTranslationCup;
-	Point cupCenter = Point(cupCenterMat);
 
 	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
 	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;

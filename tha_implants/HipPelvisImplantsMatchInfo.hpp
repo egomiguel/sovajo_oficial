@@ -100,11 +100,11 @@ namespace THA
 
 			double getRealStemVersion(const Point& pVectorNeckToHead) const;
 
-			double getCombinedOffsetDistance() const;
+			double getCombinedOffsetDistance(bool useLinerCenter = false, const Point linerCenter=Point()) const;
 
 			double getRealCombinedOffsetDistance(const Point& pFinalCupCenter) const;
 
-			double getHipLengthDistance() const;
+			double getHipLengthDistance(bool useLinerCenter = false, const Point linerCenter = Point()) const;
 
 			double getRealHipLengthDistance(const Point& pFinalCupCenter) const;
 
