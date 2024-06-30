@@ -15,7 +15,7 @@ namespace THA
 		{
 		public:
 			HipPelvisCupImplant();
-			void init(const Point& pTopPoint, const Point& pBasePoint1, const Point& pBasePoint2, const Point& pBasePoint3, const std::vector<Point>& pExternalPoints, double pHemiSphereResolution = 0.05);
+			void init(const Point& pTopPoint, const Point& pBasePoint1, const Point& pBasePoint2, const Point& pBasePoint3, const std::vector<Point>& pExternalPoints, double pHemiSphereResolution = 0.05, double pThickness = 0);
 			Point getVectorX() const;
 			Point getVectorZ() const;
 			Point getTopPoint() const;
@@ -24,12 +24,14 @@ namespace THA
 			vtkSmartPointer<vtkPolyData> getHemiSphereCup() const;
 			double getHemiSphereSurfaceArea() const;
 			void setHemisphereResolution(double pResolution);
+			double getThickness() const;
+			double getInternalRadius() const;
 
 		private:
 			Point mTopPoint;
 			Point mBasePoint1, mBasePoint2, mBasePoint3;
 			vtkSmartPointer<vtkPolyData> mHemiSphereCup;
-			double mRadius;
+			double mRadius, mThickness;
 			Point mCenter;
 			Plane mBasePlane;
 			double mHemiSphereSurfaceArea;

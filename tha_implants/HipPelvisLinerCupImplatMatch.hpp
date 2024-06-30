@@ -24,12 +24,16 @@ namespace THA
 
 			itk::Rigid3DTransform<>::Pointer getTransform() const;
 
+			Point getLinerCenterInCup() const;
+
 		private:
 			HipPelvisCupImplant mCupImplant;
 			HipPelvisLinerImplant mLinerImplant;
 
 			cv::Mat mRotationMatrix;
 			cv::Mat mTranslationMatrix;
+
+			Point mLinerCenterInCup;
 
 			void getRigidTransform();
 

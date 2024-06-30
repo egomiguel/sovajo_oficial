@@ -23,6 +23,11 @@ void HipPelvisLinerCupImplantMatch::init(const HipPelvisCupImplant& pCupImplant,
     isInit = true;
 }
 
+Point HipPelvisLinerCupImplantMatch::getLinerCenterInCup() const
+{
+	return mLinerCenterInCup;
+}
+
 itk::Matrix< double, 3, 3 > HipPelvisLinerCupImplantMatch::GetRotationMatrix() const
 {
 	itk::Matrix< double, 3, 3 > rotation;
@@ -69,6 +74,15 @@ void HipPelvisLinerCupImplantMatch::getRigidTransform()
 
 	mRotationMatrix = ImplantTools::getRotateMatrix(rotationAxisVector, angle);
 	mTranslationMatrix = mCupImplant.getCenterOfRotationImplant().ToMatPoint() - (mRotationMatrix * mLinerImplant.getCenterOfRotationImplant().ToMatPoint());
+	
+	if (mLinerImplant.getInternalRadius() > mCupImplant.getInternalRadius() && mCupImplant.getInternalRadius() > 0)
+	{
+		double move = mLinerImplant.getInternalRadius() - mCupImplant.getInternalRadius();
+		mTranslationMatrix = mTranslationMatrix - move * linerVector.ToMatPoint();
+	}
+
+	auto newLinerCenter = mRotationMatrix * mLinerImplant.getCenterOfRotationImplant().ToMatPoint() + mTranslationMatrix;
+	mLinerCenterInCup = Point(newLinerCenter);
 }
 
 itk::Rigid3DTransform<>::Pointer HipPelvisLinerCupImplantMatch::getTransform() const

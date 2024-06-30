@@ -13,7 +13,7 @@ HipPelvisCupImplant::HipPelvisCupImplant()
     isInit = false;
 }
 
-void HipPelvisCupImplant::init(const Point& pTopPoint, const Point& pBasePoint1, const Point& pBasePoint2, const Point& pBasePoint3, const std::vector<Point>& pExternalPoints, double pHemiSphereResolution)
+void HipPelvisCupImplant::init(const Point& pTopPoint, const Point& pBasePoint1, const Point& pBasePoint2, const Point& pBasePoint3, const std::vector<Point>& pExternalPoints, double pHemiSphereResolution, double pThickness)
 {
     if (isInit == true)
     {
@@ -24,6 +24,7 @@ void HipPelvisCupImplant::init(const Point& pTopPoint, const Point& pBasePoint1,
     this->mBasePoint1 = pBasePoint1;
     this->mBasePoint2 = pBasePoint2;
     this->mBasePoint3 = pBasePoint3;
+	this->mThickness = pThickness;
 
 	mBasePlane.init(pBasePoint1, pBasePoint2, pBasePoint3);
 	mBasePlane.reverseByPoint(pTopPoint);
@@ -113,6 +114,21 @@ void HipPelvisCupImplant::init(const Point& pTopPoint, const Point& pBasePoint1,
 	}
 
     isInit = true;
+}
+
+double HipPelvisCupImplant::getThickness() const
+{
+	return mThickness;
+}
+
+double HipPelvisCupImplant::getInternalRadius() const
+{
+	double result = mRadius - mThickness;
+	if (result > 0)
+	{
+		return result;
+	}
+	return 0;
 }
 
 void HipPelvisCupImplant::setHemisphereResolution(double pResolution)

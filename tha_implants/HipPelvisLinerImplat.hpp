@@ -17,6 +17,7 @@ namespace THA
 			Point getTopPoint() const;
 			Point getCenterOfRotationImplant() const;
 			Point getCenterToTopVector() const;
+			double getInternalRadius() const;
 
 		private:
 			Point mTopPoint;

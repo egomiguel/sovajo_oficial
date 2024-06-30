@@ -852,7 +852,8 @@ double HipPelvisImplantsMatchInfo::getCombinedOffsetDistance(bool useLinerCenter
 	}
 	else
 	{
-		cupCenter = linerCenter;
+		cv::Mat cupCenterMat = (mRotationCup * linerCenter.ToMatPoint()) + mTranslationCup;
+		cupCenter = Point(cupCenterMat);
 	}
 
 	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
@@ -921,9 +922,9 @@ double HipPelvisImplantsMatchInfo::getHipLengthDistance(bool useLinerCenter, con
 	}
 	else
 	{
-		cupCenter = linerCenter;
+		cv::Mat cupCenterMat = (mRotationCup * linerCenter.ToMatPoint()) + mTranslationCup;
+		cupCenter = Point(cupCenterMat);
 	}
-	
 
 	cv::Mat stemHeadCenter = (mRotationStemHead * mImplantStemHead.getCenterOfSphere().ToMatPoint()) + mTranslationStemHead;
 	stemHeadCenter = (mRotationStem * stemHeadCenter) + mTranslationStem;

@@ -44,6 +44,11 @@ Point HipPelvisLinerImplant::getCenterOfRotationImplant() const
 	return mCenter;
 }
 
+double HipPelvisLinerImplant::getInternalRadius() const
+{
+	return mRadius;
+}
+
 Point HipPelvisLinerImplant::getCenterToTopVector() const
 {
 	Point vector = mTopPoint - mCenter;
