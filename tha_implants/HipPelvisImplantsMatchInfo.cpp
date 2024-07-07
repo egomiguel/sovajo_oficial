@@ -915,7 +915,7 @@ double HipPelvisImplantsMatchInfo::getHipLengthDistance(bool useLinerCenter, con
 
 	Point cupCenter;
 
-	if (useLinerCenter = false)
+	if (useLinerCenter == false)
 	{
 		cv::Mat cupCenterMat = (mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint()) + mTranslationCup;
 		cupCenter = Point(cupCenterMat);

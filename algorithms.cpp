@@ -433,7 +433,7 @@ UKA::IMPLANTS::Knee CreateKneeFromFile_NumbersPKA(const std::string& sourcePath,
 
 	UKA::IMPLANTS::Knee knee;
 	
-	knee.init(hipCenter, anteriorCortex, femurKneeCenter, lateralEpicondyle, medialEpicondyle, tibiaKneeCenter, 
+	knee.init(hipCenter, femurKneeCenter, lateralEpicondyle, medialEpicondyle, tibiaKneeCenter, 
 			  tibiaTubercle, tibiaPCL, ankleCenter, femurPoly, tibiaPoly, pSide, pSurgery);
 
 	return knee;

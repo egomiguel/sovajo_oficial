@@ -32,7 +32,7 @@ namespace UKA
 		public:
 			Knee();
 
-			void init(const Point& hipCenter, const Point& anteriorCortex, const Point& femurKneeCenter, const Point& lateralEpicondyle,
+			void init(const Point& hipCenter, const Point& femurKneeCenter, const Point& lateralEpicondyle,
 				const Point& medialEpicondyle, const Point& tibiaKneeCenter, const Point& tibiaTubercle, const Point& pclCenter,
 				const Point& ankleCenter, const vtkSmartPointer<vtkPolyData> femurPoly,
 				const vtkSmartPointer<vtkPolyData> tibiaPoly, KneeSideEnum pSide, SurgerySideEnum pSurgery, bool findRefPoints = true, double cartilage = 2.0, uint8_t imageValueMax = 1);
@@ -71,7 +71,7 @@ namespace UKA
 
 			Point getNormalVectorTibiaPlane() const;
 
-			Point getAnteriorCortex() const;
+			Point getCortexRef() const;
 
 			Point getMoveCondyle(const FemurImplantInfo& pImplant) const;
 
@@ -158,7 +158,7 @@ namespace UKA
 		private:
 			Point lateralEpicondyle, medialEpicondyle, medialEpicondylePerp;
 			Point hipCenter, femurKneeCenter, tibiaKneeCenter, tibiaRotatePoint;
-			Point anteriorCortex;
+			Point cortexRef;
 			Point lateralInferiorFemurPoint, medialInferiorFemurPoint;
 			Point lateralCondyle, medialCondyle;
 			Point lateralPlateau, medialPlateau;

@@ -4,6 +4,7 @@
 #include "TibiaRegistration.hpp"
 #include "RegistrationPrivate.hpp"
 #include "LeastSquaresICP.hpp"
+#include "vtkImplicitPolyDataDistance.h"
 
 //#include <pcl/common/common_headers.h>
 //#include <pcl/registration/icp.h>
@@ -60,11 +61,13 @@ bool TibiaRegistration::MakeRegistration(const std::vector<itk::Point<double, 3>
 
     if (useRandomAlignment == true)
     {
-        error = myICP.LeastSquaresRandomInit(poly, data);
+        error = myICP.LeastSquaresRandomInit(Registration::poly, data);
     }
     else
     {
-        error = myICP.LeastSquares(poly, data);
+		vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
+		implicitPolyDataDistance->SetInput(Registration::poly);
+        error = myICP.LeastSquares(implicitPolyDataDistance, data);
     }
 
     Registration::MakeResult(data, error);

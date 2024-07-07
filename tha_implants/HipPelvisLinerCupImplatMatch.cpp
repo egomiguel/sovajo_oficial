@@ -75,9 +75,9 @@ void HipPelvisLinerCupImplantMatch::getRigidTransform()
 	mRotationMatrix = ImplantTools::getRotateMatrix(rotationAxisVector, angle);
 	mTranslationMatrix = mCupImplant.getCenterOfRotationImplant().ToMatPoint() - (mRotationMatrix * mLinerImplant.getCenterOfRotationImplant().ToMatPoint());
 	
-	if (mLinerImplant.getInternalRadius() > mCupImplant.getInternalRadius() && mCupImplant.getInternalRadius() > 0)
+	if (mLinerImplant.getExternalRadius() > mCupImplant.getInternalRadius() && mCupImplant.getInternalRadius() > 0)
 	{
-		double move = mLinerImplant.getInternalRadius() - mCupImplant.getInternalRadius();
+		double move = mLinerImplant.getExternalRadius() - mCupImplant.getInternalRadius();
 		mTranslationMatrix = mTranslationMatrix - move * linerVector.ToMatPoint();
 	}
 

@@ -300,7 +300,7 @@ itk::Vector< double, 3 > FemurImplantMatch::GetTranslationMatrix() const
 
 Point FemurImplantMatch::getPointsOnPlane(const Plane& myPlane, std::vector<Point>& points) const
 {
-	Point cortex = knee.getAnteriorCortex();
+	Point cortex = knee.getCortexRef();
 	Point hip = knee.getHipCenter();
 	Point femurKnee = knee.getFemurKneeCenter();
 	Point directVector = hip - femurKnee;

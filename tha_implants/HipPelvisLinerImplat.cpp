@@ -13,7 +13,7 @@ HipPelvisLinerImplant::HipPelvisLinerImplant()
 	isInit = false;
 }
 
-void HipPelvisLinerImplant::init(const Point& pTopPoint, const std::vector<Point>& pInternalSpherePoints)
+void HipPelvisLinerImplant::init(const Point& pTopPoint, const std::vector<Point>& pInternalSpherePoints, double pThickness)
 {
 	if (isInit == true)
 	{
@@ -31,6 +31,8 @@ void HipPelvisLinerImplant::init(const Point& pTopPoint, const std::vector<Point
 		throw ImplantExceptionCode::CAN_NOT_FIT_SPHERE_TO_CUP_POINTS;
 	}
 
+	mRadius += pThickness;
+
 	isInit = true;
 }
 
@@ -44,7 +46,7 @@ Point HipPelvisLinerImplant::getCenterOfRotationImplant() const
 	return mCenter;
 }
 
-double HipPelvisLinerImplant::getInternalRadius() const
+double HipPelvisLinerImplant::getExternalRadius() const
 {
 	return mRadius;
 }

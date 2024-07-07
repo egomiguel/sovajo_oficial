@@ -746,11 +746,10 @@ std::vector<cv::Point3d> LeastSquaresICP::GetCorrespondence(const pcl::KdTreeFLA
 }
 */
 
-double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)
-{
-    vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
-    implicitPolyDataDistance->SetInput(surface);
 
+double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkImplicitPolyDataDistance>& implicitPolyDataDistance, cv::Mat& data, int iterations)
+{
+    
     std::vector<cv::Point3d> target = GetCorrespondence(implicitPolyDataDistance, data);
     double angleX, angleY, angleZ;
 
@@ -848,31 +847,31 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkPolyData>& surface
         target = GetCorrespondence(implicitPolyDataDistance, data);
     }
 
-    /* cv::Mat translation(3, 1, CV_64F);
-     translation.at<double>(0, 0) = data.at<double>(0, 0);
-     translation.at<double>(1, 0) = data.at<double>(1, 0);
-     translation.at<double>(2, 0) = data.at<double>(2, 0);
+     //cv::Mat translation(3, 1, CV_64F);
+     //translation.at<double>(0, 0) = data.at<double>(0, 0);
+     //translation.at<double>(1, 0) = data.at<double>(1, 0);
+     //translation.at<double>(2, 0) = data.at<double>(2, 0);
 
-     for (int i = 0; i < source.size(); i++)
-     {
-         cv::Mat transformPoint(3, 1, CV_64F);
+     //for (int i = 0; i < source.size(); i++)
+     //{
+     //    cv::Mat transformPoint(3, 1, CV_64F);
 
-         transformPoint.at<double>(0, 0) = source[i].x;
-         transformPoint.at<double>(1, 0) = source[i].y;
-         transformPoint.at<double>(2, 0) = source[i].z;
+     //    transformPoint.at<double>(0, 0) = source[i].x;
+     //    transformPoint.at<double>(1, 0) = source[i].y;
+     //    transformPoint.at<double>(2, 0) = source[i].z;
 
-         cv::Mat result = (Rx(data.at<double>(3, 0)) * Ry(data.at<double>(4, 0)) * Rz(data.at<double>(5, 0))) * transformPoint + translation;
+     //    cv::Mat result = (Rx(data.at<double>(3, 0)) * Ry(data.at<double>(4, 0)) * Rz(data.at<double>(5, 0))) * transformPoint + translation;
 
-         cv::Point3d myLastPoint = cv::Point3d(result);
+     //    cv::Point3d myLastPoint = cv::Point3d(result);
 
-         double pnt[3];
+     //    double pnt[3];
 
-         pnt[0] = myLastPoint.x;
-         pnt[1] = myLastPoint.y;
-         pnt[2] = myLastPoint.z;
+     //    pnt[0] = myLastPoint.x;
+     //    pnt[1] = myLastPoint.y;
+     //    pnt[2] = myLastPoint.z;
 
-         ClosestPoint(surface, pnt);
-     }*/
+     //    ClosestPoint(surface, pnt);
+     //}
 
     data.at<double>(0, 0) = dataTemp.at<double>(0, 0);
     data.at<double>(1, 0) = dataTemp.at<double>(1, 0);
@@ -883,6 +882,7 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkPolyData>& surface
 
     return bestError;
 }
+
 
 double LeastSquaresICP::LeastSquaresTest(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)
 {
@@ -1396,9 +1396,12 @@ double LeastSquaresICP::LeastSquaresRandomInit(const vtkSmartPointer<vtkPolyData
     dataInit.at<double>(4, 0) = data.at<double>(4, 0);
     dataInit.at<double>(5, 0) = data.at<double>(5, 0);
 
-    double error = LeastSquares(surface, data, iterations);
+	vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
+	implicitPolyDataDistance->SetInput(surface);
 
-    for (int i = 0; i < 10; i++)
+	double error = LeastSquares(implicitPolyDataDistance, data, iterations);
+
+    for (int i = 0; i < 100; i++)
     {
 
         dataTemp.at<double>(0, 0) = dataInit.at<double>(0, 0);
@@ -1418,7 +1421,7 @@ double LeastSquaresICP::LeastSquaresRandomInit(const vtkSmartPointer<vtkPolyData
 
         dataTemp += randomValues;
 
-        double errorTemp = LeastSquares(surface, dataTemp, iterations);
+		double errorTemp = LeastSquares(implicitPolyDataDistance, dataTemp, iterations);
 
         if (errorTemp < error)
         {

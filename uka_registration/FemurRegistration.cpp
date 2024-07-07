@@ -12,6 +12,7 @@
 //#include <pcl/exceptions.h>
 #include "LeastSquaresICP.hpp"
 #include "LeastSquaresPoly.hpp"
+#include "vtkImplicitPolyDataDistance.h"
 //#include "CoherentPoint/CoherentPointDrift.hpp"
 
 using namespace UKA::REGISTRATION;
@@ -72,7 +73,9 @@ bool FemurRegistration::MakeRegistration(const std::vector<itk::Point<double, 3>
     }
     else
     {
-        error = myICP.LeastSquares(Registration::poly, data);
+		vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
+		implicitPolyDataDistance->SetInput(Registration::poly);
+        error = myICP.LeastSquares(implicitPolyDataDistance, data);
     }
 
     Registration::MakeResult(data, error);

@@ -19,7 +19,7 @@ Knee::Knee()
     isInit = false;
 }
 
-void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point& femurKneeCenter, const Point& lateralEpicondyle,
+void Knee::init(const Point& hipCenter, const Point& femurKneeCenter, const Point& lateralEpicondyle,
     const Point& medialEpicondyle, const Point& tibiaKneeCenter, const Point& tibiaTubercle, const Point& pclCenter, 
     const Point& ankleCenter, const vtkSmartPointer<vtkPolyData> femurPoly, 
     const vtkSmartPointer<vtkPolyData> tibiaPoly, KneeSideEnum pSide, SurgerySideEnum pSurgery, bool findRefPoints, double cartilage, uint8_t imageValueMax)
@@ -60,13 +60,16 @@ void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point
     this->tibiaPoly = CleanTibia->GetOutput();
     this->femurCartilage = cartilage;
     this->tibiaCartilage = cartilage;
-    this->anteriorCortex = anteriorCortex;
     this->tibiaKneeCenter = tibiaKneeCenter;
     this->tibiaTubercle = tibiaTubercle;
 	this->mSurgerySize = pSurgery;
 
     Point forceLineVector = hipCenter - femurKneeCenter;
+	forceLineVector.normalice();
     Point TEA = lateralEpicondyle - medialEpicondylePerp;
+	TEA.normalice();
+
+	this->cortexRef = femurKneeCenter + (ImplantTools::getDistanceBetweenPoints(lateralEpicondyle, medialEpicondyle)/2) * forceLineVector;
 
     if (pSide == KneeSideEnum::KRight)
     {
@@ -134,7 +137,7 @@ void Knee::findFemurCondylesUsingDistalPoints()
     coronal.init(femurDirectVectorAP, femurKneeCenter);
     coronal.reverse();
 
-    transverse.init(forceLine, anteriorCortex);
+    transverse.init(forceLine, cortexRef);
     transverse.reverseByPoint(hipCenter, false);
 
     double distalLatDist = -1, distalMedDist = -1, posteriorLatDist = -1, posteriorMedDist = -1, temp;
@@ -324,9 +327,9 @@ Point Knee::getNormalVectorTibiaPlane() const
     return directVector / sqrt(squareNorm);
 }
 
-Point Knee::getAnteriorCortex() const
+Point Knee::getCortexRef() const
 {
-    return anteriorCortex;
+    return cortexRef;
 }
 
 //Point Knee::getMoveCondyle1() const
@@ -1125,8 +1128,6 @@ Point Knee::getMoveFemurKneeCenter(const FemurImplantInfo& pImplant) const
     femurLineDirectVector.normalice();
 
     ///////////////////////////////////////////////////////////////////
-    Plane helpPlane;
-    helpPlane.init(femurLineDirectVector, anteriorCortex);
 
     if (mSurgerySize == SurgerySideEnum::KMedial)
     {
@@ -1195,7 +1196,7 @@ void Knee::getDistalInferiorCondyle(Point& lateralPoint, Point& medialPoint)
     Plane coronal;
     Plane sagital;
 
-    transverseCoronal.init(directVectorAxis, anteriorCortex);
+    transverseCoronal.init(directVectorAxis, cortexRef);
     sagital.init(directVectorTEA, femurKneeCenter);
     coronal.init(vectorAP, medialEpicondyle);
     sagitalLateral.init(directVectorTEA, lateralCondyle);
@@ -1430,36 +1431,40 @@ Point Knee::getComputeAnkleCenter(const Point& lateralMalleolus, const Point& me
 
 double Knee::getEstimateFemurImplantsDimensions() const
 {
-    Plane transverse, coronal;
-    Point vectorAxis = hipCenter - femurKneeCenter;
-    Point vectorML = lateralEpicondyle - medialEpicondylePerp;
-    Point vectorAP = vectorAxis.cross(vectorML);
-    double distance;
-    double implantAverage = 5.0;
+ //   Plane transverse, coronal;
+ //   Point vectorAxis = hipCenter - femurKneeCenter;
+ //   Point vectorML = lateralEpicondyle - medialEpicondylePerp;
+ //   Point vectorAP = vectorAxis.cross(vectorML);
+ //   double distance;
+ //   //double implantAverage = 5.0;
 
-    coronal.init(femurDirectVectorAP, femurKneeCenter);
-    coronal.movePlane(lateralCondyle);
+ //   coronal.init(femurDirectVectorAP, femurKneeCenter);
+ //   coronal.movePlane(lateralCondyle);
+	//double epicondyleRadiusDistance = ImplantTools::getDistanceBetweenPoints(lateralEpicondyle, lateralCondyle);
 
     if (goodSide == LateralSide)
     {
-        transverse.init(vectorAxis, lateralCondyle);
-        Point cortexProy = transverse.getProjectionPoint(anteriorCortex);
-        Point vectorAPProy = transverse.getProjectionVector(vectorAP);
-        Line lateralAP(vectorAPProy, lateralCondyle);
-        Point lastCortexProy = lateralAP.getProjectPoint(cortexProy);
-        distance = Line::getDistanceBetweenPoints(lastCortexProy, lateralCondyle);// -implantAverage;
+        //transverse.init(vectorAxis, lateralCondyle);
+        //Point cortexProy = transverse.getProjectionPoint(anteriorCortex);
+        //Point vectorAPProy = transverse.getProjectionVector(vectorAP);
+        //Line lateralAP(vectorAPProy, lateralCondyle);
+        //Point lastCortexProy = lateralAP.getProjectPoint(cortexProy);
+        //distance = Line::getDistanceBetweenPoints(lastCortexProy, lateralCondyle);// -implantAverage;
+		return 2 * ImplantTools::getDistanceBetweenPoints(lateralEpicondyle, lateralCondyle);
     }
     else
     {
-        transverse.init(vectorAxis, medialCondyle);
-        Point cortexProy = transverse.getProjectionPoint(anteriorCortex);
-        Point vectorAPProy = transverse.getProjectionVector(vectorAP);
-        Line medialAP(vectorAPProy, medialCondyle);
-        Point lastCortexProy = medialAP.getProjectPoint(cortexProy);
-        distance = Line::getDistanceBetweenPoints(lastCortexProy, medialCondyle) - abs(coronal.eval(medialCondyle)); //-implantAverage
-    }
+        //transverse.init(vectorAxis, medialCondyle);
+        //Point cortexProy = transverse.getProjectionPoint(anteriorCortex);
+        //Point vectorAPProy = transverse.getProjectionVector(vectorAP);
+        //Line medialAP(vectorAPProy, medialCondyle);
+        //Point lastCortexProy = medialAP.getProjectPoint(cortexProy);
+        //distance = Line::getDistanceBetweenPoints(lastCortexProy, medialCondyle) - abs(coronal.eval(medialCondyle)); //-implantAverage
+		
+		return 2 * ImplantTools::getDistanceBetweenPoints(medialEpicondyle, medialCondyle);
+	}
 
-    return distance;
+    //return distance;
 }
 
 /*
