@@ -756,7 +756,7 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkImplicitPolyDataDi
     bool finish = false;
 
     double lambda = 0.01;
-    double currentError, beforeError = -1, totalError;
+	double currentError, beforeError = -1;// , totalError;
     double maxLambda = 1000.0;
 
     int batch = 3;
@@ -781,11 +781,11 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkImplicitPolyDataDi
 
             GaussNewton resultInfo = GetSystem(target, data, posA, posB, lambda);
             currentError = resultInfo.localError;
-			totalError = sqrt(resultInfo.totalError / tSize);
+			//totalError = sqrt(resultInfo.totalError / tSize);
 
-			if (bestError < 0 || totalError < bestError)
+			if (bestError < 0 || currentError < bestError)
 			{
-				bestError = totalError;
+				bestError = currentError;
 
 				dataTemp.at<double>(0, 0) = data.at<double>(0, 0);
 				dataTemp.at<double>(1, 0) = data.at<double>(1, 0);
@@ -1401,7 +1401,7 @@ double LeastSquaresICP::LeastSquaresRandomInit(const vtkSmartPointer<vtkPolyData
 
 	double error = LeastSquares(implicitPolyDataDistance, data, iterations);
 
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 30; i++)
     {
 
         dataTemp.at<double>(0, 0) = dataInit.at<double>(0, 0);

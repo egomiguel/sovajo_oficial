@@ -144,6 +144,11 @@ SpineSegmentation::SpineSegmentation(ImageType::Pointer pSpine)
     mSpine = pSpine;
 }
 
+/*
+	The highest correlation is sought between the series of points in the center of the column. 
+	This correlation defines the size of a sliding window within which the pixel with the lowest value is chosen.
+*/
+
 std::vector<SpineSegmentation::Plane> SpineSegmentation::getIntervertebralPlanes(const std::vector<ImageType::PointType>& centerPhysicalPoints, const ImageType::RegionType& region) const
 {
 	std::vector<SpineSegmentation::Plane> result;
@@ -159,7 +164,12 @@ std::vector<SpineSegmentation::Plane> SpineSegmentation::getIntervertebralPlanes
 			values.push_back(getPixel(mSpine, indexPoint[0], indexPoint[1], indexPoint[2]));
 
 			values.push_back(getPixel(mSpine, indexPoint[0] + 1, indexPoint[1], indexPoint[2]));
+			values.push_back(getPixel(mSpine, indexPoint[0] + 1, indexPoint[1] + 1, indexPoint[2]));
+			values.push_back(getPixel(mSpine, indexPoint[0] + 1, indexPoint[1] - 1, indexPoint[2]));
+
 			values.push_back(getPixel(mSpine, indexPoint[0] - 1, indexPoint[1], indexPoint[2]));
+			values.push_back(getPixel(mSpine, indexPoint[0] - 1, indexPoint[1] + 1, indexPoint[2]));
+			values.push_back(getPixel(mSpine, indexPoint[0] - 1, indexPoint[1] - 1, indexPoint[2]));
 
 			values.push_back(getPixel(mSpine, indexPoint[0], indexPoint[1] + 1, indexPoint[2]));
 			values.push_back(getPixel(mSpine, indexPoint[0], indexPoint[1] - 1, indexPoint[2]));
@@ -169,7 +179,6 @@ std::vector<SpineSegmentation::Plane> SpineSegmentation::getIntervertebralPlanes
 
 			double avg = calculateMean(values);
 			pixels.push_back(avg);
-
 		}
 		else
 		{
@@ -197,6 +206,7 @@ std::vector<SpineSegmentation::Plane> SpineSegmentation::getIntervertebralPlanes
 	{
 		return result;
 	}
+	std::cout << "Size: " << pixels.size() << ", Correlation: " << bestCorrlag << std::endl;
 
 	int generalMin = getLowerValueAsPos(pixels, 0, pixels.size() - 1);
 	std::set<int> allPos;
