@@ -4231,6 +4231,11 @@ void Resgistration_General_test()
 	std::cout << error << std::endl;
 }
 
+double getDistancePoints(const cv::Point3d& A, const cv::Point3d& B)
+{
+	auto diff = B - A;
+	return sqrt(diff.dot(diff));
+}
 
 int main()
 {
@@ -4401,6 +4406,26 @@ int main()
 		allPoints.push_back(physicalPoint);
 	}
 	*/
+
+	std::vector<cv::Point3d> morePoints;
+	/*
+	for (int i=0; i < listaPoints.size()-1; i++)
+	{
+		auto currentPoint = listaPoints[i];
+		auto nextPoint = listaPoints[i + 1];
+		auto vector = nextPoint - currentPoint;
+		vector = vector / sqrt(vector.dot(vector));
+		morePoints.push_back(currentPoint);
+		auto tempPoint = currentPoint;
+		while (getDistancePoints(tempPoint, nextPoint) > 1.3)
+		{
+			tempPoint = tempPoint + vector;
+			morePoints.push_back(tempPoint);
+		}
+	}
+	morePoints.push_back(listaPoints[listaPoints.size() - 1]);*/
+
+	std::cout << "Antes: " << listaPoints.size() << ", Despues: " << morePoints.size() << std::endl;
 
 	for (auto& tempPoint: listaPoints)
 	{

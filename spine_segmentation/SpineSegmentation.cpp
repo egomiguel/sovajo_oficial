@@ -138,6 +138,12 @@ inline cv::Mat GetRotateLineToX_Spine(const cv::Point3d& vector)
 	return rotation;
 }
 
+inline double getDistancePoints(const cv::Point3d& A, const cv::Point3d& B)
+{
+	auto diff = B - A;
+	return sqrt(diff.dot(diff));
+}
+
 
 SpineSegmentation::SpineSegmentation(ImageType::Pointer pSpine)
 {
@@ -155,7 +161,36 @@ std::vector<SpineSegmentation::Plane> SpineSegmentation::getIntervertebralPlanes
 
 	std::vector<double> pixels;
 
-	for (auto& item : centerPhysicalPoints)
+	std::vector<ImageType::PointType> morePoints;
+
+	for (int i = 0; i < centerPhysicalPoints.size() - 1; i++)
+	{
+		auto currentPoint = cv::Point3d(centerPhysicalPoints[i][0], centerPhysicalPoints[i][1], centerPhysicalPoints[i][2]);
+		auto nextPoint = cv::Point3d(centerPhysicalPoints[i + 1][0], centerPhysicalPoints[i + 1][1], centerPhysicalPoints[i + 1][2]);
+		auto vector = nextPoint - currentPoint;
+		vector = vector / sqrt(vector.dot(vector));
+
+		ImageType::PointType physicalPoint1;
+		physicalPoint1[0] = currentPoint.x;
+		physicalPoint1[1] = currentPoint.y;
+		physicalPoint1[2] = currentPoint.z;
+		morePoints.push_back(physicalPoint1);
+
+		auto tempPoint = currentPoint;
+		while (getDistancePoints(tempPoint, nextPoint) > 1.3)
+		{
+			tempPoint = tempPoint + vector;
+			ImageType::PointType physicalPoint2;
+			physicalPoint2[0] = tempPoint.x;
+			physicalPoint2[1] = tempPoint.y;
+			physicalPoint2[2] = tempPoint.z;
+			morePoints.push_back(physicalPoint2);
+		}
+	}
+
+	morePoints.push_back(centerPhysicalPoints[centerPhysicalPoints.size() - 1]);
+
+	for (auto& item : morePoints)
 	{
 		ImageType::IndexType indexPoint;
 		if (mSpine->TransformPhysicalPointToIndex(item, indexPoint))
@@ -206,7 +241,7 @@ std::vector<SpineSegmentation::Plane> SpineSegmentation::getIntervertebralPlanes
 	{
 		return result;
 	}
-	std::cout << "Size: " << pixels.size() << ", Correlation: " << bestCorrlag << std::endl;
+	//std::cout << "Size: " << pixels.size() << ", Correlation: " << bestCorrlag << std::endl;
 
 	int generalMin = getLowerValueAsPos(pixels, 0, pixels.size() - 1);
 	std::set<int> allPos;
@@ -320,7 +355,7 @@ std::vector<SpineSegmentation::Plane> SpineSegmentation::getIntervertebralPlanes
 
 	for (; it1 != it2; ++it1)
 	{
-		auto temp = centerPhysicalPoints[*it1];
+		auto temp = morePoints[*it1];
 		centers.push_back(cv::Point3d(temp[0], temp[1], temp[2]));
 	}
 
