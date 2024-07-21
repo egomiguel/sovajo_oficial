@@ -1319,6 +1319,35 @@ void MatchEasy()
 	//TestVTK::show(myKnee.GetFemurPoly(), testRef);
 }
 
+void MatchTibiaPKA()
+{
+	std::string folder = "D:\\sovajo\\Cases_Plan_PKA\\UKA-data";
+	/*
+		Here I am creating a right knee from a JSON file. The surgical side is medial.
+	*/
+	UKA::IMPLANTS::Knee myKnee = CreateKneeFromFile_NumbersPKA(folder, UKA::IMPLANTS::KRight, UKA::IMPLANTS::KMedial);
+	UKA::IMPLANTS::TibiaImplant tibiaImplant;
+
+	auto tibiaModel = TestVTK::ReadPolyDataSTL("D:\\sovajo\\Implants\\pka\\tibia.STL");
+	UKA::IMPLANTS::Point apLinePclPoint(10.4801, 9.06646, 0.934849);
+	UKA::IMPLANTS::Point apLineTuberPoint(10.2438, -37.5031, 0.951554);
+	UKA::IMPLANTS::Point sidePoint(-14.1021, -11.1526, 1.1545);
+	UKA::IMPLANTS::Point exteriorPoint(-14.5152, -10.8294, 4.41175);
+	UKA::IMPLANTS::TibiaImplantInfo tibiaInfo;
+	tibiaInfo.tibiaThickness = 2.0;
+
+	tibiaImplant.init(apLinePclPoint, apLineTuberPoint, sidePoint, exteriorPoint, tibiaInfo);
+
+	UKA::IMPLANTS::TibiaImplantMatch tibiaImplantMatch;
+	tibiaImplantMatch.init(tibiaImplant, myKnee);
+
+	vtkSmartPointer<vtkPolyData> newImplantTibia = TestVTK::TransformPoly(tibiaModel, tibiaImplantMatch.GetRotationMatrix(), tibiaImplantMatch.GetTranslationMatrix());
+	
+	std::vector<vtkSmartPointer<vtkPolyData>> polyList;
+	polyList.push_back(newImplantTibia);
+	TestVTK::show(myKnee.GetTibiaPoly(), polyList);
+}
+
 void MatchEasyPKA()
 {
 	// Error 4 is right
@@ -4241,7 +4270,7 @@ int main()
 {
 	std::string casePlan = "D:\\sovajo\\Cases_Plan_TKA\\case1_left";
 	Knee myKnee;
-	/*
+	
 	UKA::IMPLANTS::Point apLinePclPoint(10.4801, 9.06646, 0.934849);
 	UKA::IMPLANTS::Point apLineTuberPoint(10.2438, -37.5031, 0.951554);
 	UKA::IMPLANTS::Point sidePoint(-0.1021, -11.1526, 1.1545);
@@ -4267,7 +4296,7 @@ int main()
 	auto spacerImplant3D = TestVTK::ReadPolyDataSTL("D:\\sovajo\\Implants\\pka\\Tibial_spacer.STL");
 
 	auto spacerTransform = TestVTK::TransformPoly(spacerImplant3D, tibiaSpacerMatch.GetRotationMatrix(), tibiaSpacerMatch.GetTranslationMatrix());
-
+	/*
 	vtkNew<vtkAppendPolyData> appendFilter;
 	appendFilter->AddInputData(tibiaImplant3D);
 	appendFilter->AddInputData(spacerTransform);
@@ -4426,7 +4455,7 @@ int main()
 	morePoints.push_back(listaPoints[listaPoints.size() - 1]);*/
 
 	std::cout << "Antes: " << listaPoints.size() << ", Despues: " << morePoints.size() << std::endl;
-
+	/*
 	for (auto& tempPoint: listaPoints)
 	{
 		ImageType::PointType physicalPoint;
@@ -4445,7 +4474,7 @@ int main()
 	{
 		std::cout << item.center << std::endl;
 	}
-	
+	*/
 	//std::vector<SpineSegmentation::Plane> getIntervertebralPlanes(const std::vector<ImageType::PointType>& physicalPoints)
 
 
@@ -4454,7 +4483,7 @@ int main()
 
 	//std::cout <<"Result: "  << result << " Error: " << error << std::endl;
 
-	//MatchEasyPKA();
+	MatchTibiaPKA();
 	//RegistrationScale();
 	//Resgistration_General_test();
 	//PelvisImplantMatch();

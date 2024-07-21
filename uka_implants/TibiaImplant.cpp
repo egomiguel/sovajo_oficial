@@ -13,14 +13,14 @@ TibiaImplant::TibiaImplant()
 	isInit = false;
 }
 
-void TibiaImplant::init(const Point& apLinePclPoint, const Point& apLineTuberPoint, const Point& plateauRefPointUp, const Point& exteriorPointDown, const TibiaImplantInfo& pImplantInfo)
+void TibiaImplant::init(const Point& apLinePclPoint, const Point& apLineTuberPoint, const Point& mostFarPointUp, const Point& exteriorPointDown, const TibiaImplantInfo& pImplantInfo)
 {
     if (isInit == true)
     {
         throw ImplantExceptionCode::ALREADY_INITIALIZED_TIBIA_IMPLANT;
     }
     this->mImplantInfo = pImplantInfo;
-    tibiaPlane.init(apLinePclPoint, apLineTuberPoint, plateauRefPointUp);
+    tibiaPlane.init(apLinePclPoint, apLineTuberPoint, mostFarPointUp);
 	centralPointUp = (apLinePclPoint + apLineTuberPoint) / 2;
 
 	Point newNormal = tibiaPlane.getProjectionPoint(exteriorPointDown) - exteriorPointDown;
@@ -28,10 +28,10 @@ void TibiaImplant::init(const Point& apLinePclPoint, const Point& apLineTuberPoi
 	tibiaPlane.movePlane(exteriorPointDown);
 	centralPoint = tibiaPlane.getProjectionPoint(centralPointUp);
 
-    this->exteriorPoint = plateauRefPointUp; // This refers to exterior up point (that is side point on plateau area)
+    this->exteriorPoint = mostFarPointUp; // This refers to exterior up point
 	this->pclPoint = tibiaPlane.getProjectionPoint(apLinePclPoint);
 	this->tuberPoint = tibiaPlane.getProjectionPoint(apLineTuberPoint);
-	this->plateauRefPointDown = tibiaPlane.getProjectionPoint(plateauRefPointUp);
+	this->plateauRefPointDown = (tibiaPlane.getProjectionPoint(mostFarPointUp) + centralPoint) / 2;
     
     isInit = true;
 }
@@ -118,11 +118,12 @@ Point TibiaImplant::getPlateauRefPointDown() const
 
 Point TibiaImplant::getExtremeSidePoint() const
 {
-	Line refLine = Line::makeLineWithPoints(pclPoint, tuberPoint);
+	/*Line refLine = Line::makeLineWithPoints(pclPoint, tuberPoint);
 	double distance = refLine.getDistanceFromPoint(plateauRefPointDown);
 	Point tempPoint = refLine.getProjectPoint(plateauRefPointDown);
 	Point tempVector = plateauRefPointDown - tempPoint;
 	tempVector.normalice();
 	Point result = plateauRefPointDown + distance * tempVector;
-	return result;
+	return result;*/
+	return tibiaPlane.getProjectionPoint(exteriorPoint);
 }

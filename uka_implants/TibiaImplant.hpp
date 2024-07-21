@@ -19,7 +19,7 @@ namespace UKA
 
 			TibiaImplant(const TibiaImplant& pImplant);
 
-			void init(const Point& apLinePclPoint, const Point& apLineTuberPoint, const Point& plateauRefPointUp, const Point& exteriorPointDown, const TibiaImplantInfo& pImplantInfo);
+			void init(const Point& apLinePclPoint, const Point& apLineTuberPoint, const Point& mostFarPointUp, const Point& exteriorPointDown, const TibiaImplantInfo& pImplantInfo);
 
 			Plane getTibiaPlane() const;
 
