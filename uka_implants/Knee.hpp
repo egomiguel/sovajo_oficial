@@ -35,7 +35,8 @@ namespace UKA
 			void init(const Point& hipCenter, const Point& femurKneeCenter, const Point& lateralEpicondyle,
 				const Point& medialEpicondyle, const Point& tibiaKneeCenter, const Point& tibiaTubercle, const Point& pclCenter,
 				const Point& ankleCenter, const vtkSmartPointer<vtkPolyData> femurPoly,
-				const vtkSmartPointer<vtkPolyData> tibiaPoly, KneeSideEnum pSide, SurgerySideEnum pSurgery, bool findRefPoints = true, double cartilage = 2.0, uint8_t imageValueMax = 1);
+				const vtkSmartPointer<vtkPolyData> tibiaPoly, KneeSideEnum pSide, SurgerySideEnum pSurgery, 
+				bool findRefPoints = true, double cartilage = 2.0, uint8_t imageValueMax = 1);
 
 			///////////////////////////////////////////////////
 			/*

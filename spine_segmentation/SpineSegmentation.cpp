@@ -105,6 +105,7 @@ inline double getAngleBetweenVectors_Spine(const cv::Point3d& a, const cv::Point
 	}
 }
 
+
 inline cv::Mat getRotateMatrix_Spine(const cv::Point3d& axis, double angle)
 {
 	cv::Mat rotationMatrix(3, 3, CV_64F);
@@ -148,6 +149,65 @@ inline double getDistancePoints(const cv::Point3d& A, const cv::Point3d& B)
 SpineSegmentation::SpineSegmentation(ImageType::Pointer pSpine)
 {
     mSpine = pSpine;
+}
+
+cv::Point3d SpineSegmentation::getFixNormal(const cv::Point3d& V1, const cv::Point3d& V2, bool fixFirst) const
+{
+	double degreeThreshold = 19.;
+	double angle_rad = getAngleBetweenVectors_Spine(V1, V2);
+	double angleDegree = angle_rad * 180. / 3.14159;
+	if (180. - angleDegree > degreeThreshold)
+	{
+		double diff = (180. - angleDegree) - degreeThreshold;
+		diff = diff * 3.14159 / 180.;
+		cv::Point3d axis, finalNormal;
+		if (fixFirst == true)
+		{
+			axis = V2.cross(V1);
+		}
+		else
+		{
+			axis = V1.cross(V2);
+		}
+
+		auto rotation = getRotateMatrix_Spine(axis, diff);
+
+		if (fixFirst == true)
+		{
+			cv::Mat pointMat(3, 1, CV_64F);
+			pointMat.at <double>(0, 0) = V1.x;
+			pointMat.at <double>(1, 0) = V1.y;
+			pointMat.at <double>(2, 0) = V1.z;
+
+			cv::Mat rotateV1 = rotation * pointMat;
+			cv::Point3d V1_temp = cv::Point3d(rotateV1);
+			V1_temp = V1_temp / sqrt(V1_temp.dot(V1_temp));
+			return V1_temp;
+		}
+		else
+		{
+			cv::Mat pointMat(3, 1, CV_64F);
+			pointMat.at <double>(0, 0) = V2.x;
+			pointMat.at <double>(1, 0) = V2.y;
+			pointMat.at <double>(2, 0) = V2.z;
+
+			cv::Mat rotateV2 = rotation * pointMat;
+			cv::Point3d V2_temp = cv::Point3d(rotateV2);
+			V2_temp = V2_temp / sqrt(V2_temp.dot(V2_temp));
+			return V2_temp;
+		}
+	}
+	else
+	{
+		if (fixFirst == true)
+		{
+			return V1;
+		}
+		else
+		{
+			return V2;
+		}
+	}
 }
 
 /*
@@ -201,16 +261,36 @@ std::vector<SpineSegmentation::Plane> SpineSegmentation::getIntervertebralPlanes
 			values.push_back(getPixel(mSpine, indexPoint[0] + 1, indexPoint[1], indexPoint[2]));
 			values.push_back(getPixel(mSpine, indexPoint[0] + 1, indexPoint[1] + 1, indexPoint[2]));
 			values.push_back(getPixel(mSpine, indexPoint[0] + 1, indexPoint[1] - 1, indexPoint[2]));
+			values.push_back(getPixel(mSpine, indexPoint[0] + 1, indexPoint[1] + 2, indexPoint[2]));
+			values.push_back(getPixel(mSpine, indexPoint[0] + 1, indexPoint[1] - 2, indexPoint[2]));
+
+			values.push_back(getPixel(mSpine, indexPoint[0] + 2, indexPoint[1], indexPoint[2]));
+			values.push_back(getPixel(mSpine, indexPoint[0] + 2, indexPoint[1] + 1, indexPoint[2]));
+			values.push_back(getPixel(mSpine, indexPoint[0] + 2, indexPoint[1] - 1, indexPoint[2]));
+			values.push_back(getPixel(mSpine, indexPoint[0] + 2, indexPoint[1] + 2, indexPoint[2]));
+			values.push_back(getPixel(mSpine, indexPoint[0] + 2, indexPoint[1] - 2, indexPoint[2]));
 
 			values.push_back(getPixel(mSpine, indexPoint[0] - 1, indexPoint[1], indexPoint[2]));
 			values.push_back(getPixel(mSpine, indexPoint[0] - 1, indexPoint[1] + 1, indexPoint[2]));
 			values.push_back(getPixel(mSpine, indexPoint[0] - 1, indexPoint[1] - 1, indexPoint[2]));
+			values.push_back(getPixel(mSpine, indexPoint[0] - 1, indexPoint[1] + 2, indexPoint[2]));
+			values.push_back(getPixel(mSpine, indexPoint[0] - 1, indexPoint[1] - 2, indexPoint[2]));
+
+			values.push_back(getPixel(mSpine, indexPoint[0] - 2, indexPoint[1], indexPoint[2]));
+			values.push_back(getPixel(mSpine, indexPoint[0] - 2, indexPoint[1] + 1, indexPoint[2]));
+			values.push_back(getPixel(mSpine, indexPoint[0] - 2, indexPoint[1] - 1, indexPoint[2]));
+			values.push_back(getPixel(mSpine, indexPoint[0] - 2, indexPoint[1] + 2, indexPoint[2]));
+			values.push_back(getPixel(mSpine, indexPoint[0] - 2, indexPoint[1] - 2, indexPoint[2]));
 
 			values.push_back(getPixel(mSpine, indexPoint[0], indexPoint[1] + 1, indexPoint[2]));
 			values.push_back(getPixel(mSpine, indexPoint[0], indexPoint[1] - 1, indexPoint[2]));
+			values.push_back(getPixel(mSpine, indexPoint[0], indexPoint[1] + 2, indexPoint[2]));
+			values.push_back(getPixel(mSpine, indexPoint[0], indexPoint[1] - 2, indexPoint[2]));
 
 			values.push_back(getPixel(mSpine, indexPoint[0], indexPoint[1], indexPoint[2] + 1));
 			values.push_back(getPixel(mSpine, indexPoint[0], indexPoint[1], indexPoint[2] - 1));
+			values.push_back(getPixel(mSpine, indexPoint[0], indexPoint[1], indexPoint[2] + 2));
+			values.push_back(getPixel(mSpine, indexPoint[0], indexPoint[1], indexPoint[2] - 2));
 
 			double avg = calculateMean(values);
 			pixels.push_back(avg);
@@ -251,6 +331,12 @@ std::vector<SpineSegmentation::Plane> SpineSegmentation::getIntervertebralPlanes
 
 	double lagOffset = bestCorrlag / 10;
 
+	/*
+		Searching for the lowest values ​​from the general minimum backwards and using the correlation 
+		as the search size. The correlation is shifted by (correlation/2) and from there a window of 
+		size equal to the correlation is searched.
+	*/
+
 	while (tempPos > 0)
 	{
 		int tEnd = tempPos - (bestCorrlag / 2);
@@ -271,6 +357,12 @@ std::vector<SpineSegmentation::Plane> SpineSegmentation::getIntervertebralPlanes
 		tempPos = getLowerValueAsPos(pixels, tBegin, tEnd);
 		allPos.insert(tempPos);
 	}
+
+	/*
+		Searching for the lowest values ​​from the general minimum forwards and using the correlation
+		as the search size. The correlation is shifted by (correlation/2) and from there a window of
+		size equal to the correlation is searched.
+	*/
 
 	tempPos = generalMin;
 
@@ -357,22 +449,46 @@ std::vector<SpineSegmentation::Plane> SpineSegmentation::getIntervertebralPlanes
 	{
 		auto temp = morePoints[*it1];
 		centers.push_back(cv::Point3d(temp[0], temp[1], temp[2]));
+		/*
+		ImageType::IndexType indexPoint;
+		if (mSpine->TransformPhysicalPointToIndex(temp, indexPoint))
+		{
+			std::cout << "Small: " << getPixel(mSpine, indexPoint[0], indexPoint[1], indexPoint[2]) << std::endl;
+		}
+		*/
 	}
+
+	cv::Point3d beforeNormal;
 
 	for (int i = 0; i < centers.size(); i++)
 	{
-		cv::Point3d normalTemp;
-		
+		cv::Point3d normalTemp, V1, V2;
+
 		if (i == 0)
 		{
-			normalTemp = centers[i] - centers[i + 1];
+			V1 = centers[i] - centers[i + 1];
+			V1 = V1 / sqrt(V1.dot(V1));
+
+			normalTemp = V1;
+			//std::cout << normalTemp << std::endl;
+			beforeNormal = normalTemp;
 		}
 		else
 		{
-			normalTemp = centers[i - 1] - centers[i];
+			if (i < centers.size() - 1)
+			{
+				V2 = centers[i + 1] - centers[i];
+				normalTemp = -getFixNormal(beforeNormal, V2, false);
+				normalTemp = normalTemp / sqrt(normalTemp.dot(normalTemp));
+				//std::cout << normalTemp << std::endl;
+				beforeNormal = normalTemp;
+			}
+			else
+			{
+				normalTemp = beforeNormal;
+			}
 		}
 		
-		normalTemp = normalTemp / sqrt(normalTemp.dot(normalTemp));
 
 		itk::Point<double, 3> normal;
 		itk::Point<double, 3> center;
@@ -391,6 +507,22 @@ std::vector<SpineSegmentation::Plane> SpineSegmentation::getIntervertebralPlanes
 
 		result.push_back(obj);
 	}
+
+	/*
+	for (int i = 0; i < result.size() - 1; i++)
+	{
+		auto n1 = result[i].normal;
+		auto n2 = result[i + 1].normal;
+
+		cv::Point3d V1 = cv::Point3d(n1[0], n1[1], n1[2]);
+		cv::Point3d V2 = -cv::Point3d(n2[0], n2[1], n2[2]);
+
+
+		double angle = getAngleBetweenVectors_Spine(V1, V2);
+		std::cout <<V1 << "; " <<V2 << " Angle: " << angle * 180 / 3.14 << std::endl;
+		
+	}
+	*/
 	
 	return result;
 }
@@ -535,6 +667,32 @@ int SpineSegmentation::getLowerValueAsPos(const std::vector<double>& values, int
 		else
 		{
 			if (values[i] < values[pos])
+			{
+				pos = i;
+			}
+		}
+	}
+
+	return pos;
+}
+
+int SpineSegmentation::getGreaterValueAsPos(const std::vector<double>& values, int pBegin, int pEnd) const
+{
+	if (pBegin < 0 || pEnd >= values.size())
+	{
+		return -1;
+	}
+
+	int pos;
+	for (int i = pBegin; i <= pEnd; i++)
+	{
+		if (i == pBegin)
+		{
+			pos = i;
+		}
+		else
+		{
+			if (values[i] > values[pos])
 			{
 				pos = i;
 			}

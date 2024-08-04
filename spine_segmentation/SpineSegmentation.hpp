@@ -38,6 +38,10 @@ namespace SPINE
 
 			int getLowerValueAsPos(const std::vector<double>& values, int pBegin, int pEnd) const;
 
+			int getGreaterValueAsPos(const std::vector<double>& values, int pBegin, int pEnd) const;
+
+			cv::Point3d getFixNormal(const cv::Point3d& V1, const cv::Point3d& V2, bool fixFirst = true) const;
+
 		};
 	}
 }

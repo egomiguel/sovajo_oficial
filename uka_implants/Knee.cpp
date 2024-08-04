@@ -379,7 +379,8 @@ Point Knee::getMoveCondyle(const FemurImplantInfo& pImplant) const
         resectionThickness = pImplant.femurPosteriorThickness - femurCartilage;
     }
     //////////////////////////////////////////////////////////////////////
-
+	//std::cout << "--------------------------->>>>>> " << resectionThickness << std::endl;
+	//std::cout << "--------------------------->>>>>> Thickness " << pImplant.femurPosteriorThickness << " Cartilago: "<< femurCartilage << std::endl;
     myMoveCondyle = myMoveCondyle + resectionThickness * normaliceFemurDirectVectorAP;
 
     return myMoveCondyle;
