@@ -289,7 +289,7 @@ bool PelvisRegistration::MakeRegistration(const std::vector<itk::Point<double, 3
 
 	double error;
 
-	error = myICP.LeastSquares(Registration::poly, data);
+	error = myICP.LeastSquaresRandomInit(Registration::poly, data);
 
 	Registration::MakeResult(data, error);
 

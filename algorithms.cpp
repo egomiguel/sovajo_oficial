@@ -1459,7 +1459,7 @@ void MatchEasyPKA()
 
 	std::vector<vtkSmartPointer<vtkPolyData>> polyList;
 	polyList.push_back(newImplantFemur);
-	//polyList.push_back(newImplantTibia);
+	polyList.push_back(newImplantTibia);
 	TestVTK::show(myKnee.GetFemurPoly(), polyList);
 
 	
@@ -4588,7 +4588,7 @@ int main()
 
 	//std::cout <<"Result: "  << result << " Error: " << error << std::endl;
 
-	//MatchEasyPKA();
+	MatchEasyPKA();
 	//RegistrationScale();
 	//Resgistration_General_test();
 	//PelvisImplantMatch();
