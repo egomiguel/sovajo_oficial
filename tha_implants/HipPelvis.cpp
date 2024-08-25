@@ -618,14 +618,14 @@ std::pair<Point, Point> HipPelvis::getAbductionAnteversionVectorsZX(const Point&
     return std::make_pair(resultAbduction, resultPointAnteversion);
 }
 
-Point HipPelvis::getNativeCenterOfRotation(const std::vector<Point>& pPoints)
+std::pair<cv::Point3d, double> HipPelvis::getNativeCenterOfRotation(const std::vector<Point>& pPoints)
 {
     std::pair<cv::Point3d, double> result = ImplantTools::fitSphere(pPoints);
     if (result.second == -1)
     {
         throw ImplantExceptionCode::FAILED_COMPUTING_CENTER_OF_ROTATION_ON_HIP_PELVIS;
     }
-    return result.first;
+    return result;
 }
 
 Point HipPelvis::getPubicJoin() const

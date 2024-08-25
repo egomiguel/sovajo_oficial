@@ -532,8 +532,9 @@ LeastSquaresICP::GaussNewton LeastSquaresICP::GetSystem(const std::vector<cv::Po
     double chi = 0;
     double squareError;
     double localError = 0;
+	int tSize = source.size();
 
-    for (int i = posBegin; i < posEnd; i++)
+    for (int i = 0; i < tSize; i++)
     {
         cv::Mat sourcePoint = CreatePoint(source[i]);
         cv::Mat targetPoint = CreatePoint(target[i]);
@@ -567,8 +568,9 @@ LeastSquaresICP::GaussNewton LeastSquaresICP::GetSystemScale(const std::vector<c
     double chi = 0;
     double squareError;
     double localError = 0;
+	int tSize = source.size();
 
-    for (int i = posBegin; i < posEnd; i++)
+    for (int i = 0; i < tSize; i++)
     {
         cv::Mat sourcePoint = CreatePoint(centerSource[i]);
         cv::Mat targetPoint = CreatePoint(target[i]);
@@ -756,7 +758,7 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkImplicitPolyDataDi
     bool finish = false;
 
     double lambda = 0.01;
-	double currentError, beforeError = -1;// , totalError;
+	double currentError, totalError, beforeError = -1;// , totalError;
     double maxLambda = 1000.0;
 
     int batch = 3;
@@ -781,11 +783,11 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkImplicitPolyDataDi
 
             GaussNewton resultInfo = GetSystem(target, data, posA, posB, lambda);
             currentError = resultInfo.localError;
-			//totalError = sqrt(resultInfo.totalError / tSize);
+			totalError = sqrt(resultInfo.totalError / tSize);
 
-			if (bestError < 0 || currentError < bestError)
+			if (bestError < 0 || totalError < bestError)
 			{
-				bestError = currentError;
+				bestError = totalError;
 
 				dataTemp.at<double>(0, 0) = data.at<double>(0, 0);
 				dataTemp.at<double>(1, 0) = data.at<double>(1, 0);

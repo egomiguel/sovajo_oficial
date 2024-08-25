@@ -72,7 +72,7 @@ namespace THA
 
 			vtkSmartPointer<vtkImplicitPolyDataDistance> getImplicitPelvisDistance() const;
 
-			static Point getNativeCenterOfRotation(const std::vector<Point>& pPoints);
+			static std::pair<cv::Point3d, double> getNativeCenterOfRotation(const std::vector<Point>& pPoints);
 
 			///////////////////////////////Test
 
