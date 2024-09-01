@@ -32,6 +32,8 @@ namespace THA
 
 			itk::Rigid3DTransform<>::Pointer setStemVersionAngle(double pStemVersionAngleDegree);
 
+			itk::Rigid3DTransform<>::Pointer setStemVersionAngleNew(double pStemVersionAngleDegree);
+
 			itk::Rigid3DTransform<>::Pointer setCupAngles(double pAbductionAngle, double pAnteversionAngle);
 
 			itk::Vector< double, 3 > setCupTranslation(double pShifSuperior, double pShifLateral, double pShiftAnterior);
@@ -137,6 +139,8 @@ namespace THA
 			cv::Mat Rigid3DTransformToCVTranslation(const itk::Rigid3DTransform<>::Pointer transform) const;
 
 			Plane TransformPlane(const Plane& plane, const cv::Mat& rotation, const cv::Mat& translation) const;
+
+			cv::Mat rotateStemVersionAngle(double pStemVersionAngleDegree, double alpha = 1);
 
 		};
 	}

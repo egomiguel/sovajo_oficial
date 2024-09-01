@@ -1099,6 +1099,43 @@ itk::Vector< double, 3 > HipPelvisImplantsMatchInfo::matchStemToCupRotationCente
 	return ImplantTools::CVTranslationToITKVector(mTranslationStem);
 }
 
+itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::setStemVersionAngleNew(double pStemVersionAngleDegree)
+{
+	cv::Mat neckAxisMat = mRotationStem * mImplantStem.getVectorNeckToHead().ToMatPoint();
+	Point neckAxis = Point(neckAxisMat);
+
+	neckAxis.normalice();
+
+	double angle = mPelvis.getFemurVersionRadian(neckAxis);
+	double refAngle = (pStemVersionAngleDegree * PI) / 180.;
+
+	if (refAngle == angle)
+	{
+		return getITKStemTransform();
+	}
+	
+	cv::Mat tempTransform = rotateStemVersionAngle(pStemVersionAngleDegree);
+
+	neckAxisMat = tempTransform * mImplantStem.getVectorNeckToHead().ToMatPoint();
+	neckAxis = Point(neckAxisMat);
+
+	neckAxis.normalice();
+
+	double angleTemp = mPelvis.getFemurVersionRadian(neckAxis);
+	double diff1 = abs(angle - refAngle);
+	double diff2 = abs(angle - angleTemp);
+	double alpha = diff2 / diff1;
+
+	if (diff2 == 0)
+	{
+		return getITKStemTransform();
+	}
+
+	tempTransform = rotateStemVersionAngle(pStemVersionAngleDegree, 1./alpha);
+	mRotationStem = tempTransform * mRotationStem;
+	return getITKStemTransform();
+}
+
 itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::setStemVersionAngle(double pStemVersionAngleDegree)
 {
 	cv::Mat neckAxisMatTemp = mRotationStem * mImplantStem.getVectorNeckToHeadPerpendicularToInfSup().ToMatPoint();
@@ -1176,6 +1213,51 @@ itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::setStemVersionAngle
 	mTranslationStem += diff;
 
 	return getITKStemTransform();
+}
+
+cv::Mat HipPelvisImplantsMatchInfo::rotateStemVersionAngle(double pStemVersionAngleDegree, double alpha)
+{
+	cv::Mat neckAxisMat = mRotationStem * mImplantStem.getVectorNeckToHead().ToMatPoint();
+	Point neckAxis = Point(neckAxisMat);
+
+	neckAxis.normalice();
+
+	double angle = mPelvis.getFemurVersionRadian(neckAxis);
+	double refAngle = (pStemVersionAngleDegree * PI) / 180.;
+
+	cv::Mat rodAxis = mRotationStem * mImplantStem.getVectorInfSup().ToMatPoint();
+	Point canalAxis = Point(rodAxis);
+
+	cv::Mat transformation;
+
+	if (refAngle > angle)
+	{
+		double temp = alpha * (refAngle - angle);
+
+		if (mPelvis.getSide() == PelvisSide::RIGHT_SIDE)
+		{
+			transformation = ImplantTools::getRotateMatrix(-canalAxis, temp);
+		}
+		else
+		{
+			transformation = ImplantTools::getRotateMatrix(canalAxis, temp);
+		}
+	}
+	else
+	{
+		double temp = alpha * (angle - refAngle);
+
+		if (mPelvis.getSide() == PelvisSide::RIGHT_SIDE)
+		{
+			transformation = ImplantTools::getRotateMatrix(canalAxis, temp);
+		}
+		else
+		{
+			transformation = ImplantTools::getRotateMatrix(-canalAxis, temp);
+		}
+	}
+
+	return transformation * mRotationStem;
 }
 
 
