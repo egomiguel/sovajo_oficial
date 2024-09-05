@@ -50,3 +50,9 @@ Point HipFemurStemHeadImplant::getCenterOfSphere() const
 {
 	return mSphereCenter;
 }
+
+double HipFemurStemHeadImplant::getRadius() const
+{
+	return mRadius;
+}
+

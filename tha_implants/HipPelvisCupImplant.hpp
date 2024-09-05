@@ -26,6 +26,7 @@ namespace THA
 			void setHemisphereResolution(double pResolution);
 			double getThickness() const;
 			double getInternalRadius() const;
+			double getCupRadius() const;
 
 		private:
 			Point mTopPoint;

@@ -131,6 +131,11 @@ double HipPelvisCupImplant::getInternalRadius() const
 	return 0;
 }
 
+double HipPelvisCupImplant::getCupRadius() const
+{
+	return mRadius;
+}
+
 void HipPelvisCupImplant::setHemisphereResolution(double pResolution)
 {
 	double pnt[3];

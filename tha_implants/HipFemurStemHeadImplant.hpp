@@ -17,6 +17,7 @@ namespace THA
 			Point getVectorInfSup() const;
 			Point getInsideCenterTopPoint() const;
 			Point getCenterOfSphere() const;
+			double getRadius() const;
 
 		private:
 			Point mHeadInfSupVector;
