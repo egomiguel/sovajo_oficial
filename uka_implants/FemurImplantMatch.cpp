@@ -200,7 +200,7 @@ bool FemurImplantMatch::getTranslationMatrix()
 	baseTibiaImplant.init(Point(tempTuber), Point(tempPCL), Point(tempSide));
 	Plane sidePlane = baseTibiaImplant.getPerpendicularPlane(Point(tempTuber), Point(tempPCL));
 	sidePlane.reverseByPoint(Point(tempSide));
-	sidePlane.movePlaneOnNormal((implantFemur.getWidthSize() / 2.) + 1.);
+	sidePlane.movePlaneOnNormal((implantFemur.getWidthSize() / 2.) + 1.); //One is added to prevent the femur implant from adhering to the limit of the tibia implant.
 	tCenter = sidePlane.getProjectionPoint(Point(tempSide));
 
 	cv::Mat kneeNormalVectorPlaneA = rotationMatrix * implantFemur.getPosterior().getNormalVectorMat();

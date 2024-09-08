@@ -45,11 +45,13 @@ namespace UKA
 
 			Point getPlateauRefPointDown() const;
 
+			Point getPlateauRefPointUp() const;
+
 			TibiaImplantInfo getImplantInfo() const;
 
 		private:
 			Plane tibiaPlane;
-			Point centralPoint, centralPointUp, exteriorPoint, pclPoint, tuberPoint, plateauRefPointDown;
+			Point centralPoint, centralPointUp, exteriorPoint, pclPoint, tuberPoint, plateauRefPointDown, plateauRefPointUp;
 			TibiaImplantInfo mImplantInfo;
 			bool isInit;
 			//void fixNormalVectorTibia(const Point& fixPoint, const Point& referencePoint);

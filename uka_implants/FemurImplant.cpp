@@ -187,6 +187,11 @@ Point FemurImplant::getRodTopPointProjectedOnBase() const
 	return mRodTopPointProjectedOnBase;
 }
 
+Point FemurImplant::getRodTopPointProjectedOnBaseExterior() const
+{
+	return mRodTopPointProjectedOnBase - mImplantInfo.femurDistalThickness * mDistal.getNormalVector();
+}
+
 std::vector<Point> FemurImplant::getSortPointsSide1() const
 {
 	return mSideBorder1;

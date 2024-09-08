@@ -70,6 +70,82 @@ ImplantsMatchFinalInfo::~ImplantsMatchFinalInfo()
     femurCoordenate = NULL;*/
 }
 
+itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::FemurImplantToTibiaImplant()
+{
+	std::vector<cv::Point3d> femurVectors;
+	std::vector<cv::Point3d> tibiaVectors;
+
+	Point implantFemurAxis = femurImplant.getDirectVectorFemurAxis();
+	Point implantFemurAP = femurImplant.getDirectVectorAP();
+	Point implantFemurTEA = implantFemurAxis.cross(implantFemurAP);
+	implantFemurTEA.normalice();
+
+	femurVectors.push_back(implantFemurTEA.ToCVPoint());
+	femurVectors.push_back(implantFemurAxis.ToCVPoint());
+	femurVectors.push_back(implantFemurAP.ToCVPoint());
+
+	cv::Mat implantTibiaAxisMat = tibiaRotation * tibiaImplant.getTibiaNormalVector().ToMatPoint();
+	cv::Mat implantTibiaAPMat = tibiaRotation * tibiaImplant.getTibiaVectorAP().ToMatPoint();
+
+	Point implantTibiaAxis = Point(implantTibiaAxisMat);
+	Point implantTibiaAP = Point(implantTibiaAPMat);
+	Point implantTibiaTEA = implantTibiaAxis.cross(implantTibiaAP);
+	implantTibiaTEA.normalice();
+
+	tibiaVectors.push_back(implantTibiaTEA.ToCVPoint());
+	tibiaVectors.push_back(implantTibiaAxis.ToCVPoint());
+	tibiaVectors.push_back(implantTibiaAP.ToCVPoint());
+
+	cv::Mat implantFemurMatrix = cv::Mat(femurVectors.size(), 3, CV_64F, femurVectors.data());
+	cv::Mat implantTibiaMatrix = cv::Mat(tibiaVectors.size(), 3, CV_64F, tibiaVectors.data());
+
+	cv::Mat inverse = (implantFemurMatrix.t()).inv();
+	femurRotation = (implantTibiaMatrix.t()) * inverse;
+
+	cv::Mat refPointMat = tibiaRotation * tibiaImplant.getPlateauRefPointUp().ToMatPoint() + tibiaTranslation;
+	femurTranslation = refPointMat - femurRotation * femurImplant.getRodTopPointProjectedOnBaseExterior().ToMatPoint();
+
+	return getITKFemurTransform();
+}
+
+itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::TibiaImplantToFemurImplant()
+{
+	std::vector<cv::Point3d> femurVectors;
+	std::vector<cv::Point3d> tibiaVectors;
+
+	Point implantTibiaAxis = tibiaImplant.getTibiaNormalVector();
+	Point implantTibiaAP = tibiaImplant.getTibiaVectorAP();
+	Point implantTibiaTEA = implantTibiaAxis.cross(implantTibiaAP);
+	implantTibiaTEA.normalice();
+
+	tibiaVectors.push_back(implantTibiaTEA.ToCVPoint());
+	tibiaVectors.push_back(implantTibiaAxis.ToCVPoint());
+	tibiaVectors.push_back(implantTibiaAP.ToCVPoint());
+
+	cv::Mat implantFemurAxisMat = femurRotation * femurImplant.getDirectVectorFemurAxis().ToMatPoint();
+	cv::Mat implantFemurAPMat = femurRotation * femurImplant.getDirectVectorAP().ToMatPoint();
+
+	Point implantFemurAxis = Point(implantFemurAxisMat);
+	Point implantFemurAP = Point(implantFemurAPMat);
+	Point implantFemurTEA = implantFemurAxis.cross(implantFemurAP);
+	implantFemurTEA.normalice();
+
+	femurVectors.push_back(implantFemurTEA.ToCVPoint());
+	femurVectors.push_back(implantFemurAxis.ToCVPoint());
+	femurVectors.push_back(implantFemurAP.ToCVPoint());
+
+	cv::Mat implantTibiaMatrix = cv::Mat(tibiaVectors.size(), 3, CV_64F, tibiaVectors.data());
+	cv::Mat implantFemurMatrix = cv::Mat(femurVectors.size(), 3, CV_64F, femurVectors.data());
+
+	cv::Mat inverse = (implantTibiaMatrix.t()).inv();
+	tibiaRotation = (implantFemurMatrix.t()) * inverse;
+
+	cv::Mat refPointMat = femurRotation * femurImplant.getRodTopPointProjectedOnBaseExterior().ToMatPoint() + femurTranslation;
+	tibiaTranslation = refPointMat - tibiaRotation * tibiaImplant.getPlateauRefPointUp().ToMatPoint();
+
+	return getITKTibiaTransform();
+}
+
 const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurImplant(const FemurImplant& pFemurImplant)
 {
     femurImplant = pFemurImplant;

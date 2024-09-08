@@ -28,6 +28,16 @@ namespace UKA
 			ResectionThickness GetFemurResectionAxial() const;
 			ResectionThickness GetFemurResectionCoronal() const;
 
+			/*
+			   Updates the femur transformation internally on the object. Return the new translation
+			*/
+			itk::Rigid3DTransform<>::Pointer FemurImplantToTibiaImplant();
+
+			/*
+			   Updates the femur transformation internally on the object. Return the new translation
+			*/
+			itk::Rigid3DTransform<>::Pointer TibiaImplantToFemurImplant();
+
 			double GetFemurVarusAngle() const;
 			double GetFemurFlexionAngle() const;
 			double GetFemurImplantTEAAngle() const;

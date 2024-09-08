@@ -37,6 +37,8 @@ namespace UKA
 
 			Point getRodTopPointProjectedOnBase() const;
 
+			Point getRodTopPointProjectedOnBaseExterior() const;
+
 			std::vector<Point> getSortPointsSide1() const;
 
 			std::vector<Point> getSortPointsSide2() const;
