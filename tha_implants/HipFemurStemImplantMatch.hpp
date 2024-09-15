@@ -23,6 +23,8 @@ namespace THA
 
 			itk::Rigid3DTransform<>::Pointer getStemTransform(double pStemVersionAngleDegree) const;
 
+			itk::Rigid3DTransform<>::Pointer getStemTransform() const;
+
 		private:
 			HipPelvis mPelvis;
 			HipFemurStemImplant mImplant;

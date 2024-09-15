@@ -32,8 +32,6 @@ namespace THA
 
 			itk::Rigid3DTransform<>::Pointer setStemVersionAngle(double pStemVersionAngleDegree);
 
-			itk::Rigid3DTransform<>::Pointer setStemVersionAngleNew(double pStemVersionAngleDegree);
-
 			itk::Rigid3DTransform<>::Pointer setCupAngles(double pAbductionAngle, double pAnteversionAngle);
 
 			itk::Vector< double, 3 > setCupTranslation(double pShifSuperior, double pShifLateral, double pShiftAnterior);

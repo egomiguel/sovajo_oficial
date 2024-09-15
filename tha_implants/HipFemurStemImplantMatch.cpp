@@ -70,8 +70,12 @@ void HipFemurStemImplantMatch::getRigidTransform()
 
 	Point femurX = mPelvis.getFemurOperationSide().getVectorLatMed();  //getFemurVectorLatMed(mHipCenterOfRotation);
 	Point femurZ = mPelvis.getFemurOperationSide().getCanalAxisVectorInfSup();  //getFemurVectorInfSup();
+	//femurZ = femurZ + Point(0.1, 0.2, 0.3); // Just for test ******************************************************
     Point femurY = femurX.cross(femurZ);
     femurY.normalice();
+
+	//femurZ = -femurX.cross(femurY);//***********************************************
+	//femurZ.normalice();
 
     femurVectors.push_back(femurX.ToCVPoint());
     femurVectors.push_back(femurZ.ToCVPoint());
@@ -144,6 +148,12 @@ itk::Rigid3DTransform<>::Pointer HipFemurStemImplantMatch::getStemTransform(doub
 
 	return getITKTransform(lastRotation, translationMatrix);
 }
+
+itk::Rigid3DTransform<>::Pointer HipFemurStemImplantMatch::getStemTransform() const
+{
+	return getITKTransform(rotationMatrix, translationMatrix);
+}
+
 
 itk::Rigid3DTransform<>::Pointer HipFemurStemImplantMatch::getITKTransform(const cv::Mat& pRotation, const cv::Mat& pTranslation) const
 {

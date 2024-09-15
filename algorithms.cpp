@@ -3309,7 +3309,7 @@ void PelvisImplantMatch()
 	stemHeadMatch.init(pImplantHead, pImplantStem);
 
 	auto pelvisInfo = THA::IMPLANTS::HipPelvisImplantsMatchInfo(objPelvis, centerOfRotation, objImplant, pImplantStem, pImplantHead,
-																transformMatch, stemMatch.getStemTransform(20), 
+																transformMatch, stemMatch.getStemTransform(), 
 																stemHeadMatch.getStemHeadTransform());
 
 	auto headToStemTransform = stemHeadMatch.getStemHeadTransform();
@@ -3322,11 +3322,11 @@ void PelvisImplantMatch()
 	double shiftAnterior = pelvisInfo.getCupShiftAnterior();
 	double shiftLateral = pelvisInfo.getCupShiftLateral();
 
-	std::cout << "Incination: " << inclination << ", Version: " << antVersion << std::endl;
-	std::cout << "Superior: " << shiftSuperior << ", Anterior: " << shiftAnterior << ", Lateral: " << shiftLateral << std::endl;
+	//std::cout << "Incination: " << inclination << ", Version: " << antVersion << std::endl;
+	//std::cout << "Superior: " << shiftSuperior << ", Anterior: " << shiftAnterior << ", Lateral: " << shiftLateral << std::endl;
 
-	std::cout << "Offset: " << objPelvis.getCombinedOffsetDistance() << " Offset Opside: " << objPelvis.getCombinedOffsetDistanceOppsite() << std::endl;
-	std::cout << "Lenght: " << objPelvis.getHipLengthDistance() << " Offset Opside: " << objPelvis.getHipLengthDistanceOppsite() << std::endl;
+	//std::cout << "Offset: " << objPelvis.getCombinedOffsetDistance() << " Offset Opside: " << objPelvis.getCombinedOffsetDistanceOppsite() << std::endl;
+	//std::cout << "Lenght: " << objPelvis.getHipLengthDistance() << " Offset Opside: " << objPelvis.getHipLengthDistanceOppsite() << std::endl;
 
 	std::cout << "-------------------------------------------" << std::endl;
 	/*
@@ -3352,9 +3352,13 @@ void PelvisImplantMatch()
 	}
 	*/
 	
+	std::cout << ": Current angle 1: " << pelvisInfo.getStemVersion() << std::endl;
+	
 	pelvisInfo.matchStemToCupRotationCenter();
 
-	for (float i = -20; i < 21; i += 2)
+	std::cout << ": Current angle 2: " << pelvisInfo.getStemVersion() << std::endl;
+
+	for (float i = -20; i < 21; i += 5)
 	{
 		
 		if (i == 20)
@@ -3365,7 +3369,7 @@ void PelvisImplantMatch()
 		}
 		else
 		{
-			pelvisInfo.setStemHeadTranslation(i, i, i);
+			//pelvisInfo.setStemHeadTranslation(i, i, i);
 			pelvisInfo.setStemVersionAngle(i);
 		}
 
@@ -3382,9 +3386,9 @@ void PelvisImplantMatch()
 
 		std::cout << "Stem superior distance: " << pelvisInfo.getStemAxisShiftSuperiorHip() << ", Stem Lateral Distance: " << pelvisInfo.getStemAxisShiftLateralHip() <<", Stem Anterior Distance: " << pelvisInfo.getStemAxisShiftAnteriorHip()<< std::endl;
 		
-		pelvisInfo.setStemAxisShiftHip(10, 20, 30);
+		//pelvisInfo.setStemAxisShiftHip(10, 20, 30);
 
-		std::cout << "Stem superior distance: " << pelvisInfo.getStemAxisShiftSuperiorHip() << ", Stem Lateral Distance: " << pelvisInfo.getStemAxisShiftLateralHip() << ", Stem Anterior Distance: " << pelvisInfo.getStemAxisShiftAnteriorHip() << std::endl;
+		//std::cout << "Stem superior distance: " << pelvisInfo.getStemAxisShiftSuperiorHip() << ", Stem Lateral Distance: " << pelvisInfo.getStemAxisShiftLateralHip() << ", Stem Anterior Distance: " << pelvisInfo.getStemAxisShiftAnteriorHip() << std::endl;
 
 
 		//pelvisInfo.setStemTranslation(i, i, i);
@@ -3397,7 +3401,7 @@ void PelvisImplantMatch()
 		//pelvisInfo.setCupAngles(abductionCup, versionCup);
 
 		
-		pelvisInfo.setCupTranslation(0, 0, 10);
+		//pelvisInfo.setCupTranslation(0, 0, 10);
 
 		/*
 		std::cout << "Cup new abduction: " << abductionCup << ", Cup new version: " << versionCup << std::endl;
@@ -3407,16 +3411,16 @@ void PelvisImplantMatch()
 
 		//std::cout << i << " Cup: " << pelvisInfo.getCupShiftAnterior() << ", Cup: " << pelvisInfo.getCupShiftLateral() << ", Cup: " << pelvisInfo.getCupShiftSuperior() <<std::endl;
 		
-		std::cout << " Hip lenght: " << objPelvis.getHipLengthDistance() << ", new lenght: " << pelvisInfo.getHipLengthDistance() << ", Hip Offset: " << objPelvis.getCombinedOffsetDistance() << ", Hip New Offset: " << pelvisInfo.getCombinedOffsetDistance() << std::endl;
+		//std::cout << " Hip lenght: " << objPelvis.getHipLengthDistance() << ", new lenght: " << pelvisInfo.getHipLengthDistance() << ", Hip Offset: " << objPelvis.getCombinedOffsetDistance() << ", Hip New Offset: " << pelvisInfo.getCombinedOffsetDistance() << std::endl;
 
 		
-		//vtkNew<vtkAppendPolyData> appendFilter;
-		//appendFilter->AddInputData(transformImplantCup);
-		//appendFilter->AddInputData(transformImplantStem);
+		vtkNew<vtkAppendPolyData> appendFilter;
+		appendFilter->AddInputData(transformImplantCup);
+		appendFilter->AddInputData(transformImplantStem);
 		//appendFilter->AddInputData(transformImplantHead);
-		//appendFilter->Update();
+		appendFilter->Update();
 
-		//TestVTK::show(appendFilter->GetOutput());
+		TestVTK::show(appendFilter->GetOutput());
 
 	}
 
@@ -4588,10 +4592,10 @@ int main()
 
 	//std::cout <<"Result: "  << result << " Error: " << error << std::endl;
 
-	MatchEasyPKA();
+	//MatchEasyPKA();
 	//RegistrationScale();
 	//Resgistration_General_test();
-	//PelvisImplantMatch();
+	PelvisImplantMatch();
 	//std::cout << "tttttttttttttttttt" << std::endl;
 	//TestHullPoints();
 	//Test30PointsVTK();
