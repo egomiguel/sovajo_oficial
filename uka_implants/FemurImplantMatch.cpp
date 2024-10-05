@@ -125,17 +125,14 @@ FemurImplantMatch::FemurImplantMatch()
 	isInit = false;
 }
 
-void FemurImplantMatch::init(const FemurImplant& implantFemur, const TibiaImplant& implantTibia, const Knee& knee, const itk::Rigid3DTransform<double>::Pointer tibiaImplantTransform)
+void FemurImplantMatch::init(const FemurImplant& implantFemur, const Knee& knee)
 {
 	if (isInit == true)
 	{
 		throw ImplantExceptionCode::ALREADY_INITIALIZED_FEMUR_IMPLANT_MATCH;
 	}
 	this->implantFemur = implantFemur;
-	this->implantTibia = implantTibia;
 	this->knee = knee;
-	this->rotationMatrixTibiaImplant = Rigid3DTransformToCVRotation(tibiaImplantTransform);
-	this->translationMatrixTibiaImplant = Rigid3DTransformToCVTranslation(tibiaImplantTransform);
 	getRotationMatrix();
 	bool result = getTranslationMatrix();
 	if (result == false)
@@ -181,6 +178,15 @@ bool FemurImplantMatch::getTranslationMatrix()
 {
 	Point tCenter;
 
+	if (knee.getSurgerySide() == SurgerySideEnum::KMedial)
+	{
+		tCenter = knee.getFemurKneeCenter() + 0.6 * (knee.getMedialEpicondylePerp() - knee.getFemurKneeCenter());
+	}
+	else
+	{
+		tCenter = knee.getFemurKneeCenter() + 0.5 * (knee.getLateralEpicondyle() - knee.getFemurKneeCenter());
+	}
+
 	/*
 	if (knee.getSurgerySide() == SurgerySideEnum::KMedial)
 	{
@@ -192,16 +198,16 @@ bool FemurImplantMatch::getTranslationMatrix()
 	}
 	*/
 
-	cv::Mat tempTuber = rotationMatrixTibiaImplant * implantTibia.getPointTuber().ToMatPoint() + translationMatrixTibiaImplant;
-	cv::Mat tempPCL = rotationMatrixTibiaImplant * implantTibia.getPointPCL().ToMatPoint() + translationMatrixTibiaImplant;
-	cv::Mat tempSide = rotationMatrixTibiaImplant * implantTibia.getPlateauRefPointDown().ToMatPoint() + translationMatrixTibiaImplant;
+	//cv::Mat tempTuber = rotationMatrixTibiaImplant * implantTibia.getPointTuber().ToMatPoint() + translationMatrixTibiaImplant;
+	//cv::Mat tempPCL = rotationMatrixTibiaImplant * implantTibia.getPointPCL().ToMatPoint() + translationMatrixTibiaImplant;
+	//cv::Mat tempSide = rotationMatrixTibiaImplant * implantTibia.getPlateauRefPointDown().ToMatPoint() + translationMatrixTibiaImplant;
 
-	Plane baseTibiaImplant;
-	baseTibiaImplant.init(Point(tempTuber), Point(tempPCL), Point(tempSide));
-	Plane sidePlane = baseTibiaImplant.getPerpendicularPlane(Point(tempTuber), Point(tempPCL));
-	sidePlane.reverseByPoint(Point(tempSide));
-	sidePlane.movePlaneOnNormal((implantFemur.getWidthSize() / 2.) + 1.); //One is added to prevent the femur implant from adhering to the limit of the tibia implant.
-	tCenter = sidePlane.getProjectionPoint(Point(tempSide));
+	//Plane baseTibiaImplant;
+	//baseTibiaImplant.init(Point(tempTuber), Point(tempPCL), Point(tempSide));
+	//Plane sidePlane = baseTibiaImplant.getPerpendicularPlane(Point(tempTuber), Point(tempPCL));
+	//sidePlane.reverseByPoint(Point(tempSide));
+	//sidePlane.movePlaneOnNormal((implantFemur.getWidthSize() / 2.) + 1.); //One is added to prevent the femur implant from adhering to the limit of the tibia implant.
+	//tCenter = sidePlane.getProjectionPoint(Point(tempSide));
 
 	cv::Mat kneeNormalVectorPlaneA = rotationMatrix * implantFemur.getPosterior().getNormalVectorMat();
 	Plane kneePlaneA;

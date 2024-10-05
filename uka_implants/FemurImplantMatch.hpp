@@ -35,7 +35,7 @@ namespace UKA
 
 			FemurImplantMatch();
 
-			void init(const FemurImplant& implantFemur, const TibiaImplant& implantTibia, const Knee& knee, const itk::Rigid3DTransform<double>::Pointer tibiaImplantTransform);
+			void init(const FemurImplant& implantFemur, const Knee& knee);
 
 			itk::Matrix< double, 3, 3 > GetRotationMatrix() const;
 
@@ -46,10 +46,9 @@ namespace UKA
 		private:
 
 			FemurImplant implantFemur;
-			TibiaImplant implantTibia;
 			Knee knee;
-			cv::Mat rotationMatrix, rotationMatrixTibiaImplant;
-			cv::Mat translationMatrix, translationMatrixTibiaImplant;
+			cv::Mat rotationMatrix;
+			cv::Mat translationMatrix;
 			bool isInit;
 			void getRotationMatrix();
 			bool getTranslationMatrix();

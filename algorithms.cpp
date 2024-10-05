@@ -1415,7 +1415,7 @@ void MatchEasyPKA()
 	itk::Rigid3DTransform<double>::Pointer transformTibia = itk::VersorRigid3DTransform<double>::New();
 	transformTibia->SetMatrix(tibiaImplantMatch.GetRotationMatrix());
 	transformTibia->SetOffset(tibiaImplantMatch.GetTranslationMatrix());
-	femurImplantMatch.init(femurImplant, tibiaImplant, myKnee, transformTibia);
+	femurImplantMatch.init(femurImplant, myKnee);
 
 	itk::Rigid3DTransform<double>::Pointer transformFemur = itk::VersorRigid3DTransform<double>::New();
 	
@@ -4592,10 +4592,10 @@ int main()
 
 	//std::cout <<"Result: "  << result << " Error: " << error << std::endl;
 
-	//MatchEasyPKA();
+	MatchEasyPKA();
 	//RegistrationScale();
 	//Resgistration_General_test();
-	PelvisImplantMatch();
+	//PelvisImplantMatch();
 	//std::cout << "tttttttttttttttttt" << std::endl;
 	//TestHullPoints();
 	//Test30PointsVTK();
