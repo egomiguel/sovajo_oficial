@@ -34,6 +34,7 @@
 #include "uka_implants/Point.hpp"
 #include "uka_implants/TibiaSpacerImplant.hpp"
 #include "uka_implants/TibiaSpacerImplantMatch.hpp"
+#include "uka_implants/ImplantsMatchFinalInfo.hpp"
 
 #include "hip/HipCenter.hpp"
 #include "segmentation/AutomaticSegmentation.hpp"
@@ -1396,9 +1397,9 @@ void MatchEasyPKA()
 
 	femurImplant.init(pPosterior, pRodBasePoint, pRodTopPoint, pSideBorder1, pSideBorder2, femurModel, femurInfo);
 
-	UKA::IMPLANTS::Point apLinePclPoint(10.4801, 9.06646, 0.934849);
-	UKA::IMPLANTS::Point apLineTuberPoint(10.2438, -37.5031, 0.951554);
-	UKA::IMPLANTS::Point sidePoint(-0.1021, -11.1526, 1.1545);
+	UKA::IMPLANTS::Point apLinePclPoint(10.35, 11.28, 1.15);
+	UKA::IMPLANTS::Point apLineTuberPoint(10.01, -39.601, 1.06);
+	UKA::IMPLANTS::Point sidePoint(-15.2245, -12.73, 1.15);
 	UKA::IMPLANTS::Point exteriorPoint(-14.5152, -10.8294, 4.41175);
 	UKA::IMPLANTS::TibiaImplantInfo tibiaInfo;
 	tibiaInfo.tibiaThickness = 2.0;
@@ -1461,6 +1462,20 @@ void MatchEasyPKA()
 	polyList.push_back(newImplantFemur);
 	polyList.push_back(newImplantTibia);
 	TestVTK::show(myKnee.GetFemurPoly(), polyList);
+
+	///////////////////////////////////////////////////// Implant Match Info
+
+	UKA::IMPLANTS::ImplantsMatchFinalInfo info(&myKnee, femurImplant, tibiaImplant, transformFemur, transformTibia);
+	//auto transformFemurFinal = info.FemurImplantToTibiaImplant();
+	auto transformTibiaFinal = info.TibiaImplantToFemurImplant();
+
+	//vtkSmartPointer<vtkPolyData> newImplantFemurFinal = TestVTK::TransformPoly(femurModel, transformFemurFinal->GetMatrix(), transformFemurFinal->GetOffset());
+	vtkSmartPointer<vtkPolyData> newImplantTibiaFinal = TestVTK::TransformPoly(tibiaModel, transformTibiaFinal->GetMatrix(), transformTibiaFinal->GetOffset());
+
+	std::vector<vtkSmartPointer<vtkPolyData>> polyListFinal;
+	polyListFinal.push_back(newImplantFemur);
+	polyListFinal.push_back(newImplantTibiaFinal);
+	TestVTK::show(myKnee.GetFemurPoly(), polyListFinal);
 
 	
 	//TestVTK::show(myKnee.GetFemurPoly(), tPoints, true);

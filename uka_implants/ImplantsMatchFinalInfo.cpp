@@ -105,6 +105,8 @@ itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::FemurImplantToTibiaImpl
 	cv::Mat refPointMat = tibiaRotation * tibiaImplant.getPlateauRefPointUp().ToMatPoint() + tibiaTranslation;
 	femurTranslation = refPointMat - femurRotation * femurImplant.getRodTopPointProjectedOnBaseExterior().ToMatPoint();
 
+	updateFemurImplantVectors();
+
 	return getITKFemurTransform();
 }
 
@@ -142,6 +144,8 @@ itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::TibiaImplantToFemurImpl
 
 	cv::Mat refPointMat = femurRotation * femurImplant.getRodTopPointProjectedOnBaseExterior().ToMatPoint() + femurTranslation;
 	tibiaTranslation = refPointMat - tibiaRotation * tibiaImplant.getPlateauRefPointUp().ToMatPoint();
+
+	updateTibiaImplantVectors();
 
 	return getITKTibiaTransform();
 }

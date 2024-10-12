@@ -1,5 +1,5 @@
-#ifndef IMPLANT_MATCH_FINAL_INFO_H
-#define IMPLANT_MATCH_FINAL_INFO_H
+#ifndef UKA_IMPLANT_MATCH_FINAL_INFO_H
+#define UKA_IMPLANT_MATCH_FINAL_INFO_H
 
 #include "Knee.hpp"
 #include <itkRigid3DTransform.h>
