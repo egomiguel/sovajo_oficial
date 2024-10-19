@@ -1,6 +1,7 @@
 #include <iostream>
 //#include "test/TestFunction.hpp"
 #include "test/TestVtk.hpp"
+#include "Test_PKA.h"
 #include "test/segmentationTest.cpp"
 
 #include "implants/FemurImplantMatch.hpp"
@@ -1479,6 +1480,67 @@ void MatchEasyPKA()
 
 	
 	//TestVTK::show(myKnee.GetFemurPoly(), tPoints, true);
+
+}
+
+void videoToImage(const std::string& videoPathIn, const std::string& videoPathOut)
+{
+	cv::VideoCapture cap(videoPathIn);
+
+	if (!cap.isOpened())
+	{
+		std::cout << "Error open video" << std::endl;
+		return;
+	}
+
+	int frameNumber = 0;
+	cv::Mat frame;
+
+	typedef unsigned char PixelType;
+	typedef itk::Image<PixelType, 2> ImageType;
+
+	while (cap.read(frame)) {
+		cvtColor(frame, frame, cv::COLOR_BGR2GRAY);
+
+		int width = frame.cols;
+		int height = frame.rows;
+
+		ImageType::Pointer itkImage = ImageType::New();
+		ImageType::RegionType region;
+		ImageType::IndexType start;
+		start.Fill(0);
+
+		ImageType::SizeType size;
+		size[0] = width;  // X dimension
+		size[1] = height; // Y dimension
+
+		region.SetSize(size);
+		region.SetIndex(start);
+
+		itkImage->SetRegions(region);
+		itkImage->Allocate();
+
+		PixelType* itkBufferPointer = itkImage->GetBufferPointer();
+		std::memcpy(itkBufferPointer, frame.data, width * height * sizeof(PixelType));
+
+		typedef itk::ImageFileWriter<ImageType> WriterType;
+		WriterType::Pointer writer = WriterType::New();
+
+		std::ostringstream filename;
+		filename << videoPathOut << "\\frame_" << frameNumber << ".dcm";
+		writer->SetFileName(filename.str());
+		writer->SetInput(itkImage);
+
+		try {
+			writer->Update();
+		}
+		catch (itk::ExceptionObject &error) {
+			std::cout << "Error writing the image: " << error << std::endl;
+		}
+
+		std::cout << "Frame " << frameNumber << " save as " << filename.str() << std::endl;
+		frameNumber++;
+	}
 
 }
 
@@ -4601,13 +4663,17 @@ int main()
 	
 	//std::vector<SpineSegmentation::Plane> getIntervertebralPlanes(const std::vector<ImageType::PointType>& physicalPoints)
 
+	std::string videoPathIn = "D:\\sovajo\\Spine_Images\\avi_images\\1_2.avi";
+	std::string videoPathOut = "D:\\sovajo\\Spine_Images\\avi_images\\DICOM_Format";
+
+	//videoToImage(videoPathIn, videoPathOut);
 
 	//myKnee = CreateKneeFromFile_Numbers(casePlan, KneeSideEnum::KLeft);
 	//double error = FemurRegistrationFromNumbersTKA(myKnee, casePlan, result);
 
 	//std::cout <<"Result: "  << result << " Error: " << error << std::endl;
 
-	MatchEasyPKA();
+	//MatchEasyPKA();
 	//RegistrationScale();
 	//Resgistration_General_test();
 	//PelvisImplantMatch();
@@ -4620,6 +4686,8 @@ int main()
 	//PolydataInterception();
 
 	//MatchEasy();
+	//TEST_PKA::MatchPKA();
+	TEST_PKA_SUEN::testImplants();
 
 	//double pnt[3] = { 0, 0, 0 };
 	//Plane planeTemp;

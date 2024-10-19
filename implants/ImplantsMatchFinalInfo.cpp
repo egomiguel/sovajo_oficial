@@ -213,6 +213,11 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaSlopeAngl
 
 	myAngle = ImplantTools::getAngleBetweenVectors(newVectorFromImplant, baseVectorFromImplant);
 
+	if (myAngle == 0)
+	{
+		return getITKTibiaTransform();
+	}
+
 	rotation = ImplantTools::getRotateMatrix(baseVectorFromImplant.cross(newVectorFromImplant), myAngle);
 
 	//////////////////////////////////////////////////////////////////////
@@ -302,6 +307,11 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaRotationA
 	Point baseVectorFromImplant = Point(baseVectorFromImplantMat);
 
 	myAngle = ImplantTools::getAngleBetweenVectors(newVectorFromImplant, baseVectorFromImplant);
+
+	if (myAngle == 0)
+	{
+		return getITKTibiaTransform();
+	}
 
 	rotation = ImplantTools::getRotateMatrix(baseVectorFromImplant.cross(newVectorFromImplant), myAngle);
 
@@ -408,6 +418,11 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurTEAAngle(
 
 	myAngle = ImplantTools::getAngleBetweenVectors(newVectorFromImplant, baseVectorFromImplant);
 
+	if (myAngle == 0)
+	{
+		return getITKFemurTransform();
+	}
+
 	rotation = ImplantTools::getRotateMatrix(baseVectorFromImplant.cross(newVectorFromImplant), myAngle);
 
 	//////////////////////////////////////////////////////////////////////
@@ -490,6 +505,11 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurPCAAngle(
 	}
 
 	myAngle = ImplantTools::getAngleBetweenVectors(newVectorFromImplant, baseVectorFromImplant);
+
+	if (myAngle == 0)
+	{
+		return getITKFemurTransform();
+	}
 
 	rotation = ImplantTools::getRotateMatrix(baseVectorFromImplant.cross(newVectorFromImplant), myAngle);
 
@@ -610,11 +630,15 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurVarusAngl
 	implantPlane.transformPlane(femurRotation, femurTranslation);
 
 	Point newVectorFromImplant = ImplantTools::getOriginalVectorFromProjectionWithPlanes(projectionPlane, mainVector, implantPlane);
-
 	auto baseVectorFromImplantMat = femurRotation * femurImplant.getDirectVectorFemurAxis().ToMatPoint();
 	Point baseVectorFromImplant = Point(baseVectorFromImplantMat);
 
 	myAngle = ImplantTools::getAngleBetweenVectors(newVectorFromImplant, baseVectorFromImplant);
+
+	if (myAngle == 0)
+	{
+		return getITKFemurTransform();
+	}
 
 	rotation = ImplantTools::getRotateMatrix(baseVectorFromImplant.cross(newVectorFromImplant), myAngle);
 
@@ -720,6 +744,11 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurFlexionAn
 
 	myAngle = ImplantTools::getAngleBetweenVectors(newVectorFromImplant, baseVectorFromImplant);
 
+	if (myAngle == 0)
+	{
+		return getITKFemurTransform();
+	}
+
 	rotation = ImplantTools::getRotateMatrix(baseVectorFromImplant.cross(newVectorFromImplant), myAngle);
 
 	//////////////////////////////////////////////////////////////////////
@@ -767,6 +796,11 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaVarusAngl
 	Point baseVectorFromImplant = Point(baseVectorFromImplantMat);
 
 	myAngle = ImplantTools::getAngleBetweenVectors(newVectorFromImplant, baseVectorFromImplant);
+
+	if (myAngle == 0)
+	{
+		return getITKTibiaTransform();
+	}
 
 	rotation = ImplantTools::getRotateMatrix(baseVectorFromImplant.cross(newVectorFromImplant), myAngle);
 
