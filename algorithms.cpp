@@ -61,6 +61,7 @@
 #include "vtkRuledSurfaceFilter.h"
 #include "vtkContourTriangulator.h"
 #include <cmath>
+#include <vtkVersion.h>
 
 //#include "slicer/vtkPlanarContourToClosedSurfaceConversionRule.h"
 #include "segmentation/surface/BinaryTree.hpp"
@@ -114,6 +115,7 @@
 #include <vtkDistancePolyDataFilter.h>
 
 #include "spine_segmentation/SpineSegmentation.hpp"
+#include "spine_segmentation/BallsManualSegmentation.hpp"
 
 
 std::string dicom = "C:\\DICOM\\dcm2";
@@ -4452,8 +4454,155 @@ void PointsTo2D()
 
 }
 
+
+void testSegSliceBordes()
+{
+	auto femurData = TestVTK::ReadPolyData("D:\\sovajo\\Test_Cases\\Segmentation_TKA\\test-segmentation\\femur.vtk");
+	double normal[2][3] = { {1.0,0.0,0.0},{1.0,0.0,0.0} };
+	double center[2][3] = { {37.93057714926232,198.0709686279297,-312.04998779296875},
+	{126.2567716473318,198.0709686279297,-312.04998779296875} };
+	TKA::SEGMENTATION::SPlane plane[2];
+	plane[0].init(normal[0], center[0]);
+	plane[1].init(normal[1], center[1]);
+	TKA::SEGMENTATION::SliceBorder sliceBorder;
+	auto slices = sliceBorder.MakeSlicesFromPolyData(femurData, plane[0], plane[1]);
+
+
+	for (int i = 0; i < slices.size(); ++i)
+	{
+
+		auto points = sliceBorder.GetMainPoints(slices[i], 179);
+		std::cout << "Size: " << points.size() << std::endl;
+
+		for (int j = 0; j < points.size(); j++)
+		{
+			if (std::isnan(points[j][0]))
+			{
+
+				std::cout << "i:NAN" << i << std::endl;
+			}
+		}
+
+	}
+
+}
+
+#include "itkLabelImageToShapeLabelMapFilter.h"
+#include "itkConnectedComponentImageFilter.h"
+#include "itkRelabelComponentImageFilter.h"
+#include "itkMaskImageFilter.h"
+
+void segment_balls(int upperThreshold=100, int lowerThreshold=0, int minObjectSize=50)
+{
+
+	auto reader = itk::ImageFileReader<SPINE::SEGMENTATION::ImageType>::New();
+	reader->SetFileName("D:\\sovajo\\Spine_Images\\avi_images\\DICOM_Format\\1_1.dcm");
+	std::vector<itk::Point<double, 3>> centroid;
+	SPINE::SEGMENTATION::BallsManualSegmentation balls(reader->GetOutput());
+	SPINE::SEGMENTATION::SegmentImageType::Pointer result = balls.getSegmentBallsAndCentroids(lowerThreshold, upperThreshold, minObjectSize, centroid);
+
+	/*
+	using PixelType = unsigned short;
+	using ImageType = itk::Image<PixelType, 3>;
+	using LabelImageType = itk::Image<unsigned short, 3>;
+
+	auto thresholdFilter = itk::BinaryThresholdImageFilter<ImageType, ImageType>::New();
+	thresholdFilter->SetInput(reader->GetOutput());
+	thresholdFilter->SetUpperThreshold(upperThreshold);
+	thresholdFilter->SetLowerThreshold(lowerThreshold);
+	thresholdFilter->SetInsideValue(1); 
+	thresholdFilter->SetOutsideValue(0); 
+
+
+	using LabelImageType = itk::Image<unsigned short, 3>;
+	auto connectedFilter = itk::ConnectedComponentImageFilter<ImageType, LabelImageType>::New();
+	connectedFilter->SetInput(thresholdFilter->GetOutput());
+
+	auto relabelFilter = itk::RelabelComponentImageFilter<LabelImageType, LabelImageType>::New();
+	relabelFilter->SetInput(connectedFilter->GetOutput());   
+	relabelFilter->SetMinimumObjectSize(minObjectSize); 
+
+	using LabelMapType = itk::LabelMap<itk::ShapeLabelObject<unsigned short, 3>>;
+	auto labelMapFilter = itk::LabelImageToShapeLabelMapFilter<LabelImageType, LabelMapType>::New();
+	labelMapFilter->SetInput(relabelFilter->GetOutput());
+	labelMapFilter->Update();
+
+	LabelMapType *labelMap = labelMapFilter->GetOutput();
+	std::vector<unsigned long> sizes;
+	for (unsigned int i = 0; i < labelMap->GetNumberOfLabelObjects(); ++i) {
+		auto labelObject = labelMap->GetNthLabelObject(i);
+		sizes.push_back(labelObject->GetNumberOfPixels());
+	}
+
+	std::sort(sizes.begin(), sizes.end());
+	unsigned long medianSize = sizes[sizes.size() / 2];
+	//unsigned long rangeMin = static_cast<unsigned long>(medianSize * 0.8);
+	unsigned long rangeMax = static_cast<unsigned long>(medianSize * 2);
+	
+	auto filteredLabels = LabelImageType::New();
+	filteredLabels->SetRegions(relabelFilter->GetOutput()->GetLargestPossibleRegion());
+	filteredLabels->Allocate();
+	filteredLabels->FillBuffer(0);
+
+	for (unsigned int i = 0; i < labelMap->GetNumberOfLabelObjects(); ++i) {
+		auto labelObject = labelMap->GetNthLabelObject(i);
+		unsigned long size = labelObject->GetNumberOfPixels();
+
+		if (size <= rangeMax) {
+			auto boundingBox = labelObject->GetBoundingBox();
+			centroid.push_back(labelObject->GetCentroid());
+
+			itk::ImageRegionIterator<LabelImageType> it(filteredLabels, boundingBox);
+			for (it.GoToBegin(); !it.IsAtEnd(); ++it) {
+				if (labelObject->HasIndex(it.GetIndex())) {
+					it.Set(labelObject->GetLabel());
+				}
+			}
+		}
+	}
+
+	///////////////////////////////////////////////////
+
+	
+	// Aplicar la máscara final
+	auto maskFilter = itk::MaskImageFilter<ImageType, LabelImageType, ImageType>::New();
+	maskFilter->SetInput(reader->GetOutput());
+	maskFilter->SetMaskImage(filteredLabels);
+
+	// Guardar la imagen resultante
+	**/
+	
+	for (int i = 0; i < centroid.size(); i++)
+	{
+		std::cout << centroid[i] << std::endl;
+	}
+
+	std::cout << "Size: "<< centroid.size() << std::endl;
+	
+	auto writer = itk::ImageFileWriter<SPINE::SEGMENTATION::SegmentImageType>::New();
+	writer->SetFileName("D:\\sovajo\\Spine_Images\\avi_images\\DICOM_Format\\output.dcm");
+	writer->SetInput(result);
+
+	try
+	{
+		writer->Update();
+		std::cout << "Finishhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh" << std::endl;
+	}
+	catch (const itk::ExceptionObject & error)
+	{
+		std::cout << "Error: " << error.GetDescription() << std::endl;
+	}
+
+}
+
+
 int main()
 {
+	//testSegSliceBordes();
+	segment_balls();
+
+	std::cout << "VTK Version: " << vtkVersion::GetVTKVersion() << std::endl;
+
 	std::string casePlan = "D:\\sovajo\\Cases_Plan_TKA\\case1_left";
 	Knee myKnee;
 	
@@ -4687,7 +4836,7 @@ int main()
 
 	//MatchEasy();
 	//TEST_PKA::MatchPKA();
-	TEST_PKA_SUEN::testImplants();
+	//TEST_PKA_SUEN::testImplants();
 
 	//double pnt[3] = { 0, 0, 0 };
 	//Plane planeTemp;
