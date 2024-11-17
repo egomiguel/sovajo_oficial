@@ -658,6 +658,47 @@ std::vector<cv::Point3d> LeastSquaresICP::GetCorrespondence(const vtkSmartPointe
     return result;
 }
 
+std::vector<cv::Point3d> LeastSquaresICP::GetCorrespondence(const cv::Mat& target, const cv::Mat& data)
+{
+	std::vector<cv::Point3d> result;
+
+	double angleX = data.at<double>(3, 0);
+	double angleY = data.at<double>(4, 0);
+	double angleZ = data.at<double>(5, 0);
+
+	cv::Mat translation(3, 1, CV_64F);
+	translation.at<double>(0, 0) = data.at<double>(0, 0);
+	translation.at<double>(1, 0) = data.at<double>(1, 0);
+	translation.at<double>(2, 0) = data.at<double>(2, 0);
+
+	cv::Mat sourceMat(source.size(), 3, CV_64F);
+
+	for (int i = 0; i < source.size(); i++)
+	{
+		cv::Mat pointMat = CreatePoint(source[i]);
+		cv::Mat newPointMat = (Rx(angleX) * Ry(angleY) * Rz(angleZ)) * pointMat + translation;
+		cv::Point3d newPoint = cv::Point3d(newPointMat);
+
+		sourceMat.at<double>(i, 0) = newPoint.x;
+		sourceMat.at<double>(i, 1) = newPoint.y;
+		sourceMat.at<double>(i, 2) = newPoint.z;
+	}
+
+	cv::FlannBasedMatcher matcher(new cv::flann::KDTreeIndexParams(1));
+	std::vector<std::vector<cv::DMatch>> knnMatches;
+	matcher.knnMatch(sourceMat, target, knnMatches, 1); // 1 KNN
+
+	for (size_t i = 0; i < knnMatches.size(); ++i) {
+		int closestIdx = knnMatches[i][0].trainIdx;
+		//float closestDist = knnMatches[i][0].distance;
+		cv::Point3d tempPoint = cv::Point3d(target.at<double>(closestIdx, 0), target.at<double>(closestIdx, 1), target.at<double>(closestIdx, 2));
+		result.push_back(tempPoint);
+	}
+
+
+	return result;
+}
+
 std::vector<cv::Point3d> LeastSquaresICP::GetCorrespondenceScale(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const cv::Mat& data)
 {
     std::vector<cv::Point3d> result;
@@ -1315,6 +1356,229 @@ double LeastSquaresICP::LeastSquaresRandomInit(const pcl::PointCloud<pcl::PointX
 }
 
 */
+
+double LeastSquaresICP::LeastSquares(const cv::Mat& targetOnCT, cv::Mat& data, int iterations)
+{
+	std::vector<cv::Point3d> target = GetCorrespondence(targetOnCT, data);
+	double angleX, angleY, angleZ;
+
+	bool finish = false;
+
+	double lambda = 0.01;
+	double currentError, beforeError = -1, totalError;
+	double maxLambda = 1000.0;
+
+	int batch = 3;
+	int step = source.size() / batch;
+
+	cv::Mat dataTemp(6, 1, CV_64F);
+	double bestError = -1;
+	double tSize = source.size();
+
+	for (int i = 0; i < iterations && finish == false; i++)
+	{
+
+		for (int j = 0; j < batch; j++)
+		{
+			int posA, posB;
+			posA = step * j;
+			posB = posA + step;
+
+			if (j == batch - 1)
+			{
+				posB = source.size();
+			}
+
+			GaussNewton resultInfo = GetSystem(target, data, posA, posB, lambda);
+			currentError = resultInfo.localError;
+			totalError = sqrt(resultInfo.totalError / tSize);
+
+			if (bestError < 0 || totalError < bestError)
+			{
+				bestError = totalError;
+
+				dataTemp.at<double>(0, 0) = data.at<double>(0, 0);
+				dataTemp.at<double>(1, 0) = data.at<double>(1, 0);
+				dataTemp.at<double>(2, 0) = data.at<double>(2, 0);
+				dataTemp.at<double>(3, 0) = data.at<double>(3, 0);
+				dataTemp.at<double>(4, 0) = data.at<double>(4, 0);
+				dataTemp.at<double>(5, 0) = data.at<double>(5, 0);
+			}
+
+			if (bestError < maxError)
+			{
+				finish = true;
+				break;
+			}
+
+			if (beforeError < 0)
+			{
+				beforeError = currentError;
+			}
+			else
+			{
+				if (currentError < beforeError)
+				{
+					lambda = lambda / 3.0;
+				}
+				else if (currentError > beforeError)
+				{
+					lambda = lambda * 2.0;
+					if (lambda > maxLambda)
+					{
+						lambda = maxLambda;
+					}
+				}
+				beforeError = currentError;
+			}
+
+			cv::Mat dx;
+
+			bool result = cv::solve(resultInfo.A, resultInfo.B, dx);
+
+			data = data + dx;
+
+			angleX = data.at<double>(3, 0);
+			angleY = data.at<double>(4, 0);
+			angleZ = data.at<double>(5, 0);
+
+			data.at<double>(3, 0) = atan2(sin(angleX), cos(angleX));
+			data.at<double>(4, 0) = atan2(sin(angleY), cos(angleY));
+			data.at<double>(5, 0) = atan2(sin(angleZ), cos(angleZ));
+
+			/*if (resultInfo.totalError < chi2 && resultInfo.localError < maxError)
+			{
+				finish = true;
+				break;
+			}*/
+
+		}
+
+		/*std::sort(tempResult.begin(), tempResult.end(), [](const BatchResult &a, const BatchResult &b) { return (a.error < b.error); });
+		int pos = batch - 2;
+		if (bestError < 0 || tempResult[pos].error < bestError)
+		{
+			bestError = tempResult[pos].error;
+
+			dataTemp.at<double>(0, 0) = tempResult[pos].data.at<double>(0, 0);
+			dataTemp.at<double>(1, 0) = tempResult[pos].data.at<double>(1, 0);
+			dataTemp.at<double>(2, 0) = tempResult[pos].data.at<double>(2, 0);
+			dataTemp.at<double>(3, 0) = tempResult[pos].data.at<double>(3, 0);
+			dataTemp.at<double>(4, 0) = tempResult[pos].data.at<double>(4, 0);
+			dataTemp.at<double>(5, 0) = tempResult[pos].data.at<double>(5, 0);
+		}
+
+		tempResult.clear();*/
+
+		//if (bestError < maxError)
+		//{
+		//	finish = true;
+		//}
+
+		if (finish == true)
+		{
+			continue;
+		}
+
+		shuffleSource();
+		target.clear();
+		target = GetCorrespondence(targetOnCT, data);
+	}
+
+	/* cv::Mat translation(3, 1, CV_64F);
+	 translation.at<double>(0, 0) = data.at<double>(0, 0);
+	 translation.at<double>(1, 0) = data.at<double>(1, 0);
+	 translation.at<double>(2, 0) = data.at<double>(2, 0);
+
+	 for (int i = 0; i < source.size(); i++)
+	 {
+		 cv::Mat transformPoint(3, 1, CV_64F);
+
+		 transformPoint.at<double>(0, 0) = source[i].x;
+		 transformPoint.at<double>(1, 0) = source[i].y;
+		 transformPoint.at<double>(2, 0) = source[i].z;
+
+		 cv::Mat result = (Rx(data.at<double>(3, 0)) * Ry(data.at<double>(4, 0)) * Rz(data.at<double>(5, 0))) * transformPoint + translation;
+
+		 cv::Point3d myLastPoint = cv::Point3d(result);
+
+		 double pnt[3];
+
+		 pnt[0] = myLastPoint.x;
+		 pnt[1] = myLastPoint.y;
+		 pnt[2] = myLastPoint.z;
+
+		 ClosestPoint(surface, pnt);
+	 }*/
+
+	data.at<double>(0, 0) = dataTemp.at<double>(0, 0);
+	data.at<double>(1, 0) = dataTemp.at<double>(1, 0);
+	data.at<double>(2, 0) = dataTemp.at<double>(2, 0);
+	data.at<double>(3, 0) = dataTemp.at<double>(3, 0);
+	data.at<double>(4, 0) = dataTemp.at<double>(4, 0);
+	data.at<double>(5, 0) = dataTemp.at<double>(5, 0);
+
+	return bestError;
+}
+
+double LeastSquaresICP::LeastSquaresRandomInit(const cv::Mat& targetOnCT, cv::Mat& data, int iterations)
+{
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<> distr_translation(-1, 1);
+	std::uniform_real_distribution<> distr_rotation(-0.06, 0.06);
+
+	cv::Mat dataTemp(6, 1, CV_64F);
+	cv::Mat dataInit(6, 1, CV_64F);
+	cv::Mat randomValues(6, 1, CV_64F);
+
+	dataInit.at<double>(0, 0) = data.at<double>(0, 0);
+	dataInit.at<double>(1, 0) = data.at<double>(1, 0);
+	dataInit.at<double>(2, 0) = data.at<double>(2, 0);
+	dataInit.at<double>(3, 0) = data.at<double>(3, 0);
+	dataInit.at<double>(4, 0) = data.at<double>(4, 0);
+	dataInit.at<double>(5, 0) = data.at<double>(5, 0);
+
+	double error = LeastSquares(targetOnCT, data, iterations);
+
+	for (int i = 0; i < 10; i++)
+	{
+
+		dataTemp.at<double>(0, 0) = dataInit.at<double>(0, 0);
+		dataTemp.at<double>(1, 0) = dataInit.at<double>(1, 0);
+		dataTemp.at<double>(2, 0) = dataInit.at<double>(2, 0);
+		dataTemp.at<double>(3, 0) = dataInit.at<double>(3, 0);
+		dataTemp.at<double>(4, 0) = dataInit.at<double>(4, 0);
+		dataTemp.at<double>(5, 0) = dataInit.at<double>(5, 0);
+
+		randomValues.at<double>(0, 0) = distr_translation(gen);
+		randomValues.at<double>(1, 0) = distr_translation(gen);
+		randomValues.at<double>(2, 0) = distr_translation(gen);
+
+		randomValues.at<double>(3, 0) = distr_rotation(gen);
+		randomValues.at<double>(4, 0) = distr_rotation(gen);
+		randomValues.at<double>(5, 0) = distr_rotation(gen);
+
+		dataTemp += randomValues;
+
+		double errorTemp = LeastSquares(targetOnCT, dataTemp, iterations);
+
+		if (errorTemp < error)
+		{
+			error = errorTemp;
+
+			data.at<double>(0, 0) = dataTemp.at<double>(0, 0);
+			data.at<double>(1, 0) = dataTemp.at<double>(1, 0);
+			data.at<double>(2, 0) = dataTemp.at<double>(2, 0);
+			data.at<double>(3, 0) = dataTemp.at<double>(3, 0);
+			data.at<double>(4, 0) = dataTemp.at<double>(4, 0);
+			data.at<double>(5, 0) = dataTemp.at<double>(5, 0);
+		}
+
+	}
+
+	return error;
+}
 
 cv::Mat LeastSquaresICP::GetRotationAnglesXYZ(const std::vector<cv::Point3d>& threeVectorsSource, const std::vector<cv::Point3d>& threeVectorstarget, cv::Mat& data)
 {

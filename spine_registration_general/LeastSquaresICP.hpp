@@ -76,6 +76,8 @@ namespace SPINE
 
 			std::vector<cv::Point3d> GetCorrespondence(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const cv::Mat& data);
 
+			std::vector<cv::Point3d> GetCorrespondence(const cv::Mat& target, const cv::Mat& data);
+
 			std::vector<cv::Point3d> GetCorrespondenceScale(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const cv::Mat& data);
 
 			//std::vector<cv::Point3d> GetCorrespondence(const pcl::KdTreeFLANN<pcl::PointXYZ>& kdtree, const pcl::PointCloud<pcl::PointXYZ>::Ptr surface, const cv::Mat& data);
@@ -94,11 +96,11 @@ namespace SPINE
 
 			double LeastSquares(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, vtkNew<vtkImplicitPolyDataDistance>& implicitPolyDataDistance, int iterations = 200);
 
-			//double LeastSquares(const pcl::PointCloud<pcl::PointXYZ>::Ptr surface, cv::Mat& data, int iterations = 200);
-
 			double LeastSquaresRandomInit(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 200);
 
-			//double LeastSquaresRandomInit(const pcl::PointCloud<pcl::PointXYZ>::Ptr surface, cv::Mat& data, int iterations = 200);
+			double LeastSquares(const cv::Mat& targetOnCT, cv::Mat& data, int iterations = 200);
+
+			double LeastSquaresRandomInit(const cv::Mat& targetOnCT, cv::Mat& data, int iterations = 200);
 
 			double LeastSquaresTest(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 100);
 

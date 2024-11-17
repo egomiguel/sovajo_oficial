@@ -1,5 +1,5 @@
-#ifndef GENERAL_REGISTRATION_H
-#define GENERAL_REGISTRATION_H
+#ifndef SPINE_GENERAL_REGISTRATION_H
+#define SPINE_GENERAL_REGISTRATION_H
 
 #include "spine_registration_export.h"
 #include <opencv2/calib3d/calib3d.hpp>

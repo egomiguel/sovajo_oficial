@@ -472,7 +472,7 @@ std::vector<cv::Point3d> LeastSquaresICP::GetCorrespondence(const cv::Mat& targe
     translation.at<double>(1, 0) = data.at<double>(1, 0);
     translation.at<double>(2, 0) = data.at<double>(2, 0);
 
-	cv::Mat sourceMat(source.size(), 2, CV_64F);
+	cv::Mat sourceMat(source.size(), 3, CV_64F);
 
     for (int i = 0; i < source.size(); i++)
     {
