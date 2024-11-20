@@ -191,7 +191,7 @@ vtkSmartPointer<vtkPolyData> SplitPoly(vtkSmartPointer<vtkPolyData> poly, Plane 
 
 void writeListPoints(const std::vector<cv::Point3d>& pPoints, const std::string& pName)
 {
-	ofstream myfile;
+	std::ofstream myfile;
 	myfile.open(pName);
 	for (int i = 0; i < pPoints.size(); i++)
 	{
@@ -4460,27 +4460,27 @@ void testSegSliceBordes()
 	auto femurData = TestVTK::ReadPolyData("D:\\sovajo\\Test_Cases\\Segmentation_TKA\\test-segmentation\\femur.vtk");
 	double normal[2][3] = { {1.0,0.0,0.0},{1.0,0.0,0.0} };
 	double center[2][3] = { {37.93057714926232,198.0709686279297,-312.04998779296875},
-	{126.2567716473318,198.0709686279297,-312.04998779296875} };
+							{126.2567716473318,198.0709686279297,-312.04998779296875} };
 	TKA::SEGMENTATION::SPlane plane[2];
 	plane[0].init(normal[0], center[0]);
 	plane[1].init(normal[1], center[1]);
 	TKA::SEGMENTATION::SliceBorder sliceBorder;
 	auto slices = sliceBorder.MakeSlicesFromPolyData(femurData, plane[0], plane[1]);
 
-
 	for (int i = 0; i < slices.size(); ++i)
 	{
-
 		auto points = sliceBorder.GetMainPoints(slices[i], 179);
-		std::cout << "Size: " << points.size() << std::endl;
 
+		std::cout << "Size: " << points.size() << std::endl;
+		
 		for (int j = 0; j < points.size(); j++)
 		{
 			if (std::isnan(points[j][0]))
 			{
 
-				std::cout << "i:NAN" << i << std::endl;
+				std::cout << "i:NAN " << i << std::endl;
 			}
+			
 		}
 
 	}
@@ -4598,11 +4598,11 @@ void segment_balls(int upperThreshold=100, int lowerThreshold=0, int minObjectSi
 
 int main()
 {
-	//testSegSliceBordes();
-	segment_balls();
+	testSegSliceBordes();
+	//segment_balls();
 
 	std::cout << "VTK Version: " << vtkVersion::GetVTKVersion() << std::endl;
-
+	/*
 	std::string casePlan = "D:\\sovajo\\Cases_Plan_TKA\\case1_left";
 	Knee myKnee;
 	
@@ -4631,6 +4631,7 @@ int main()
 	auto spacerImplant3D = TestVTK::ReadPolyDataSTL("D:\\sovajo\\Implants\\pka\\Tibial_spacer.STL");
 
 	auto spacerTransform = TestVTK::TransformPoly(spacerImplant3D, tibiaSpacerMatch.GetRotationMatrix(), tibiaSpacerMatch.GetTranslationMatrix());
+	*/
 	/*
 	vtkNew<vtkAppendPolyData> appendFilter;
 	appendFilter->AddInputData(tibiaImplant3D);
@@ -4641,16 +4642,12 @@ int main()
 
 	//bool result;
 
-	
+	/*
 	SPINE::SEGMENTATION::ImageType::Pointer inputImg;
 
 	std::string spine = "C:\\Users\\Miguel\\Desktop\\Algoritmos_Neuvos\\CT\\Spine_CT_17.nrrd";
 	spine = "D:\\sovajo\\Spine_Images\\sping_seg_debug\\spine.nrrd";
 	Test::readImage<ImageType>(spine, inputImg);
-
-	
-	//cv::Point3d A(-10.5, -7.9, -313.24);
-	//cv::Point3d B(-10.35, -9.66, -470.24);
 
 	cv::Point3d A(-5.2, 63.98, 159);
 	cv::Point3d B(-5.2, 58.84, -28.5);
@@ -4756,6 +4753,7 @@ int main()
 											cv::Point3d(-11.4071,73.9791,145.915) };
 
 	std::vector<ImageType::PointType> allPoints;
+	*/
 	/*
 	double distance = sqrt((A - B).dot(A - B));
 	double step = 1. / distance;
@@ -4789,6 +4787,7 @@ int main()
 	}
 	morePoints.push_back(listaPoints[listaPoints.size() - 1]);*/
 
+	/*
 	std::cout << "Antes: " << listaPoints.size() << ", Despues: " << morePoints.size() << std::endl;
 	
 	for (auto& tempPoint: listaPoints)
@@ -4809,6 +4808,7 @@ int main()
 	{
 		std::cout << "Center: " << item.center << std::endl;
 	}
+	*/
 	
 	//std::vector<SpineSegmentation::Plane> getIntervertebralPlanes(const std::vector<ImageType::PointType>& physicalPoints)
 

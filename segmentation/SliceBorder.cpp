@@ -139,12 +139,23 @@ std::vector<PointTypeITK> SliceBorder::GetMainPoints(const vtkSmartPointer<vtkPo
 
     auto itl1 = lines.begin();
     auto itl2 = lines.end();
-
+	
     for (; itl1 != itl2; ++itl1)
     {  
         double p[3];
         points->GetPoint((*itl1).first, p);
-        sortPoints.push_back(cv::Point3d(p[0], p[1], p[2]));
+		cv::Point3d tempPoint = cv::Point3d(p[0], p[1], p[2]);
+		if (sortPoints.size() == 0)
+		{
+			sortPoints.push_back(tempPoint);
+		}
+		else
+		{
+			if (sortPoints.back() != tempPoint)
+			{
+				sortPoints.push_back(tempPoint);
+			}
+		}
     }
 
     std::vector<cv::Point3d> splinePoints = m_data->InterpolateSpline(sortPoints, 60);

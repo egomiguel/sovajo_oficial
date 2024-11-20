@@ -27,12 +27,13 @@
 #include "vtkMatrix4x4.h"
 #include "vtkTransform.h"
 #include "vtkTransformPolyDataFilter.h"
+#include <fstream>
 
 using namespace THA::IMPLANTS;
 
 void ImplantTools::saveVectorPoints(const std::vector<Point>& pPoints, const std::string& pName, int axis)
 {
-	ofstream MyFile(pName);
+	std::ofstream MyFile(pName);
 	auto it1 = pPoints.begin();
 	auto it2 = pPoints.end();
 
@@ -370,7 +371,7 @@ Point ImplantTools::getLocalMinimumTest(const std::list<Point>& pPoints, const P
 	double maxX = -9999999;
 	double minX = 9999999;
 
-	ofstream MyFile("curve.txt");
+	std::ofstream MyFile("curve.txt");
 	for (; it1 != it2; ++it1)
 	{
 		cv::Mat pointTempMat = rotateFinal * (*it1).ToMatPoint();
@@ -388,7 +389,7 @@ Point ImplantTools::getLocalMinimumTest(const std::list<Point>& pPoints, const P
 		}
 	}
 
-	ofstream MyFileFit("curve_fit.txt");
+	std::ofstream MyFileFit("curve_fit.txt");
 
 	//PolyConstraintPoint constraintObj;
 

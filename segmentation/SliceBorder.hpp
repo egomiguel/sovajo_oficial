@@ -22,7 +22,7 @@ namespace TKA
 			~SliceBorder();
 
 			std::vector<PointTypeITK> GetMainPoints(const vtkSmartPointer<vtkPolyData>& slice, double curvatureMaxAngle = 160.0) const;
-
+			
 			void AddImproveSlice(const vtkSmartPointer<vtkPolyData>& slice);
 
 			vtkSmartPointer<vtkPolyData> GetSurface3D(bool& result, std::string& msg) const;

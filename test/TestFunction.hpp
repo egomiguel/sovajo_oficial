@@ -68,7 +68,7 @@
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
-
+#include <fstream>
 
 namespace Test {
 
@@ -438,7 +438,7 @@ namespace Test {
 		ImageType::SizeType dims = inputRegion.GetSize();
 		ImageType::PixelType* buffer = pImage->GetBufferPointer();
 
-		ofstream myfile(path);
+		std::ofstream myfile(path);
 
 		int total = dims[0] * dims[1] * dims[2];
 
@@ -1417,7 +1417,7 @@ namespace Test {
 	void saveFileITK(const std::vector<itk::Point<double, 3>>& pPoints, std::string name)
 	{
 		std::string fullName = name + ".txt";
-		ofstream MyFile(fullName);
+		std::ofstream MyFile(fullName);
 
 		for (int i = 0; i < pPoints.size(); i++)
 		{
