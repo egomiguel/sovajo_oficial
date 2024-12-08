@@ -224,6 +224,32 @@ Line Line::makeLineWithPoints(const Point& P1, const Point& P2)
     return Line(tempVector, P1);
 }
 
+Line Line::getBestLine(const std::vector<Point>& pPoints)
+{
+	if (pPoints.size() < 2)
+	{
+		throw ImplantExceptionCode::LINE_DIRECT_VECTOR_CAN_NOT_BE_ZERO;
+	}
+
+	cv::Point3d centroid(0, 0, 0);
+	for (const auto& pt : pPoints) {
+		centroid += pt;
+	}
+	centroid *= (1.0 / pPoints.size());
+
+	cv::Matx33d covariance = cv::Matx33d::zeros();
+	for (const auto& pt : pPoints) {
+		cv::Vec3d diff = cv::Vec3d(pt.x - centroid.x, pt.y - centroid.y, pt.z - centroid.z);
+		covariance += diff * diff.t();
+	}
+
+	cv::SVD svd(covariance);
+	Point directVector = Point(svd.u.at<double>(0, 0), svd.u.at<double>(1, 0), svd.u.at<double>(2, 0));
+	Point pointOnLine = centroid;
+
+	return Line(directVector, pointOnLine);
+}
+
 bool Line::getInterceptionSphere(const Point& center, double radius, std::pair<Point, Point>& result) const
 {
     //ax^2 + bx + c = 0

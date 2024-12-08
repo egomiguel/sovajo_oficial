@@ -33,6 +33,41 @@ Tiling::Tiling(const vtkSmartPointer<vtkPolyData> sliceDown, const vtkSmartPoint
     originalDown = ExtractSortPoints(sliceDown);
     originalUp = ExtractSortPoints(sliceUp);
 
+	/*for (int i = 0; i < originalDown->GetNumberOfPoints() - 1; i++)
+	{
+		for (int j = i + 1; j < originalDown->GetNumberOfPoints(); j++)
+		{
+			double aa[3];
+			double bb[3];
+			originalDown->GetPoint(i, aa);
+			originalDown->GetPoint(j, bb);
+
+			if (aa[0] == bb[0] && aa[1] == bb[1] && aa[2] == bb[2])
+			{
+				std::cout << "Point down repeat " << aa[0] << ", " << aa[1] << ", " << aa[2] << std::endl;
+				std::cout << i << " " << j << std::endl;
+			}
+		}
+	}
+	std::cout << "//////////////////////////////////////////////////////" << std::endl;
+	for (int i = 0; i < originalUp->GetNumberOfPoints(); i++)
+	{
+		for (int j = i + 1; j < originalUp->GetNumberOfPoints(); j++)
+		{
+			double aa[3];
+			double bb[3];
+
+			originalUp->GetPoint(i, aa);
+			originalUp->GetPoint(j, bb);
+
+			if (aa[0] == bb[0] && aa[1] == bb[1] && aa[2] == bb[2])
+			{
+				std::cout << "Point up repeat " << aa[0] << ", " << aa[1] << ", " << aa[2] << std::endl;
+				std::cout << i << " " << j << std::endl;
+			}
+		}
+	}*/
+
     double downCenter[3];
     double upCenter[3];
     double downSize[6];
@@ -54,6 +89,13 @@ Tiling::Tiling(const vtkSmartPointer<vtkPolyData> sliceDown, const vtkSmartPoint
         downRot = 0;
         upRot = 0;
     }
+
+	/*auto aa = originalDown->GetPoint(downRot);
+	auto bb = originalUp->GetPoint(upRot);
+
+	std::cout << "************************ " << downRot << ", " << upRot << " Down size: " << originalDown->GetNumberOfPoints() << " Up size: " << originalUp->GetNumberOfPoints() << std::endl;
+	std::cout << "Point down begin " << aa[0] << ", " << aa[1] << ", "<< aa[2] << std::endl;
+	std::cout << "Point up begin " << bb[0] << ", " << bb[1] << ", "<< bb[2]<< std::endl;*/
 
     pointsDownRot = RotatePoints(originalDown, downRot);
     pointsUpRot = RotatePoints(originalUp, upRot);
@@ -165,7 +207,7 @@ Tiling::Tiling(const vtkSmartPointer<vtkPoints> pointsDown, const vtkSmartPointe
 
     pointsDownRot = RotatePoints(originalDown, downRot);
     pointsUpRot = RotatePoints(originalUp, upRot);
-
+	
     normaliceDownRot = normalice(pointsDownRot, downCenter, abs(downSize[1] - downSize[0]), abs(downSize[3] - downSize[2]));
 
     normaliceUpRot = normalice(pointsUpRot, upCenter, abs(upSize[1] - upSize[0]), abs(upSize[3] - upSize[2]));
@@ -311,21 +353,55 @@ vtkSmartPointer<vtkPoints> Tiling::ExtractSortPoints(const vtkSmartPointer<vtkPo
 
     auto it1 = lines.begin();
     auto it2 = lines.end();
-
+	double lastPoint[3];
+	int cont = 0;
     for (; it1 != it2; ++it1)
     {
         double p1[3];
         points->GetPoint(it1->first, p1);
-        result->InsertNextPoint(p1);
-    }
 
+		if (cont == 0)
+		{
+			lastPoint[0] = p1[0];
+			lastPoint[1] = p1[1];
+			lastPoint[2] = p1[2];
+			result->InsertNextPoint(p1);
+		}
+		else if (lastPoint[0] != p1[0] || lastPoint[1] != p1[1] || lastPoint[2] != p1[2])
+		{
+			lastPoint[0] = p1[0];
+			lastPoint[1] = p1[1];
+			lastPoint[2] = p1[2];
+			result->InsertNextPoint(p1);
+		}
+        
+		cont++;
+    }
+	/*std::cout << "Cont: " << cont << std::endl;*/
     if (lines.size() > 0)
     {
         if (lines.front().first != lines.back().second)
         {
-            result->InsertNextPoint(points->GetPoint(lines.back().second));
+			double p1[3];
+			points->GetPoint(lines.back().second, p1);
+			if (lastPoint[0] != p1[0] || lastPoint[1] != p1[1] || lastPoint[2] != p1[2])
+			{
+				lastPoint[0] = p1[0];
+				lastPoint[1] = p1[1];
+				lastPoint[2] = p1[2];
+				result->InsertNextPoint(p1);
+			}
         }
     }
+
+	double p1[3];
+	double p2[3];
+	result->GetPoint(0, p1);
+	result->GetPoint(result->GetNumberOfPoints() - 1, p2);
+	if (p2[0] != p1[0] || p2[1] != p1[1] || p2[2] != p1[2])
+	{
+		result->InsertNextPoint(p1);
+	}
 
     return result;
 }

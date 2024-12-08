@@ -84,10 +84,18 @@ namespace TKA
 
 			void ExtractSortLines(const vtkSmartPointer<vtkPolyData> polyData, std::list<std::pair<vtkIdType, vtkIdType>>& lines);
 
+			vtkSmartPointer<vtkPoints> ExtractSortPoints(const vtkSmartPointer<vtkPolyData> polyData);
+
 			vtkIdType GetNearestPoints(const vtkSmartPointer<vtkPolyData> poly, const Point& pPoint);
+
+			vtkIdType GetNearestPoints(const vtkSmartPointer<vtkPoints> points, const Point& pPoint);
+
+			Point GetNearestPointsOnPlane(const vtkSmartPointer<vtkImplicitPolyDataDistance> polyDistance, const Plane& pPlane, const Point& pPoint, const Point& vectorToPoly);
 
 			vtkIdType GetNearestPoints(const vtkSmartPointer<vtkPolyData> poly, const Line& pLine, const Plane& pPlane1, const Plane& pPlane2);
 
+			vtkSmartPointer<vtkPoints> RotatePoints(vtkSmartPointer<vtkPoints> points, vtkIdType id);
+			
 			std::pair<int, float> GetNearestPointToLine(const std::vector<Point>& pPoints, const Line& pLine, const Plane& pConditionPlane);
 
 			std::pair<double, Point> GetDistancePlaneToSurface(const vtkSmartPointer<vtkPolyData> poly, const Plane& pPlane, const Plane& pUseOneSide = Plane());
@@ -95,6 +103,8 @@ namespace TKA
 			bool GetInterceptionWithSegment(const vtkSmartPointer<vtkPolyData> poly, const Point& p1, const Point& p2, Point& result);
 
 			double GetInterceptionWithLine(const vtkSmartPointer<vtkImplicitPolyDataDistance> polyDistance, const Point& pRefPoint, const Point& p2, Point& result);
+
+			double GetInterceptionWithLineUsingVector(const vtkSmartPointer<vtkImplicitPolyDataDistance> polyDistance, const Point& pRefPoint, const Point& vectorToPoly, Point& result);
 
 			int GetFarestPositivePoint(const std::vector<Point>& pPoints, const Plane& pPlane);
 

@@ -287,7 +287,7 @@ void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point
 
     //FillTibiaPoints();
 
-    //makeKneeGroovePath();
+    makeKneeGroovePathNew();
 
     goodSide = getGoodSide(hipCenter, femurKneeCenter, lateralEpicondyle, medialEpicondylePerp, ankleCenter);
 
@@ -2545,6 +2545,449 @@ void Knee::findAutomaticPlateaus()
     this->medialPlateau.x = myClosestMed[0];
     this->medialPlateau.y = myClosestMed[1];
     this->medialPlateau.z = myClosestMed[2];
+}
+
+void Knee::makeKneeGroovePathNew()
+{
+	vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
+	implicitPolyDataDistance->SetInput(GetFemurPoly());
+
+	TemplateFemur templateObj;
+
+	Point targetAP, targetTEA, targetAxis, targetCenter;
+	Point sourceAP, sourceTEA, sourceAxis, sourceCenter;
+	double tScale;
+
+	targetAP = getFemurDirectVectorAP();
+	targetTEA = getFemurVectorLateralTEA();
+	targetAxis = targetAP.cross(targetTEA);
+	targetAxis.normalice();
+	targetCenter = (getLateralEpicondyle() + getMedialEpicondyle()) / 2.0;
+
+	Point diff = getLateralEpicondyle() - getMedialEpicondyle();
+	double targetSize = sqrt(diff.dot(diff));
+
+	std::vector<std::vector<Point>> myGroovePoints, fitPoints;
+	std::vector<cv::Point3d> myTemplatePoints;
+
+	if (getIsRight() == false)
+	{
+		sourceAP = templateObj.vectorLeftAP;
+		sourceTEA = templateObj.vectorLeftTEA;
+		sourceCenter = templateObj.centerLeft;
+		tScale = (targetSize / templateObj.sizeLeft);
+		myTemplatePoints = templateObj.mTemplateLeft;
+		myGroovePoints = templateObj.mOfficialLeftGroovePlanes;
+	}
+	else
+	{
+		sourceAP = templateObj.vectorRightAP;
+		sourceTEA = templateObj.vectorRightTEA;
+		sourceCenter = templateObj.centerRight;
+		tScale = (targetSize / templateObj.sizeLeft);
+		myTemplatePoints = templateObj.mTemplateRight;
+		myGroovePoints = templateObj.mOfficialRightGroovePlanes;
+	}
+
+	if (tScale < 1.0)
+	{
+		tScale = 1.0;
+	}
+
+	sourceAxis = sourceAP.cross(sourceTEA);
+	sourceAxis.normalice();
+
+	std::vector<cv::Point3d> vectorTarget = { targetAP, targetTEA, targetAxis };
+	std::vector<cv::Point3d> vectorSource = { sourceAP, sourceTEA, sourceAxis };
+
+	cv::Mat data(7, 1, CV_64F);
+
+	cv::Mat rotation = LeastSquaresScaleICP::GetRotationAnglesXYZ(vectorSource, vectorTarget, data);
+	cv::Mat translation = targetCenter.ToMatPoint() - (rotation * sourceCenter.ToMatPoint());
+
+	data.at<double>(3, 0) = data.at<double>(0, 0);
+	data.at<double>(4, 0) = data.at<double>(1, 0);
+	data.at<double>(5, 0) = data.at<double>(2, 0);
+
+	data.at<double>(0, 0) = translation.at<double>(0, 0);
+	data.at<double>(1, 0) = translation.at<double>(1, 0);
+	data.at<double>(2, 0) = translation.at<double>(2, 0);
+
+	data.at<double>(6, 0) = tScale;
+
+	LeastSquaresScaleICP registerObj(myTemplatePoints);
+
+	registerObj.LeastSquaresScale(GetFemurPoly(), data);
+
+	////////////////////////////////////////////////////////////////////
+
+	cv::Mat myTranslation(3, 1, CV_64F);
+	myTranslation.at<double>(0, 0) = data.at<double>(0, 0);
+	myTranslation.at<double>(1, 0) = data.at<double>(1, 0);
+	myTranslation.at<double>(2, 0) = data.at<double>(2, 0);
+
+	double angleX = data.at<double>(3, 0);
+	double angleY = data.at<double>(4, 0);
+	double angleZ = data.at<double>(5, 0);
+
+	double scale = data.at<double>(6, 0);
+
+	cv::Mat myRotation = registerObj.GetRotationMatrix(angleX, angleY, angleZ);
+	std::vector<Point> fitVertexPoint, fitVertexVectorDown;
+
+	for (auto& items: myGroovePoints)
+	{
+		std::vector<Point> tempPlane;
+		for (auto& point: items)
+		{
+			cv::Mat tempPoint = scale * (myRotation * point.ToMatPoint()) + myTranslation;
+			tempPlane.push_back(Point(tempPoint));
+		}
+		fitVertexPoint.push_back(tempPlane[1]);
+		fitPoints.push_back(tempPlane);
+		Line tempLine = Line::makeLineWithPoints(tempPlane[0], tempPlane[2]);
+		Point vectorDown = tempPlane[1] - tempLine.getProjectPoint(tempPlane[1]);
+		vectorDown.normalice();
+		fitVertexVectorDown.push_back(vectorDown);
+	}
+
+	Line bestFitLineOld = Line::getBestLine(fitVertexPoint);
+
+	///////////////////////////////////////////////////////////////////
+
+	Point vectorAxis = hipCenter - femurKneeCenter;
+	Plane axial;
+	axial.init(vectorAxis, femurKneeCenter);
+	Plane basePlane = axial.getPerpendicularPlane(lateralCondyle, medialCondyle);
+	basePlane.reverseByPoint(femurKneeCenter);
+	std::vector<Point> mainVertexPoints;
+
+	for (auto& items: fitPoints)
+	{
+		Plane tempPlane;
+		tempPlane.init(items[0], items[1], items[2]);
+		std::vector<Point> cutPointsInGroove = getGrooveCutPoints(tempPlane, items);
+
+		if (cutPointsInGroove.size() == 0)
+		{
+			throw ImplantExceptionCode::CAN_NOT_DETERMINE_PATELLA_GROOVE;
+		}
+
+		try
+		{
+			Point myVertex = ImplantTools::getLocalMinimum(cutPointsInGroove, tempPlane, tempPlane.getProjectionVector(basePlane.getNormalVector()));
+			mainVertexPoints.push_back(myVertex);
+		}
+		catch (...)
+		{
+			throw ImplantExceptionCode::CHECK_LANDMARKS_CAN_NOT_DETERMINE_WHITESIDE_LINE;
+		}
+	}
+
+	Line bestVertexLine = Line::getBestLine(mainVertexPoints);
+	double angle = ImplantTools::getAngleBetweenVectorsDegree(basePlane.getProjectionVector(bestFitLineOld.getDirectVector()),
+															  basePlane.getProjectionVector(bestVertexLine.getDirectVector()));
+
+	if (angle > 90)
+	{
+		angle = 180 - angle;
+	}
+
+	Line bestLine = (angle >= 10) ? bestFitLineOld : bestVertexLine;
+	Plane groovePlane = basePlane.getPerpendicularPlane(bestLine.getPoint(), bestLine.getDirectVector() + bestLine.getPoint());
+	
+	std::vector<Point> refPoints;
+	int tSize = mainVertexPoints.size();
+	if (angle >= 10)
+	{
+		refPoints = {ImplantTools::GetNearestPointsOnPlane(implicitPolyDataDistance, groovePlane, fitVertexPoint[0], fitVertexVectorDown[0]),
+					ImplantTools::GetNearestPointsOnPlane(implicitPolyDataDistance, groovePlane, fitVertexPoint[tSize / 2], fitVertexVectorDown[tSize / 2]),
+					ImplantTools::GetNearestPointsOnPlane(implicitPolyDataDistance, groovePlane, fitVertexPoint[tSize - 1], fitVertexVectorDown[tSize - 1]) };
+	}
+	else
+	{
+		refPoints = { ImplantTools::GetNearestPointsOnPlane(implicitPolyDataDistance, groovePlane, mainVertexPoints[0], fitVertexVectorDown[0]),
+					  ImplantTools::GetNearestPointsOnPlane(implicitPolyDataDistance, groovePlane, mainVertexPoints[tSize / 2], fitVertexVectorDown[tSize / 2]),
+					  ImplantTools::GetNearestPointsOnPlane(implicitPolyDataDistance, groovePlane, mainVertexPoints[tSize - 1], fitVertexVectorDown[tSize - 1]) };
+	}
+
+	mKneeGroovePath = getGrooveCutPoints(groovePlane, refPoints);   
+}
+
+std::vector<cv::Point3d> Knee::getFitGroovePointsTest()
+{
+	vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
+	implicitPolyDataDistance->SetInput(GetFemurPoly());
+
+	TemplateFemur templateObj;
+
+	Point targetAP, targetTEA, targetAxis, targetCenter;
+	Point sourceAP, sourceTEA, sourceAxis, sourceCenter;
+	double tScale;
+
+	targetAP = getFemurDirectVectorAP();
+	targetTEA = getFemurVectorLateralTEA();
+	targetAxis = targetAP.cross(targetTEA);
+	targetAxis.normalice();
+	targetCenter = (getLateralEpicondyle() + getMedialEpicondyle()) / 2.0;
+
+	Point diff = getLateralEpicondyle() - getMedialEpicondyle();
+	double targetSize = sqrt(diff.dot(diff));
+
+	std::vector<std::vector<Point>> myGroovePoints;
+	std::vector<cv::Point3d> myTemplatePoints;
+
+	if (getIsRight() == false)
+	{
+		sourceAP = templateObj.vectorLeftAP;
+		sourceTEA = templateObj.vectorLeftTEA;
+		sourceCenter = templateObj.centerLeft;
+		tScale = (targetSize / templateObj.sizeLeft);
+		myTemplatePoints = templateObj.mTemplateLeft;
+		myGroovePoints = templateObj.mOfficialLeftGroovePlanes;
+	}
+	else
+	{
+		sourceAP = templateObj.vectorRightAP;
+		sourceTEA = templateObj.vectorRightTEA;
+		sourceCenter = templateObj.centerRight;
+		tScale = (targetSize / templateObj.sizeLeft);
+		myTemplatePoints = templateObj.mTemplateRight;
+		myGroovePoints = templateObj.mOfficialRightGroovePlanes;
+	}
+
+	if (tScale < 1.0)
+	{
+		tScale = 1.0;
+	}
+
+	sourceAxis = sourceAP.cross(sourceTEA);
+	sourceAxis.normalice();
+
+	std::vector<cv::Point3d> vectorTarget = { targetAP, targetTEA, targetAxis };
+	std::vector<cv::Point3d> vectorSource = { sourceAP, sourceTEA, sourceAxis };
+
+	cv::Mat data(7, 1, CV_64F);
+
+	cv::Mat rotation = LeastSquaresScaleICP::GetRotationAnglesXYZ(vectorSource, vectorTarget, data);
+	cv::Mat translation = targetCenter.ToMatPoint() - (rotation * sourceCenter.ToMatPoint());
+
+	data.at<double>(3, 0) = data.at<double>(0, 0);
+	data.at<double>(4, 0) = data.at<double>(1, 0);
+	data.at<double>(5, 0) = data.at<double>(2, 0);
+
+	data.at<double>(0, 0) = translation.at<double>(0, 0);
+	data.at<double>(1, 0) = translation.at<double>(1, 0);
+	data.at<double>(2, 0) = translation.at<double>(2, 0);
+
+	data.at<double>(6, 0) = tScale;
+
+	LeastSquaresScaleICP registerObj(myTemplatePoints);
+
+	registerObj.LeastSquaresScale(GetFemurPoly(), data);
+
+	////////////////////////////////////////////////////////////////////
+
+	cv::Mat myTranslation(3, 1, CV_64F);
+	myTranslation.at<double>(0, 0) = data.at<double>(0, 0);
+	myTranslation.at<double>(1, 0) = data.at<double>(1, 0);
+	myTranslation.at<double>(2, 0) = data.at<double>(2, 0);
+
+	double angleX = data.at<double>(3, 0);
+	double angleY = data.at<double>(4, 0);
+	double angleZ = data.at<double>(5, 0);
+
+	double scale = data.at<double>(6, 0);
+
+	cv::Mat myRotation = registerObj.GetRotationMatrix(angleX, angleY, angleZ);
+
+	std::vector<cv::Point3d> tempPlane;
+
+	for (auto& items : myGroovePoints)
+	{
+		for (auto& point : items)
+		{
+			cv::Mat tempPoint = scale * (myRotation * point.ToMatPoint()) + myTranslation;
+			tempPlane.push_back(Point(tempPoint));
+		}
+	}
+	return tempPlane;
+}
+
+std::vector<cv::Point3d> Knee::getFitVertexGroovePointsTest()
+{
+	vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
+	implicitPolyDataDistance->SetInput(GetFemurPoly());
+
+	TemplateFemur templateObj;
+
+	Point targetAP, targetTEA, targetAxis, targetCenter;
+	Point sourceAP, sourceTEA, sourceAxis, sourceCenter;
+	double tScale;
+
+	targetAP = getFemurDirectVectorAP();
+	targetTEA = getFemurVectorLateralTEA();
+	targetAxis = targetAP.cross(targetTEA);
+	targetAxis.normalice();
+	targetCenter = (getLateralEpicondyle() + getMedialEpicondyle()) / 2.0;
+
+	Point diff = getLateralEpicondyle() - getMedialEpicondyle();
+	double targetSize = sqrt(diff.dot(diff));
+
+	std::vector<std::vector<Point>> myGroovePoints, fitPoints;
+	std::vector<cv::Point3d> myTemplatePoints;
+
+	if (getIsRight() == false)
+	{
+		sourceAP = templateObj.vectorLeftAP;
+		sourceTEA = templateObj.vectorLeftTEA;
+		sourceCenter = templateObj.centerLeft;
+		tScale = (targetSize / templateObj.sizeLeft);
+		myTemplatePoints = templateObj.mTemplateLeft;
+		myGroovePoints = templateObj.mOfficialLeftGroovePlanes;
+	}
+	else
+	{
+		sourceAP = templateObj.vectorRightAP;
+		sourceTEA = templateObj.vectorRightTEA;
+		sourceCenter = templateObj.centerRight;
+		tScale = (targetSize / templateObj.sizeLeft);
+		myTemplatePoints = templateObj.mTemplateRight;
+		myGroovePoints = templateObj.mOfficialRightGroovePlanes;
+	}
+
+	if (tScale < 1.0)
+	{
+		tScale = 1.0;
+	}
+
+	sourceAxis = sourceAP.cross(sourceTEA);
+	sourceAxis.normalice();
+
+	std::vector<cv::Point3d> vectorTarget = { targetAP, targetTEA, targetAxis };
+	std::vector<cv::Point3d> vectorSource = { sourceAP, sourceTEA, sourceAxis };
+
+	cv::Mat data(7, 1, CV_64F);
+
+	cv::Mat rotation = LeastSquaresScaleICP::GetRotationAnglesXYZ(vectorSource, vectorTarget, data);
+	cv::Mat translation = targetCenter.ToMatPoint() - (rotation * sourceCenter.ToMatPoint());
+
+	data.at<double>(3, 0) = data.at<double>(0, 0);
+	data.at<double>(4, 0) = data.at<double>(1, 0);
+	data.at<double>(5, 0) = data.at<double>(2, 0);
+
+	data.at<double>(0, 0) = translation.at<double>(0, 0);
+	data.at<double>(1, 0) = translation.at<double>(1, 0);
+	data.at<double>(2, 0) = translation.at<double>(2, 0);
+
+	data.at<double>(6, 0) = tScale;
+
+	LeastSquaresScaleICP registerObj(myTemplatePoints);
+
+	registerObj.LeastSquaresScale(GetFemurPoly(), data);
+
+	////////////////////////////////////////////////////////////////////
+
+	cv::Mat myTranslation(3, 1, CV_64F);
+	myTranslation.at<double>(0, 0) = data.at<double>(0, 0);
+	myTranslation.at<double>(1, 0) = data.at<double>(1, 0);
+	myTranslation.at<double>(2, 0) = data.at<double>(2, 0);
+
+	double angleX = data.at<double>(3, 0);
+	double angleY = data.at<double>(4, 0);
+	double angleZ = data.at<double>(5, 0);
+
+	double scale = data.at<double>(6, 0);
+
+	cv::Mat myRotation = registerObj.GetRotationMatrix(angleX, angleY, angleZ);
+
+	for (auto& items : myGroovePoints)
+	{
+		std::vector<Point> tempPlane;
+		for (auto& point : items)
+		{
+			cv::Mat tempPoint = scale * (myRotation * point.ToMatPoint()) + myTranslation;
+			tempPlane.push_back(Point(tempPoint));
+		}
+		fitPoints.push_back(tempPlane);
+	}
+
+	///////////////////////////////////////////////////////////////////
+
+	Point vectorAxis = hipCenter - femurKneeCenter;
+	Plane axial;
+	axial.init(vectorAxis, femurKneeCenter);
+	Plane basePlane = axial.getPerpendicularPlane(lateralCondyle, medialCondyle);
+	basePlane.reverseByPoint(femurKneeCenter);
+	std::vector<cv::Point3d> mainVertexPoints;
+
+	for (auto& items : fitPoints)
+	{
+		Plane tempPlane;
+		tempPlane.init(items[0], items[1], items[2]);
+		std::vector<Point> cutPointsInGroove = getGrooveCutPoints(tempPlane, items);
+
+		if (cutPointsInGroove.size() == 0)
+		{
+			throw ImplantExceptionCode::CAN_NOT_DETERMINE_PATELLA_GROOVE;
+		}
+
+		try
+		{
+			Point myVertex = ImplantTools::getLocalMinimum(cutPointsInGroove, tempPlane, tempPlane.getProjectionVector(basePlane.getNormalVector()));
+			mainVertexPoints.push_back(myVertex);
+		}
+		catch (...)
+		{
+			throw ImplantExceptionCode::CHECK_LANDMARKS_CAN_NOT_DETERMINE_WHITESIDE_LINE;
+		}
+	}
+
+	return mainVertexPoints;
+}
+
+std::vector<Point> Knee::getGrooveCutPoints(Plane& pPlane, std::vector<Point>& refPoints)
+{
+	std::vector<Point> result;
+	vtkSmartPointer<vtkPolyData> contour = ImplantTools::getMaxContour(femurPoly, pPlane.getNormalVector(), pPlane.getPoint());
+
+	if (contour->GetNumberOfPoints() == 0)
+	{
+		return result;
+	}
+	
+	vtkSmartPointer<vtkPoints> sortPoints = ImplantTools::ExtractSortPoints(contour);
+	auto pivot = ImplantTools::GetNearestPoints(sortPoints, refPoints[0]);
+	vtkSmartPointer<vtkPoints> rotatePoints = ImplantTools::RotatePoints(sortPoints, pivot);
+
+	auto pivotCenter = ImplantTools::GetNearestPoints(rotatePoints, refPoints[1]);
+	auto pivotOpposite = ImplantTools::GetNearestPoints(rotatePoints, refPoints[2]);
+	auto tSize = rotatePoints->GetNumberOfPoints();
+
+	if (pivotCenter < pivotOpposite)
+	{
+		for (vtkIdType i = 0; i <= pivotOpposite; i++)
+		{
+			double pnt[3];
+			rotatePoints->GetPoint(i, pnt);
+			result.push_back(Point(pnt[0], pnt[1], pnt[2]));
+		}
+	}
+	else
+	{
+		double pnt[3];
+		rotatePoints->GetPoint(0, pnt);
+		result.push_back(Point(pnt[0], pnt[1], pnt[2]));
+
+		for (vtkIdType i = tSize - 1; i >= pivotOpposite; i--)
+		{
+			double pnt[3];
+			rotatePoints->GetPoint(i, pnt);
+			result.push_back(Point(pnt[0], pnt[1], pnt[2]));
+		}
+	}
+
+	return result;
 }
 
 void Knee::makeKneeGroovePath()

@@ -345,6 +345,87 @@ namespace TestVTK
         interactor->Start();
     }
 
+
+	void show(const std::vector<std::vector<cv::Point3d>>& pointsVector)
+	{
+		if (pointsVector.size() == 0)
+		{
+			return;
+		}
+
+		vtkNew<vtkNamedColors> colors;
+
+		std::vector<vtkSmartPointer<vtkActor>> pointsActor;
+
+		for (int i = 0; i < pointsVector.size(); i++)
+		{
+			vtkNew<vtkPoints> tPoints;
+			auto points = pointsVector[i];
+			for (int i = 0; i < points.size(); i++)
+			{
+				double pnt[3];
+				pnt[0] = points[i].x;
+				pnt[1] = points[i].y;
+				pnt[2] = points[i].z;
+
+				tPoints->InsertNextPoint(pnt);
+			}
+
+			vtkNew<vtkCellArray> cells;
+
+			for (unsigned int i = 0; i < tPoints->GetNumberOfPoints() - 1; i++)
+			{
+				vtkNew<vtkLine> myLine;
+
+				myLine->GetPointIds()->SetId(0, i);
+				myLine->GetPointIds()->SetId(1, i + 1);
+
+				cells->InsertNextCell(myLine);
+			}
+
+			vtkNew<vtkPolyData> polyLine;
+			polyLine->SetPoints(tPoints);
+			polyLine->SetLines(cells);
+
+			vtkNew<vtkPolyDataMapper> polyMapper;
+			polyMapper->SetInputData(polyLine);
+			polyMapper->ScalarVisibilityOff();
+
+			vtkNew<vtkActor> polyActor;
+			polyActor->SetMapper(polyMapper);
+			polyActor->GetProperty()->SetRepresentationToWireframe();
+			polyActor->GetProperty()->ShadingOff();
+			polyActor->GetProperty()->SetColor(colors->GetColor3d("blue").GetData());
+
+			pointsActor.push_back(polyActor);
+		}
+
+		vtkNew<vtkRenderer> renderer;
+		//renderer->SetViewport(0., 0., 0.5, 1.);
+		renderer->SetBackground(colors->GetColor3d("CadetBlue").GetData());
+
+		vtkNew<vtkRenderWindow> renderWindow;
+		renderWindow->SetSize(800, 400);
+		renderWindow->SetWindowName("Surface");
+
+		renderWindow->AddRenderer(renderer);
+
+		vtkNew<vtkRenderWindowInteractor> interactor;
+		interactor->SetRenderWindow(renderWindow);
+
+		//renderer->AddActor(polyActor);
+
+		for (int i = 0; i < pointsActor.size(); i++)
+		{
+			renderer->AddActor(pointsActor[i]);
+		}
+
+		renderWindow->Render();
+
+		interactor->Start();
+	}
+
+
 	void show(const std::vector<cv::Point3d>& points, bool makePolyLine = false)
 	{
 		if (points.size() == 0)
@@ -586,6 +667,50 @@ namespace TestVTK
 
         interactor->Start();
     }
+
+	void show(std::vector<vtkSmartPointer<vtkPolyData>> polyList = {})
+	{
+		vtkNew<vtkNamedColors> colors;
+
+		std::vector<vtkSmartPointer<vtkActor>> pointsActor;
+
+		for (int i = 0; i < polyList.size(); i++)
+		{
+			vtkNew<vtkPolyDataMapper> polyMapper;
+			polyMapper->SetInputData(polyList[i]);
+			polyMapper->ScalarVisibilityOff();
+
+			vtkNew<vtkActor> sphereActor;
+			sphereActor->SetMapper(polyMapper);
+			sphereActor->GetProperty()->SetRepresentationToWireframe();
+			sphereActor->GetProperty()->ShadingOff();
+			sphereActor->GetProperty()->SetColor(colors->GetColor3d("blue").GetData());
+
+			pointsActor.push_back(sphereActor);
+		}
+
+		vtkNew<vtkRenderer> renderer;
+		//renderer->SetViewport(0., 0., 0.5, 1.);
+		renderer->SetBackground(colors->GetColor3d("CadetBlue").GetData());
+
+		vtkNew<vtkRenderWindow> renderWindow;
+		renderWindow->SetSize(800, 400);
+		renderWindow->SetWindowName("Surface");
+
+		renderWindow->AddRenderer(renderer);
+
+		vtkNew<vtkRenderWindowInteractor> interactor;
+		interactor->SetRenderWindow(renderWindow);
+
+		for (int i = 0; i < pointsActor.size(); i++)
+		{
+			renderer->AddActor(pointsActor[i]);
+		}
+
+		renderWindow->Render();
+
+		interactor->Start();
+	}
 
 
     vtkSmartPointer<vtkPolyData> itkImageToSurface3D(const std::string& pathImage)

@@ -179,6 +179,9 @@ namespace TKA
 
 			static double getInitialAnglePCA(const Point& hipCenter, const Point& femurKneeCenter, const Point& lateralEpicondyle,
 				const Point& medialEpicondyle, const Point& lateralCondyle, const Point& medialCondyle);
+			/////////////////////////Testing Groove
+			std::vector<cv::Point3d> getFitGroovePointsTest();
+			std::vector<cv::Point3d> getFitVertexGroovePointsTest();
 		private:
 			Point lateralEpicondyle, medialEpicondyle, medialEpicondylePerp;
 			Point hipCenter, femurKneeCenter, tibiaKneeCenter, tibiaRotatePoint;
@@ -234,6 +237,8 @@ namespace TKA
 			Side getGoodSide(const Point& hipCenter, const Point& kneeCenter, const Point& latEpi, const Point& medEpi, const Point& ankle) const;
 
 			void makeKneeGroovePath();
+			void makeKneeGroovePathNew();
+			std::vector<Point> getGrooveCutPoints(Plane& pPlane, std::vector<Point>& refPoints);
 		};
 	}
 }

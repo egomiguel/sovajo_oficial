@@ -3631,12 +3631,16 @@ void PelvisImplantMatch_2()
 
 void RotulaGroovePath()
 {
-	Knee kneeRight = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Right");
-	Knee kneeLeft = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Left");
+	//Knee kneeRight = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Right");
+	//Knee kneeLeft = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Left");
+	//"D:\\sovajo\\Errores\\Error5", TKA::IMPLANTS::KRight
+	//"D:\\sovajo\\Errores\\Error8", TKA::IMPLANTS::KLeft
+	Knee newKnew = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error2", TKA::IMPLANTS::KLeft);
 
-	Knee myKnee = kneeLeft;
+	Knee myKnee = newKnew;
+	myKnee.findFemurCondylesUsingDistalPoints();
 
-	std::vector<Point> pointPath; // = myKnee.getKneeGroovePath();
+	std::vector<Point> pointPath = myKnee.getKneeGroovePath();
 	std::vector<Point> pointPathOutLiers; // = myKnee.getKneeGrooveOutLiers();
 	std::vector<cv::Point3d> allPoints;
 
@@ -3649,7 +3653,8 @@ void RotulaGroovePath()
 	{
 		//allPoints.push_back(pointPathOutLiers[i]);
 	}
-
+	TestVTK::show(myKnee.GetFemurPoly(), myKnee.getFitGroovePointsTest());
+	TestVTK::show(myKnee.GetFemurPoly(), myKnee.getFitVertexGroovePointsTest());
 	TestVTK::show(myKnee.GetFemurPoly(), allPoints);
 }
 
@@ -4467,12 +4472,14 @@ void testSegSliceBordes()
 	TKA::SEGMENTATION::SliceBorder sliceBorder;
 	auto slices = sliceBorder.MakeSlicesFromPolyData(femurData, plane[0], plane[1]);
 
+	std::vector<std::vector<cv::Point3d>> lista;
+	
 	for (int i = 0; i < slices.size(); ++i)
 	{
 		auto points = sliceBorder.GetMainPoints(slices[i], 179);
 
-		std::cout << "Size: " << points.size() << std::endl;
-		
+		//std::cout << "Size: " << points.size() << std::endl;
+		/*
 		for (int j = 0; j < points.size(); j++)
 		{
 			if (std::isnan(points[j][0]))
@@ -4482,8 +4489,57 @@ void testSegSliceBordes()
 			}
 			
 		}
+		*/
 
+		std::vector<cv::Point3d> oneSlice;
+
+		for (int j = 0; j < points.size(); j++)
+		{
+			oneSlice.push_back(cv::Point3d(points[j][0], points[j][1], points[j][2]));
+		}
+		lista.push_back(oneSlice);
 	}
+	
+
+	//TestVTK::show(lista);
+	for (int i = 8; i < 10; i++)
+	{
+		bool result;
+		std::string msg;
+		std::vector<vtkSmartPointer<vtkPolyData>> polySlices;
+		polySlices.push_back(slices[i]);
+		polySlices.push_back(slices[i+1]);
+		auto surface = sliceBorder.GetSurface3D(polySlices, result, msg);
+		//std::cout << "********************* " << i << std::endl;
+		double pntDown[3];
+		double pntUP[3];
+		int pos1, pos2;
+		if (i == 8)
+		{
+			pos1 = 170;
+			pos2 = 170 + 251;
+		}
+		else
+		{
+			pos1 = 244;
+			pos2 = 20 + 260;
+		}
+		//slices[i]->GetPoint(pos1, pntDown);
+		//slices[i + 1]->GetPoint(pos2, pntUP);
+		
+		surface->GetPoint(pos1, pntDown);
+		surface->GetPoint(pos2, pntUP);
+		std::vector<cv::Point3d> nearPoints = {cv::Point3d(pntDown[0], pntDown[1], pntDown[2]), 
+												cv::Point3d(pntUP[0], pntUP[1], pntUP[2])};
+
+		std::cout << "Point down end: " << cv::Point3d(pntDown[0], pntDown[1], pntDown[2]) << ", Points up end: " << cv::Point3d(pntUP[0], pntUP[1], pntUP[2]) <<std::endl;
+		
+		TestVTK::show(surface, nearPoints);
+		
+
+		
+	}
+	//std::cout <<"********************* " << msg << std::endl;
 
 }
 
@@ -4600,7 +4656,7 @@ int main()
 {
 	testSegSliceBordes();
 	//segment_balls();
-
+	RotulaGroovePath();
 	std::cout << "VTK Version: " << vtkVersion::GetVTKVersion() << std::endl;
 	/*
 	std::string casePlan = "D:\\sovajo\\Cases_Plan_TKA\\case1_left";

@@ -57,6 +57,8 @@ namespace TKA
 
 			static Line makeLineWithPoints(const Point& P1, const Point& P2);
 
+			static Line getBestLine(const std::vector<Point>& pPoints);
+
 		private:
 			Point mPoint;
 			Point directVector;

@@ -1030,6 +1030,150 @@ vtkSmartPointer<vtkPolyData> ImplantTools::getContours(const vtkSmartPointer<vtk
 	return contour;
 }
 
+vtkSmartPointer<vtkPoints> ImplantTools::ExtractSortPoints(const vtkSmartPointer<vtkPolyData> polyData)
+{
+	std::list<std::pair<vtkIdType, vtkIdType>> lines;
+	vtkSmartPointer<vtkPoints> points = polyData->GetPoints();
+	vtkSmartPointer<vtkCellArray> cells = polyData->GetLines();
+	cells->InitTraversal();
+	vtkNew<vtkIdList> myList;
+	std::list<std::pair<vtkIdType, vtkIdType>> restLines;
+	while (cells->GetNextCell(myList))
+	{
+		vtkIdType id1 = myList->GetId(0);
+		vtkIdType id2 = myList->GetId(1);
+
+		if (lines.size() == 0)
+		{
+			lines.push_back(std::make_pair(id1, id2));
+		}
+		else
+		{
+			std::pair<vtkIdType, vtkIdType> front = lines.front();
+			std::pair<vtkIdType, vtkIdType> back = lines.back();
+
+			if (id1 == front.first)
+			{
+				lines.push_front(std::make_pair(id2, id1));
+			}
+			else if (id2 == front.first)
+			{
+				lines.push_front(std::make_pair(id1, id2));
+			}
+			else if (id1 == back.second)
+			{
+				lines.push_back(std::make_pair(id1, id2));
+			}
+			else if (id2 == back.second)
+			{
+				lines.push_back(std::make_pair(id2, id1));
+			}
+			else
+			{
+				restLines.push_back(std::make_pair(id1, id2));
+			}
+		}
+
+	}
+
+	vtkIdType size1 = restLines.size();
+
+	for (int i = 0; i < size1; i++)
+	{
+		auto it1 = restLines.begin();
+		auto it2 = restLines.end();
+		for (; it1 != it2; ++it1)
+		{
+			vtkIdType id1 = (*it1).first;
+			vtkIdType id2 = (*it1).second;
+
+			std::pair<vtkIdType, vtkIdType> front = lines.front();
+			std::pair<vtkIdType, vtkIdType> back = lines.back();
+
+			if (id1 == front.first)
+			{
+				lines.push_front(std::make_pair(id2, id1));
+				restLines.erase(it1);
+				break;
+			}
+			else if (id2 == front.first)
+			{
+				lines.push_front(std::make_pair(id1, id2));
+				restLines.erase(it1);
+				break;
+			}
+			else if (id1 == back.second)
+			{
+				lines.push_back(std::make_pair(id1, id2));
+				restLines.erase(it1);
+				break;
+			}
+			else if (id2 == back.second)
+			{
+				lines.push_back(std::make_pair(id2, id1));
+				restLines.erase(it1);
+				break;
+			}
+		}
+	}
+
+	vtkNew<vtkPoints> result;
+
+	auto it1 = lines.begin();
+	auto it2 = lines.end();
+	double lastPoint[3];
+	int cont = 0;
+	for (; it1 != it2; ++it1)
+	{
+		double p1[3];
+		points->GetPoint(it1->first, p1);
+
+		if (cont == 0)
+		{
+			lastPoint[0] = p1[0];
+			lastPoint[1] = p1[1];
+			lastPoint[2] = p1[2];
+			result->InsertNextPoint(p1);
+		}
+		else if (lastPoint[0] != p1[0] || lastPoint[1] != p1[1] || lastPoint[2] != p1[2])
+		{
+			lastPoint[0] = p1[0];
+			lastPoint[1] = p1[1];
+			lastPoint[2] = p1[2];
+			result->InsertNextPoint(p1);
+		}
+
+		cont++;
+	}
+
+	if (lines.size() > 0)
+	{
+		if (lines.front().first != lines.back().second)
+		{
+			double p1[3];
+			points->GetPoint(lines.back().second, p1);
+			if (lastPoint[0] != p1[0] || lastPoint[1] != p1[1] || lastPoint[2] != p1[2])
+			{
+				lastPoint[0] = p1[0];
+				lastPoint[1] = p1[1];
+				lastPoint[2] = p1[2];
+				result->InsertNextPoint(p1);
+			}
+		}
+	}
+
+	double p1[3];
+	double p2[3];
+	result->GetPoint(0, p1);
+	result->GetPoint(result->GetNumberOfPoints() - 1, p2);
+	if (p2[0] != p1[0] || p2[1] != p1[1] || p2[2] != p1[2])
+	{
+		result->InsertNextPoint(p1);
+	}
+
+	return result;
+}
+
 void ImplantTools::ExtractSortLines(const vtkSmartPointer<vtkPolyData> polyData, std::list<std::pair<vtkIdType, vtkIdType>>& lines)
 {
 	vtkSmartPointer<vtkPoints> points = polyData->GetPoints();
@@ -1122,6 +1266,40 @@ void ImplantTools::ExtractSortLines(const vtkSmartPointer<vtkPolyData> polyData,
 	}
 }
 
+double ImplantTools::GetInterceptionWithLineUsingVector(const vtkSmartPointer<vtkImplicitPolyDataDistance> polyDistance, const Point& pRefPoint, const Point& vectorToPoly, Point& result)
+{
+	double error = 0.1;
+	int iter = 20;
+	double currentDistance = 1;
+	result = pRefPoint;
+	double myClosest[3];
+
+	do
+	{
+		double pnt[3] = { result.x, result.y, result.z };
+		currentDistance = abs(polyDistance->EvaluateFunctionAndGetClosestPoint(pnt, myClosest));
+
+		Point a = result + currentDistance * vectorToPoly;
+
+		double pntA[3] = { a.x, a.y, a.z };
+
+		double distanceA = abs(polyDistance->EvaluateFunctionAndGetClosestPoint(pntA, myClosest));
+
+		if (distanceA > currentDistance)
+		{
+			return -1;
+		}
+
+		result = Point(pntA[0], pntA[1], pntA[2]);
+		currentDistance = distanceA;
+
+		iter--;
+
+	} while (currentDistance > error && iter > 0);
+
+	return currentDistance;
+}
+
 double ImplantTools::GetInterceptionWithLine(const vtkSmartPointer<vtkImplicitPolyDataDistance> polyDistance, const Point& pRefPoint, const Point& p2, Point& result)
 {
 	Point vector = pRefPoint - p2;
@@ -1193,10 +1371,66 @@ bool ImplantTools::GetInterceptionWithSegment(const vtkSmartPointer<vtkPolyData>
 	}
 }
 
+vtkSmartPointer<vtkPoints> ImplantTools::RotatePoints(vtkSmartPointer<vtkPoints> points, vtkIdType id)
+{
+	if (id == 0)
+	{
+		return points;
+	}
+
+	vtkNew<vtkPoints> result;
+	vtkIdType size = points->GetNumberOfPoints();
+
+	for (int i = id; i < size; i++)
+	{
+		result->InsertNextPoint(points->GetPoint(i));
+	}
+
+	for (int i = 0; i < id; i++)
+	{
+		result->InsertNextPoint(points->GetPoint(i));
+	}
+
+	return result;
+}
+
+Point ImplantTools::GetNearestPointsOnPlane(const vtkSmartPointer<vtkImplicitPolyDataDistance> polyDistance, const Plane& pPlane, const Point& pPoint, const Point& vectorToPoly)
+{
+	Point temp = pPlane.getProjectionPoint(pPoint);
+	Point refVector = pPlane.getProjectionVector(vectorToPoly);
+	Point pRefPoint = temp - 1000 * refVector;
+	Point result;
+	double distance = ImplantTools::GetInterceptionWithLineUsingVector(polyDistance, pRefPoint, refVector, result);
+	if (distance < 0)
+	{
+		double pnt[3] = { temp.x, temp.y, temp.z };
+		double myClosest[3];
+		polyDistance->EvaluateFunctionAndGetClosestPoint(pnt, myClosest);
+		result = Point(myClosest[0], myClosest[1], myClosest[2]);
+	}
+	return result;
+}
+
 vtkIdType ImplantTools::GetNearestPoints(const vtkSmartPointer<vtkPolyData> poly, const Point& pPoint)
 {
 	vtkNew<vtkKdTreePointLocator> kDTree;
 	kDTree->SetDataSet(poly);
+	kDTree->BuildLocator();
+
+	double pnt[3] = { pPoint.x, pPoint.y, pPoint.z };
+
+	vtkIdType nearPoint = kDTree->FindClosestPoint(pnt);
+
+	return nearPoint;
+}
+
+vtkIdType ImplantTools::GetNearestPoints(const vtkSmartPointer<vtkPoints> points, const Point& pPoint)
+{
+	vtkNew<vtkPolyData> polydata;
+	polydata->SetPoints(points);
+	
+	vtkNew<vtkKdTreePointLocator> kDTree;
+	kDTree->SetDataSet(polydata);
 	kDTree->BuildLocator();
 
 	double pnt[3] = { pPoint.x, pPoint.y, pPoint.z };
