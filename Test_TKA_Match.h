@@ -30,6 +30,7 @@
 #include "implants/Utils.hpp"
 #include "implants/ImplantTools.hpp"
 
+
 using namespace TKA::IMPLANTS;
 
 namespace TEST_IMPLANTS
@@ -107,6 +108,62 @@ namespace TEST_IMPLANTS
 		reader->SetFileName(filePath);
 		reader->Update();
 		return reader->GetOutput();
+	}
+
+	void show(vtkSmartPointer<vtkPolyData> poly, std::vector<vtkSmartPointer<vtkPolyData>> polyList = {})
+	{
+		vtkNew<vtkNamedColors> colors;
+
+		vtkNew<vtkPolyDataMapper> contoursMapper;
+		contoursMapper->SetInputData(poly);
+		contoursMapper->ScalarVisibilityOff();
+
+		vtkNew<vtkActor> polyActor;
+		polyActor->SetMapper(contoursMapper);
+		polyActor->GetProperty()->SetRepresentationToWireframe();
+		polyActor->GetProperty()->ShadingOff();
+		polyActor->GetProperty()->SetColor(colors->GetColor3d("MistyRose").GetData());
+
+		std::vector<vtkSmartPointer<vtkActor>> pointsActor;
+
+		for (int i = 0; i < polyList.size(); i++)
+		{
+			vtkNew<vtkPolyDataMapper> polyMapper;
+			polyMapper->SetInputData(polyList[i]);
+			polyMapper->ScalarVisibilityOff();
+
+			vtkNew<vtkActor> sphereActor;
+			sphereActor->SetMapper(polyMapper);
+			sphereActor->GetProperty()->SetRepresentationToWireframe();
+			sphereActor->GetProperty()->ShadingOff();
+			sphereActor->GetProperty()->SetColor(colors->GetColor3d("blue").GetData());
+
+			pointsActor.push_back(sphereActor);
+		}
+
+		vtkNew<vtkRenderer> renderer;
+		//renderer->SetViewport(0., 0., 0.5, 1.);
+		renderer->SetBackground(colors->GetColor3d("CadetBlue").GetData());
+
+		vtkNew<vtkRenderWindow> renderWindow;
+		renderWindow->SetSize(800, 400);
+		renderWindow->SetWindowName("Surface");
+
+		renderWindow->AddRenderer(renderer);
+
+		vtkNew<vtkRenderWindowInteractor> interactor;
+		interactor->SetRenderWindow(renderWindow);
+
+		renderer->AddActor(polyActor);
+
+		for (int i = 0; i < pointsActor.size(); i++)
+		{
+			renderer->AddActor(pointsActor[i]);
+		}
+
+		renderWindow->Render();
+
+		interactor->Start();
 	}
 
 	class LandmarksFind
@@ -483,6 +540,8 @@ namespace TEST_PKA_SUEN
 		QFile file(jsonPath);
 		if (!file.open(QIODevice::ReadOnly))
 		{
+			std::cout << std::string(jsonPath) << std::endl;
+			std::cout << std::string(stlPath) << std::endl;
 			std::cout << "read failed" << std::endl;
 			return nullptr;
 		}
@@ -500,9 +559,12 @@ namespace TEST_PKA_SUEN
 
 	std::shared_ptr<TKA::IMPLANTS::FemurImplant> createFemurImplant(const char *jsonPath, const char *stlPath)
 	{
+
 		QFile file(jsonPath);
 		if (!file.open(QIODevice::ReadOnly))
 		{
+			std::cout << std::string(jsonPath) << std::endl;
+			std::cout << std::string(stlPath) << std::endl;
 			std::cout << "read failed" << std::endl;
 			return nullptr;
 		}
@@ -650,6 +712,7 @@ namespace TEST_PKA_SUEN
 		return trans;
 	}
 
+
 	itk::Rigid3DTransform<>::Pointer matchFemur(std::shared_ptr<TKA::IMPLANTS::Knee> knee, std::shared_ptr<TKA::IMPLANTS::FemurImplant> femurImplant)
 	{
 		auto femurMatch = std::make_shared<TKA::IMPLANTS::FemurImplantMatch>();
@@ -764,6 +827,62 @@ namespace TEST_PKA_SUEN
 		}
 		
 		printInfo(info2);
+	}
+
+	void testTibiaImplant2()
+	{
+		const char *dirPath = "D:\\sovajo\\Test_Cases\\TKA_Test";
+
+		auto femur4Implants = createFemurImplant(QString("%1\\femur_right_4_data.json").arg(dirPath).toStdString().c_str(),
+			QString("%1\\femur_right_4.stl").arg(dirPath).toStdString().c_str());
+		auto tibia3_10Implants = createTibiaImplant(QString("%1\\tibia_right_3_10+_data.json").arg(dirPath).toStdString().c_str(),
+			QString("%1\\tibia_right_3_10+.stl").arg(dirPath).toStdString().c_str());
+		auto tibia3_12Implants = createTibiaImplant(QString("%1\\tibia_right_3_12_data.json").arg(dirPath).toStdString().c_str(),
+			QString("%1\\tibia_right_3_12+.stl").arg(dirPath).toStdString().c_str());
+		auto landmarks = readLandmarks(QString("%1\\landmark.json").arg(dirPath).toStdString().c_str());
+		//Right Leg
+		auto knee = createKnee(landmarks, QString("%1\\femur.vtk").arg(dirPath).toStdString().c_str(),
+			QString("%1\\tibia.vtk").arg(dirPath).toStdString().c_str(), false);
+		auto implantToFemur = matchFemur(knee, femur4Implants);
+		auto implantToTibia = matchTibia(knee, tibia3_10Implants);
+
+		//1
+		//implantToTibia->Print(std::cout);
+
+		TKA::IMPLANTS::ImplantsMatchFinalInfo info(knee.get(), *femur4Implants, *tibia3_10Implants,
+			implantToFemur, implantToTibia);
+
+		std::cout << "Varus: " << info.GetTibiaVarusAngle() << ". Slope: " << info.GetTibiaImplantSlopeAngle() << ". Rotation: " << info.GetTibiaImplantRotationAngle() << std::endl;
+
+
+		auto tibiaModel = TEST_IMPLANTS::readSTLFile("D:\\sovajo\\Test_Cases\\TKA_Test\\tibia_right_3_10+.stl");
+
+		info.test();
+		vtkSmartPointer<vtkPolyData> newImplantTibia = TestVTK::TransformPoly(tibiaModel, implantToTibia->GetMatrix(), implantToTibia->GetTranslation());
+
+		std::vector<vtkSmartPointer<vtkPolyData>> polyList;
+		polyList.push_back(newImplantTibia);
+		TEST_IMPLANTS::show(knee->GetTibiaPoly(), polyList);
+
+
+
+		//info.setTibiaVarusAngle(3.1562700920978872);
+		info.setTibiaRotationAngle(-30.746164266024422);
+		//info.setTibiaSlopeAngle(-0.40464877902511232);
+		auto newImplantToTibia = info.getITKTibiaTransform();
+		//2
+		//newImplantToTibia->Print(std::cout);
+
+		std::cout << "Varus: " << info.GetTibiaVarusAngle() << ". Slope: " << info.GetTibiaImplantSlopeAngle() << ". Rotation: " << info.GetTibiaImplantRotationAngle() << std::endl;
+
+		vtkSmartPointer<vtkPolyData> newImplantTibia2 = TestVTK::TransformPoly(tibiaModel, newImplantToTibia->GetMatrix(), newImplantToTibia->GetTranslation());
+
+		info.test();
+		std::vector<vtkSmartPointer<vtkPolyData>> polyList2;
+		polyList2.push_back(newImplantTibia2);
+		TEST_IMPLANTS::show(knee->GetTibiaPoly(), polyList2);
+	
+	
 	}
 
 }

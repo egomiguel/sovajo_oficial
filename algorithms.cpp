@@ -1,5 +1,6 @@
 #include <iostream>
 //#include "test/TestFunction.hpp"
+//#include "Test_TKA_Tibia_Rotation.h"
 #include "test/TestVtk.hpp"
 #include "Test_PKA.h"
 #include "test/segmentationTest.cpp"
@@ -1251,7 +1252,7 @@ void MatchEasy()
 	{
 
 		//hull1 = femurImplantMatch.GetHullPoints(transformIn, transformOut, FemurImplantMatch::kPlaneB, 1, 2, 10, 15, 200);
-		hull1 = tibiaImplantMatch.GetHullPoints(transformTibia, transformOut);
+		hull1 = tibiaImplantMatch.GetHullPoints(transformTibia, transformOut, 1, 10);
 		std::cout << transformIn << std::endl;
 
 		for (int i = 0; i < hull1.size(); i++)
@@ -3635,10 +3636,11 @@ void RotulaGroovePath()
 	//Knee kneeLeft = CreateKneeFromFile("D:\\3D_DICOM_DATA\\Person_2\\Left");
 	//"D:\\sovajo\\Errores\\Error5", TKA::IMPLANTS::KRight
 	//"D:\\sovajo\\Errores\\Error8", TKA::IMPLANTS::KLeft
-	Knee newKnew = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error2", TKA::IMPLANTS::KLeft);
+	Knee newKnew = CreateKneeFromFile_Numbers("D:\\sovajo\\Errores\\Error3", TKA::IMPLANTS::KLeft);
 
 	Knee myKnee = newKnew;
 	myKnee.findFemurCondylesUsingDistalPoints();
+	myKnee.makeKneeGroovePathNew();
 
 	std::vector<Point> pointPath = myKnee.getKneeGroovePath();
 	std::vector<Point> pointPathOutLiers; // = myKnee.getKneeGrooveOutLiers();
@@ -4502,7 +4504,7 @@ void testSegSliceBordes()
 	
 
 	//TestVTK::show(lista);
-	for (int i = 8; i < 10; i++)
+	for (int i = 9; i < 10; i++)
 	{
 		bool result;
 		std::string msg;
@@ -4655,6 +4657,8 @@ void segment_balls(int upperThreshold=100, int lowerThreshold=0, int minObjectSi
 int main()
 {
 	testSegSliceBordes();
+	//MatchEasy();
+	//::testTibiaImplant2();
 	//segment_balls();
 	RotulaGroovePath();
 	std::cout << "VTK Version: " << vtkVersion::GetVTKVersion() << std::endl;
@@ -4890,7 +4894,6 @@ int main()
 
 	//PolydataInterception();
 
-	//MatchEasy();
 	//TEST_PKA::MatchPKA();
 	//TEST_PKA_SUEN::testImplants();
 

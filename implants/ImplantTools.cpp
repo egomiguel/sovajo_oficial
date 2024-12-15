@@ -2881,6 +2881,13 @@ std::vector<Point> ImplantTools::removePointByCondition(const std::vector<Point>
 	return result;
 }
 
+cv::Mat ImplantTools::keepCenterWhenChangeRotation(const cv::Mat& newRotation, const cv::Mat& pastRotation, const cv::Mat& pastTranslation, const Point& centerOfRotation)
+{
+	cv::Mat centerRef = pastRotation * centerOfRotation.ToMatPoint() + pastTranslation;
+	cv::Mat centerNew = newRotation * centerOfRotation.ToMatPoint() + pastTranslation;
+	return centerRef - centerNew + pastTranslation;
+}
+
 Point ImplantTools::getOriginalVectorFromProjectionWithPlanes(const Plane& projectionPlaneA, const Point& projectionVectorX,
 	const Plane& originalPlaneB)
 {

@@ -287,7 +287,7 @@ void Knee::init(const Point& hipCenter, const Point& anteriorCortex, const Point
 
     //FillTibiaPoints();
 
-    makeKneeGroovePathNew();
+    //makeKneeGroovePathNew();
 
     goodSide = getGoodSide(hipCenter, femurKneeCenter, lateralEpicondyle, medialEpicondylePerp, ankleCenter);
 

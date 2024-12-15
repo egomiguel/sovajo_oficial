@@ -166,6 +166,8 @@ namespace TKA
 
 			std::vector<Point> removePointByCondition(const std::vector<Point>& pPoints, int beginPos, int endPos, const Plane& pCondition);
 
+			cv::Mat keepCenterWhenChangeRotation(const cv::Mat& newRotation, const cv::Mat& pastRotation, const cv::Mat& pastTranslation, const Point& centerOfRotation);
+			
 			/*
 				This method solves the following problem:
 				We have a plane A and a vector X parallel to plane A. 

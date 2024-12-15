@@ -311,13 +311,14 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaRotationA
 	if (myAngle == 0)
 	{
 		return getITKTibiaTransform();
-	}
+	}   
 
 	rotation = ImplantTools::getRotateMatrix(baseVectorFromImplant.cross(newVectorFromImplant), myAngle);
 
 	//////////////////////////////////////////////////////////////////////
-
-    tibiaRotation = rotation * tibiaRotation;
+	cv::Mat newRotation = rotation * tibiaRotation;
+	tibiaTranslation = ImplantTools::keepCenterWhenChangeRotation(newRotation, tibiaRotation, tibiaTranslation, tibiaImplant.getCentralPoint());
+	tibiaRotation = newRotation;
 
     return getITKTibiaTransform();
 }

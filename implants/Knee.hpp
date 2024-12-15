@@ -50,6 +50,8 @@ namespace TKA
 
 			void findAutomaticPlateaus();
 			//////////////////////////////////////////////////
+
+			void makeKneeGroovePathNew();
 			
 			Point getFemurVectorTEA() const;
 
@@ -151,7 +153,7 @@ namespace TKA
 
 			void setTibiaSlope(double angleInDegrees);
 
-			std::vector<Point> getKneeGroovePath() const; //Now it is returning an empty list ************************************
+			std::vector<Point> getKneeGroovePath() const;
 
 			//std::vector<Point> getKneeGrooveOutLiers() const;
 
@@ -237,7 +239,7 @@ namespace TKA
 			Side getGoodSide(const Point& hipCenter, const Point& kneeCenter, const Point& latEpi, const Point& medEpi, const Point& ankle) const;
 
 			void makeKneeGroovePath();
-			void makeKneeGroovePathNew();
+
 			std::vector<Point> getGrooveCutPoints(Plane& pPlane, std::vector<Point>& refPoints);
 		};
 	}
