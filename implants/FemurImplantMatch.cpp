@@ -169,6 +169,25 @@ void FemurImplantMatch::init(const FemurImplant& implant, const Knee& knee, bool
 	isInit = true;
 }
 
+void FemurImplantMatch::makeGrooveAlignment(const std::vector<Point>& pImplatGroovePathUpToDown, const std::vector<Point>& pKneeGroovePathUpToDown)
+{
+	Line implantGroove = Line::getBestLine(pImplatGroovePathUpToDown);
+	Line kneeGroove = Line::getBestLine(pKneeGroovePathUpToDown);
+	rotationMatrix = ImplantTools::GetGeneralRotateTransformVectors(implantGroove.getDirectVector(), kneeGroove.getDirectVector());
+
+	bool result = getTranslationMatrix();
+	if (result == false)
+	{
+		throw ImplantExceptionCode::FAILED_TRANSFORMATION_MATCH_BY_CONDYLE;
+	}
+
+	result = getTranslationMatrixByCortex();
+	if (result == false)
+	{
+		throw ImplantExceptionCode::FAILED_TRANSFORMATION_MATCH_BY_CORTEX;
+	}
+}
+
 void FemurImplantMatch::getRotationMatrix()
 {
 	std::vector<cv::Point3d> implantVectors;

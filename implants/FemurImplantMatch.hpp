@@ -39,6 +39,8 @@ namespace TKA
 
 			void init(const FemurImplant& implant, const Knee& knee, bool useKneeCenterAlignment = true);
 
+			void makeGrooveAlignment(const std::vector<Point>& pImplatGroovePathUpToDown, const std::vector<Point>& pKneeGroovePathUpToDown);
+
 			Plane GetPlane(PlaneID id, bool translateByCondyle = true) const;
 
 			itk::Matrix< double, 3, 3 > GetRotationMatrix() const;
