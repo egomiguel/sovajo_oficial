@@ -36,6 +36,23 @@ void HipPelvisLinerImplant::init(const Point& pTopPoint, const std::vector<Point
 	isInit = true;
 }
 
+void HipPelvisLinerImplant::init(const Point& pTopPoint, const Point& pInternalCenter, double pRadius, double pThickness)
+{
+	if (isInit == true)
+	{
+		throw ImplantExceptionCode::ALREADY_INITIALIZED_HIP_PELVIS_LINER_IMPLANT;
+	}
+
+	this->mTopPoint = pTopPoint;
+
+	mCenter = pInternalCenter;
+	mRadius = pRadius;
+
+	mRadius += pThickness;
+
+	isInit = true;
+}
+
 Point HipPelvisLinerImplant::getTopPoint() const
 {
 	return mTopPoint;

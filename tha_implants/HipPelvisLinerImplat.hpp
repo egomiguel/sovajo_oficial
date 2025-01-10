@@ -14,6 +14,7 @@ namespace THA
 		public:
 			HipPelvisLinerImplant();
 			void init(const Point& pTopPoint, const std::vector<Point>& pInternalSpherePoints, double pThickness = 0);
+			void init(const Point& pTopPoint, const Point& pInternalCenter, double pRadius, double pThickness = 0);
 			Point getTopPoint() const;
 			Point getCenterOfRotationImplant() const;
 			Point getCenterToTopVector() const;

@@ -116,6 +116,103 @@ void HipPelvisCupImplant::init(const Point& pTopPoint, const Point& pBasePoint1,
     isInit = true;
 }
 
+void HipPelvisCupImplant::init(const Point& pTopPoint, const Point& pBasePoint1, const Point& pBasePoint2, const Point& pBasePoint3, const Point& pSphereCenter, double pRadius, double pHemiSphereResolution, double pThickness)
+{
+	if (isInit == true)
+	{
+		throw ImplantExceptionCode::ALREADY_INITIALIZED_HIP_PELVIS_CUT_IMPLANT;
+	}
+
+	this->mTopPoint = pTopPoint;
+	this->mBasePoint1 = pBasePoint1;
+	this->mBasePoint2 = pBasePoint2;
+	this->mBasePoint3 = pBasePoint3;
+	this->mThickness = pThickness;
+
+	mBasePlane.init(pBasePoint1, pBasePoint2, pBasePoint3);
+	mBasePlane.reverseByPoint(pTopPoint);
+
+	if (pRadius > 0)
+	{
+		mCenter = pSphereCenter;
+		mRadius = pRadius;
+
+		double distance = mBasePlane.getDistanceFromPoint(mCenter);
+		double h = mRadius;
+		if (distance < mRadius && distance > 0)
+		{
+			Point planeCutAndCenterVector = mCenter - mBasePlane.getProjectionPoint(mCenter);
+			planeCutAndCenterVector.normalice();
+
+			double direction = planeCutAndCenterVector.dot(mBasePlane.getNormalVector());
+
+			if (direction > 0)
+			{
+				h = distance + mRadius;
+			}
+			else
+			{
+				h = mRadius - distance;
+			}
+		}
+
+		mHemiSphereSurfaceArea = 2. * PI * mRadius * h;
+
+		double pnt[3];
+		pnt[0] = mCenter.x;
+		pnt[1] = mCenter.y;
+		pnt[2] = mCenter.z;
+
+		vtkNew<vtkSphereSource> sphere;
+
+		double tResolution;
+		double minResolution = sphere->GetThetaResolutionMinValue() / sphere->GetThetaResolutionMaxValue();
+
+		if (pHemiSphereResolution <= 1 && pHemiSphereResolution >= minResolution)
+		{
+			tResolution = pHemiSphereResolution;
+		}
+		else if (pHemiSphereResolution > 1)
+		{
+			tResolution = 1;
+		}
+		else
+		{
+			tResolution = minResolution;
+		}
+
+		sphere->SetCenter(pnt);
+		sphere->SetRadius(mRadius);
+		sphere->SetThetaResolution(sphere->GetThetaResolutionMaxValue() * tResolution);
+		sphere->SetPhiResolution(sphere->GetPhiResolutionMaxValue() * tResolution);
+		sphere->Update();
+
+		vtkNew<vtkPlane> vtkPlaneA;
+
+		auto planeNormal = mBasePlane.getNormalVector();
+		auto planePoint = mBasePlane.getPoint();
+		vtkPlaneA->SetOrigin(planePoint.x, planePoint.y, planePoint.z);
+		vtkPlaneA->SetNormal(planeNormal.x, planeNormal.y, planeNormal.z);
+
+		vtkNew<vtkPlaneCollection> cutPlanes;
+		cutPlanes->AddItem(vtkPlaneA);
+
+		vtkNew<vtkClipClosedSurface> Clipper;
+		Clipper->SetInputData(sphere->GetOutput());
+		Clipper->SetClippingPlanes(cutPlanes);
+		Clipper->Update();
+
+		mHemiSphereCup = Clipper->GetOutput();
+	}
+	else
+	{
+		mHemiSphereSurfaceArea = 0;
+		mRadius = -1;
+	}
+
+	isInit = true;
+}
+
 double HipPelvisCupImplant::getThickness() const
 {
 	return mThickness;

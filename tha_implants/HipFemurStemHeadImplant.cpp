@@ -36,6 +36,27 @@ void HipFemurStemHeadImplant::init(const Point& pHeadBasePoint1, const Point& pH
     isInit = true;
 }
 
+void HipFemurStemHeadImplant::init(const Point& pHeadBasePoint1, const Point& pHeadBasePoint2, const Point& pHeadBasePoint3,
+	const Point& pHeadInsideCenterTopPoint, const Point& pSphereCenter, double pRadius)
+{
+	if (isInit == true)
+	{
+		throw ImplantExceptionCode::ALREADY_INITIALIZED_HIP_FEMUR_STEM_HEAD_IMPLANT;
+	}
+
+	Plane headPlaneBase;
+	headPlaneBase.init(pHeadBasePoint1, pHeadBasePoint2, pHeadBasePoint3);
+	headPlaneBase.reverseByPoint(pHeadInsideCenterTopPoint);
+
+	mHeadInfSupVector = headPlaneBase.getNormalVector();
+	mHeadInsideCenterTopPoint = pHeadInsideCenterTopPoint;
+
+	mSphereCenter = pSphereCenter;
+	mRadius = pRadius;
+
+	isInit = true;
+}
+
 Point HipFemurStemHeadImplant::getVectorInfSup() const
 {
 	return mHeadInfSupVector;

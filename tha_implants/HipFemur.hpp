@@ -13,7 +13,7 @@ namespace THA
 		{
 		public:
 			HipFemur();
-			void init(const Point& headCenter, const Point& neckCenter, const Point& canalCenter, const Point& lesserTrochanter,
+			void init(const Point& headCenter, const Point& neckCenter, const Point& canalDistalCenter, const Point& canalProximalCenter, const Point& lesserTrochanter,
 				const Point& medialEpicondyle, const Point& lateralEpicondyle, const Point& femurKneeCenter, 
 				const vtkSmartPointer<vtkPolyData>& femurPoly);
 			Point getNeckCenter() const;
