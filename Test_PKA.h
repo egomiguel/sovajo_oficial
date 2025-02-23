@@ -282,7 +282,7 @@ namespace TEST_PKA
 		//////////////////////////////////////////////Implants
 
 		UKA::IMPLANTS::Plane pPosterior;
-				pPosterior.init(UKA::IMPLANTS::Point(-1.98705693113, 16.0609375982, 8.76559347481), UKA::IMPLANTS::Point(-2.50396500712, 16.0613293561, -8.94437729719), UKA::IMPLANTS::Point(-7.92687551969, 16.0599612205, 8.9119337399));
+		pPosterior.init(UKA::IMPLANTS::Point(-1.98705693113, 16.0609375982, 8.76559347481), UKA::IMPLANTS::Point(-2.50396500712, 16.0613293561, -8.94437729719), UKA::IMPLANTS::Point(-7.92687551969, 16.0599612205, 8.9119337399));
 
 		UKA::IMPLANTS::Point pRodBasePoint(17.1500611935, -3.64306703195, 0.0115669254999);
 		UKA::IMPLANTS::Point pRodTopPoint(-1.57067067764, 0.0963311269987, -0.0533355484788);
@@ -308,6 +308,7 @@ namespace TEST_PKA
 		UKA::IMPLANTS::Point exteriorPoint(-14.5152, -10.8294, 4.41175);
 		UKA::IMPLANTS::TibiaImplantInfo tibiaInfo;
 		tibiaInfo.tibiaThickness = 2.0;
+		tibiaInfo.tibiaSpacer = 4.0;
 
 		tibiaImplant.init(apLinePclPoint, apLineTuberPoint, sidePoint, exteriorPoint, tibiaInfo);
 
@@ -337,7 +338,7 @@ namespace TEST_PKA
 		////////////////////// First Match
 		std::vector<vtkSmartPointer<vtkPolyData>> polyList;
 		polyList.push_back(newImplantFemur);
-		polyList.push_back(newImplantTibia);
+		//polyList.push_back(newImplantTibia);
 		show(myKnee.GetFemurPoly(), polyList);
 
 		///////////////////////////////////////////////////// Second Match
@@ -351,7 +352,7 @@ namespace TEST_PKA
 
 		std::vector<vtkSmartPointer<vtkPolyData>> polyListFinal;
 		polyListFinal.push_back(newImplantFemur);
-		polyListFinal.push_back(newImplantTibiaFinal);
+		//polyListFinal.push_back(newImplantTibiaFinal);
 		show(myKnee.GetFemurPoly(), polyListFinal);
 
 	}

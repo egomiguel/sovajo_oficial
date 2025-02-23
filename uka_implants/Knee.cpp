@@ -371,17 +371,16 @@ Point Knee::getMoveCondyle(const FemurImplantInfo& pImplant) const
     if (mSurgerySize == SurgerySideEnum::KMedial)
     {
         myMoveCondyle = medialCondyle;
-		resectionThickness = pImplant.femurPosteriorThickness - femurCartilage;
     }
     else
     {
         myMoveCondyle = lateralCondyle;
-        resectionThickness = pImplant.femurPosteriorThickness - femurCartilage;
     }
     //////////////////////////////////////////////////////////////////////
 	//std::cout << "--------------------------->>>>>> " << resectionThickness << std::endl;
 	//std::cout << "--------------------------->>>>>> Thickness " << pImplant.femurPosteriorThickness << " Cartilago: "<< femurCartilage << std::endl;
-    myMoveCondyle = myMoveCondyle + resectionThickness * normaliceFemurDirectVectorAP;
+	resectionThickness = pImplant.femurPosteriorThickness - femurCartilage;
+	myMoveCondyle = myMoveCondyle + resectionThickness * normaliceFemurDirectVectorAP;
 
     return myMoveCondyle;
 }
@@ -454,15 +453,13 @@ Point Knee::getMovePlateau(const TibiaImplantInfo& pImplant) const
     if (mSurgerySize == SurgerySideEnum::KMedial)
     {
         myMovePlateau = medialPlateau;
-		resectionThickness = pImplant.tibiaThickness - tibiaCartilage;
     }
     else
     {
         myMovePlateau = lateralPlateau;
-        resectionThickness = pImplant.tibiaThickness - tibiaCartilage;
     }
     //////////////////////////////////////////////////////////////////////
-
+	resectionThickness = pImplant.tibiaThickness - tibiaCartilage + pImplant.tibiaSpacer;
     myMovePlateau = myMovePlateau - resectionThickness * tibiaLineDirectVector;
 
     return myMovePlateau;
@@ -622,15 +619,13 @@ Point Knee::getInferiorMoveFemurPoint(const FemurImplantInfo& pImplant) const
     if (mSurgerySize == SurgerySideEnum::KMedial)
     {
         myInferiorMoveFemurPoint = medialInferiorFemurPoint;
-        resectionThickness = pImplant.femurDistalThickness - femurCartilage;
     }
     else
     {
         myInferiorMoveFemurPoint = lateralInferiorFemurPoint;
-        resectionThickness = pImplant.femurDistalThickness - femurCartilage;
     }
     //////////////////////////////////////////////////////////////////////
-
+	resectionThickness = pImplant.femurDistalThickness - femurCartilage;
     myInferiorMoveFemurPoint = myInferiorMoveFemurPoint + resectionThickness * femurLineDirectVector;
 
     return myInferiorMoveFemurPoint;

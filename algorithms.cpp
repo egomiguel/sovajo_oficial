@@ -4661,7 +4661,7 @@ int main()
 	//MatchEasy();
 	//::testTibiaImplant2();
 	//segment_balls();
-	RotulaGroovePath();
+	//RotulaGroovePath();
 	std::cout << "VTK Version: " << vtkVersion::GetVTKVersion() << std::endl;
 	/*
 	std::string casePlan = "D:\\sovajo\\Cases_Plan_TKA\\case1_left";
@@ -4894,8 +4894,7 @@ int main()
 	//std::cout << Point(result) << "; " << proj << std::endl;
 
 	//PolydataInterception();
-
-	//TEST_PKA::MatchPKA();
+	TEST_PKA::MatchPKA();
 	//TEST_PKA_SUEN::testImplants();
 
 	//double pnt[3] = { 0, 0, 0 };

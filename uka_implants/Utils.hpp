@@ -19,6 +19,7 @@ namespace UKA
 		struct TibiaImplantInfo
 		{
 			double tibiaThickness;
+			double tibiaSpacer;
 			//double slope;
 		};
 
