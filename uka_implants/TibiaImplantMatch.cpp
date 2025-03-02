@@ -1492,7 +1492,7 @@ vtkSmartPointer<vtkPolyData> TibiaImplantMatch::getContour(const vtkSmartPointer
 	return contour;
 }
 
-std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, double distance, double distancePcl, double closeCurveLateral, double closeCurveMedial, int amount) const
+std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, double distance, double distancePcl, double distanceSide, double closeCurveLateral, double closeCurveMedial, int amount) const
 {
 	std::vector<PointTypeITK> hull;
 	Plane myPlane = finalTransformPlane(implant.getTibiaPlane(), pTransformIn);
@@ -1684,6 +1684,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	//////////////////////////////////////////////////////////////////////////////////////
 	//ImplantTools::show(contourMax, pclPoints);
 	//ImplantTools::show(contourMax, contourMax);
+	//////////////////////////////////////////////////////////////////////////////////
 
 	if (pclPoints.size() < 10)
 	{
@@ -1998,6 +1999,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	}
 	////////////////////////////////////////////Div PKA section/////////////////////////////////////////////////////////////////////
 	//ImplantTools::show(contourMax, finalSplinePointsTKA);
+	///////////////////////////////////////////////////////////////////////
 
 	Plane midPlane = myPlane.getPerpendicularPlane(pcl, tubercle);
 
@@ -2017,15 +2019,21 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	Point implantPCL = finalTransformPoint(implant.getPointPCL(), pTransformIn);
 	Point implantTuber = finalTransformPoint(implant.getPointTuber(), pTransformIn);
 	Point implantSide = finalTransformPoint(implant.getPlateauRefPointDown(), pTransformIn);
+	Point implantPlaneSidePoint = finalTransformPoint(implant.getPlaneSidePoint(), pTransformIn);
 
 	Plane midPlaneImplant = myPlane.getPerpendicularPlane(implantPCL, implantTuber);
 	midPlaneImplant.reverseByPoint(implantSide);
 
+	Point vectorToPlaneSide = -midPlaneImplant.getNormalVector();
+	double sidePlaneThickness = abs(midPlaneImplant.eval(implantPlaneSidePoint)) + distanceSide;
+
+	midPlaneImplant.movePlaneOnNormal(-sidePlaneThickness);
+
 	if (midPlane.eval(finalSplinePointsTKA[0]) < 0)
 	{
-		for (float i = 0.1; i <= 1.0; i += 0.1)
+		for (float i = 0.5; i <= 1.0; i += 0.1)
 		{
-			Point temp = implantTuber + i * (implantPCL - implantTuber);
+			Point temp = implantTuber + i * (implantPCL - implantTuber) + sidePlaneThickness * vectorToPlaneSide;
 			finalSplinePointsPKA.push_back(myPlane.getProjectionPoint(temp));
 		}
 	}
@@ -2040,16 +2048,17 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	if (midPlane.eval(finalSplinePointsTKA[0]) > 0)
 	{
-		for (float i = 0.1; i <= 1.0; i += 0.1)
+		for (float i = 0.5; i <= 1.0; i += 0.1)
 		{
-			Point temp = implantPCL + i * (implantTuber - implantPCL);
+			Point temp = implantPCL + i * (implantTuber - implantPCL) + sidePlaneThickness * vectorToPlaneSide;
 			finalSplinePointsPKA.push_back(myPlane.getProjectionPoint(temp));
 		}
 	}
 
+	/////////////////////////////////////////////////////////
 	//ImplantTools::show(contourMax, finalSplinePointsPKA);
-
 	//ImplantTools::show(contourMax, finalSplinePointsPKA, true);
+	/////////////////////////////////////////////////////////////
 
 	hull = increaseVectorToAmount(finalSplinePointsPKA, amount);
 

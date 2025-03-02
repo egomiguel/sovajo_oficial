@@ -1338,10 +1338,11 @@ void MatchTibiaPKA()
 	UKA::IMPLANTS::Point apLineTuberPoint(10.2438, -37.5031, 0.951554);
 	UKA::IMPLANTS::Point sidePoint(-14.1021, -11.1526, 1.1545);
 	UKA::IMPLANTS::Point exteriorPoint(-14.5152, -10.8294, 4.41175);
+	UKA::IMPLANTS::Point planeSidePoint(12.10, -12.08, 2.59);
 	UKA::IMPLANTS::TibiaImplantInfo tibiaInfo;
 	tibiaInfo.tibiaThickness = 2.0;
 
-	tibiaImplant.init(apLinePclPoint, apLineTuberPoint, sidePoint, exteriorPoint, tibiaInfo);
+	tibiaImplant.init(apLinePclPoint, apLineTuberPoint, sidePoint, exteriorPoint, planeSidePoint, tibiaInfo);
 
 	UKA::IMPLANTS::TibiaImplantMatch tibiaImplantMatch;
 	tibiaImplantMatch.init(tibiaImplant, myKnee);
@@ -1405,10 +1406,11 @@ void MatchEasyPKA()
 	UKA::IMPLANTS::Point apLineTuberPoint(10.01, -39.601, 1.06);
 	UKA::IMPLANTS::Point sidePoint(-15.2245, -12.73, 1.15);
 	UKA::IMPLANTS::Point exteriorPoint(-14.5152, -10.8294, 4.41175);
+	UKA::IMPLANTS::Point planeSidePoint(12.10, -12.08, 2.59);
 	UKA::IMPLANTS::TibiaImplantInfo tibiaInfo;
 	tibiaInfo.tibiaThickness = 2.0;
 
-	tibiaImplant.init(apLinePclPoint, apLineTuberPoint, sidePoint, exteriorPoint, tibiaInfo);
+	tibiaImplant.init(apLinePclPoint, apLineTuberPoint, sidePoint, exteriorPoint, planeSidePoint, tibiaInfo);
 
 	////////////////////////////////////////////////////////
 

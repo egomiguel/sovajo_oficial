@@ -13,7 +13,7 @@ TibiaImplant::TibiaImplant()
 	isInit = false;
 }
 
-void TibiaImplant::init(const Point& apLinePclPoint, const Point& apLineTuberPoint, const Point& mostFarPointUp, const Point& exteriorPointDown, const TibiaImplantInfo& pImplantInfo)
+void TibiaImplant::init(const Point& apLinePclPoint, const Point& apLineTuberPoint, const Point& mostFarPointUp, const Point& exteriorPointDown, const Point& planeSidePoint, const TibiaImplantInfo& pImplantInfo)
 {
     if (isInit == true)
     {
@@ -34,6 +34,7 @@ void TibiaImplant::init(const Point& apLinePclPoint, const Point& apLineTuberPoi
 	this->pclPoint = tibiaPlane.getProjectionPoint(apLinePclPoint);
 	this->tuberPoint = tibiaPlane.getProjectionPoint(apLineTuberPoint);
 	this->plateauRefPointDown = tibiaPlane.getProjectionPoint(plateauRefPointUp);
+	this->planeSidePoint = planeSidePoint;
     
     isInit = true;
 }
@@ -121,6 +122,11 @@ Point TibiaImplant::getPlateauRefPointDown() const
 Point TibiaImplant::getPlateauRefPointUp() const
 {
 	return plateauRefPointUp;
+}
+
+Point TibiaImplant::getPlaneSidePoint() const
+{
+	return planeSidePoint;
 }
 
 Point TibiaImplant::getExtremeSidePoint() const
