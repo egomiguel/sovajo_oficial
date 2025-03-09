@@ -382,8 +382,8 @@ namespace TEST_PKA
 
 	void MatchPKA()
 	{
-		std::string folder = "D:\\sovajo\\Cases_Plan_PKA\\UKA-data"; // right
-		UKA::IMPLANTS::Knee myKnee = CreateKneeFromFile_NumbersPKA(folder, UKA::IMPLANTS::KRight, UKA::IMPLANTS::KMedial);
+		std::string folder = "D:\\sovajo\\Cases_Plan_PKA\\UKA-data_2"; // right
+		UKA::IMPLANTS::Knee myKnee = CreateKneeFromFile_NumbersPKA(folder, UKA::IMPLANTS::KLeft, UKA::IMPLANTS::KLateral);
 
 		UKA::IMPLANTS::FemurImplant femurImplant;
 
@@ -448,9 +448,9 @@ namespace TEST_PKA
 
 		////////////////////// First Match
 		std::vector<vtkSmartPointer<vtkPolyData>> polyList;
-		//polyList.push_back(newImplantFemur);
+		polyList.push_back(newImplantFemur);
 		//polyList.push_back(newImplantTibia);
-		//show(myKnee.GetFemurPoly(), polyList);
+		show(myKnee.GetFemurPoly(), polyList);
 
 		///////////////////////////////////////////////////// Second Match
 		/*

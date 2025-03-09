@@ -24,7 +24,7 @@ namespace UKA
 		public:
 			ImplantsMatchFinalInfo(Knee* pKnee, const FemurImplant pFemurImplant, const TibiaImplant pTibiaImplant, const itk::Rigid3DTransform<>::Pointer pImplantToBoneFemurTransform, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTibiaTransform);
 			~ImplantsMatchFinalInfo();
-			ResectionThickness GetTibiaResection() const;
+			ResectionThickness GetTibiaProtrudes() const;
 			ResectionThickness GetFemurResectionAxial() const;
 			ResectionThickness GetFemurResectionCoronal() const;
 
@@ -53,40 +53,22 @@ namespace UKA
 			//std::vector<PointTypeITK> getImplantKneeCapPath() const;
 
 			/*
-			   Change the medial thickness of the tibia. Updates the tibia transformation internally
+			   Change the protrudes of tibia implant. Updates the tibia transformation internally
 			   on the object with the new translation. Return the new translation
 			*/
-			itk::Vector< double, 3 > SetThicknessTibia(double medialThickness);
+			itk::Vector< double, 3 > SetTibiaProtrudes(double proud);
 
 			/*
-			   Change the lateral thickness of the tibia. Updates the tibia transformation internally
+			   Change the thickness of the femur axial view. Updates the femur transformation internally
 			   on the object with the new translation. Return the new translation
 			*/
-			//itk::Vector< double, 3 > SetThicknessTibiaLateral(double lateralThickness);
+			itk::Vector< double, 3 > SetThicknessFemurAxial(double thickness);
 
 			/*
-			   Change the medial thickness of the femur axial view. Updates the femur transformation internally
-			   on the object with the new translation. Return the new translation
-			*/
-			itk::Vector< double, 3 > SetThicknessFemurAxial(double medialThickness);
-
-			/*
-			   Change the lateral thickness of the femur axial view. Updates the femur transformation internally
-			   on the object with the new translation. Return the new translation
-			*/
-			//itk::Vector< double, 3 > SetThicknessFemurAxialLateral(double lateralThickness);
-
-			/*
-			  Change the medial thickness of the femur coronal view. Updates the femur transformation internally
+			  Change the thickness of the femur coronal view. Updates the femur transformation internally
 			  on the object with the new translation. Return the new translation
 		   */
-			itk::Vector< double, 3 > SetThicknessFemurCoronal(double medialThickness);
-
-			/*
-			   Change the lateral thickness of the femur coronal view. Updates the femur transformation internally
-			   on the object with the new translation. Return the new translation
-			*/
-			//itk::Vector< double, 3 > SetThicknessFemurCoronalLateral(double lateralThickness);
+			itk::Vector< double, 3 > SetThicknessFemurCoronal(double thickness);
 
 			/*
 				Change the flexion angle of the femur implant. Updates the femur implant transformation internally

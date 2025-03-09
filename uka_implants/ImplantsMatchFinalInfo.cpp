@@ -932,7 +932,7 @@ double ImplantsMatchFinalInfo::GetTibiaVarusAngle() const
     }
 }
 
-ResectionThickness ImplantsMatchFinalInfo::GetTibiaResection() const
+ResectionThickness ImplantsMatchFinalInfo::GetTibiaProtrudes() const
 {
     Plane planeTemp = tibiaImplant.getTibiaPlane();
     planeTemp.reverseByPoint(tibiaImplant.getExteriorPoint());
@@ -979,10 +979,18 @@ ResectionThickness ImplantsMatchFinalInfo::GetFemurResectionCoronal() const
 }
 
 
-itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessTibia(double medialThickness)
+itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetTibiaProtrudes(double proud)
 {
-    double finalThickness = medialThickness;// -tibiaCartilage;
-    Point movePlateau = knee->getMedialPlateau();
+	Point movePlateau;
+
+	if (knee->getSurgerySide() == SurgerySideEnum::KLateral)
+	{
+		movePlateau = knee->getLateralPlateau();
+	}
+	else
+	{
+		movePlateau = knee->getMedialPlateau();
+	}
 
     Plane planeTemp = tibiaImplant.getTibiaPlane();
     planeTemp.reverseByPoint(tibiaImplant.getExteriorPoint(), false);
@@ -991,7 +999,7 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessTibia(double medial
     Point oldPoint = tibia.getProjectionPoint(movePlateau);
 
     tibia.movePlane(movePlateau);
-    tibia.movePlaneOnNormal(finalThickness);
+    tibia.movePlaneOnNormal(proud);
 
     Point newMovePlateau = tibia.getProjectionPoint(movePlateau);
 
@@ -1007,40 +1015,19 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessTibia(double medial
     return newTranslation;
 }
 
-/*
-itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessTibiaLateral(double lateralThickness)
+
+itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessFemurCoronal(double thickness)
 {
-    double finalThickness = lateralThickness;// -tibiaCartilage;
-    Point movePlateau = knee->getLateralPlateau();
+    Point movePoint;
 
-    Plane planeTemp = tibiaImplant.getTibiaPlane();
-    planeTemp.reverseByPoint(tibiaImplant.getExteriorPoint(), false);
-
-    Plane tibia = TransformPlane(planeTemp, tibiaRotation, tibiaTranslation);
-    Point oldPoint = tibia.getProjectionPoint(movePlateau);
-
-    tibia.movePlane(movePlateau); 
-    tibia.movePlaneOnNormal(finalThickness);
-
-    Point newMovePlateau = tibia.getProjectionPoint(movePlateau);
-
-    tibiaTranslation = tibiaTranslation + (newMovePlateau.ToMatPoint() - oldPoint.ToMatPoint());
-
-    Point newTranslationCV = Point(tibiaTranslation);
-
-    itk::Vector< double, 3 > newTranslation;
-    newTranslation[0] = newTranslationCV.x;
-    newTranslation[1] = newTranslationCV.y;
-    newTranslation[2] = newTranslationCV.z;
-
-    return newTranslation;
-}
-*/
-
-itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessFemurCoronal(double medialThickness)
-{
-    double finalThickness = medialThickness;// -femurCartilage;
-    Point movePoint = knee->getMedialCondyle();
+	if (knee->getSurgerySide() == SurgerySideEnum::KLateral)
+	{
+		movePoint = knee->getLateralCondyle();
+	}
+	else
+	{
+		movePoint = knee->getMedialCondyle();
+	}
 
     Plane planeTemp = femurImplant.getPosterior();
     planeTemp.reverseByPoint(femurImplant.getRodBasePoint());
@@ -1050,7 +1037,7 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessFemurCoronal(double
     Point oldPoint = femur.getProjectionPoint(movePoint);
 
     femur.movePlane(movePoint);
-    femur.movePlaneOnNormal(finalThickness);
+    femur.movePlaneOnNormal(thickness);
 
     Point newPoint = femur.getProjectionPoint(movePoint);
 
@@ -1066,42 +1053,18 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessFemurCoronal(double
     return newTranslation;
 }
 
-/*
-itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessFemurCoronalLateral(double lateralThickness)
+itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessFemurAxial(double thickness)
 {
-    double finalThickness = lateralThickness;// -femurCartilage;
-
-    Point movePoint = knee->getLateralCondyle();
-
-    Plane planeTemp = femurImplant.getPlaneA();
-    planeTemp.reverseByPoint(femurImplant.getCortexPoint());
-
-    Plane femur = TransformPlane(planeTemp, femurRotation, femurTranslation);
-
-    Point oldPoint = femur.getProjectionPoint(movePoint);
-
-    femur.movePlane(movePoint);
-    femur.movePlaneOnNormal(finalThickness);
-
-    Point newPoint = femur.getProjectionPoint(movePoint);
-
-    femurTranslation = femurTranslation + (newPoint.ToMatPoint() - oldPoint.ToMatPoint());
-
-    Point newTranslationCV = Point(femurTranslation);
-
-    itk::Vector< double, 3 > newTranslation;
-    newTranslation[0] = newTranslationCV.x;
-    newTranslation[1] = newTranslationCV.y;
-    newTranslation[2] = newTranslationCV.z;
-
-    return newTranslation;
-}
-*/
-
-itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessFemurAxial(double medialThickness)
-{
-    double finalThickness = medialThickness;// -femurCartilage;
     Point movePoint = knee->getMedialInferiorFemurPoint();
+
+	if (knee->getSurgerySide() == SurgerySideEnum::KLateral)
+	{
+		movePoint = knee->getLateralInferiorFemurPoint();
+	}
+	else
+	{
+		movePoint = knee->getMedialInferiorFemurPoint();
+	}
 
     Plane planeTemp = femurImplant.getDistalPlane();
     planeTemp.reverseByPoint(femurImplant.getRodTopPoint());
@@ -1111,7 +1074,7 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessFemurAxial(double m
     Point oldPoint = femur.getProjectionPoint(movePoint);
 
     femur.movePlane(movePoint);
-    femur.movePlaneOnNormal(finalThickness);
+    femur.movePlaneOnNormal(thickness);
 
     Point newPoint = femur.getProjectionPoint(movePoint);
 
@@ -1126,37 +1089,6 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessFemurAxial(double m
 
     return newTranslation;
 }
-
-/*
-itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessFemurAxialLateral(double lateralThickness)
-{
-    double finalThickness = lateralThickness;// -femurCartilage;
-    Point movePoint = knee->getLateralInferiorFemurPoint();
-
-    Plane planeTemp = femurImplant.getPlaneC();
-    planeTemp.reverseByPoint(femurImplant.getCortexPoint());
-
-    Plane femur = TransformPlane(planeTemp, femurRotation, femurTranslation);
-
-    Point oldPoint = femur.getProjectionPoint(movePoint);
-
-    femur.movePlane(movePoint);
-    femur.movePlaneOnNormal(finalThickness);
-
-    Point newPoint = femur.getProjectionPoint(movePoint);
-
-    femurTranslation = femurTranslation + (newPoint.ToMatPoint() - oldPoint.ToMatPoint());
-
-    Point newTranslationCV = Point(femurTranslation);
-
-    itk::Vector< double, 3 > newTranslation;
-    newTranslation[0] = newTranslationCV.x;
-    newTranslation[1] = newTranslationCV.y;
-    newTranslation[2] = newTranslationCV.z;
-
-    return newTranslation;
-}
-*/
 
 ResectionThickness ImplantsMatchFinalInfo::GetFemurResectionAxial() const
 {
@@ -1455,7 +1387,7 @@ void ImplantsMatchFinalInfo::setTibiaTransform(const itk::Rigid3DTransform<>::Po
 
 void ImplantsMatchFinalInfo::test()
 {
-    ResectionThickness tibia = GetTibiaResection();
+    ResectionThickness tibia = GetTibiaProtrudes();
     ResectionThickness axialFemur = GetFemurResectionAxial();
     ResectionThickness coronalFemur = GetFemurResectionCoronal();
     double varusAngle = GetFemurVarusAngle();

@@ -55,6 +55,8 @@ namespace UKA
 
 			Point getPointsOnPlane(const Plane& myPlane, std::vector<Point>& points) const;
 
+			Point getPointsOnPlane(const Plane& myPlane, std::vector<Point>& allPoints, std::vector<Point>& pointsLat, std::vector<Point>& pointsMed) const;
+
 			Plane finalTransformPlane(const Plane& plane, const itk::Rigid3DTransform<>::Pointer pTransform) const;
 
 			void getCurveLikeU(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distanceSide, double distanceTop, int amount) const;

@@ -345,6 +345,93 @@ Point FemurImplantMatch::getPointsOnPlane(const Plane& myPlane, std::vector<Poin
 	return midPoint;
 }
 
+Point FemurImplantMatch::getPointsOnPlane(const Plane& myPlane, std::vector<Point>& allPoints, std::vector<Point>& pointsLat, std::vector<Point>& pointsMed) const
+{
+	Point hip = knee.getHipCenter();
+	Point femurKnee = knee.getFemurKneeCenter();
+	Point cortex = femurKnee + 0.25 * (hip - femurKnee);
+	Point directVector = hip - femurKnee;
+	Plane Transverse, midPlane;
+	Transverse.init(directVector, cortex);
+	int transverseSign;
+	if (Transverse.eval(hip) > 0)
+		transverseSign = -1.0;
+	else
+		transverseSign = 1.0;
+
+	midPlane.init(knee.getFemurVectorTEA(), femurKnee);
+	midPlane.reverseByPoint(knee.getLateralEpicondyle());
+
+	Point midPoint, tempPoint;
+	pointsLat.clear();
+	pointsMed.clear();
+
+	auto allContours = ImplantTools::getAllContours(knee.GetFemurPoly(), myPlane.getNormalVector(), myPlane.getPoint());
+	bool separated = true;
+
+	for (int i = 0; i < allContours.size(); i++)
+	{
+		//ImplantTools::show(allContours[i].first, allContours[i].first);
+		vtkSmartPointer<vtkPoints> pointsCut = allContours[i].second;
+		int tSize = pointsCut->GetNumberOfPoints();
+		int lateralCount = 0;
+		int medialCount = 0;
+		midPlane.countPositiveAndNegativePoints(pointsCut, lateralCount, medialCount);
+
+		for (int j = 0; j < tSize; j++)
+		{
+			double pnt[3];
+			pointsCut->GetPoint(j, pnt);
+			Point myPoint(pnt[0], pnt[1], pnt[2]);
+
+			if (transverseSign * Transverse.eval(myPoint) > 0)
+			{
+				midPoint = midPoint + myPoint;
+
+				allPoints.push_back(myPoint);
+
+				if (lateralCount > medialCount && separated == true)
+				{
+					float comp = medialCount * 2.5;
+					if (lateralCount >= comp)
+					{
+						pointsLat.push_back(myPoint);
+					}
+					else
+					{
+						pointsLat.clear();
+						pointsMed.clear();
+						separated = false;
+					}
+				}
+				else if (medialCount > lateralCount && separated == true)
+				{
+					float comp = lateralCount * 2.5;
+					if (medialCount >= comp)
+					{
+						pointsMed.push_back(myPoint);
+					}
+					else
+					{
+						pointsLat.clear();
+						pointsMed.clear();
+						separated = false;
+					}
+				}
+
+			}
+		}
+
+	}
+
+	if (allPoints.size() > 0)
+	{
+		midPoint = midPoint / double(allPoints.size());
+	}
+
+	return midPoint;
+}
+
 std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneArea id, double distanceSide, double distanceTop, double angleLateral, double angleMedial, int amount) const
 {
 	std::vector<Point> projectedPoints;
@@ -374,13 +461,15 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	sagitalAnatomicPlane.init(knee.getFemurVectorTEA(), knee.getFemurKneeCenter());
 	cv::Mat myRotation;
 	Point myNormal, myNormalTemp;
+	std::vector<Point> pointsLatTemp, pointsMedTemp;
 
 	if (id == KPosteriorPlane)
 	{
 		currentPlane = finalTransformPlane(implantFemur.getPosterior(), pTransformIn);
 		projectedPoints.clear();
 
-		midPointPlane = getPointsOnPlane(currentPlane, projectedPoints);
+		//midPointPlane = getPointsOnPlane(currentPlane, projectedPoints);
+		midPointPlane = getPointsOnPlane(currentPlane, projectedPoints, pointsLatTemp, pointsMedTemp);
 
 		myNormalTemp = knee.getFemurKneeCenter() - resizeVector * knee.getFemurDirectVectorAP();
 		myNormal = currentPlane.getProjectionPoint(myNormalTemp) - myNormalTemp;
@@ -460,7 +549,18 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	if (id == KPosteriorPlane)
 	{
-		getCurveLikeU(projectedPoints, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
+		if (knee.getSurgerySide() == SurgerySideEnum::KLateral && pointsLatTemp.size() > 3)
+		{
+			getCurveLikeU(pointsLatTemp, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
+		}
+		else if (knee.getSurgerySide() == SurgerySideEnum::KMedial && pointsMedTemp.size() > 3)
+		{
+			getCurveLikeU(pointsMedTemp, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
+		}
+		else
+		{
+			getCurveLikeU(pointsLatTemp, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
+		}
 	}
 	else
 	{
@@ -647,10 +747,10 @@ FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const
 	int downLatCorner = ImplantTools::GetCornerPointOnContour(fullConvex, centerPoint, downLine.getProjectPoint(centerPoint), lateralLine.getProjectPoint(centerPoint));
 	int downMedCorner = ImplantTools::GetCornerPointOnContour(fullConvex, centerPoint, downLine.getProjectPoint(centerPoint), medialLine.getProjectPoint(centerPoint));
 
-
-	//auto poly = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
-	//ImplantTools::show(poly, fullConvex, true);
-
+	////////////////////////////////////////////////////////////////////////////////////
+	//auto poly1 = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
+	//ImplantTools::show(poly1, fullConvex, true);
+	////////////////////////////////////////////////////////////////////////////////////
 
 	if (topLatCorner < 0 || topMedCorner < 0 || downLatCorner < 0 || downMedCorner < 0)
 	{
@@ -748,8 +848,8 @@ FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const
 	tSize = fullConvex.size();
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//auto poly = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
-	//ImplantTools::show(poly, convHull.getChangeDirectionPoints());
+	//auto poly2 = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
+	//ImplantTools::show(poly2, convHull.getChangeDirectionPoints());
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::vector<Point> changeDirPoints = convHull.getChangeDirectionPoints();
