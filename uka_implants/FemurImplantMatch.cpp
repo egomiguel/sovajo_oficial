@@ -603,8 +603,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	//ImplantTools::fitEllipse(vertices, currentPlane.getNormalVector(), midPointPlane);
 
-	ConvexHull tempHull(vertices, myRotation);
-	midPointPlane = ImplantTools::getPolygonCenter(tempHull.GetConvexHull(), currentPlane.getNormalVector());
+	midPointPlane = ImplantTools::getPolygonCenter(vertices, currentPlane.getNormalVector());
 
 	/*auto vectorTest = vertices;
 	vectorTest.push_back(midPointPlane);

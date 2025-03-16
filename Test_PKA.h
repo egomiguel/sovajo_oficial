@@ -478,7 +478,7 @@ namespace TEST_PKA
 		femurTransformIn->SetMatrix(femurImplantMatch.GetRotationMatrix());
 		femurTransformIn->SetOffset(femurImplantMatch.GetTranslationMatrix());
 
-		std::vector<PointTypeITK> hullFemur = femurImplantMatch.GetHullPoints(femurTransformIn, femurTransformOut, UKA::IMPLANTS::FemurImplantMatch::KPosteriorPlane);
+		std::vector<PointTypeITK> hullFemur = femurImplantMatch.GetHullPoints(femurTransformIn, femurTransformOut, UKA::IMPLANTS::FemurImplantMatch::KAnteriorAndDistalCurve);
 		
 		std::vector<PointTypeITK> hull = tibiaImplantMatch.GetHullPoints(tibiaTransformIn, tibiaTransformOut);
 

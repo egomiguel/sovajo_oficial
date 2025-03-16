@@ -118,7 +118,7 @@ namespace UKA
 
 			std::pair<double, double> fitEllipse(const std::vector<Point>& pPoints, const Point& pNormal, Point& center);
 
-			Point getPolygonCenter(const std::vector<Point>& pOrderedPoints, const Point& pNormal);
+			Point getPolygonCenter(const std::vector<Point>& pPoints, const Point& pNormal);
 			
 			int orientation(const cv::Point2d& p1, const cv::Point2d& p2, const cv::Point2d& p3); //0 collinear, 1 Clockwise, 2 Counterclockwise
 

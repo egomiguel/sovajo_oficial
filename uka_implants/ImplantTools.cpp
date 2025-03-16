@@ -1655,31 +1655,39 @@ std::pair<Point, double> ImplantTools::fitSphere(const std::vector<Point>& pPoin
 	return std::make_pair(center, radius);
 }
 
-Point ImplantTools::getPolygonCenter(const std::vector<Point>& pOrderedPoints, const Point& pNormal)
+Point ImplantTools::getPolygonCenter(const std::vector<Point>& pPoints, const Point& pNormal)
 {
 	double area = 0.0;
 	double cx = 0.0, cy = 0.0;
-	int n = pOrderedPoints.size();
 
 	cv::Mat rotate = GetRotateZ(pNormal);
-	std::vector<cv::Point2f> coplanar2d;
+	std::vector<cv::Point2f> coplanar2d, convexHull2D;
 	double z = 0;
 
-	for (auto& newPoint : pOrderedPoints)
+	for (auto& point : pPoints)
 	{
-		cv::Mat transformPointMat = rotate * newPoint.ToMatPoint();
-		Point tPoint = Point(transformPointMat);
-		coplanar2d.push_back(cv::Point2f(tPoint.x, tPoint.y));
-		z = tPoint.z;
+		cv::Mat rotatePointMat = rotate * point.ToMatPoint();
+		cv::Point3d rotatePoint = cv::Point3d(rotatePointMat);
+		cv::Point3f fPoint = static_cast<cv::Point3f>(rotatePoint);
+		coplanar2d.push_back(cv::Point2f(fPoint.x, fPoint.y));
+		z += fPoint.z;
 	}
+
+	if (pPoints.size() > 0)
+	{
+		z = z / float(pPoints.size());
+	}
+
+	cv::convexHull(coplanar2d, convexHull2D, true);
+	int n = convexHull2D.size();
 
 	for (int i = 0; i < n; i++)
 	{
 		int j = (i + 1) % n;
-		double factor = (coplanar2d[i].x * coplanar2d[j].y - coplanar2d[j].x * coplanar2d[i].y);
+		double factor = (convexHull2D[i].x * convexHull2D[j].y - convexHull2D[j].x * convexHull2D[i].y);
 		area += factor;
-		cx += (coplanar2d[i].x + coplanar2d[j].x) * factor;
-		cy += (coplanar2d[i].y + coplanar2d[j].y) * factor;
+		cx += (convexHull2D[i].x + convexHull2D[j].x) * factor;
+		cy += (convexHull2D[i].y + convexHull2D[j].y) * factor;
 	}
 
 	area *= 0.5;

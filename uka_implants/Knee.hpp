@@ -90,6 +90,8 @@ namespace UKA
 
 			Point getMovePlateau(const TibiaImplantInfo& pImplant) const;
 
+			Point getMovePlateauCenter(const TibiaImplantInfo& pImplant) const;
+
 			Point getAnkleCenter() const;
 
 			Point getLateralEpicondyle() const;
@@ -147,6 +149,8 @@ namespace UKA
 			bool getIsRight() const;
 
 			Plane getEquisPlaneTibia() const;
+
+			void getTibiaPlateauCenters(Point& lateral, Point& medial) const;
 
 			std::pair<double, double> getTibiaAutomaticAxis(Point& pVectorApFront, Point& pVectorTeaLat, Point& pCenterPoint) const;
 

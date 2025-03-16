@@ -100,7 +100,6 @@ void Knee::init(const Point& hipCenter, const Point& femurKneeCenter, const Poin
     }
 
     findTibiaPlaneNormalVector();
-
     isInit = true;
 }
 
@@ -419,6 +418,34 @@ Point Knee::getMedialPlateau() const
 //{
 //    return movePlateau;
 //}
+
+Point Knee::getMovePlateauCenter(const TibiaImplantInfo& pImplant) const
+{
+	double resectionThickness;
+	Point myMovePlateau;
+	
+	Point tibiaLineDirectVector = tibiaNormalPlaneVector;
+	tibiaLineDirectVector.normalice();
+
+	///////////////////////////////////////////////////////////////////
+
+	Point lateralCenter, medialCenter;
+	getTibiaPlateauCenters(lateralCenter, medialCenter);
+
+	if (mSurgerySize == SurgerySideEnum::KMedial)
+	{
+		myMovePlateau = medialCenter;
+	}
+	else
+	{
+		myMovePlateau = lateralCenter;
+	}
+	//////////////////////////////////////////////////////////////////////
+	resectionThickness = pImplant.tibiaThickness - tibiaCartilage + pImplant.tibiaSpacer;
+	myMovePlateau = myMovePlateau - resectionThickness * tibiaLineDirectVector;
+
+	return myMovePlateau;
+}
 
 Point Knee::getMovePlateau(const TibiaImplantInfo& pImplant) const
 {
@@ -817,6 +844,51 @@ cv::Mat Knee::getTibiaCenterPointOnImplantAP(const TibiaImplantInfo& pImplant) c
     result.at <double>(2, 0) = tibiaCenter.z;
 
     return result;
+}
+
+void Knee::getTibiaPlateauCenters(Point& lateral, Point& medial) const
+{
+	Plane equis = getEquisPlaneTibia();
+
+	vtkSmartPointer<vtkPolyData> contourMax = ImplantTools::getContours(GetTibiaPoly(), equis.getNormalVector(), equis.getPoint());
+	vtkSmartPointer<vtkPoints> vtkMyPoints = contourMax->GetPoints();
+	int tVtkPointSize = vtkMyPoints->GetNumberOfPoints();
+
+	std::vector<Point> contourLat, cotourMed;
+	Plane midPlane = equis.getPerpendicularPlane(equis.getProjectionPoint(pclCenter), equis.getProjectionPoint(tibiaTubercle));
+	Point tempPoint = midPlane.getPoint();
+	midPlane.movePlane(medialPlateau);
+	midPlane.reverseByPoint(lateralPlateau);
+	midPlane.movePlane(tempPoint);
+
+	Point refLateralVector = lateralPlateau - equis.getProjectionPoint(lateralPlateau);
+	Point refMedialVector = medialPlateau - equis.getProjectionPoint(medialPlateau);
+
+	for (int i = 0; i < tVtkPointSize; i++)
+	{
+		double pnt[3];
+		vtkMyPoints->GetPoint(i, pnt);
+		Point currentPoint(pnt[0], pnt[1], pnt[2]);
+		if (midPlane.eval(currentPoint) >= 1)
+		{
+			contourLat.push_back(currentPoint + refLateralVector);
+		}
+		else if (midPlane.eval(currentPoint) <= -2)
+		{
+			cotourMed.push_back(currentPoint + refMedialVector);
+		}
+	}
+
+	if (contourLat.size() > 0 && cotourMed.size() > 0)
+	{
+		lateral = ImplantTools::getPolygonCenter(contourLat, equis.getNormalVector());
+		medial = ImplantTools::getPolygonCenter(cotourMed, equis.getNormalVector());
+	}
+	else
+	{
+		lateral = lateralPlateau;
+		medial = medialPlateau;
+	}
 }
 
 Plane Knee::getEquisPlaneTibia() const

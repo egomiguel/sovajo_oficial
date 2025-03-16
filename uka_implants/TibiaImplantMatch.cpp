@@ -172,7 +172,7 @@ void TibiaImplantMatch::makeTranslationMatrix()
 	Point vectorToSurgicalTEAProj = equisPlane.getProjectionVector(vectorToSurgicalTEA);
 	vectorToSurgicalTEAProj.normalice();
 
-	Point tibiaPlateau = knee.getMovePlateau(implant.getImplantInfo());
+	Point tibiaPlateau = knee.getMovePlateauCenter(implant.getImplantInfo());
 	//Point tibiaPlateau = knee.getTibiaCenterPointApAutomatic();
 	translationMatrix = tibiaPlateau.ToMatPoint() - (rotationMatrix * implant.getPlateauRefPointDown().ToMatPoint());
 
@@ -2028,11 +2028,15 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	midPlaneImplant.movePlaneOnNormal(-sidePlaneThickness);
 
+	Line tempLine = Line::makeLineWithPoints(implantTuber, implantPCL);
+	Point refBoneTuber = tempLine.getProjectPoint(knee.getTibiaTubercle());
+	Point refBonePcl = tempLine.getProjectPoint(knee.getPclCenterPoint());
+
 	if (midPlane.eval(finalSplinePointsTKA[0]) < 0)
 	{
-		for (float i = 0.0; i <= 1.0; i += 0.1)
+		for (float i = 0.1; i < 0.3; i += 0.1)
 		{
-			Point temp = implantTuber + i * (implantPCL - implantTuber) + sidePlaneThickness * vectorToPlaneSide;
+			Point temp = refBoneTuber + i * (refBonePcl - refBoneTuber) + sidePlaneThickness * vectorToPlaneSide;
 			finalSplinePointsPKA.push_back(myPlane.getProjectionPoint(temp));
 		}
 	}
@@ -2047,9 +2051,9 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	if (midPlane.eval(finalSplinePointsTKA[0]) > 0)
 	{
-		for (float i = 0.5; i <= 1.0; i += 0.1)
+		for (float i = 0.8; i < 1.0; i += 0.1)
 		{
-			Point temp = implantPCL + i * (implantTuber - implantPCL) + sidePlaneThickness * vectorToPlaneSide;
+			Point temp = refBonePcl + i * (refBoneTuber - refBonePcl) + sidePlaneThickness * vectorToPlaneSide;
 			finalSplinePointsPKA.push_back(myPlane.getProjectionPoint(temp));
 		}
 	}
@@ -2063,8 +2067,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	itk::Vector< double, 3 > translate;
 	//ImplantTools::fitEllipse(finalSplinePointsPKA, myPlane.getNormalVector(), hullCenter);
-	ConvexHull tempHull(finalSplinePointsPKA, myRotation);
-	hullCenter = ImplantTools::getPolygonCenter(tempHull.GetConvexHull(), myPlane.getNormalVector());
+	hullCenter = ImplantTools::getPolygonCenter(finalSplinePointsPKA, myPlane.getNormalVector());
 
 	/*auto vectorTest = finalSplinePointsPKA;
 	vectorTest.push_back(hullCenter);
