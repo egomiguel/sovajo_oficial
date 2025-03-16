@@ -16,7 +16,7 @@ namespace UKA
 
 		struct UKA_IMPLANTS_EXPORT ResectionThickness
 		{
-			double SurgerySide, NoSurgerySide;
+			double SurgerySide;// , NoSurgerySide;
 		};
 
 		class UKA_IMPLANTS_EXPORT ImplantsMatchFinalInfo
@@ -25,8 +25,8 @@ namespace UKA
 			ImplantsMatchFinalInfo(Knee* pKnee, const FemurImplant pFemurImplant, const TibiaImplant pTibiaImplant, const itk::Rigid3DTransform<>::Pointer pImplantToBoneFemurTransform, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTibiaTransform);
 			~ImplantsMatchFinalInfo();
 			ResectionThickness GetTibiaProtrudes() const;
-			ResectionThickness GetFemurResectionAxial() const;
-			ResectionThickness GetFemurResectionCoronal() const;
+			ResectionThickness GetFemurProtrudesAxial() const;
+			ResectionThickness GetFemurProtrudesCoronal() const;
 
 			/*
 			   Updates the femur transformation internally on the object. Return the new translation
@@ -59,16 +59,16 @@ namespace UKA
 			itk::Vector< double, 3 > SetTibiaProtrudes(double proud);
 
 			/*
-			   Change the thickness of the femur axial view. Updates the femur transformation internally
+			   Change the protrudes of the femur axial view. Updates the femur transformation internally
 			   on the object with the new translation. Return the new translation
 			*/
-			itk::Vector< double, 3 > SetThicknessFemurAxial(double thickness);
+			itk::Vector< double, 3 > SetFemurProtrudesAxial(double proud);
 
 			/*
-			  Change the thickness of the femur coronal view. Updates the femur transformation internally
+			  Change the protrudes of the femur coronal view. Updates the femur transformation internally
 			  on the object with the new translation. Return the new translation
 		   */
-			itk::Vector< double, 3 > SetThicknessFemurCoronal(double thickness);
+			itk::Vector< double, 3 > SetFemurProtrudesCoronal(double proud);
 
 			/*
 				Change the flexion angle of the femur implant. Updates the femur implant transformation internally

@@ -1601,7 +1601,6 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	ConvexHull hullObj(contourPoints, myRotation);
 	std::vector<Point> hullPoints = hullObj.GetConvexHull();
-
 	if (hullPoints.size() < 4)
 	{
 		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL_ON_TIBIA_CUT_PLANE;
@@ -2031,7 +2030,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	if (midPlane.eval(finalSplinePointsTKA[0]) < 0)
 	{
-		for (float i = 0.5; i <= 1.0; i += 0.1)
+		for (float i = 0.0; i <= 1.0; i += 0.1)
 		{
 			Point temp = implantTuber + i * (implantPCL - implantTuber) + sidePlaneThickness * vectorToPlaneSide;
 			finalSplinePointsPKA.push_back(myPlane.getProjectionPoint(temp));
@@ -2063,10 +2062,16 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	hull = increaseVectorToAmount(finalSplinePointsPKA, amount);
 
 	itk::Vector< double, 3 > translate;
+	//ImplantTools::fitEllipse(finalSplinePointsPKA, myPlane.getNormalVector(), hullCenter);
+	ConvexHull tempHull(finalSplinePointsPKA, myRotation);
+	hullCenter = ImplantTools::getPolygonCenter(tempHull.GetConvexHull(), myPlane.getNormalVector());
+
+	/*auto vectorTest = finalSplinePointsPKA;
+	vectorTest.push_back(hullCenter);
+	ImplantTools::show(contourMax, vectorTest);*/
 
 	if (tHullSize > 0)
 	{
-		hullCenter = sagitalPlane.getProjectionPoint(hullCenter);
 		hullCenter = myPlane.getProjectionPoint(hullCenter);
 		Point tTemp = myRotation * (hullCenter.ToMatPoint());
 		translate[0] = -tTemp.x;

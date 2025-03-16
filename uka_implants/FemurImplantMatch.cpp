@@ -600,9 +600,18 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	hull = increaseVectorToAmount(vertices, amount);
 
 	itk::Vector< double, 3 > translate;
+
+	//ImplantTools::fitEllipse(vertices, currentPlane.getNormalVector(), midPointPlane);
+
+	ConvexHull tempHull(vertices, myRotation);
+	midPointPlane = ImplantTools::getPolygonCenter(tempHull.GetConvexHull(), currentPlane.getNormalVector());
+
+	/*auto vectorTest = vertices;
+	vectorTest.push_back(midPointPlane);
+	ImplantTools::show(knee.GetFemurPoly(), vectorTest);*/
+
 	if (projectedPoints.size() > 0)
 	{
-		midPointPlane = sagitalAnatomicPlane.getProjectionPoint(midPointPlane);
 		midPointPlane = currentPlane.getProjectionPoint(midPointPlane);
 		Point tTemp = myRotation * (midPointPlane.ToMatPoint());
 		translate[0] = -tTemp.x;

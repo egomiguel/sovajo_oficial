@@ -1655,6 +1655,65 @@ std::pair<Point, double> ImplantTools::fitSphere(const std::vector<Point>& pPoin
 	return std::make_pair(center, radius);
 }
 
+Point ImplantTools::getPolygonCenter(const std::vector<Point>& pOrderedPoints, const Point& pNormal)
+{
+	double area = 0.0;
+	double cx = 0.0, cy = 0.0;
+	int n = pOrderedPoints.size();
+
+	cv::Mat rotate = GetRotateZ(pNormal);
+	std::vector<cv::Point2f> coplanar2d;
+	double z = 0;
+
+	for (auto& newPoint : pOrderedPoints)
+	{
+		cv::Mat transformPointMat = rotate * newPoint.ToMatPoint();
+		Point tPoint = Point(transformPointMat);
+		coplanar2d.push_back(cv::Point2f(tPoint.x, tPoint.y));
+		z = tPoint.z;
+	}
+
+	for (int i = 0; i < n; i++)
+	{
+		int j = (i + 1) % n;
+		double factor = (coplanar2d[i].x * coplanar2d[j].y - coplanar2d[j].x * coplanar2d[i].y);
+		area += factor;
+		cx += (coplanar2d[i].x + coplanar2d[j].x) * factor;
+		cy += (coplanar2d[i].y + coplanar2d[j].y) * factor;
+	}
+
+	area *= 0.5;
+	cx /= (6.0 * area);
+	cy /= (6.0 * area);
+
+	cv::Mat resultCenter = rotate.inv() * Point(cx, cy, z).ToMatPoint();
+	return Point(resultCenter);
+}
+
+std::pair<double, double> ImplantTools::fitEllipse(const std::vector<Point>& pPoints, const Point& pNormal, Point& center)
+{
+	cv::Mat rotate = GetRotateZ(pNormal);
+	std::vector<cv::Point2f> coplanar2d;
+	double z = 0;
+
+	for (auto& newPoint : pPoints)
+	{
+		cv::Mat transformPointMat = rotate * newPoint.ToMatPoint();
+		Point tPoint = Point(transformPointMat);
+		coplanar2d.push_back(cv::Point2f(tPoint.x, tPoint.y));
+		z = tPoint.z;
+	}
+
+	cv::RotatedRect box = cv::fitEllipse(coplanar2d);
+	std::pair<double, double> result = std::make_pair(box.size.width, box.size.height);
+
+	Point newCenter = Point(box.center.x, box.center.y, z);
+	cv::Mat resultCenter = rotate.inv() * newCenter.ToMatPoint();
+	center = Point(resultCenter);
+
+	return result;
+}
+
 std::pair<double, double> ImplantTools::fitEllipse(const vtkSmartPointer<vtkPolyData> pContour, const Point& pNormal, Point& center)
 {
 	cv::Mat rotate = GetRotateZ(pNormal);

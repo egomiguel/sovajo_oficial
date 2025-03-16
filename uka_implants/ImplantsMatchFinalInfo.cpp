@@ -944,18 +944,18 @@ ResectionThickness ImplantsMatchFinalInfo::GetTibiaProtrudes() const
 	if (knee->getSurgerySide() == SurgerySideEnum::KLateral)
 	{
 		result.SurgerySide = tibia.eval(knee->getLateralPlateau());
-		result.NoSurgerySide = tibia.eval(knee->getMedialPlateau());
+		//result.NoSurgerySide = tibia.eval(knee->getMedialPlateau());
 	}
 	else
 	{
-		result.NoSurgerySide = tibia.eval(knee->getLateralPlateau());
+		//result.NoSurgerySide = tibia.eval(knee->getLateralPlateau());
 		result.SurgerySide = tibia.eval(knee->getMedialPlateau());
 	}
 
     return result;
 }
 
-ResectionThickness ImplantsMatchFinalInfo::GetFemurResectionCoronal() const
+ResectionThickness ImplantsMatchFinalInfo::GetFemurProtrudesCoronal() const
 {
     Plane planeTemp = femurImplant.getPosterior();
     planeTemp.reverseByPoint(femurImplant.getRodBasePoint(), false);
@@ -967,11 +967,11 @@ ResectionThickness ImplantsMatchFinalInfo::GetFemurResectionCoronal() const
 	if (knee->getSurgerySide() == SurgerySideEnum::KLateral)
 	{
 		result.SurgerySide = femur.eval(knee->getLateralCondyle());
-		result.NoSurgerySide = femur.eval(knee->getMedialCondyle());
+		//result.NoSurgerySide = femur.eval(knee->getMedialCondyle());
 	}
 	else
 	{
-		result.NoSurgerySide = femur.eval(knee->getLateralCondyle());
+		//result.NoSurgerySide = femur.eval(knee->getLateralCondyle());
 		result.SurgerySide = femur.eval(knee->getMedialCondyle());
 	}
 
@@ -1016,7 +1016,7 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetTibiaProtrudes(double proud)
 }
 
 
-itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessFemurCoronal(double thickness)
+itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetFemurProtrudesCoronal(double proud)
 {
     Point movePoint;
 
@@ -1037,7 +1037,7 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessFemurCoronal(double
     Point oldPoint = femur.getProjectionPoint(movePoint);
 
     femur.movePlane(movePoint);
-    femur.movePlaneOnNormal(thickness);
+    femur.movePlaneOnNormal(proud);
 
     Point newPoint = femur.getProjectionPoint(movePoint);
 
@@ -1053,9 +1053,9 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessFemurCoronal(double
     return newTranslation;
 }
 
-itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessFemurAxial(double thickness)
+itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetFemurProtrudesAxial(double proud)
 {
-    Point movePoint = knee->getMedialInferiorFemurPoint();
+    Point movePoint;
 
 	if (knee->getSurgerySide() == SurgerySideEnum::KLateral)
 	{
@@ -1074,7 +1074,7 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessFemurAxial(double t
     Point oldPoint = femur.getProjectionPoint(movePoint);
 
     femur.movePlane(movePoint);
-    femur.movePlaneOnNormal(thickness);
+    femur.movePlaneOnNormal(proud);
 
     Point newPoint = femur.getProjectionPoint(movePoint);
 
@@ -1090,7 +1090,7 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetThicknessFemurAxial(double t
     return newTranslation;
 }
 
-ResectionThickness ImplantsMatchFinalInfo::GetFemurResectionAxial() const
+ResectionThickness ImplantsMatchFinalInfo::GetFemurProtrudesAxial() const
 {
     Plane planeTemp = femurImplant.getDistalPlane();
     planeTemp.reverseByPoint(femurImplant.getRodTopPoint(), false);
@@ -1101,11 +1101,11 @@ ResectionThickness ImplantsMatchFinalInfo::GetFemurResectionAxial() const
 	if (knee->getSurgerySide() == SurgerySideEnum::KLateral)
 	{
 		result.SurgerySide = femur.eval(knee->getLateralInferiorFemurPoint());
-		result.NoSurgerySide = femur.eval(knee->getMedialInferiorFemurPoint());
+		//result.NoSurgerySide = femur.eval(knee->getMedialInferiorFemurPoint());
 	}
 	else
 	{
-		result.NoSurgerySide = femur.eval(knee->getLateralInferiorFemurPoint());
+		//result.NoSurgerySide = femur.eval(knee->getLateralInferiorFemurPoint());
 		result.SurgerySide = femur.eval(knee->getMedialInferiorFemurPoint());
 	}
 
@@ -1388,8 +1388,8 @@ void ImplantsMatchFinalInfo::setTibiaTransform(const itk::Rigid3DTransform<>::Po
 void ImplantsMatchFinalInfo::test()
 {
     ResectionThickness tibia = GetTibiaProtrudes();
-    ResectionThickness axialFemur = GetFemurResectionAxial();
-    ResectionThickness coronalFemur = GetFemurResectionCoronal();
+    ResectionThickness axialFemur = GetFemurProtrudesAxial();
+    ResectionThickness coronalFemur = GetFemurProtrudesCoronal();
     double varusAngle = GetFemurVarusAngle();
     double flexionAngle = GetFemurFlexionAngle();
     double slopeAngle = GetTibiaImplantSlopeAngle();
@@ -1405,9 +1405,9 @@ void ImplantsMatchFinalInfo::test()
     std::cout << "Tibia Varus: " << tibiaVarus << std::endl;
     std::cout << "TEA: " << TEAAngle << std::endl;
     std::cout << "PCA: " << PCAAngle << std::endl;
-    std::cout << "Tibia resection surgical: " << tibia.SurgerySide << " No surgical: " << tibia.NoSurgerySide << std::endl;
-    std::cout << "Femur resection axial surgical: " << axialFemur.SurgerySide << " No surgical: " << axialFemur.NoSurgerySide << std::endl;
-    std::cout << "Femur resection coronal surgical: " << coronalFemur.SurgerySide << " No surgical: " << coronalFemur.NoSurgerySide << std::endl;
+    std::cout << "Tibia resection surgical: " << tibia.SurgerySide << " No surgical: " << 0 /*tibia.NoSurgerySide*/ << std::endl;
+    std::cout << "Femur resection axial surgical: " << axialFemur.SurgerySide << " No surgical: " << 0 /*axialFemur.NoSurgerySide*/ << std::endl;
+    std::cout << "Femur resection coronal surgical: " << coronalFemur.SurgerySide << " No surgical: " << 0 /*coronalFemur.NoSurgerySide*/ << std::endl;
 
     std::cout << "Translation femur: " << femurTranslation << std::endl;
     std::cout << "Translation tibia: " << tibiaTranslation << std::endl;

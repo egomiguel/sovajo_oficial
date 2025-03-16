@@ -382,7 +382,7 @@ namespace TEST_PKA
 
 	void MatchPKA()
 	{
-		std::string folder = "D:\\sovajo\\Cases_Plan_PKA\\UKA-data_2"; // right
+		std::string folder = "D:\\sovajo\\Cases_Plan_PKA\\UKA-data"; // right
 		UKA::IMPLANTS::Knee myKnee = CreateKneeFromFile_NumbersPKA(folder, UKA::IMPLANTS::KLeft, UKA::IMPLANTS::KLateral);
 
 		UKA::IMPLANTS::FemurImplant femurImplant;
@@ -414,7 +414,7 @@ namespace TEST_PKA
 
 		UKA::IMPLANTS::Point apLinePclPoint(10.35, 11.28, 1.15);
 		UKA::IMPLANTS::Point apLineTuberPoint(10.01, -39.601, 1.06);
-		UKA::IMPLANTS::Point sidePoint(-15.2245, -12.73, 1.15);
+		UKA::IMPLANTS::Point sidePoint(-15.2245, -18.73, 1.15);
 		UKA::IMPLANTS::Point exteriorPoint(-14.5152, -10.8294, 4.41175);
 		UKA::IMPLANTS::Point planeSidePoint(12.10, -12.08, 2.59);
 		UKA::IMPLANTS::TibiaImplantInfo tibiaInfo;
@@ -448,9 +448,9 @@ namespace TEST_PKA
 
 		////////////////////// First Match
 		std::vector<vtkSmartPointer<vtkPolyData>> polyList;
-		polyList.push_back(newImplantFemur);
-		//polyList.push_back(newImplantTibia);
-		show(myKnee.GetFemurPoly(), polyList);
+		//polyList.push_back(newImplantFemur);
+		polyList.push_back(newImplantTibia);
+		show(myKnee.GetTibiaPoly(), polyList);
 
 		///////////////////////////////////////////////////// Second Match
 		/*
@@ -478,7 +478,11 @@ namespace TEST_PKA
 		femurTransformIn->SetMatrix(femurImplantMatch.GetRotationMatrix());
 		femurTransformIn->SetOffset(femurImplantMatch.GetTranslationMatrix());
 
-		std::vector<PointTypeITK> hull = femurImplantMatch.GetHullPoints(femurTransformIn, femurTransformOut, UKA::IMPLANTS::FemurImplantMatch::KPosteriorPlane);
+		std::vector<PointTypeITK> hullFemur = femurImplantMatch.GetHullPoints(femurTransformIn, femurTransformOut, UKA::IMPLANTS::FemurImplantMatch::KPosteriorPlane);
+		
+		std::vector<PointTypeITK> hull = tibiaImplantMatch.GetHullPoints(tibiaTransformIn, tibiaTransformOut);
+
+		
 		std::cout << "Hull size: " << hull.size() << std::endl;
 
 		std::vector<cv::Point3d> tPoints;
@@ -490,8 +494,8 @@ namespace TEST_PKA
 			tPoints.push_back(myPoint);
 		}
 
-		show(myKnee.GetFemurPoly(), tPoints, true);
-		show(newImplantFemur, tPoints, true);
+		show(myKnee.GetTibiaPoly(), tPoints, true);
+		show(newImplantTibia, tPoints, true);
 
 	}
 }
