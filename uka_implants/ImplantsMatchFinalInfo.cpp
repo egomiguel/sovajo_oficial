@@ -943,13 +943,13 @@ ResectionThickness ImplantsMatchFinalInfo::GetTibiaProtrudes() const
 
 	if (knee->getSurgerySide() == SurgerySideEnum::KLateral)
 	{
-		result.SurgerySide = tibia.eval(knee->getLateralPlateau());
+		result.SurgerySide = tibiaImplant.getImplantInfo().tibiaThickness + tibia.eval(knee->getLateralPlateau());
 		//result.NoSurgerySide = tibia.eval(knee->getMedialPlateau());
 	}
 	else
 	{
 		//result.NoSurgerySide = tibia.eval(knee->getLateralPlateau());
-		result.SurgerySide = tibia.eval(knee->getMedialPlateau());
+		result.SurgerySide = tibiaImplant.getImplantInfo().tibiaThickness + tibia.eval(knee->getMedialPlateau());
 	}
 
     return result;
@@ -966,13 +966,13 @@ ResectionThickness ImplantsMatchFinalInfo::GetFemurProtrudesCoronal() const
 
 	if (knee->getSurgerySide() == SurgerySideEnum::KLateral)
 	{
-		result.SurgerySide = femur.eval(knee->getLateralCondyle());
+		result.SurgerySide = femurImplant.getImplantInfo().femurPosteriorThickness + femur.eval(knee->getLateralCondyle());
 		//result.NoSurgerySide = femur.eval(knee->getMedialCondyle());
 	}
 	else
 	{
 		//result.NoSurgerySide = femur.eval(knee->getLateralCondyle());
-		result.SurgerySide = femur.eval(knee->getMedialCondyle());
+		result.SurgerySide = femurImplant.getImplantInfo().femurPosteriorThickness + femur.eval(knee->getMedialCondyle());
 	}
 
     return result;
@@ -982,6 +982,7 @@ ResectionThickness ImplantsMatchFinalInfo::GetFemurProtrudesCoronal() const
 itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetTibiaProtrudes(double proud)
 {
 	Point movePlateau;
+	double distance = proud - tibiaImplant.getImplantInfo().tibiaThickness;
 
 	if (knee->getSurgerySide() == SurgerySideEnum::KLateral)
 	{
@@ -999,7 +1000,7 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetTibiaProtrudes(double proud)
     Point oldPoint = tibia.getProjectionPoint(movePlateau);
 
     tibia.movePlane(movePlateau);
-    tibia.movePlaneOnNormal(proud);
+    tibia.movePlaneOnNormal(distance);
 
     Point newMovePlateau = tibia.getProjectionPoint(movePlateau);
 
@@ -1019,6 +1020,7 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetTibiaProtrudes(double proud)
 itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetFemurProtrudesCoronal(double proud)
 {
     Point movePoint;
+	double distance = proud - femurImplant.getImplantInfo().femurPosteriorThickness;
 
 	if (knee->getSurgerySide() == SurgerySideEnum::KLateral)
 	{
@@ -1037,7 +1039,7 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetFemurProtrudesCoronal(double
     Point oldPoint = femur.getProjectionPoint(movePoint);
 
     femur.movePlane(movePoint);
-    femur.movePlaneOnNormal(proud);
+    femur.movePlaneOnNormal(distance);
 
     Point newPoint = femur.getProjectionPoint(movePoint);
 
@@ -1056,6 +1058,7 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetFemurProtrudesCoronal(double
 itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetFemurProtrudesAxial(double proud)
 {
     Point movePoint;
+	double distance = proud - femurImplant.getImplantInfo().femurDistalThickness;
 
 	if (knee->getSurgerySide() == SurgerySideEnum::KLateral)
 	{
@@ -1074,7 +1077,7 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetFemurProtrudesAxial(double p
     Point oldPoint = femur.getProjectionPoint(movePoint);
 
     femur.movePlane(movePoint);
-    femur.movePlaneOnNormal(proud);
+    femur.movePlaneOnNormal(distance);
 
     Point newPoint = femur.getProjectionPoint(movePoint);
 
@@ -1100,13 +1103,13 @@ ResectionThickness ImplantsMatchFinalInfo::GetFemurProtrudesAxial() const
 
 	if (knee->getSurgerySide() == SurgerySideEnum::KLateral)
 	{
-		result.SurgerySide = femur.eval(knee->getLateralInferiorFemurPoint());
+		result.SurgerySide = femurImplant.getImplantInfo().femurDistalThickness + femur.eval(knee->getLateralInferiorFemurPoint());
 		//result.NoSurgerySide = femur.eval(knee->getMedialInferiorFemurPoint());
 	}
 	else
 	{
 		//result.NoSurgerySide = femur.eval(knee->getLateralInferiorFemurPoint());
-		result.SurgerySide = femur.eval(knee->getMedialInferiorFemurPoint());
+		result.SurgerySide = femurImplant.getImplantInfo().femurDistalThickness + femur.eval(knee->getMedialInferiorFemurPoint());
 	}
 
     return result;
