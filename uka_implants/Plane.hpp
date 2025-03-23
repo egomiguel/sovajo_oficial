@@ -70,6 +70,8 @@ namespace UKA
 
 			void reverse();
 
+			void setCenter(const Point& pPoint);
+
 			void reverseByNormal(const Point& checkNormal);
 
 			void reverseByPoint(const Point& pPoint, bool sameDirection = true);

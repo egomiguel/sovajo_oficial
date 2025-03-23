@@ -548,6 +548,12 @@ void Plane::reverse()
     bias = -1.0 * bias;
 }
 
+void Plane::setCenter(const Point& pPoint)
+{
+	mPoint = pPoint;
+	this->bias = (-1.0) * normalVector.dot(pPoint);
+}
+
 void Plane::reverseByNormal(const Point& checkNormal)
 {
     if (checkNormal.dot(normalVector) < 0)

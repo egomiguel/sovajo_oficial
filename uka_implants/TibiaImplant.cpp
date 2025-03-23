@@ -35,6 +35,7 @@ void TibiaImplant::init(const Point& apLinePclPoint, const Point& apLineTuberPoi
 	this->tuberPoint = tibiaPlane.getProjectionPoint(apLineTuberPoint);
 	this->plateauRefPointDown = tibiaPlane.getProjectionPoint(plateauRefPointUp);
 	this->planeSidePoint = planeSidePoint;
+	tibiaPlane.setCenter(this->plateauRefPointDown);
     
     isInit = true;
 }

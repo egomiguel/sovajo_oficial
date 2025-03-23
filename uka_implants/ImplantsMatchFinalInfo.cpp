@@ -960,7 +960,7 @@ ResectionThickness ImplantsMatchFinalInfo::GetTibiaProtrudes() const
 ResectionThickness ImplantsMatchFinalInfo::GetFemurProtrudesCoronal() const
 {
     Plane planeTemp = femurImplant.getPosterior();
-    planeTemp.reverseByPoint(femurImplant.getRodBasePoint(), false);
+    planeTemp.reverseByPoint(femurImplant.getRodBasePoint());
 
     Plane femur = TransformPlane(planeTemp, femurRotation, femurTranslation);
 
@@ -1098,7 +1098,7 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetFemurProtrudesAxial(double p
 ResectionThickness ImplantsMatchFinalInfo::GetFemurProtrudesAxial() const
 {
     Plane planeTemp = femurImplant.getDistalPlane();
-    planeTemp.reverseByPoint(femurImplant.getRodTopPoint(), false);
+    planeTemp.reverseByPoint(femurImplant.getRodTopPoint());
     Plane femur = TransformPlane(planeTemp, femurRotation, femurTranslation);
 
     ResectionThickness result;
