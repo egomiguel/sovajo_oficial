@@ -294,8 +294,11 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaSlopeAngl
 	rotation = ImplantTools::getRotateMatrix(baseVectorFromImplant.cross(newVectorFromImplant), myAngle);
 
 	//////////////////////////////////////////////////////////////////////
-
+	cv::Mat oldPoint = tibiaRotation * tibiaImplant.getExtremeSidePoint().ToMatPoint() + tibiaTranslation;
 	tibiaRotation = rotation * tibiaRotation;
+
+	cv::Mat newPoint = tibiaRotation * tibiaImplant.getExtremeSidePoint().ToMatPoint() + tibiaTranslation;
+	tibiaTranslation = tibiaTranslation - (newPoint - oldPoint);
 
     knee->setTibiaSlope(angle);
 
@@ -996,7 +999,7 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetTibiaProtrudes(double proud)
 	}
 
     Plane planeTemp = tibiaImplant.getTibiaPlane();
-    planeTemp.reverseByPoint(tibiaImplant.getExteriorPoint(), false);
+    planeTemp.reverseByPoint(tibiaImplant.getExteriorPoint());
 
     Plane tibia = TransformPlane(planeTemp, tibiaRotation, tibiaTranslation);
     Point oldPoint = tibia.getProjectionPoint(movePlateau);
@@ -1034,7 +1037,7 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetFemurProtrudesCoronal(double
 	}
 
     Plane planeTemp = femurImplant.getPosterior();
-    planeTemp.reverseByPoint(femurImplant.getRodBasePoint());
+    planeTemp.reverseByPoint(femurImplant.getRodBasePoint(), false);
 
     Plane femur = TransformPlane(planeTemp, femurRotation, femurTranslation);
 
@@ -1072,7 +1075,7 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetFemurProtrudesAxial(double p
 	}
 
     Plane planeTemp = femurImplant.getDistalPlane();
-    planeTemp.reverseByPoint(femurImplant.getRodTopPoint());
+    planeTemp.reverseByPoint(femurImplant.getRodTopPoint(), false);
 
     Plane femur = TransformPlane(planeTemp, femurRotation, femurTranslation);
 

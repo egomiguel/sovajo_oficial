@@ -504,9 +504,17 @@ namespace TEST_PKA
 		
 		matchFinalInfo.test();
 
-		matchFinalInfo.setTibiaSlopeAngle(0);
+		matchFinalInfo.SetTibiaProtrudes(-5);
+		matchFinalInfo.SetFemurProtrudesAxial(-5);
+		matchFinalInfo.SetFemurProtrudesCoronal(-5);
 
 		matchFinalInfo.test();
+
+		vtkSmartPointer<vtkPolyData> newImplantTibia3 = TransformPoly(tibiaModel, matchFinalInfo.getITKTibiaTransform()->GetMatrix(), matchFinalInfo.getITKTibiaTransform()->GetTranslation());
+		std::vector<vtkSmartPointer<vtkPolyData>> polyList3;
+		//polyList.push_back(newImplantFemur);
+		polyList3.push_back(newImplantTibia3);
+		show(myKnee.GetTibiaPoly(), polyList3);
 
 	}
 }
