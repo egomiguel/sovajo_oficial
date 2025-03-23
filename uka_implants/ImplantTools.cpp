@@ -2612,6 +2612,16 @@ Point ImplantTools::getHighestPointsOnTibia(const std::vector<Point>& pData, con
 	return hullCenter;
 }
 
+Plane ImplantTools::TransformPlane(const Plane& plane, const cv::Mat& rotation, const cv::Mat& translation)
+{
+	cv::Mat transformNormalVector = rotation * plane.getNormalVectorMat();
+	cv::Mat transformPoint = (rotation * plane.getPointMat()) + translation;
+	Plane transformPlane;
+	transformPlane.init(Point(transformNormalVector), Point(transformPoint));
+	return transformPlane;
+}
+
+
 Plane ImplantTools::TransformPlane(const Plane& plane, const itk::Rigid3DTransform<>::Pointer pTransform)
 {
 	cv::Mat rotation = Rigid3DTransformToCVRotation(pTransform);

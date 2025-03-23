@@ -150,6 +150,8 @@ namespace UKA
 
 			Point getHighestPointsOnTibia(const std::vector<Point>& pData, const Plane& pSplitLatPlane, Line& pTopLine, int& latPos, int& medPos);
 
+			Plane TransformPlane(const Plane& plane, const cv::Mat& rotation, const cv::Mat& translation);
+
 			Plane TransformPlane(const Plane& plane, const itk::Rigid3DTransform<>::Pointer pTransform);
 
 			std::vector<Point> getSortPointVectorFill(const std::vector<Point>& pVector, double pDistance);

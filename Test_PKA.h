@@ -383,7 +383,7 @@ namespace TEST_PKA
 	void MatchPKA()
 	{
 		std::string folder = "D:\\sovajo\\Cases_Plan_PKA\\UKA-data"; // right
-		UKA::IMPLANTS::Knee myKnee = CreateKneeFromFile_NumbersPKA(folder, UKA::IMPLANTS::KLeft, UKA::IMPLANTS::KLateral);
+		UKA::IMPLANTS::Knee myKnee = CreateKneeFromFile_NumbersPKA(folder, UKA::IMPLANTS::KRight, UKA::IMPLANTS::KMedial);
 
 		UKA::IMPLANTS::FemurImplant femurImplant;
 
@@ -407,21 +407,21 @@ namespace TEST_PKA
 		auto tibiaModel = ReadPolyDataSTL("D:\\sovajo\\Cases_Plan_PKA\\UKA-data\\implants\\tibia.STL");
 
 		UKA::IMPLANTS::FemurImplantInfo femurInfo;
-		femurInfo.femurDistalThickness = 1.0;
-		femurInfo.femurPosteriorThickness = 5.0;
+		femurInfo.femurDistalThickness = 4.0;
+		femurInfo.femurPosteriorThickness = 4.0;
 
 		femurImplant.init(pPosterior, pRodBasePoint, pRodTopPoint, pSideBorder1, pSideBorder2, femurModel, femurInfo);
 
 		UKA::IMPLANTS::Point apLinePclPoint(10.35, 11.28, 1.15);
 		UKA::IMPLANTS::Point apLineTuberPoint(10.01, -39.601, 1.06);
-		UKA::IMPLANTS::Point sidePoint(-15.2245, -18.73, 1.15);
-		UKA::IMPLANTS::Point exteriorPoint(-14.5152, -10.8294, 4.41175);
+		UKA::IMPLANTS::Point sidePointUp(-15.2245, -10.73, 1.15);
+		UKA::IMPLANTS::Point exteriorPointDown(-14.5152, -10.8294, 4.41175);
 		UKA::IMPLANTS::Point planeSidePoint(12.10, -12.08, 2.59);
 		UKA::IMPLANTS::TibiaImplantInfo tibiaInfo;
-		tibiaInfo.tibiaThickness = 2.0;
+		tibiaInfo.tibiaThickness = 4.0;
 		tibiaInfo.tibiaSpacer = 4.0;
 
-		tibiaImplant.init(apLinePclPoint, apLineTuberPoint, sidePoint, exteriorPoint, planeSidePoint, tibiaInfo);
+		tibiaImplant.init(apLinePclPoint, apLineTuberPoint, sidePointUp, exteriorPointDown, planeSidePoint, tibiaInfo);
 
 		////////////////////////////////////////////////////////
 
@@ -447,10 +447,13 @@ namespace TEST_PKA
 
 
 		////////////////////// First Match
-		std::vector<vtkSmartPointer<vtkPolyData>> polyList;
+		std::vector<vtkSmartPointer<vtkPolyData>> polyList1, polyList2;
 		//polyList.push_back(newImplantFemur);
-		polyList.push_back(newImplantTibia);
-		show(myKnee.GetTibiaPoly(), polyList);
+		polyList1.push_back(newImplantTibia);
+		show(myKnee.GetTibiaPoly(), polyList1);
+
+		polyList2.push_back(newImplantFemur);
+		show(myKnee.GetFemurPoly(), polyList2);
 
 		///////////////////////////////////////////////////// Second Match
 		/*
@@ -494,8 +497,16 @@ namespace TEST_PKA
 			tPoints.push_back(myPoint);
 		}
 
-		show(myKnee.GetTibiaPoly(), tPoints, true);
-		show(newImplantTibia, tPoints, true);
+		//show(myKnee.GetTibiaPoly(), tPoints, true);
+		//show(newImplantTibia, tPoints, true);
+
+		UKA::IMPLANTS::ImplantsMatchFinalInfo matchFinalInfo(&myKnee, femurImplant, tibiaImplant, femurTransformIn, tibiaTransformIn);
+		
+		matchFinalInfo.test();
+
+		matchFinalInfo.setTibiaSlopeAngle(0);
+
+		matchFinalInfo.test();
 
 	}
 }

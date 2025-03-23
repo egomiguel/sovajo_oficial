@@ -440,10 +440,10 @@ Point Knee::getMovePlateauCenter(const TibiaImplantInfo& pImplant) const
 	{
 		myMovePlateau = lateralCenter;
 	}
-	//////////////////////////////////////////////////////////////////////
-	resectionThickness = pImplant.tibiaThickness - tibiaCartilage + pImplant.tibiaSpacer;
-	myMovePlateau = myMovePlateau - resectionThickness * tibiaLineDirectVector;
 
+	//////////////////////////////////////////////////////////////////////
+	resectionThickness = pImplant.tibiaThickness - tibiaCartilage;
+	myMovePlateau = myMovePlateau + resectionThickness * tibiaLineDirectVector;
 	return myMovePlateau;
 }
 
@@ -486,8 +486,8 @@ Point Knee::getMovePlateau(const TibiaImplantInfo& pImplant) const
         myMovePlateau = lateralPlateau;
     }
     //////////////////////////////////////////////////////////////////////
-	resectionThickness = pImplant.tibiaThickness - tibiaCartilage + pImplant.tibiaSpacer;
-    myMovePlateau = myMovePlateau - resectionThickness * tibiaLineDirectVector;
+	resectionThickness = pImplant.tibiaThickness - tibiaCartilage;
+    myMovePlateau = myMovePlateau + resectionThickness * tibiaLineDirectVector;
 
     return myMovePlateau;
 }
