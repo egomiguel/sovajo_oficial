@@ -371,9 +371,9 @@ std::vector<SpineSegmentation::Plane> SpineSegmentation::getIntervertebralPlanes
 		int tBegin = tempPos + (bestCorrlag / 2);
 		int tEnd = tBegin + bestCorrlag;
 
-		//std::cout << "Inicio2: " << tBegin << " tEnd2: " << tEnd << "Total: " << pixels.size() << std::endl;
-		
-		if (tEnd >= pixels.size() && ((tempPos + bestCorrlag) - pixels.size()) <= lagOffset)
+		//std::cout << "Correlation: " << bestCorrlag << " Temppos: " << tempPos << " Inicio2: " << tBegin << " tEnd2: " << tEnd << " Total: " << pixels.size() << std::endl;
+
+		if (tEnd >= pixels.size() && ((tempPos + bestCorrlag) - int(pixels.size())) <= lagOffset)
 		{
 			tEnd = pixels.size() - 1;
 		}

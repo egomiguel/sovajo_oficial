@@ -695,6 +695,37 @@ PatellaImplant CreatePatellaImplantFromFile(const std::string& sourcePath, vtkSm
 	return Implant;
 }
 
+std::vector<cv::Point3d> GetSpineLineFromFile(const std::string& sourcePath)
+{
+	QDir directory(QString::fromStdString(sourcePath));
+	QStringList files = directory.entryList(QStringList() << "*.json" << "*.JSON", QDir::Files);
+	if (files.size() == 0)
+	{
+		std::cout << "Error there are not json file" << std::endl;
+		throw ("Error there are not json file");
+	}
+
+	QString jsonPath = directory.filePath(files[0]);
+	QString var;
+	QFile file;
+	file.setFileName(jsonPath);
+	file.open(QIODevice::ReadOnly | QIODevice::Text);
+	var = file.readAll();
+	file.close();
+	QJsonDocument jsonDoc = QJsonDocument::fromJson(var.toUtf8());
+	QJsonObject jsonObject = jsonDoc.object();
+
+	auto pointList = jsonObject.value(QString("centerPhysicalPoints")).toArray();
+	std::vector<cv::Point3d> result;
+
+	for (auto& item : pointList)
+	{
+		Point point1 = QJsonArrayToPoint(item.toArray());
+		result.push_back(point1);
+	}
+	return result;
+}
+
 std::vector<Point> ITKVectorToCV(const std::vector<PointTypeITK>& pData)
 {
 	std::vector<Point> result;
@@ -4705,154 +4736,17 @@ int main()
 
 	//bool result;
 
-	/*
+	
 	SPINE::SEGMENTATION::ImageType::Pointer inputImg;
 
 	std::string spine = "C:\\Users\\Miguel\\Desktop\\Algoritmos_Neuvos\\CT\\Spine_CT_17.nrrd";
-	spine = "D:\\sovajo\\Spine_Images\\sping_seg_debug\\spine.nrrd";
+	spine = "D:\\sovajo\\Case_Spine\\spine_ct.nrrd";
 	Test::readImage<ImageType>(spine, inputImg);
 
-	cv::Point3d A(-5.2, 63.98, 159);
-	cv::Point3d B(-5.2, 58.84, -28.5);
-
-	std::vector<cv::Point3d> listaPoints = { cv::Point3d(-6.50229,76.922,-32.6216),
-											cv::Point3d(-6.50229,76.4315,-31.1501),
-											cv::Point3d(-6.50229,71.0362,-29.6786),
-											cv::Point3d(-6.99277,66.6218,-28.2072),
-											cv::Point3d(-6.50229,65.1503,-26.2452),
-											cv::Point3d(-6.50229,63.6789,-24.2833),
-											cv::Point3d(-6.0118,62.6979,-21.8309),
-											cv::Point3d(-4.54035,61.2264,-19.8689),
-											cv::Point3d(-4.54035,59.755,-17.907),
-											cv::Point3d(-4.04986,58.774,-16.4355),
-											cv::Point3d(-4.04986,57.793,-14.4736),
-											cv::Point3d(-4.04986,56.3216,-11.5307),
-											cv::Point3d(-4.04986,54.3596,-9.07825),
-											cv::Point3d(-4.04986,53.8692,-7.60679),
-											cv::Point3d(-4.04986,52.8882,-5.15436),
-											cv::Point3d(-4.04986,52.8882,-3.19242),
-											cv::Point3d(-4.04986,52.8882,-1.23048),
-											cv::Point3d(-4.04986,52.8882,1.22195),
-											cv::Point3d(-4.04986,52.8882,2.69341),
-											cv::Point3d(-4.04986,52.8882,4.16486),
-											cv::Point3d(-4.04986,52.8882,5.63632),
-											cv::Point3d(-4.04986,52.8882,7.10778),
-											cv::Point3d(-4.04986,52.8882,9.06972),
-											cv::Point3d(-4.04986,52.8882,10.5412),
-											cv::Point3d(-4.04986,52.8882,12.5031),
-											cv::Point3d(-4.04986,52.8882,13.9746),
-											cv::Point3d(-4.04986,52.8882,15.446),
-											cv::Point3d(-4.04986,53.3787,17.8985),
-											cv::Point3d(-4.54035,53.8692,19.3699),
-											cv::Point3d(-6.0118,54.3596,21.8223),
-											cv::Point3d(-6.0118,54.8501,23.2938),
-											cv::Point3d(-6.50229,55.3406,25.2557),
-											cv::Point3d(-6.99277,55.3406,26.7272),
-											cv::Point3d(-6.99277,55.3406,28.1987),
-											cv::Point3d(-6.99277,55.3406,30.1606),
-											cv::Point3d(-7.97375,55.3406,31.6321),
-											cv::Point3d(-7.97375,55.3406,33.1035),
-											cv::Point3d(-7.97375,55.3406,35.5559),
-											cv::Point3d(-9.93569,55.3406,38.4989),
-											cv::Point3d(-9.93569,55.3406,39.9703),
-											cv::Point3d(-9.93569,55.3406,41.4418),
-											cv::Point3d(-10.9167,55.3406,42.9132),
-											cv::Point3d(-11.4071,55.3406,45.3657),
-											cv::Point3d(-11.4071,55.8311,47.3276),
-											cv::Point3d(-11.4071,56.3216,48.7991),
-											cv::Point3d(-11.8976,57.793,52.2325),
-											cv::Point3d(-11.8976,57.793,53.7039),
-											cv::Point3d(-12.8786,58.2835,55.1754),
-											cv::Point3d(-12.8786,59.2645,57.1373),
-											cv::Point3d(-13.3691,60.2455,59.0993),
-											cv::Point3d(-13.3691,60.2455,61.0612),
-											cv::Point3d(-13.3691,61.2264,64.0041),
-											cv::Point3d(-13.3691,61.7169,65.966),
-											cv::Point3d(-13.3691,62.2074,67.4375),
-											cv::Point3d(-13.3691,62.2074,69.3994),
-											cv::Point3d(-13.3691,62.6979,71.8519),
-											cv::Point3d(-13.3691,63.6789,73.8138),
-											cv::Point3d(-13.3691,64.1694,75.2853),
-											cv::Point3d(-13.3691,64.6598,78.2282),
-											cv::Point3d(-13.3691,65.1503,80.6806),
-											cv::Point3d(-13.3691,65.1503,82.1521),
-											cv::Point3d(-13.3691,65.6408,83.6235),
-											cv::Point3d(-12.8786,65.6408,85.5855),
-											cv::Point3d(-12.8786,65.6408,87.0569),
-											cv::Point3d(-12.8786,67.1123,89.0189),
-											cv::Point3d(-12.8786,67.1123,90.4903),
-											cv::Point3d(-12.8786,68.0932,93.4332),
-											cv::Point3d(-12.8786,68.5837,95.3952),
-											cv::Point3d(-11.4071,69.0742,96.8666),
-											cv::Point3d(-11.4071,70.0552,98.3381),
-											cv::Point3d(-11.4071,70.0552,99.8096),
-											cv::Point3d(-11.4071,71.5266,101.281),
-											cv::Point3d(-11.4071,72.0171,102.752),
-											cv::Point3d(-11.4071,72.5076,104.224),
-											cv::Point3d(-11.4071,73.4886,106.186),
-											cv::Point3d(-11.4071,73.4886,107.657),
-											cv::Point3d(-11.4071,73.4886,109.129),
-											cv::Point3d(-11.4071,73.4886,110.6),
-											cv::Point3d(-11.4071,73.4886,112.072),
-											cv::Point3d(-11.4071,72.5076,114.524),
-											cv::Point3d(-11.4071,72.5076,116.486),
-											cv::Point3d(-11.4071,72.0171,117.958),
-											cv::Point3d(-11.4071,71.5266,119.429),
-											cv::Point3d(-11.4071,71.5266,120.9),
-											cv::Point3d(-11.4071,71.5266,122.372),
-											cv::Point3d(-11.4071,71.5266,123.843),
-											cv::Point3d(-11.4071,71.5266,125.315),
-											cv::Point3d(-11.4071,71.5266,127.767),
-											cv::Point3d(-11.4071,71.5266,129.239),
-											cv::Point3d(-11.4071,71.5266,130.71),
-											cv::Point3d(-11.4071,71.5266,132.182),
-											cv::Point3d(-11.4071,71.5266,133.653),
-											cv::Point3d(-11.4071,72.5076,135.125),
-											cv::Point3d(-11.4071,72.5076,136.596),
-											cv::Point3d(-11.4071,72.5076,138.067),
-											cv::Point3d(-11.4071,73.4886,141.01),
-											cv::Point3d(-11.4071,73.4886,142.972),
-											cv::Point3d(-11.4071,74.4696,144.444),
-											cv::Point3d(-11.4071,73.9791,145.915) };
+	std::vector<cv::Point3d> listaPoints = GetSpineLineFromFile("D:\\sovajo\\Case_Spine");
 
 	std::vector<ImageType::PointType> allPoints;
-	*/
-	/*
-	double distance = sqrt((A - B).dot(A - B));
-	double step = 1. / distance;
-	for (float i = 0; i < 1 + step; i += step)
-	{
-		auto tempPoint = A + i * (B - A);
-		ImageType::PointType physicalPoint;
-		physicalPoint[0] = tempPoint.x;
-		physicalPoint[1] = tempPoint.y;
-		physicalPoint[2] = tempPoint.z;
 
-		allPoints.push_back(physicalPoint);
-	}
-	*/
-
-	std::vector<cv::Point3d> morePoints;
-	/*
-	for (int i=0; i < listaPoints.size()-1; i++)
-	{
-		auto currentPoint = listaPoints[i];
-		auto nextPoint = listaPoints[i + 1];
-		auto vector = nextPoint - currentPoint;
-		vector = vector / sqrt(vector.dot(vector));
-		morePoints.push_back(currentPoint);
-		auto tempPoint = currentPoint;
-		while (getDistancePoints(tempPoint, nextPoint) > 1.3)
-		{
-			tempPoint = tempPoint + vector;
-			morePoints.push_back(tempPoint);
-		}
-	}
-	morePoints.push_back(listaPoints[listaPoints.size() - 1]);*/
-
-	/*
-	std::cout << "Antes: " << listaPoints.size() << ", Despues: " << morePoints.size() << std::endl;
-	
 	for (auto& tempPoint: listaPoints)
 	{
 		ImageType::PointType physicalPoint;
@@ -4871,7 +4765,7 @@ int main()
 	{
 		std::cout << "Center: " << item.center << std::endl;
 	}
-	*/
+	
 	
 	//std::vector<SpineSegmentation::Plane> getIntervertebralPlanes(const std::vector<ImageType::PointType>& physicalPoints)
 
@@ -4896,7 +4790,7 @@ int main()
 	//std::cout << Point(result) << "; " << proj << std::endl;
 
 	//PolydataInterception();
-	TEST_PKA::MatchPKA();
+	//TEST_PKA::MatchPKA();
 	//TEST_PKA_SUEN::testImplants();
 
 	//double pnt[3] = { 0, 0, 0 };
