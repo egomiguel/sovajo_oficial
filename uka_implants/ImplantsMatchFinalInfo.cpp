@@ -5,7 +5,7 @@
 
 using namespace UKA::IMPLANTS;
 
-ImplantsMatchFinalInfo::ImplantsMatchFinalInfo(Knee* pKnee, const FemurImplant pFemurImplant, const TibiaImplant pTibiaImplant, const itk::Rigid3DTransform<>::Pointer pImplantToBoneFemurTransform, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTibiaTransform)
+ImplantsMatchFinalInfo::ImplantsMatchFinalInfo(Knee* pKnee, const FemurImplantOnePlane pFemurImplant, const TibiaImplant pTibiaImplant, const itk::Rigid3DTransform<>::Pointer pImplantToBoneFemurTransform, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTibiaTransform)
 {
     knee = pKnee;
     femurRotation = Rigid3DTransformToCVRotation(pImplantToBoneFemurTransform);
@@ -150,7 +150,7 @@ itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::TibiaImplantToFemurImpl
 	return getITKTibiaTransform();
 }
 
-const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurImplant(const FemurImplant& pFemurImplant)
+const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurImplant(const FemurImplantOnePlane& pFemurImplant)
 {
     femurImplant = pFemurImplant;
     //this->implantKneeCapPath = pFemurImplant.GetKneeCapPath();

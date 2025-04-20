@@ -125,7 +125,7 @@ FemurImplantMatch::FemurImplantMatch()
 	isInit = false;
 }
 
-void FemurImplantMatch::init(const FemurImplant& implantFemur, const Knee& knee)
+void FemurImplantMatch::init(const FemurImplantOnePlane& implantFemur, const Knee& knee)
 {
 	if (isInit == true)
 	{

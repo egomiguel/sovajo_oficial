@@ -385,7 +385,7 @@ namespace TEST_PKA
 		std::string folder = "D:\\sovajo\\Cases_Plan_PKA\\UKA-data"; // right
 		UKA::IMPLANTS::Knee myKnee = CreateKneeFromFile_NumbersPKA(folder, UKA::IMPLANTS::KRight, UKA::IMPLANTS::KMedial);
 
-		UKA::IMPLANTS::FemurImplant femurImplant;
+		UKA::IMPLANTS::FemurImplantOnePlane femurImplant;
 
 		UKA::IMPLANTS::TibiaImplant tibiaImplant;
 

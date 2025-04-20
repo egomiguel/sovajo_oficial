@@ -2,7 +2,7 @@
 #define FEMUR_IMPLANT_UKA_MATCH_H
 
 #include <itkRigid3DTransform.h>
-#include "FemurImplant.hpp"
+#include "FemurImplantOnePlane.hpp"
 #include "TibiaImplant.hpp"
 #include "Knee.hpp"
 #include "Plane.hpp"
@@ -35,7 +35,7 @@ namespace UKA
 
 			FemurImplantMatch();
 
-			void init(const FemurImplant& implantFemur, const Knee& knee);
+			void init(const FemurImplantOnePlane& implantFemur, const Knee& knee);
 
 			itk::Matrix< double, 3, 3 > GetRotationMatrix() const;
 
@@ -45,7 +45,7 @@ namespace UKA
 
 		private:
 
-			FemurImplant implantFemur;
+			FemurImplantOnePlane implantFemur;
 			Knee knee;
 			cv::Mat rotationMatrix;
 			cv::Mat translationMatrix;

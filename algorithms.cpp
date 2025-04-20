@@ -1393,7 +1393,7 @@ void MatchEasyPKA()
 
 	//vtkSmartPointer<vtkPolyData> polyTibiaImplant, polyPatellaImplant;
 
-	UKA::IMPLANTS::FemurImplant femurImplant;
+	UKA::IMPLANTS::FemurImplantOnePlane femurImplant;
 
 	UKA::IMPLANTS::TibiaImplant tibiaImplant;
 
