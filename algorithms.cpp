@@ -1393,7 +1393,7 @@ void MatchEasyPKA()
 
 	//vtkSmartPointer<vtkPolyData> polyTibiaImplant, polyPatellaImplant;
 
-	UKA::IMPLANTS::FemurImplantOnePlane femurImplant;
+	UKA::IMPLANTS::FemurImplant* femurImplant = new UKA::IMPLANTS::FemurImplantOnePlane();
 
 	UKA::IMPLANTS::TibiaImplant tibiaImplant;
 
@@ -1431,7 +1431,7 @@ void MatchEasyPKA()
 	femurInfo.femurDistalThickness = 1.0;
 	femurInfo.femurPosteriorThickness = 2.0;
 
-	femurImplant.init(pPosterior, pRodBasePoint, pRodTopPoint, pSideBorder1, pSideBorder2, femurModel, femurInfo);
+	((UKA::IMPLANTS::FemurImplantOnePlane*)femurImplant)->init(pPosterior, pRodBasePoint, pRodTopPoint, pSideBorder1, pSideBorder2, femurModel, femurInfo);
 
 	UKA::IMPLANTS::Point apLinePclPoint(10.35, 11.28, 1.15);
 	UKA::IMPLANTS::Point apLineTuberPoint(10.01, -39.601, 1.06);
@@ -4790,7 +4790,7 @@ int main()
 	//std::cout << Point(result) << "; " << proj << std::endl;
 
 	//PolydataInterception();
-	//TEST_PKA::MatchPKA();
+	TEST_PKA::MatchPKA();
 	//TEST_PKA_SUEN::testImplants();
 
 	//double pnt[3] = { 0, 0, 0 };

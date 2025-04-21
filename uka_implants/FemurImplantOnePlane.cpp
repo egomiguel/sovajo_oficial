@@ -19,11 +19,6 @@ void FemurImplantOnePlane::init(const Plane& pPosterior, const Point& pRodBasePo
 {
 	FemurImplant::init(pPosterior, implantModel, pImplantInfo);
 
-    if (isInit == true)
-    {
-        throw ImplantExceptionCode::ALREADY_INITIALIZED_FEMUR_IMPLANT;
-    }
-
 	if (pSortPointsSide1.size() < 3 || pSortPointsSide2.size() < 3)
 	{
 		throw ImplantExceptionCode::FEMUR_IMPLANT_MUST_HAVE_ENOUGH_SIDE_POINTS;

@@ -5,7 +5,7 @@
 
 using namespace UKA::IMPLANTS;
 
-ImplantsMatchFinalInfo::ImplantsMatchFinalInfo(Knee* pKnee, const FemurImplantOnePlane pFemurImplant, const TibiaImplant pTibiaImplant, const itk::Rigid3DTransform<>::Pointer pImplantToBoneFemurTransform, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTibiaTransform)
+ImplantsMatchFinalInfo::ImplantsMatchFinalInfo(Knee* pKnee, FemurImplant* pFemurImplant, const TibiaImplant pTibiaImplant, const itk::Rigid3DTransform<>::Pointer pImplantToBoneFemurTransform, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTibiaTransform)
 {
     knee = pKnee;
     femurRotation = Rigid3DTransformToCVRotation(pImplantToBoneFemurTransform);
@@ -32,10 +32,10 @@ ImplantsMatchFinalInfo::ImplantsMatchFinalInfo(Knee* pKnee, const FemurImplantOn
 
 void ImplantsMatchFinalInfo::updateFemurImplantVectors()
 {
-    cv::Mat axisTemp = femurRotation * (femurImplant.getDirectVectorFemurAxis().ToMatPoint());
-    cv::Mat apTemp = femurRotation * (femurImplant.getDirectVectorAP().ToMatPoint());
-    cv::Mat TEATemp = femurRotation * (femurImplant.getDirectVectorTEA().ToMatPoint());
-    cv::Mat middleTemp = femurRotation * (femurImplant.getRodTopPointProjectedOnBase().ToMatPoint()) + femurTranslation;
+    cv::Mat axisTemp = femurRotation * (((FemurImplantOnePlane*)femurImplant)->getDirectVectorFemurAxis().ToMatPoint());
+    cv::Mat apTemp = femurRotation * (((FemurImplantOnePlane*)femurImplant)->getDirectVectorAP().ToMatPoint());
+    cv::Mat TEATemp = femurRotation * (((FemurImplantOnePlane*)femurImplant)->getDirectVectorTEA().ToMatPoint());
+    cv::Mat middleTemp = femurRotation * (((FemurImplantOnePlane*)femurImplant)->getRodTopPointProjectedOnBase().ToMatPoint()) + femurTranslation;
 
     femurAxisImplantVector = Point(axisTemp);
     femurAPImplantVector = Point(apTemp);
@@ -68,6 +68,11 @@ ImplantsMatchFinalInfo::~ImplantsMatchFinalInfo()
 {
     /*delete femurCoordenate;
     femurCoordenate = NULL;*/
+	//if (femurImplant)
+	//{
+	//	delete femurImplant;
+	//	femurImplant = NULL;
+	//}
 }
 
 itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::FemurImplantToTibiaImplant()
@@ -75,8 +80,8 @@ itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::FemurImplantToTibiaImpl
 	std::vector<cv::Point3d> femurVectors;
 	std::vector<cv::Point3d> tibiaVectors;
 
-	Point implantFemurAxis = femurImplant.getDirectVectorFemurAxis();
-	Point implantFemurAP = femurImplant.getDirectVectorAP();
+	Point implantFemurAxis = ((FemurImplantOnePlane*)femurImplant)->getDirectVectorFemurAxis();
+	Point implantFemurAP = ((FemurImplantOnePlane*)femurImplant)->getDirectVectorAP();
 	Point implantFemurTEA = implantFemurAxis.cross(implantFemurAP);
 	implantFemurTEA.normalice();
 
@@ -103,7 +108,7 @@ itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::FemurImplantToTibiaImpl
 	femurRotation = (implantTibiaMatrix.t()) * inverse;
 
 	cv::Mat refPointMat = tibiaRotation * tibiaImplant.getPlateauRefPointUp().ToMatPoint() + tibiaTranslation;
-	femurTranslation = refPointMat - femurRotation * femurImplant.getRodTopPointProjectedOnBaseExterior().ToMatPoint();
+	femurTranslation = refPointMat - femurRotation * ((FemurImplantOnePlane*)femurImplant)->getRodTopPointProjectedOnBaseExterior().ToMatPoint();
 
 	updateFemurImplantVectors();
 
@@ -124,8 +129,8 @@ itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::TibiaImplantToFemurImpl
 	tibiaVectors.push_back(implantTibiaAxis.ToCVPoint());
 	tibiaVectors.push_back(implantTibiaAP.ToCVPoint());
 
-	cv::Mat implantFemurAxisMat = femurRotation * femurImplant.getDirectVectorFemurAxis().ToMatPoint();
-	cv::Mat implantFemurAPMat = femurRotation * femurImplant.getDirectVectorAP().ToMatPoint();
+	cv::Mat implantFemurAxisMat = femurRotation * ((FemurImplantOnePlane*)femurImplant)->getDirectVectorFemurAxis().ToMatPoint();
+	cv::Mat implantFemurAPMat = femurRotation * ((FemurImplantOnePlane*)femurImplant)->getDirectVectorAP().ToMatPoint();
 
 	Point implantFemurAxis = Point(implantFemurAxisMat);
 	Point implantFemurAP = Point(implantFemurAPMat);
@@ -142,7 +147,7 @@ itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::TibiaImplantToFemurImpl
 	cv::Mat inverse = (implantTibiaMatrix.t()).inv();
 	tibiaRotation = (implantFemurMatrix.t()) * inverse;
 
-	cv::Mat refPointMat = femurRotation * femurImplant.getRodTopPointProjectedOnBaseExterior().ToMatPoint() + femurTranslation;
+	cv::Mat refPointMat = femurRotation * ((FemurImplantOnePlane*)femurImplant)->getRodTopPointProjectedOnBaseExterior().ToMatPoint() + femurTranslation;
 	tibiaTranslation = refPointMat - tibiaRotation * tibiaImplant.getPlateauRefPointUp().ToMatPoint();
 
 	updateTibiaImplantVectors();
@@ -150,7 +155,7 @@ itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::TibiaImplantToFemurImpl
 	return getITKTibiaTransform();
 }
 
-const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurImplant(const FemurImplantOnePlane& pFemurImplant)
+const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurImplant(FemurImplant* pFemurImplant)
 {
     femurImplant = pFemurImplant;
     //this->implantKneeCapPath = pFemurImplant.GetKneeCapPath();
@@ -158,9 +163,9 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurImplant(c
     std::vector<cv::Point3d> implantVectors;
     std::vector<cv::Point3d> kneeVectors;
 
-    Point implantTEA = femurImplant.getDirectVectorTEA();
-    Point implantFemurAxis = femurImplant.getDirectVectorFemurAxis();
-    Point implantAP = femurImplant.getDirectVectorAP();
+    Point implantTEA = ((FemurImplantOnePlane*)femurImplant)->getDirectVectorTEA();
+    Point implantFemurAxis = ((FemurImplantOnePlane*)femurImplant)->getDirectVectorFemurAxis();
+    Point implantAP = ((FemurImplantOnePlane*)femurImplant)->getDirectVectorAP();
     implantVectors.push_back(implantTEA.ToCVPoint());
     implantVectors.push_back(implantFemurAxis.ToCVPoint());
     implantVectors.push_back(implantAP.ToCVPoint());
@@ -175,7 +180,7 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurImplant(c
     cv::Mat inverse = (implantMatrix.t()).inv();
 
     femurRotation = (kneeMatrix.t()) * inverse;
-    femurTranslation = femurImplantMiddlePoint.ToMatPoint() - (femurRotation * femurImplant.getRodTopPointProjectedOnBase().ToMatPoint());
+    femurTranslation = femurImplantMiddlePoint.ToMatPoint() - (femurRotation * ((FemurImplantOnePlane*)femurImplant)->getRodTopPointProjectedOnBase().ToMatPoint());
 
     return getITKFemurTransform();
 }
@@ -446,10 +451,10 @@ std::pair<Point, Point> ImplantsMatchFinalInfo::GetFemurBoneTEALine() const
 
 std::pair<Point, Point> ImplantsMatchFinalInfo::GetFemurImplantTEALine() const
 {
-    double distance = (femurImplant.getWidthSize()) / 2.0;
-	Point tCentral = femurImplant.getMidPlane().getProjectionPoint(femurImplant.getRodBasePoint());
+    double distance = (((FemurImplantOnePlane*)femurImplant)->getWidthSize()) / 2.0;
+	Point tCentral = ((FemurImplantOnePlane*)femurImplant)->getMidPlane().getProjectionPoint(((FemurImplantOnePlane*)femurImplant)->getRodBasePoint());
 
-    cv::Mat vectorimplantTEAMat = femurRotation * (femurImplant.getDirectVectorTEA().ToMatPoint());
+    cv::Mat vectorimplantTEAMat = femurRotation * (((FemurImplantOnePlane*)femurImplant)->getDirectVectorTEA().ToMatPoint());
     Point vectorimplantTEA = Point(vectorimplantTEAMat);
     vectorimplantTEA.normalice();
 
@@ -484,13 +489,13 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurTEAAngle(
 	projectionPlane.init(axisRotation, knee->getFemurKneeCenter());
 
 	Plane implantPlane;
-	Point axisRotationImplant = femurImplant.getDirectVectorFemurAxis();
-	implantPlane.init(axisRotationImplant, femurImplant.getRodTopPointProjectedOnBase());
+	Point axisRotationImplant = ((FemurImplantOnePlane*)femurImplant)->getDirectVectorFemurAxis();
+	implantPlane.init(axisRotationImplant, ((FemurImplantOnePlane*)femurImplant)->getRodTopPointProjectedOnBase());
 	implantPlane.transformPlane(femurRotation, femurTranslation);
 
 	Point newVectorFromImplant = ImplantTools::getOriginalVectorFromProjectionWithPlanes(projectionPlane, mainVector, implantPlane);
 	
-	auto baseVectorFromImplantMat = femurRotation * femurImplant.getDirectVectorTEA().ToMatPoint();
+	auto baseVectorFromImplantMat = femurRotation * ((FemurImplantOnePlane*)femurImplant)->getDirectVectorTEA().ToMatPoint();
 	Point baseVectorFromImplant = Point(baseVectorFromImplantMat);
 
 	myAngle = ImplantTools::getAngleBetweenVectors(newVectorFromImplant, baseVectorFromImplant);
@@ -518,7 +523,7 @@ double ImplantsMatchFinalInfo::GetFemurImplantTEAAngle() const
     axial.init(knee->getDirectVectorFemurAxis(), knee->getFemurKneeCenter());
 
     Point vectorBoneTEA = knee->getFemurVectorTEA();
-    cv::Mat vectorimplantTEAMat = femurRotation * (femurImplant.getDirectVectorTEA().ToMatPoint());
+    cv::Mat vectorimplantTEAMat = femurRotation * (((FemurImplantOnePlane*)femurImplant)->getDirectVectorTEA().ToMatPoint());
     Point vectorimplantTEA = Point(vectorimplantTEAMat);
     LegAngle legAngle;
     double angle = legAngle.getAngleBetweenVectors(axial.getProjectionVector(vectorBoneTEA), axial.getProjectionVector(vectorimplantTEA));
@@ -567,13 +572,13 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurPCAAngle(
 	auto mainVector = Point(mainVectorMat);
 
 	Plane implantPlane;
-	Point axisRotationImplant = femurImplant.getDirectVectorFemurAxis();
-	implantPlane.init(axisRotationImplant, femurImplant.getRodTopPointProjectedOnBase());
+	Point axisRotationImplant = ((FemurImplantOnePlane*)femurImplant)->getDirectVectorFemurAxis();
+	implantPlane.init(axisRotationImplant, ((FemurImplantOnePlane*)femurImplant)->getRodTopPointProjectedOnBase());
 	implantPlane.transformPlane(femurRotation, femurTranslation);
 
 	Point newVectorFromImplant = ImplantTools::getOriginalVectorFromProjectionWithPlanes(projectionPlane, mainVector, implantPlane);
 
-	auto baseVectorFromImplantMat = femurRotation * femurImplant.getDirectVectorTEA().ToMatPoint();
+	auto baseVectorFromImplantMat = femurRotation * ((FemurImplantOnePlane*)femurImplant)->getDirectVectorTEA().ToMatPoint();
 	Point baseVectorFromImplant = Point(baseVectorFromImplantMat);
 
 	if (knee->getIsRight() == false)
@@ -654,7 +659,7 @@ double ImplantsMatchFinalInfo::GetFemurImplantPCAAngle() const
         sameDirection = -1.0;
     }
 
-    cv::Mat vectorimplantTEAMat = femurRotation * (femurImplant.getDirectVectorTEA().ToMatPoint());
+    cv::Mat vectorimplantTEAMat = femurRotation * (((FemurImplantOnePlane*)femurImplant)->getDirectVectorTEA().ToMatPoint());
     Point vectorimplantTEA = Point(vectorimplantTEAMat);
     vectorimplantTEA = axial.getProjectionVector(vectorimplantTEA);
     vectorimplantTEA = sameDirection * vectorimplantTEA;
@@ -702,13 +707,13 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurVarusAngl
 	projectionPlane.init(axisRotation, knee->getFemurKneeCenter());
 
 	Plane implantPlane;
-	Point axisRotationImplant = femurImplant.getDirectVectorAP();
-	implantPlane.init(axisRotationImplant, femurImplant.getRodTopPointProjectedOnBase());
+	Point axisRotationImplant = ((FemurImplantOnePlane*)femurImplant)->getDirectVectorAP();
+	implantPlane.init(axisRotationImplant, ((FemurImplantOnePlane*)femurImplant)->getRodTopPointProjectedOnBase());
 	implantPlane.transformPlane(femurRotation, femurTranslation);
 
 	Point newVectorFromImplant = ImplantTools::getOriginalVectorFromProjectionWithPlanes(projectionPlane, mainVector, implantPlane);
 
-	auto baseVectorFromImplantMat = femurRotation * femurImplant.getDirectVectorFemurAxis().ToMatPoint();
+	auto baseVectorFromImplantMat = femurRotation * ((FemurImplantOnePlane*)femurImplant)->getDirectVectorFemurAxis().ToMatPoint();
 	Point baseVectorFromImplant = Point(baseVectorFromImplantMat);
 
 	myAngle = ImplantTools::getAngleBetweenVectors(newVectorFromImplant, baseVectorFromImplant);
@@ -732,7 +737,7 @@ double ImplantsMatchFinalInfo::GetFemurVarusAngle() const
     Point vectorBone = knee->getDirectVectorFemurAxis();
     LegAngle legAngle;
     
-    cv::Mat vectorImplantMat = femurRotation * (femurImplant.getDirectVectorFemurAxis().ToMatPoint());
+    cv::Mat vectorImplantMat = femurRotation * (((FemurImplantOnePlane*)femurImplant)->getDirectVectorFemurAxis().ToMatPoint());
     Point vectorImplant = Point(vectorImplantMat);
 
     Plane coronal;
@@ -768,7 +773,7 @@ double ImplantsMatchFinalInfo::GetFemurFlexionAngle() const
     }
 
     Point boneAP = knee->getFemurDirectVectorAP();
-    cv::Mat implantAPMat = femurRotation * (femurImplant.getDirectVectorAP().ToMatPoint());
+    cv::Mat implantAPMat = femurRotation * (((FemurImplantOnePlane*)femurImplant)->getDirectVectorAP().ToMatPoint());
     Point implantAP = Point(implantAPMat);
     implantAP = sagital.getProjectionVector(implantAP);
     LegAngle legAngle;
@@ -811,13 +816,13 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurFlexionAn
 	projectionPlane.init(axisRotation, knee->getFemurKneeCenter());
 
 	Plane implantPlane;
-	Point axisRotationImplant = femurImplant.getDirectVectorTEA();
-	implantPlane.init(axisRotationImplant, femurImplant.getRodTopPointProjectedOnBase());
+	Point axisRotationImplant = ((FemurImplantOnePlane*)femurImplant)->getDirectVectorTEA();
+	implantPlane.init(axisRotationImplant, ((FemurImplantOnePlane*)femurImplant)->getRodTopPointProjectedOnBase());
 	implantPlane.transformPlane(femurRotation, femurTranslation);
 
 	Point newVectorFromImplant = ImplantTools::getOriginalVectorFromProjectionWithPlanes(projectionPlane, mainVector, implantPlane);
 
-	auto baseVectorFromImplantMat = femurRotation * femurImplant.getDirectVectorAP().ToMatPoint();
+	auto baseVectorFromImplantMat = femurRotation * ((FemurImplantOnePlane*)femurImplant)->getDirectVectorAP().ToMatPoint();
 	Point baseVectorFromImplant = Point(baseVectorFromImplantMat);
 
 	myAngle = ImplantTools::getAngleBetweenVectors(newVectorFromImplant, baseVectorFromImplant);
@@ -962,8 +967,8 @@ ResectionThickness ImplantsMatchFinalInfo::GetTibiaProtrudes() const
 
 ResectionThickness ImplantsMatchFinalInfo::GetFemurProtrudesCoronal() const
 {
-    Plane planeTemp = femurImplant.getPosterior();
-    planeTemp.reverseByPoint(femurImplant.getRodBasePoint());
+    Plane planeTemp = ((FemurImplantOnePlane*)femurImplant)->getPosterior();
+    planeTemp.reverseByPoint(((FemurImplantOnePlane*)femurImplant)->getRodBasePoint());
 
     Plane femur = TransformPlane(planeTemp, femurRotation, femurTranslation);
 
@@ -971,13 +976,13 @@ ResectionThickness ImplantsMatchFinalInfo::GetFemurProtrudesCoronal() const
 
 	if (knee->getSurgerySide() == SurgerySideEnum::KLateral)
 	{
-		result.SurgerySide = femurImplant.getImplantInfo().femurPosteriorThickness + femur.eval(knee->getLateralCondyle()) - knee->getFemurCartilage();
+		result.SurgerySide = ((FemurImplantOnePlane*)femurImplant)->getImplantInfo().femurPosteriorThickness + femur.eval(knee->getLateralCondyle()) - knee->getFemurCartilage();
 		//result.NoSurgerySide = femur.eval(knee->getMedialCondyle());
 	}
 	else
 	{
 		//result.NoSurgerySide = femur.eval(knee->getLateralCondyle());
-		result.SurgerySide = femurImplant.getImplantInfo().femurPosteriorThickness + femur.eval(knee->getMedialCondyle()) - knee->getFemurCartilage();
+		result.SurgerySide = ((FemurImplantOnePlane*)femurImplant)->getImplantInfo().femurPosteriorThickness + femur.eval(knee->getMedialCondyle()) - knee->getFemurCartilage();
 	}
 
     return result;
@@ -1025,7 +1030,7 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetTibiaProtrudes(double proud)
 itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetFemurProtrudesCoronal(double proud)
 {
     Point movePoint;
-	double distance = proud - femurImplant.getImplantInfo().femurPosteriorThickness + knee->getFemurCartilage();
+	double distance = proud - ((FemurImplantOnePlane*)femurImplant)->getImplantInfo().femurPosteriorThickness + knee->getFemurCartilage();
 
 	if (knee->getSurgerySide() == SurgerySideEnum::KLateral)
 	{
@@ -1036,8 +1041,8 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetFemurProtrudesCoronal(double
 		movePoint = knee->getMedialCondyle();
 	}
 
-    Plane planeTemp = femurImplant.getPosterior();
-    planeTemp.reverseByPoint(femurImplant.getRodBasePoint(), false);
+    Plane planeTemp = ((FemurImplantOnePlane*)femurImplant)->getPosterior();
+    planeTemp.reverseByPoint(((FemurImplantOnePlane*)femurImplant)->getRodBasePoint(), false);
 
     Plane femur = TransformPlane(planeTemp, femurRotation, femurTranslation);
 
@@ -1063,7 +1068,7 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetFemurProtrudesCoronal(double
 itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetFemurProtrudesAxial(double proud)
 {
     Point movePoint;
-	double distance = proud - femurImplant.getImplantInfo().femurDistalThickness + knee->getFemurCartilage();
+	double distance = proud - ((FemurImplantOnePlane*)femurImplant)->getImplantInfo().femurDistalThickness + knee->getFemurCartilage();
 
 	if (knee->getSurgerySide() == SurgerySideEnum::KLateral)
 	{
@@ -1074,8 +1079,8 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetFemurProtrudesAxial(double p
 		movePoint = knee->getMedialInferiorFemurPoint();
 	}
 
-    Plane planeTemp = femurImplant.getDistalPlane();
-    planeTemp.reverseByPoint(femurImplant.getRodTopPoint(), false);
+    Plane planeTemp = ((FemurImplantOnePlane*)femurImplant)->getDistalPlane();
+    planeTemp.reverseByPoint(((FemurImplantOnePlane*)femurImplant)->getRodTopPoint(), false);
 
     Plane femur = TransformPlane(planeTemp, femurRotation, femurTranslation);
 
@@ -1100,20 +1105,20 @@ itk::Vector< double, 3 > ImplantsMatchFinalInfo::SetFemurProtrudesAxial(double p
 
 ResectionThickness ImplantsMatchFinalInfo::GetFemurProtrudesAxial() const
 {
-    Plane planeTemp = femurImplant.getDistalPlane();
-    planeTemp.reverseByPoint(femurImplant.getRodTopPoint());
+    Plane planeTemp = ((FemurImplantOnePlane*)femurImplant)->getDistalPlane();
+    planeTemp.reverseByPoint(((FemurImplantOnePlane*)femurImplant)->getRodTopPoint());
     Plane femur = TransformPlane(planeTemp, femurRotation, femurTranslation);
 
     ResectionThickness result;
 
 	if (knee->getSurgerySide() == SurgerySideEnum::KLateral)
 	{
-		result.SurgerySide = femurImplant.getImplantInfo().femurDistalThickness + femur.eval(knee->getLateralInferiorFemurPoint()) - knee->getFemurCartilage();
+		result.SurgerySide = ((FemurImplantOnePlane*)femurImplant)->getImplantInfo().femurDistalThickness + femur.eval(knee->getLateralInferiorFemurPoint()) - knee->getFemurCartilage();
 	}
 	else
 	{
 		//result.NoSurgerySide = femur.eval(knee->getLateralInferiorFemurPoint());
-		result.SurgerySide = femurImplant.getImplantInfo().femurDistalThickness + femur.eval(knee->getMedialInferiorFemurPoint()) - knee->getFemurCartilage();
+		result.SurgerySide = ((FemurImplantOnePlane*)femurImplant)->getImplantInfo().femurDistalThickness + femur.eval(knee->getMedialInferiorFemurPoint()) - knee->getFemurCartilage();
 	}
 	
     return result;

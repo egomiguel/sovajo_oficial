@@ -18,6 +18,8 @@ namespace UKA
 		public:
 			FemurImplantOnePlane();
 
+			virtual ~FemurImplantOnePlane() {};
+
 			FemurImplantOnePlane(const FemurImplantOnePlane& pImplant);
 
 			void init(const Plane& pPosterior, const Point& pRodBasePoint, const Point& pRodTopPoint,

@@ -35,7 +35,9 @@ namespace UKA
 
 			FemurImplantMatch();
 
-			void init(const FemurImplantOnePlane& implantFemur, const Knee& knee);
+			~FemurImplantMatch();
+
+			void init(FemurImplant* implantFemur, const Knee& knee);
 
 			itk::Matrix< double, 3, 3 > GetRotationMatrix() const;
 
@@ -45,7 +47,7 @@ namespace UKA
 
 		private:
 
-			FemurImplantOnePlane implantFemur;
+			FemurImplant* implantFemur;
 			Knee knee;
 			cv::Mat rotationMatrix;
 			cv::Mat translationMatrix;

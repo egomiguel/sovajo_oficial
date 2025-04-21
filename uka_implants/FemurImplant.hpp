@@ -17,6 +17,8 @@ namespace UKA
 		public:
 			FemurImplant();
 
+			virtual ~FemurImplant() {};
+
 			void init(const Plane& pPosterior, const vtkSmartPointer<vtkPolyData> implantModel, 
 				const FemurImplantInfo& pImplantInfo);
 

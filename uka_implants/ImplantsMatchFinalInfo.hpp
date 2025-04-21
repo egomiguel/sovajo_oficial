@@ -22,7 +22,7 @@ namespace UKA
 		class UKA_IMPLANTS_EXPORT ImplantsMatchFinalInfo
 		{
 		public:
-			ImplantsMatchFinalInfo(Knee* pKnee, const FemurImplantOnePlane pFemurImplant, const TibiaImplant pTibiaImplant, const itk::Rigid3DTransform<>::Pointer pImplantToBoneFemurTransform, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTibiaTransform);
+			ImplantsMatchFinalInfo(Knee* pKnee, FemurImplant* pFemurImplant, const TibiaImplant pTibiaImplant, const itk::Rigid3DTransform<>::Pointer pImplantToBoneFemurTransform, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTibiaTransform);
 			~ImplantsMatchFinalInfo();
 			ResectionThickness GetTibiaProtrudes() const;
 			ResectionThickness GetFemurProtrudesAxial() const;
@@ -122,7 +122,7 @@ namespace UKA
 				Update the femur implant. Updates the transformation internally on the object for
 				the new implant. Return the new transformation.
 			*/
-			const itk::Rigid3DTransform<>::Pointer setFemurImplant(const FemurImplantOnePlane& pFemurImplant);
+			const itk::Rigid3DTransform<>::Pointer setFemurImplant(FemurImplant* pFemurImplant);
 
 			/*
 				Update the tibia implant. Updates the transformation internally on the object
@@ -174,7 +174,7 @@ namespace UKA
 
 			Knee* knee;
 
-			FemurImplantOnePlane femurImplant;
+			FemurImplant* femurImplant;
 
 			TibiaImplant tibiaImplant;
 

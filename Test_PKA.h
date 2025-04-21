@@ -384,9 +384,9 @@ namespace TEST_PKA
 	{
 		std::string folder = "D:\\sovajo\\Cases_Plan_PKA\\UKA-data"; // right
 		UKA::IMPLANTS::Knee myKnee = CreateKneeFromFile_NumbersPKA(folder, UKA::IMPLANTS::KRight, UKA::IMPLANTS::KMedial);
-
-		UKA::IMPLANTS::FemurImplantOnePlane femurImplant;
-
+		std::cout << "111111111111111111111111111111" << std::endl;
+		UKA::IMPLANTS::FemurImplant* femurImplant = new UKA::IMPLANTS::FemurImplantOnePlane();
+		std::cout << "2222222222222222222222222222222222222" << std::endl;
 		UKA::IMPLANTS::TibiaImplant tibiaImplant;
 
 		//////////////////////////////////////////////Implants
@@ -410,8 +410,8 @@ namespace TEST_PKA
 		femurInfo.femurDistalThickness = 4.0;
 		femurInfo.femurPosteriorThickness = 4.0;
 
-		femurImplant.init(pPosterior, pRodBasePoint, pRodTopPoint, pSideBorder1, pSideBorder2, femurModel, femurInfo);
-
+		((UKA::IMPLANTS::FemurImplantOnePlane*)femurImplant)->init(pPosterior, pRodBasePoint, pRodTopPoint, pSideBorder1, pSideBorder2, femurModel, femurInfo);
+		std::cout << "333333333333333333333333333333333333333" << std::endl;
 		UKA::IMPLANTS::Point apLinePclPoint(10.35, 11.28, 1.15);
 		UKA::IMPLANTS::Point apLineTuberPoint(10.01, -39.601, 1.06);
 		UKA::IMPLANTS::Point sidePointUp(-15.2245, -10.73, 1.15);
@@ -434,7 +434,7 @@ namespace TEST_PKA
 		transformTibia->SetMatrix(tibiaImplantMatch.GetRotationMatrix());
 		transformTibia->SetOffset(tibiaImplantMatch.GetTranslationMatrix());
 		femurImplantMatch.init(femurImplant, myKnee);
-
+		std::cout << "4444444444444444444444444444444444444444" << std::endl;
 		itk::Rigid3DTransform<double>::Pointer transformFemur = itk::VersorRigid3DTransform<double>::New();
 
 		transformFemur->SetMatrix(femurImplantMatch.GetRotationMatrix());
@@ -501,21 +501,27 @@ namespace TEST_PKA
 		//show(newImplantTibia, tPoints, true);
 
 		UKA::IMPLANTS::ImplantsMatchFinalInfo matchFinalInfo(&myKnee, femurImplant, tibiaImplant, femurTransformIn, tibiaTransformIn);
-		
+		std::cout << "5555555555555555555555555555555555555555" << std::endl;
 		matchFinalInfo.test();
-
+		std::cout << "666666666666666666666666666666666" << std::endl;
 		matchFinalInfo.SetTibiaProtrudes(-5);
 		matchFinalInfo.SetFemurProtrudesAxial(-5);
 		matchFinalInfo.SetFemurProtrudesCoronal(-5);
 
+		std::cout << "777777777777777777777777777777777777777777" << std::endl;
+
 		matchFinalInfo.test();
+
+		std::cout << "888888888888888888888888888888888888888888" << std::endl;
 
 		vtkSmartPointer<vtkPolyData> newImplantTibia3 = TransformPoly(tibiaModel, matchFinalInfo.getITKTibiaTransform()->GetMatrix(), matchFinalInfo.getITKTibiaTransform()->GetTranslation());
 		std::vector<vtkSmartPointer<vtkPolyData>> polyList3;
 		//polyList.push_back(newImplantFemur);
 		polyList3.push_back(newImplantTibia3);
 		show(myKnee.GetTibiaPoly(), polyList3);
-
+		std::cout << "9999999999999999999999999999999999999999999999999999" << std::endl;
+		delete femurImplant;
+		femurImplant = NULL;
 	}
 }
 

@@ -125,7 +125,16 @@ FemurImplantMatch::FemurImplantMatch()
 	isInit = false;
 }
 
-void FemurImplantMatch::init(const FemurImplantOnePlane& implantFemur, const Knee& knee)
+FemurImplantMatch::~FemurImplantMatch()
+{
+	//if (implantFemur)
+	//{
+	//	delete implantFemur;
+	//	implantFemur = NULL;
+	//}
+}
+
+void FemurImplantMatch::init(FemurImplant* implantFemur, const Knee& knee)
 {
 	if (isInit == true)
 	{
@@ -133,13 +142,16 @@ void FemurImplantMatch::init(const FemurImplantOnePlane& implantFemur, const Kne
 	}
 	this->implantFemur = implantFemur;
 	this->knee = knee;
-	getRotationMatrix();
-	bool result = getTranslationMatrix();
-	if (result == false)
+	if (dynamic_cast<FemurImplantOnePlane*>(this->implantFemur))
 	{
-		throw ImplantExceptionCode::FAILED_TRANSFORMATION_MATCH;
+		getRotationMatrix();
+		bool result = getTranslationMatrix();
+		if (result == false)
+		{
+			throw ImplantExceptionCode::FAILED_TRANSFORMATION_MATCH;
+		}
 	}
-
+	
 	isInit = true;
 }
 
@@ -148,8 +160,8 @@ void FemurImplantMatch::getRotationMatrix()
 	std::vector<cv::Point3d> implantVectors;
 	std::vector<cv::Point3d> kneeVectors;
 
-	Point implantFemurAxis = implantFemur.getDirectVectorFemurAxis();
-	Point implantAP = implantFemur.getDirectVectorAP();
+	Point implantFemurAxis = ((FemurImplantOnePlane*)implantFemur)->getDirectVectorFemurAxis();
+	Point implantAP = ((FemurImplantOnePlane*)implantFemur)->getDirectVectorAP();
 	Point implantTEA = implantFemurAxis.cross(implantAP);
 	implantTEA.normalice();
 
@@ -209,21 +221,21 @@ bool FemurImplantMatch::getTranslationMatrix()
 	//sidePlane.movePlaneOnNormal((implantFemur.getWidthSize() / 2.) + 1.); //One is added to prevent the femur implant from adhering to the limit of the tibia implant.
 	//tCenter = sidePlane.getProjectionPoint(Point(tempSide));
 
-	cv::Mat kneeNormalVectorPlaneA = rotationMatrix * implantFemur.getPosterior().getNormalVectorMat();
+	cv::Mat kneeNormalVectorPlaneA = rotationMatrix * ((FemurImplantOnePlane*)implantFemur)->getPosterior().getNormalVectorMat();
 	Plane kneePlaneA;
-	kneePlaneA.init(Point(kneeNormalVectorPlaneA), knee.getMoveCondyle(implantFemur.getImplantInfo()));
+	kneePlaneA.init(Point(kneeNormalVectorPlaneA), knee.getMoveCondyle(((FemurImplantOnePlane*)implantFemur)->getImplantInfo()));
 
-	cv::Mat kneeNormalVectorMidPlane = rotationMatrix * implantFemur.getMidPlane().getNormalVectorMat();
+	cv::Mat kneeNormalVectorMidPlane = rotationMatrix * ((FemurImplantOnePlane*)implantFemur)->getMidPlane().getNormalVectorMat();
 	Plane kneeMidPlane;
 	kneeMidPlane.init(Point(kneeNormalVectorMidPlane), tCenter);
 
-	cv::Mat kneeNormalVectorPlaneC = rotationMatrix * implantFemur.getDistalPlane().getNormalVectorMat();
+	cv::Mat kneeNormalVectorPlaneC = rotationMatrix * ((FemurImplantOnePlane*)implantFemur)->getDistalPlane().getNormalVectorMat();
 	Plane kneePlaneC;
-	kneePlaneC.init(Point(kneeNormalVectorPlaneC), knee.getInferiorMoveFemurPoint(implantFemur.getImplantInfo()));
+	kneePlaneC.init(Point(kneeNormalVectorPlaneC), knee.getInferiorMoveFemurPoint(((FemurImplantOnePlane*)implantFemur)->getImplantInfo()));
 
-	cv::Mat pSeudoExpKneePointA = rotationMatrix * implantFemur.getPosterior().getPointMat();
-	cv::Mat pSeudoExpKneeMidPoint = rotationMatrix * implantFemur.getMidPlane().getPointMat();
-	cv::Mat pSeudoExpKneePointC = rotationMatrix * implantFemur.getDistalPlane().getPointMat();
+	cv::Mat pSeudoExpKneePointA = rotationMatrix * ((FemurImplantOnePlane*)implantFemur)->getPosterior().getPointMat();
+	cv::Mat pSeudoExpKneeMidPoint = rotationMatrix * ((FemurImplantOnePlane*)implantFemur)->getMidPlane().getPointMat();
+	cv::Mat pSeudoExpKneePointC = rotationMatrix * ((FemurImplantOnePlane*)implantFemur)->getDistalPlane().getPointMat();
 
 	Point pSeudoKneePointA(pSeudoExpKneePointA);
 	Point pSeudoKneeMidPoint(pSeudoExpKneeMidPoint);
@@ -440,7 +452,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	double resizeVector = 1000000.0;
 
 	Point centerP1, centerP2, topPoint, downPoint, lateralPoint, medialPoint, lateralSide, medialSide;
-	Plane midPlane = finalTransformPlane(implantFemur.getMidPlane(), pTransformIn);
+	Plane midPlane = finalTransformPlane(((FemurImplantOnePlane*)implantFemur)->getMidPlane(), pTransformIn);
 	Point fromPostToAntVector = knee.getFemurDirectVectorAP();
 
 	lateralPoint = knee.getLateralEpicondyle();
@@ -465,7 +477,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	if (id == KPosteriorPlane)
 	{
-		currentPlane = finalTransformPlane(implantFemur.getPosterior(), pTransformIn);
+		currentPlane = finalTransformPlane(((FemurImplantOnePlane*)implantFemur)->getPosterior(), pTransformIn);
 		projectedPoints.clear();
 
 		//midPointPlane = getPointsOnPlane(currentPlane, projectedPoints);
@@ -499,7 +511,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	}
 	else
 	{
-		currentPlane = finalTransformPlane(implantFemur.getBestPlaneToCurvePoints(), pTransformIn);
+		currentPlane = finalTransformPlane(((FemurImplantOnePlane*)implantFemur)->getBestPlaneToCurvePoints(), pTransformIn);
 		projectedPoints.clear();
 		midPointPlane = getPointsOnPlane(currentPlane, projectedPoints);
 
@@ -567,7 +579,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		cv::Mat rotation = Rigid3DTransformToCVRotation(pTransformIn);
 		cv::Mat translation = Rigid3DTransformToCVTranslation(pTransformIn);
 		// No esta actualizado aun en la nube de china
-		vertices = ConvexHull::interpolateSpline(implantFemur.getAllSidePointsInOrder(rotation, translation, distanceSide), amount);
+		vertices = ConvexHull::interpolateSpline(((FemurImplantOnePlane*)implantFemur)->getAllSidePointsInOrder(rotation, translation, distanceSide), amount);
 	}
 
 	Point initExtreme, endExtreme;
