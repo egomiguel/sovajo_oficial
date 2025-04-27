@@ -2,7 +2,7 @@
 #define FEMUR_IMPLANT_UKA_MATCH_H
 
 #include <itkRigid3DTransform.h>
-#include "FemurImplantOnePlane.hpp"
+#include "FemurImplant.hpp"
 #include "TibiaImplant.hpp"
 #include "Knee.hpp"
 #include "Plane.hpp"
@@ -52,8 +52,11 @@ namespace UKA
 			cv::Mat rotationMatrix;
 			cv::Mat translationMatrix;
 			bool isInit;
-			void getRotationMatrix();
-			bool getTranslationMatrix();
+			void getRotationMatrixOnePlane();
+			bool getTranslationMatrixOnePlane();
+
+			void getRotationMatrixThreePlane();
+			bool getTranslationMatrixThreePlane();
 
 			Point getPointsOnPlane(const Plane& myPlane, std::vector<Point>& points) const;
 
