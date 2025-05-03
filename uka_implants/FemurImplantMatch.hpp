@@ -17,9 +17,15 @@ namespace UKA
 		{
 		public:
 
-			enum BoneArea {
-				KPosteriorPlane,
-				KAnteriorAndDistalCurve
+			enum BoneAreaOnePlane {
+				KOnePlanePosterior,
+				KOnePlaneAnteriorAndDistalCurve
+			};
+
+			enum BoneAreaThreePlanes {
+				KThreePlanePosterior,
+				KThreePlaneCenter,
+				KThreePlaneAnterior
 			};
 
 			struct ConvexHullFeatures
@@ -43,7 +49,9 @@ namespace UKA
 
 			itk::Vector< double, 3 > GetTranslationMatrix() const;
 
-			std::vector<PointTypeITK> GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneArea id, double distanceSide = 0, double distanceTop = 1.0, double angleLateral = 10, double angleMedial = 15, int amount = 200) const;
+			std::vector<PointTypeITK> GetHullPointsOnePlane(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneAreaOnePlane id, double distanceSide = 0, double distanceTop = 1.0, double angleLateral = 10, double angleMedial = 15, int amount = 200) const;
+
+			std::vector<PointTypeITK> GetHullPointsThreePlanes(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneAreaThreePlanes id, double distanceSide = 0, double distanceTop = 1.0, double angleLateral = 10, double angleMedial = 15, int amount = 200) const;
 
 		private:
 

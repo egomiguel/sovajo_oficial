@@ -144,6 +144,7 @@ void FemurImplantMatch::init(FemurImplant* implantFemur, const Knee& knee)
 	}
 	this->implantFemur = implantFemur;
 	this->knee = knee;
+
 	if (dynamic_cast<FemurImplantOnePlane*>(this->implantFemur))
 	{
 		getRotationMatrixOnePlane();
@@ -533,14 +534,19 @@ Point FemurImplantMatch::getPointsOnPlane(const Plane& myPlane, std::vector<Poin
 		midPoint = midPoint / double(allPoints.size());
 	}
 
-	return midPoint;
+	return midPoint; 
 }
 
-std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneArea id, double distanceSide, double distanceTop, double angleLateral, double angleMedial, int amount) const
+std::vector<PointTypeITK> FemurImplantMatch::GetHullPointsOnePlane(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneAreaOnePlane id, double distanceSide, double distanceTop, double angleLateral, double angleMedial, int amount) const
 {
+	std::vector<PointTypeITK> hull;
+	if (!dynamic_cast<FemurImplantOnePlane*>(this->implantFemur))
+	{
+		return hull;
+	}
+
 	std::vector<Point> projectedPoints;
 	Point midPointPlane;
-	std::vector<PointTypeITK> hull;
 	double resizeVector = 1000000.0;
 
 	Point centerP1, centerP2, topPoint, downPoint, lateralPoint, medialPoint, lateralSide, medialSide;
@@ -567,7 +573,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	Point myNormal, myNormalTemp;
 	std::vector<Point> pointsLatTemp, pointsMedTemp;
 
-	if (id == KPosteriorPlane)
+	if (id == KOnePlanePosterior)
 	{
 		currentPlane = finalTransformPlane(((FemurImplantOnePlane*)implantFemur)->getPosterior(), pTransformIn);
 		projectedPoints.clear();
@@ -583,7 +589,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		if (projectedPoints.size() > 15)
 		{
 			centerP1 = midPointPlane;
-			centerP2 = currentPlane.getProjectionPoint(knee.getHipCenter());
+			centerP2 = currentPlane.getProjectionPoint(centerP1 + resizeVector * knee.getDirectVectorFemurAxis());
 
 			myRotation = getTransformToRobot(currentPlane, sagitalAnatomicPlane, centerP1, centerP2);
 
@@ -615,7 +621,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		if (projectedPoints.size() > 10)
 		{
 			centerP1 = midPointPlane;
-			centerP2 = knee.getFemurKneeCenter() - resizeVector * knee.getFemurDirectVectorAP();
+			centerP2 = centerP1 - resizeVector * knee.getFemurDirectVectorAP();
 			centerP2 = currentPlane.getProjectionPoint(centerP2);
 
 			myRotation = getTransformToRobot(currentPlane, sagitalAnatomicPlane, centerP1, centerP2);
@@ -651,7 +657,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	double angleLatRad = ((90.0 - angleLateral) * PI) / 180.0;
 	double angleMedRad = ((90.0 - angleMedial) * PI) / 180.0;
 
-	if (id == KPosteriorPlane)
+	if (id == KOnePlanePosterior)
 	{
 		if (knee.getSurgerySide() == SurgerySideEnum::KLateral && pointsLatTemp.size() > 3)
 		{
@@ -681,7 +687,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		initExtreme = vertices[0];
 		endExtreme = vertices[vertices.size() - 1];
 
-		if (id == KAnteriorAndDistalCurve)
+		if (id == KOnePlaneAnteriorAndDistalCurve)
 		{
 			initExtreme = currentPlane.getProjectionPoint(initExtreme);
 			endExtreme = currentPlane.getProjectionPoint(endExtreme);
@@ -746,6 +752,260 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	return hull;
 }
+
+std::vector<PointTypeITK> FemurImplantMatch::GetHullPointsThreePlanes(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneAreaThreePlanes id, double distanceSide, double distanceTop, double angleLateral, double angleMedial, int amount) const
+{
+	std::vector<PointTypeITK> hull;
+	if (!dynamic_cast<FemurImplantThreePlane*>(this->implantFemur))
+	{
+		return hull;
+	}
+
+	std::vector<Point> projectedPoints;
+	Point midPointPlane;
+	double resizeVector = 1000000.0;
+
+	Point centerP1, centerP2, topPoint, downPoint, lateralPoint, medialPoint, lateralSide, medialSide;
+	Plane midPlane = finalTransformPlane(((FemurImplantThreePlane*)implantFemur)->getMidPlane(), pTransformIn);
+	Point fromPostToAntVector = knee.getFemurDirectVectorAP();
+
+	lateralPoint = knee.getLateralEpicondyle();
+
+	medialPoint = knee.getMedialEpicondylePerp();
+
+	Point fromMedToLatVector = lateralPoint - medialPoint;
+	fromMedToLatVector = fromMedToLatVector / sqrt(fromMedToLatVector.dot(fromMedToLatVector));
+
+	Point anterior = knee.getFemurKneeCenter() + (resizeVector * fromPostToAntVector);
+
+	Point posterior = knee.getFemurKneeCenter() - (resizeVector * fromPostToAntVector);
+
+	lateralPoint = knee.getFemurKneeCenter() + (resizeVector * fromMedToLatVector);
+
+	medialPoint = knee.getFemurKneeCenter() - (resizeVector * fromMedToLatVector);
+	Plane currentPlane, sagitalAnatomicPlane;
+	sagitalAnatomicPlane.init(knee.getFemurVectorTEA(), knee.getFemurKneeCenter());
+	cv::Mat myRotation;
+	Point myNormal, myNormalTemp;
+	std::vector<Point> pointsLatTemp, pointsMedTemp;
+
+	if (id == KThreePlanePosterior)
+	{
+		currentPlane = finalTransformPlane(((FemurImplantThreePlane*)implantFemur)->getPosterior(), pTransformIn);
+		projectedPoints.clear();
+
+		//midPointPlane = getPointsOnPlane(currentPlane, projectedPoints);
+		midPointPlane = getPointsOnPlane(currentPlane, projectedPoints, pointsLatTemp, pointsMedTemp);
+
+		myNormalTemp = knee.getFemurKneeCenter() - resizeVector * knee.getFemurDirectVectorAP();
+		myNormal = currentPlane.getProjectionPoint(myNormalTemp) - myNormalTemp;
+
+		currentPlane.fixNormalVector(myNormal);
+
+		if (projectedPoints.size() > 15)
+		{
+			centerP1 = midPointPlane;
+			centerP2 = currentPlane.getProjectionPoint(centerP1 + resizeVector * knee.getDirectVectorFemurAxis());
+
+			myRotation = getTransformToRobot(currentPlane, sagitalAnatomicPlane, centerP1, centerP2);
+
+			centerP1 = midPlane.getProjectionPoint(centerP1);
+			centerP2 = midPlane.getProjectionPoint(centerP2);
+
+			topPoint = currentPlane.getProjectionPoint(knee.getHipCenter());
+			downPoint = currentPlane.getProjectionPoint(knee.getAnkleCenter());
+			lateralSide = currentPlane.getProjectionPoint(lateralPoint);
+			medialSide = currentPlane.getProjectionPoint(medialPoint);
+
+		}
+		else
+		{
+			return hull;
+		}
+	}
+	else if (id == KThreePlaneCenter)
+	{
+		currentPlane = finalTransformPlane(((FemurImplantThreePlane*)implantFemur)->getCenterPlane(), pTransformIn);
+		projectedPoints.clear();
+		midPointPlane = getPointsOnPlane(currentPlane, projectedPoints, pointsLatTemp, pointsMedTemp);
+
+		myNormalTemp = knee.getAnkleCenter();
+		myNormal = myNormalTemp - currentPlane.getProjectionPoint(myNormalTemp);
+
+		currentPlane.fixNormalVector(myNormal);
+
+		if (projectedPoints.size() > 15)
+		{
+			centerP1 = midPointPlane;
+			centerP2 = currentPlane.getProjectionPoint(centerP1 + resizeVector * knee.getFemurDirectVectorAP());
+			myRotation = getTransformToRobot(currentPlane, sagitalAnatomicPlane, centerP1, centerP2);
+
+			centerP1 = midPlane.getProjectionPoint(centerP1);
+			centerP2 = midPlane.getProjectionPoint(centerP2);
+
+			topPoint = currentPlane.getProjectionPoint(posterior);
+			downPoint = currentPlane.getProjectionPoint(anterior);
+			lateralSide = currentPlane.getProjectionPoint(lateralPoint);
+			medialSide = currentPlane.getProjectionPoint(medialPoint);
+		}
+		else
+		{
+			return hull;
+		}
+	}
+	else
+	{
+		currentPlane = finalTransformPlane(((FemurImplantThreePlane*)implantFemur)->getAnteriorPlane(), pTransformIn);
+		projectedPoints.clear();
+		midPointPlane = getPointsOnPlane(currentPlane, projectedPoints, pointsLatTemp, pointsMedTemp);
+
+		myNormalTemp = knee.getFemurKneeCenter() + resizeVector * knee.getFemurDirectVectorAP();
+		myNormal = currentPlane.getProjectionPoint(myNormalTemp) - myNormalTemp;
+
+		currentPlane.fixNormalVector(myNormal);
+
+		if (projectedPoints.size() > 15)
+		{
+			centerP1 = midPointPlane;
+			centerP2 = currentPlane.getProjectionPoint(centerP1 + resizeVector * knee.getDirectVectorFemurAxis());
+
+			myRotation = getTransformToRobot(currentPlane, sagitalAnatomicPlane, centerP1, centerP2);
+
+			centerP1 = midPlane.getProjectionPoint(centerP1);
+			centerP2 = midPlane.getProjectionPoint(centerP2);
+
+			topPoint = currentPlane.getProjectionPoint(knee.getHipCenter());
+			downPoint = currentPlane.getProjectionPoint(knee.getAnkleCenter());
+			lateralSide = currentPlane.getProjectionPoint(lateralPoint);
+			medialSide = currentPlane.getProjectionPoint(medialPoint);
+
+		}
+		else
+		{
+			return hull;
+		}
+	}
+
+	std::vector<Point> vertices, cutPoints;
+
+	if (angleLateral > 45)
+	{
+		angleLateral = 45;
+	}
+
+	if (angleLateral < 0)
+	{
+		angleLateral = 0;
+	}
+
+	if (angleMedial > 45)
+	{
+		angleMedial = 45;
+	}
+
+	if (angleMedial < 0)
+	{
+		angleMedial = 0;
+	}
+
+	double angleLatRad = ((90.0 - angleLateral) * PI) / 180.0;
+	double angleMedRad = ((90.0 - angleMedial) * PI) / 180.0;
+
+	if (true)
+	{
+		if (knee.getSurgerySide() == SurgerySideEnum::KLateral && pointsLatTemp.size() > 3)
+		{
+			getCurveLikeU(pointsLatTemp, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
+		}
+		else if (knee.getSurgerySide() == SurgerySideEnum::KMedial && pointsMedTemp.size() > 3)
+		{
+			getCurveLikeU(pointsMedTemp, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
+		}
+		else
+		{
+			getCurveLikeU(pointsLatTemp, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
+		}
+	}
+	else
+	{
+		/*cv::Mat rotation = Rigid3DTransformToCVRotation(pTransformIn);
+		cv::Mat translation = Rigid3DTransformToCVTranslation(pTransformIn);
+		vertices = ConvexHull::interpolateSpline(((FemurImplantOnePlane*)implantFemur)->getAllSidePointsInOrder(rotation, translation, distanceSide), amount);*/
+	}
+
+	Point initExtreme, endExtreme;
+
+	if (vertices.size() > 1)
+	{
+		initExtreme = vertices[0];
+		endExtreme = vertices[vertices.size() - 1];
+
+		/*if (id == KAnteriorAndDistalCurve)
+		{
+			initExtreme = currentPlane.getProjectionPoint(initExtreme);
+			endExtreme = currentPlane.getProjectionPoint(endExtreme);
+		}*/
+
+		cv::Mat initExtremeMat, endExtremeMat;
+
+		initExtremeMat = myRotation * initExtreme.ToMatPoint();
+		endExtremeMat = myRotation * endExtreme.ToMatPoint();
+
+		initExtreme = Point(initExtremeMat);
+		endExtreme = Point(endExtremeMat);
+
+		if (endExtreme.y < initExtreme.y)
+		{
+			std::reverse(vertices.begin(), vertices.end());
+		}
+	}
+
+	hull = increaseVectorToAmount(vertices, amount);
+
+	itk::Vector< double, 3 > translate;
+
+	//ImplantTools::fitEllipse(vertices, currentPlane.getNormalVector(), midPointPlane);
+
+	midPointPlane = ImplantTools::getPolygonCenter(vertices, currentPlane.getNormalVector());
+
+	/*auto vectorTest = vertices;
+	vectorTest.push_back(midPointPlane);
+	ImplantTools::show(knee.GetFemurPoly(), vectorTest);*/
+
+	if (projectedPoints.size() > 0)
+	{
+		midPointPlane = currentPlane.getProjectionPoint(midPointPlane);
+		Point tTemp = myRotation * (midPointPlane.ToMatPoint());
+		translate[0] = -tTemp.x;
+		translate[1] = -tTemp.y;
+		translate[2] = -tTemp.z;
+	}
+	else
+	{
+		translate[0] = 0;
+		translate[1] = 0;
+		translate[2] = 0;
+	}
+
+	itk::Matrix< double, 3, 3 > rotationITK;
+	rotationITK[0][0] = myRotation.at<double>(0, 0);
+	rotationITK[0][1] = myRotation.at<double>(0, 1);
+	rotationITK[0][2] = myRotation.at<double>(0, 2);
+
+	rotationITK[1][0] = myRotation.at<double>(1, 0);
+	rotationITK[1][1] = myRotation.at<double>(1, 1);
+	rotationITK[1][2] = myRotation.at<double>(1, 2);
+
+	rotationITK[2][0] = myRotation.at<double>(2, 0);
+	rotationITK[2][1] = myRotation.at<double>(2, 1);
+	rotationITK[2][2] = myRotation.at<double>(2, 2);
+
+	pTransformOut->SetMatrix(rotationITK);
+	pTransformOut->SetOffset(translate);
+
+	return hull;
+}
+
 
 Plane FemurImplantMatch::finalTransformPlane(const Plane& plane, const itk::Rigid3DTransform<>::Pointer pTransform) const
 {

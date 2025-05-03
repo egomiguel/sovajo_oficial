@@ -1473,7 +1473,7 @@ void MatchEasyPKA()
 	try
 	{
 
-		hull1 = femurImplantMatch.GetHullPoints(transformFemur, transformOut, UKA::IMPLANTS::FemurImplantMatch::KAnteriorAndDistalCurve, 10, 2, 10, 15, 200);
+		hull1 = femurImplantMatch.GetHullPointsOnePlane(transformFemur, transformOut, UKA::IMPLANTS::FemurImplantMatch::KOnePlaneAnteriorAndDistalCurve, 10, 2, 10, 15, 200);
 		//hull1 = tibiaImplantMatch.GetHullPoints(transformTibia, transformOut, 1, 1, 1.0, 0.8);
 		//std::cout << transformOut << std::endl;
 
@@ -4790,7 +4790,7 @@ int main()
 	//std::cout << Point(result) << "; " << proj << std::endl;
 
 	//PolydataInterception();
-	TEST_PKA::MatchPKA();
+	TEST_PKA::MatchPKAThreePlanes();
 	//TEST_PKA_SUEN::testImplants();
 
 	//double pnt[3] = { 0, 0, 0 };
