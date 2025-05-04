@@ -30,6 +30,24 @@ namespace UKA
 
 			FemurImplantInfo getImplantInfo() const;
 
+			virtual Plane getMidPlane() const = 0;
+
+			virtual Plane getDistalPlane() const = 0;
+
+			virtual double getWidthSize() const = 0;
+
+			virtual Point getRodTopPoint() const = 0;
+
+			virtual Point getRodTopPointProjectedOnBase() const = 0;
+
+			virtual Point getRodTopPointProjectedOnBaseExterior() const = 0;
+
+			virtual Point getDirectVectorFemurAxis() const = 0;
+
+			virtual Point getDirectVectorTEA() const = 0;
+
+			virtual Point getDirectVectorAP() const = 0;
+
 		protected:
 			Plane mPosterior;
 			bool isInit;

@@ -49,9 +49,9 @@ namespace UKA
 
 			itk::Vector< double, 3 > GetTranslationMatrix() const;
 
-			std::vector<PointTypeITK> GetHullPointsOnePlane(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneAreaOnePlane id, double distanceSide = 0, double distanceTop = 1.0, double angleLateral = 10, double angleMedial = 15, int amount = 200) const;
+			std::vector<PointTypeITK> GetHullPointsOnePlane(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneAreaOnePlane id, double distanceSide = 0, double distanceTop = 1.0, int amount = 200) const;
 
-			std::vector<PointTypeITK> GetHullPointsThreePlanes(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneAreaThreePlanes id, double distanceSide = 0, double distanceTop = 1.0, double angleLateral = 10, double angleMedial = 15, int amount = 200) const;
+			std::vector<PointTypeITK> GetHullPointsThreePlanes(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneAreaThreePlanes id, double distanceSide = 0, double distanceTop = 1.0, int amount = 200) const;
 
 		private:
 
@@ -60,11 +60,8 @@ namespace UKA
 			cv::Mat rotationMatrix;
 			cv::Mat translationMatrix;
 			bool isInit;
-			void getRotationMatrixOnePlane();
-			bool getTranslationMatrixOnePlane();
-
-			void getRotationMatrixThreePlane();
-			bool getTranslationMatrixThreePlane();
+			void getRotationMatrix();
+			bool getTranslationMatrix();
 
 			Point getPointsOnPlane(const Plane& myPlane, std::vector<Point>& points) const;
 

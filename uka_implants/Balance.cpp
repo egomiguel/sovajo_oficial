@@ -29,7 +29,7 @@ Balance::Balance()
     isInit = false;
 }
 
-void Balance::init(const Knee& pKnee, const FemurImplant& pFemurImplant, const TibiaImplant& pTibiaImplant, const itk::Rigid3DTransform<>::Pointer pImplantToBoneFemurTransform, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTibiaTransform)
+void Balance::init(const Knee& pKnee, FemurImplant* pFemurImplant, const TibiaImplant& pTibiaImplant, const itk::Rigid3DTransform<>::Pointer pImplantToBoneFemurTransform, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTibiaTransform)
 {
     if (isInit == true)
     {
@@ -46,7 +46,7 @@ void Balance::init(const Knee& pKnee, const FemurImplant& pFemurImplant, const T
     mFemurTransformImplantToBone = Rigid3DTransformToCV(pImplantToBoneFemurTransform);
     mTibiaTransformImplantToBone = Rigid3DTransformToCV(pImplantToBoneTibiaTransform);
 
-    femurImplantPoly = pFemurImplant.GetTransformImplantModel(pImplantToBoneFemurTransform);
+    femurImplantPoly = pFemurImplant->GetTransformImplantModel(pImplantToBoneFemurTransform);
 
 	PlaneTibia = TransformImplantPlaneToBone(pTibiaImplant.getTibiaPlane(), pImplantToBoneTibiaTransform);
 	PlaneTibia.reverseByPoint(knee_.getAnkleCenter(), false);
@@ -448,7 +448,7 @@ double Balance::distanceByAngleWithImplant(const PointTypeITK& implantPlateau, b
 
     if (useImplantThickness == true)
     {
-        thickness = femurImplant.getImplantInfo().femurDistalThickness + tibiaImplant.getImplantInfo().tibiaThickness;
+        thickness = femurImplant->getImplantInfo().femurDistalThickness + tibiaImplant.getImplantInfo().tibiaThickness;
     }
 
     double distance = closestPoint(polyImplantFemur, plateau, closest) + thickness;
@@ -758,8 +758,8 @@ itk::Rigid3DTransform<>::Pointer Balance::getNewImplantToBoneFemurTransformCoron
     coronal.reverseByPoint(posteriorPoint);
 
     Point newNormal = coronal.getNormalVector();
-	Point oldNormal = femurImplant.getPosterior().getNormalVector();
-    Point oldPoint = femurImplant.getPosterior().getPoint();
+	Point oldNormal = femurImplant->getPosterior().getNormalVector();
+    Point oldPoint = femurImplant->getPosterior().getPoint();
 
     cv::Mat lastRotation = ImplantTools::GetGeneralRotateTransformVectors(oldNormal, newNormal);
     cv::Mat lastTranslation = coronal.getPoint().ToMatPoint() - lastRotation * (oldPoint.ToMatPoint());

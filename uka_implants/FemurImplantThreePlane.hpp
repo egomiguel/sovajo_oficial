@@ -30,19 +30,17 @@ namespace UKA
 
 			Plane getDistalPlane() const;
 
-			Plane getAnteriorPlane() const;
-
-			Plane getCenterPlane() const;
-
 			double getWidthSize() const;
 
 			Point getRodTopPoint() const;
 
-			Point getRodBasePoint() const;
+			Point getRodTopPointProjectedOnBase() const;
 
-			//Point getRodTopPointProjectedOnBase() const;
+			Point getRodTopPointProjectedOnBaseExterior() const;
 
-			//Point getRodTopPointProjectedOnBaseExterior() const;
+			Plane getAnteriorPlane() const;
+
+			Plane getCenterPlane() const;
 
 			/*std::vector<Point> getSortPointsSide1() const;
 

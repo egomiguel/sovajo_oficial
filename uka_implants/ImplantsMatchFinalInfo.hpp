@@ -4,7 +4,6 @@
 #include "Knee.hpp"
 #include <itkRigid3DTransform.h>
 #include "Point.hpp"
-#include "FemurImplantOnePlane.hpp"
 #include "TibiaImplant.hpp"
 #include "uka_implants_export.h"
 

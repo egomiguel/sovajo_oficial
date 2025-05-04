@@ -47,7 +47,7 @@ namespace UKA
 
 			~Balance();
 
-			void init(const Knee& pKnee, const FemurImplant& pFemurImplant, const TibiaImplant& pTibiaImplant, const itk::Rigid3DTransform<>::Pointer pImplantToBoneFemurTransform, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTibiaTransform);
+			void init(const Knee& pKnee, FemurImplant* pFemurImplant, const TibiaImplant& pTibiaImplant, const itk::Rigid3DTransform<>::Pointer pImplantToBoneFemurTransform, const itk::Rigid3DTransform<>::Pointer pImplantToBoneTibiaTransform);
 
 			void setTransformFemurCtToMarker(const itk::Rigid3DTransform<>::Pointer transform);
 
@@ -92,7 +92,7 @@ namespace UKA
 
 			Knee knee_;
 
-			FemurImplant femurImplant;
+			FemurImplant* femurImplant;
 
 			TibiaImplant tibiaImplant;
 

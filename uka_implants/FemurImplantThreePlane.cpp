@@ -78,22 +78,18 @@ Point FemurImplantThreePlane::getRodTopPoint() const
 	return mRodTopPoint;
 }
 
-Point FemurImplantThreePlane::getRodBasePoint() const
-{
-	return (mRodBasePoint1 + mRodBasePoint2) / 2;
-}
-
-/*
 Point FemurImplantThreePlane::getRodTopPointProjectedOnBase() const
 {
-	return mRodTopPointProjectedOnBase;
+	Line lineTemp = Line::makeLineWithPoints(mRodBasePoint1, mRodBasePoint2);
+	return lineTemp.getProjectPoint(mRodTopPoint);
 }
 
 Point FemurImplantThreePlane::getRodTopPointProjectedOnBaseExterior() const
 {
-	return mRodTopPointProjectedOnBase - mImplantInfo.femurDistalThickness * mDistal.getNormalVector();
+	return getRodTopPointProjectedOnBase() - mImplantInfo.femurDistalThickness * mDistal.getNormalVector();
 }
 
+/*
 std::vector<Point> FemurImplantThreePlane::getSortPointsSide1() const
 {
 	return mSideBorder1;
