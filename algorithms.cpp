@@ -3,6 +3,7 @@
 //#include "Test_TKA_Tibia_Rotation.h"
 #include "test/TestVtk.hpp"
 #include "Test_PKA.h"
+#include "Test_PKA_SUEN.h"
 #include "test/segmentationTest.cpp"
 
 #include "implants/FemurImplantMatch.hpp"
@@ -4790,8 +4791,8 @@ int main()
 	//std::cout << Point(result) << "; " << proj << std::endl;
 
 	//PolydataInterception();
-	TEST_PKA::MatchPKA();
-	//TEST_PKA_SUEN::testImplants();
+	TEST_PKA::MatchPKAThreePlanes();
+	//TEST_PKA_SUEN_NEW::testMatch();
 
 	//double pnt[3] = { 0, 0, 0 };
 	//Plane planeTemp;

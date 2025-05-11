@@ -525,10 +525,72 @@ namespace TEST_PKA
 		femurImplant = NULL;
 	}
 
+
+	UKA::IMPLANTS::Point toPoint(itk::Point<double> &p)
+	{
+		return UKA::IMPLANTS::Point(p[0], p[1], p[2]);
+	}
+
+	UKA::IMPLANTS::Point toPoint(const QJsonValue& val)
+	{
+		auto arr = val.toArray();
+
+		itk::Point<double> p;
+		for (int i = 0; i < 3; i++) {
+			p[i] = arr[i].toDouble();
+		}
+		return UKA::IMPLANTS::Point(p[0], p[1], p[2]);;
+	}
+
+	UKA::IMPLANTS::Plane toPlane(const QJsonValue &val)
+	{
+		auto arr = val.toArray();
+		std::vector<itk::Point<double>> points;
+		for (auto i = 0; i < arr.size(); ++i)
+		{
+			points.push_back(toPoint(arr[i]).ToITKPoint());
+		}
+		double center[3];
+		for (int i = 0; i < 3; ++i)
+		{
+			center[i] = (points[0][i] + points[1][i] + points[2][i] + points[3][i]) / 4;
+		}
+		auto p1 = points[1] - points[0];
+		p1.Normalize();
+		auto p2 = points[1] - points[2];
+		p2.Normalize();
+		itk::Vector<double> normal;
+		vtkMath::Cross(p1.GetDataPointer(), p2.GetDataPointer(), normal.GetDataPointer());
+		UKA::IMPLANTS::Plane plane;
+		plane.init(UKA::IMPLANTS::Point(normal[0], normal[1], normal[2]), UKA::IMPLANTS::Point(center[0], center[1], center[2]));
+		return plane;
+	}
+
+	std::shared_ptr<UKA::IMPLANTS::FemurImplant> createFemurThreeImplant(vtkSmartPointer<vtkPolyData> femurImplantData, const QString &femurImplantPath)
+	{
+		QFile file(femurImplantPath);
+		if (!file.open(QIODevice::ReadOnly))
+		{
+			return nullptr;
+		}
+		QJsonParseError parseError;
+		auto obj = QJsonDocument::fromJson(file.readAll()).object();
+
+
+		UKA::IMPLANTS::FemurImplantInfo info;
+		info.femurDistalThickness = obj["distal_thickness"].toDouble();
+		info.femurPosteriorThickness = obj["posterior_thickness"].toDouble();
+		auto femurImplant = std::make_shared<UKA::IMPLANTS::FemurImplantThreePlane>();
+		femurImplant->init(toPlane(obj["posterior_plane"]), toPlane(obj["center_plane"]),
+			toPlane(obj["anterior_plane"]), toPoint(obj["p1"]), toPoint(obj["p2"]), toPoint(obj["p3"]), femurImplantData, info);
+		return femurImplant;
+	}
+
 	void MatchPKAThreePlanes()
 	{
-		std::string folder = "D:\\sovajo\\Cases_Plan_PKA\\UKA-data_2"; // left
-		UKA::IMPLANTS::Knee myKnee = CreateKneeFromFile_NumbersPKA(folder, UKA::IMPLANTS::KLeft, UKA::IMPLANTS::KMedial);
+		//std::string folder = "D:\\sovajo\\Cases_Plan_PKA\\UKA-data_2"; // left
+		std::string folder = "D:\\sovajo\\Cases_Plan_PKA\\UKA-data"; // right
+		UKA::IMPLANTS::Knee myKnee = CreateKneeFromFile_NumbersPKA(folder, UKA::IMPLANTS::KRight, UKA::IMPLANTS::KLateral);
 
 		UKA::IMPLANTS::FemurImplant* femurImplant = new UKA::IMPLANTS::FemurImplantThreePlane();
 		UKA::IMPLANTS::TibiaImplant tibiaImplant;
@@ -536,16 +598,29 @@ namespace TEST_PKA
 		//////////////////////////////////////////////Implants
 
 		UKA::IMPLANTS::Plane pPosterior, pCenter, pAnterior;
-		UKA::IMPLANTS::Point pRodTopPoint = UKA::IMPLANTS::Point(-29.55, -6.25, 21.69);
+		/*UKA::IMPLANTS::Point pRodTopPoint = UKA::IMPLANTS::Point(-29.55, -6.25, 21.69);
 		UKA::IMPLANTS::Point pRodBaseExtremeSide1 = UKA::IMPLANTS::Point(-38.03, -8.55, 5.91);
 		UKA::IMPLANTS::Point pRodBaseExtremeSide2 = UKA::IMPLANTS::Point(-20.95, -8.52, 5.96);
 
 		pPosterior.init(UKA::IMPLANTS::Point(-29.2892, -18.0309, 27.4683), UKA::IMPLANTS::Point(-23.6379, -18.0308, 19.2064), UKA::IMPLANTS::Point(-34.6305, -18.0303, 20.6091));
 		pCenter.init(UKA::IMPLANTS::Point(-24.5741, -15.8175, 12.3777), UKA::IMPLANTS::Point(-33.6575, -15.7641, 12.3235), UKA::IMPLANTS::Point(-29.2341, -13.4633, 10.0236));
 		pAnterior.init(UKA::IMPLANTS::Point(-24.2632, 1.76137, 5.37675), UKA::IMPLANTS::Point(-30.5815, 2.39802, 5.3786), UKA::IMPLANTS::Point(-28.4761, -3.36245, 5.38769));
+*/
+		UKA::IMPLANTS::Point pRodTopPoint = UKA::IMPLANTS::Point(-34.7, 21.7, -6.7);
+		UKA::IMPLANTS::Point pRodBaseExtremeSide1 = UKA::IMPLANTS::Point(-42.9, 5.9, -8.5);
+		UKA::IMPLANTS::Point pRodBaseExtremeSide2 = UKA::IMPLANTS::Point(-26.0, 6.0, -8.6);
 
-		auto femurModel = ReadPolyDataSTL("D:\\sovajo\\Implants\\pka\\3_planes\\femur_LL_RM.stl");
+		pPosterior.init(UKA::IMPLANTS::Point(-39.3325, 24.2145, -18.0487), UKA::IMPLANTS::Point(-29.68, 23.2605, -18.0496), UKA::IMPLANTS::Point(-39.1445, 17.3601, -18.0491));
+		pCenter.init(UKA::IMPLANTS::Point(-38.1176, 12.5853, -16.0614), UKA::IMPLANTS::Point(-31.2094, 12.7796, -16.2579), UKA::IMPLANTS::Point(-37.8839, 10.2226, -13.6989));
+		pAnterior.init(UKA::IMPLANTS::Point(-34.1404, 5.39091, -3.37154), UKA::IMPLANTS::Point(-30.4084, 5.39085, 2.24808), UKA::IMPLANTS::Point(-36.0448, 5.39103, 2.7041));
+
+
+		//auto femurModel = ReadPolyDataSTL("D:\\sovajo\\Implants\\pka\\3_planes\\femur_LL_RM.stl");
+		auto femurModel = ReadPolyDataSTL("D:\\sovajo\\Implants\\pka\\testImplants\\femur_LM_RL_SZ1.stl");
 		auto tibiaModel = ReadPolyDataSTL("D:\\sovajo\\Cases_Plan_PKA\\UKA-data\\implants\\tibia.STL");
+
+		//QString dir = "D:\\sovajo\\Implants\\pka\\testImplants";
+		//auto femurImplant = createFemurThreeImplant(femurModel, QString("%1\\femur_LM_RL_SZ1_data.json").arg(dir));
 
 		UKA::IMPLANTS::FemurImplantInfo femurInfo;
 		femurInfo.femurDistalThickness = 4.0;
@@ -666,8 +741,8 @@ namespace TEST_PKA
 		polyList3.push_back(newImplantTibia3);
 		show(myKnee.GetTibiaPoly(), polyList3);
 		std::cout << "9999999999999999999999999999999999999999999999999999" << std::endl;
-		delete femurImplant;
-		femurImplant = NULL;
+		//delete femurImplant;
+		//femurImplant = NULL;
 		
 		
 	}

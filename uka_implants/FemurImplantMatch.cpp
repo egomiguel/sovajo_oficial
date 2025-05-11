@@ -860,8 +860,11 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPointsThreePlanes(const itk:
 			centerP1 = midPlane.getProjectionPoint(centerP1);
 			centerP2 = midPlane.getProjectionPoint(centerP2);
 
-			topPoint = currentPlane.getProjectionPoint(knee.getHipCenter());
-			downPoint = currentPlane.getProjectionPoint(knee.getAnkleCenter());
+			Point topTemp = knee.getFemurKneeCenter() + resizeVector * (-knee.getFemurDirectVectorAP() - knee.getDirectVectorFemurAxis());
+			Point downTemp = knee.getFemurKneeCenter() + resizeVector * (knee.getFemurDirectVectorAP() + knee.getDirectVectorFemurAxis());
+
+			topPoint = currentPlane.getProjectionPoint(topTemp);
+			downPoint = currentPlane.getProjectionPoint(downTemp);
 			lateralSide = currentPlane.getProjectionPoint(lateralPoint);
 			medialSide = currentPlane.getProjectionPoint(medialPoint);
 
