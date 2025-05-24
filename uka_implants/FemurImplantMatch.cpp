@@ -9,6 +9,7 @@
 #include "vtkClipClosedSurface.h"
 #include "ImplantTools.hpp"
 #include "FemurImplantOnePlane.hpp"
+#include "FemurImplantTwoPlane.hpp"
 #include "FemurImplantThreePlane.hpp"
 
 using namespace UKA::IMPLANTS;
@@ -972,6 +973,17 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPointsThreePlanes(const itk:
 	return hull;
 }
 
+
+std::vector<PointTypeITK> FemurImplantMatch::GetHullPointsTwoPlanes(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneAreaTwoPlanes id, double distanceSide, double distanceTop, int amount) const
+{
+	std::vector<PointTypeITK> hull;
+	if (!dynamic_cast<FemurImplantTwoPlane*>(this->implantFemur))
+	{
+		return hull;
+	}
+
+	return hull;
+}
 
 Plane FemurImplantMatch::finalTransformPlane(const Plane& plane, const itk::Rigid3DTransform<>::Pointer pTransform) const
 {

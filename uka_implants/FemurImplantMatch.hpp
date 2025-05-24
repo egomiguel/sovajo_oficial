@@ -22,6 +22,12 @@ namespace UKA
 				KOnePlaneAnteriorAndDistalCurve
 			};
 
+			enum BoneAreaTwoPlanes {
+				KTwoPlanePosterior,
+				KTwoPlaneObliquePosterior,
+				KTwoPlaneAnteriorAndDistalCurve
+			};
+
 			enum BoneAreaThreePlanes {
 				KThreePlanePosterior,
 				KThreePlaneCenter,
@@ -52,6 +58,8 @@ namespace UKA
 			std::vector<PointTypeITK> GetHullPointsOnePlane(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneAreaOnePlane id, double distanceSide = 0, double distanceTop = 1.0, int amount = 200) const;
 
 			std::vector<PointTypeITK> GetHullPointsThreePlanes(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneAreaThreePlanes id, double distanceSide = 0, double distanceTop = 1.0, int amount = 200) const;
+
+			std::vector<PointTypeITK> GetHullPointsTwoPlanes(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneAreaTwoPlanes id, double distanceSide = 0, double distanceTop = 1.0, int amount = 200) const;
 
 		private:
 

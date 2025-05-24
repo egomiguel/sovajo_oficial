@@ -1,0 +1,72 @@
+#ifndef FEMUR_IMPLANT_TWO_PLANE_UKA_H
+#define FEMUR_IMPLANT_TWO_PLANE_UKA_H
+
+#include "vtkPolyData.h"
+#include "vtkSmartPointer.h"
+#include <itkRigid3DTransform.h>
+#include "Plane.hpp"
+#include "FemurImplant.hpp"
+#include "uka_implants_export.h"
+#include "Utils.hpp"
+
+namespace UKA
+{
+	namespace IMPLANTS
+	{
+		class UKA_IMPLANTS_EXPORT FemurImplantTwoPlane: public FemurImplant
+		{
+		public:
+			FemurImplantTwoPlane();
+
+			virtual ~FemurImplantTwoPlane() {};
+
+			FemurImplantTwoPlane(const FemurImplantTwoPlane& pImplant);
+
+			void init(const Plane& pPosterior, const Plane& pObliquePosterior, const Point& pRodBasePoint, 
+				      const Point& pRodTopPoint,
+					  const std::vector<Point>& pSortPointsSide1, const std::vector<Point>& pSortPointsSide2, 
+					  const vtkSmartPointer<vtkPolyData> implantModel, const FemurImplantInfo& pImplantInfo);
+
+			Plane getMidPlane() const;
+
+			Plane getDistalPlane() const;
+
+			Plane getObliquePosteriorPlane() const;
+
+			double getWidthSize() const;
+
+			Point getRodTopPoint() const;
+
+			Point getRodBasePoint() const;
+
+			Point getRodTopPointProjectedOnBase() const;
+
+			Point getRodTopPointProjectedOnBaseExterior() const;
+
+			std::vector<Point> getSortPointsSide1() const;
+
+			std::vector<Point> getSortPointsSide2() const;
+
+			std::vector<Point> getAllSidePointsInOrder(double pOffset = 0) const;
+
+			std::vector<Point> getAllSidePointsInOrder(cv::Mat& pRotation, cv::Mat& pTranslation, double pOffset = 0) const;
+
+			Plane getBestPlaneToCurvePoints() const;
+
+			Point getDirectVectorFemurAxis() const;
+
+			Point getDirectVectorTEA() const;
+
+			Point getDirectVectorAP() const;
+
+		private:
+			Plane mDistal, mObliquePosterior;
+			Point mRodBasePoint, mRodTopPoint, mRodTopPointProjectedOnBase;
+			Point mVectorAP, mVectorTEA, mVectorForceLine, mSizeMidVector;
+			std::vector<Point> mSideBorder1, mSideBorder2;
+		};
+
+	}
+}
+
+#endif
