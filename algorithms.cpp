@@ -4791,8 +4791,8 @@ int main()
 	//std::cout << Point(result) << "; " << proj << std::endl;
 
 	//PolydataInterception();
+	//TEST_PKA::MatchPKAThreePlanes();
 	TEST_PKA::MatchPKAThreePlanes();
-	//TEST_PKA_SUEN_NEW::testMatch();
 
 	//double pnt[3] = { 0, 0, 0 };
 	//Plane planeTemp;

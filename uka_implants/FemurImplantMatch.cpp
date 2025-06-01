@@ -649,21 +649,23 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPointsOnePlane(const itk::Ri
 		if (knee.getSurgerySide() == SurgerySideEnum::KLateral && pointsLatTemp.size() > 3)
 		{
 			getCurveLikeU(pointsLatTemp, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
+			midPointPlane = ImplantTools::getPolygonCenter(pointsLatTemp, currentPlane.getNormalVector());
 		}
 		else if (knee.getSurgerySide() == SurgerySideEnum::KMedial && pointsMedTemp.size() > 3)
 		{
 			getCurveLikeU(pointsMedTemp, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
+			midPointPlane = ImplantTools::getPolygonCenter(pointsMedTemp, currentPlane.getNormalVector());
 		}
 		else
 		{
-			getCurveLikeU(pointsLatTemp, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
+			getCurveLikeU(projectedPoints, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
+			midPointPlane = ImplantTools::getPolygonCenter(projectedPoints, currentPlane.getNormalVector());
 		}
 	}
 	else
 	{
 		cv::Mat rotation = Rigid3DTransformToCVRotation(pTransformIn);
 		cv::Mat translation = Rigid3DTransformToCVTranslation(pTransformIn);
-		// No esta actualizado aun en la nube de china
 		vertices = ConvexHull::interpolateSpline(((FemurImplantOnePlane*)implantFemur)->getAllSidePointsInOrder(rotation, translation, distanceSide), amount);
 	}
 
@@ -699,8 +701,6 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPointsOnePlane(const itk::Ri
 	itk::Vector< double, 3 > translate;
 
 	//ImplantTools::fitEllipse(vertices, currentPlane.getNormalVector(), midPointPlane);
-
-	midPointPlane = ImplantTools::getPolygonCenter(vertices, currentPlane.getNormalVector());
 
 	/*auto vectorTest = vertices;
 	vectorTest.push_back(midPointPlane);
@@ -883,14 +883,17 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPointsThreePlanes(const itk:
 		if (knee.getSurgerySide() == SurgerySideEnum::KLateral && pointsLatTemp.size() > 3)
 		{
 			getCurveLikeU(pointsLatTemp, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
+			midPointPlane = ImplantTools::getPolygonCenter(pointsLatTemp, currentPlane.getNormalVector());
 		}
 		else if (knee.getSurgerySide() == SurgerySideEnum::KMedial && pointsMedTemp.size() > 3)
 		{
 			getCurveLikeU(pointsMedTemp, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
+			midPointPlane = ImplantTools::getPolygonCenter(pointsMedTemp, currentPlane.getNormalVector());
 		}
 		else
 		{
-			getCurveLikeU(pointsLatTemp, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
+			getCurveLikeU(projectedPoints, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount);
+			midPointPlane = ImplantTools::getPolygonCenter(projectedPoints, currentPlane.getNormalVector());
 		}
 	}
 	else
@@ -932,8 +935,6 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPointsThreePlanes(const itk:
 	itk::Vector< double, 3 > translate;
 
 	//ImplantTools::fitEllipse(vertices, currentPlane.getNormalVector(), midPointPlane);
-
-	midPointPlane = ImplantTools::getPolygonCenter(vertices, currentPlane.getNormalVector());
 
 	/*auto vectorTest = vertices;
 	vectorTest.push_back(midPointPlane);
