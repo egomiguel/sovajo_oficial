@@ -10,7 +10,7 @@ HipPelvisCupImplantMatch::HipPelvisCupImplantMatch()
     isInit = false;
 }
 
-void HipPelvisCupImplantMatch::init(const HipPelvis& pPelvis, const HipPelvisCupImplant& pImplant, const Point& pHipCenterOfRotation)
+void HipPelvisCupImplantMatch::init(const HipPelvis& pPelvis, const HipPelvisCupImplant& pImplant)
 {
     if (isInit == true)
     {
@@ -19,8 +19,13 @@ void HipPelvisCupImplantMatch::init(const HipPelvis& pPelvis, const HipPelvisCup
 
     this->mPelvis = pPelvis;
     this->mImplant = pImplant;
-    this->mHipCenterOfRotation = pHipCenterOfRotation;
+    this->mHipCenterOfRotation = pPelvis.getHipCenterOfRotation();
     isInit = true;
+}
+
+void HipPelvisCupImplantMatch::setPelvisTiltAngle(double pTiltAngle)
+{
+	mPelvis.setCoronalTiltAngle(pTiltAngle);
 }
 
 //itk::Matrix< double, 3, 3 > HipPelvisCupImplantMatch::GetRotationMatrix() const

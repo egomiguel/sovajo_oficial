@@ -16,13 +16,15 @@ namespace THA
 		class THA_IMPLANTS_EXPORT HipPelvisImplantsMatchInfo
 		{
 		public:
-			HipPelvisImplantsMatchInfo(const HipPelvis& pPelvis, const Point& pHipCenterOfRotation, const HipPelvisCupImplant& pImplantCup, 
+			HipPelvisImplantsMatchInfo(const HipPelvis& pPelvis, const HipPelvisCupImplant& pImplantCup, 
 				const HipFemurStemImplant& pImplantStem, const HipFemurStemHeadImplant& pImplantStemHead,
 				const itk::Rigid3DTransform<>::Pointer pImplantToBoneCupTransform, 
 				const itk::Rigid3DTransform<>::Pointer pImplantToBoneStemTransform,
 				const itk::Rigid3DTransform<>::Pointer pImplantHeadToStemTransform);
 			
 			~HipPelvisImplantsMatchInfo();
+
+			void setPelvisTiltAngle(double pTiltAngle);
 
 			void setCupTransform(const itk::Rigid3DTransform<>::Pointer pImplantToBoneCupTransform);
 

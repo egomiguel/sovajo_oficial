@@ -3382,14 +3382,14 @@ void PelvisImplantMatch()
 						THA::IMPLANTS::Point(102.612, 40.8368, 1653.34), THA::IMPLANTS::Point(115.105, 42.1657, 1491.97));
 
 	THA::IMPLANTS::HipPelvis objPelvis;
-	objPelvis.init(pLeftASIS, pRightASIS, pLeftPubicTubercle, pRightPubicTubercle, pelvis3D_Real, pFemur, pFemurOppside, THA::IMPLANTS::PelvisSide::RIGHT_SIDE);
+	objPelvis.init(pLeftASIS, pRightASIS, pLeftPubicTubercle, pRightPubicTubercle, pelvis3D_Real, pFemur, pFemurOppside, THA::IMPLANTS::PelvisSide::RIGHT_SIDE, centerOfRotation);
 
 	THA::IMPLANTS::HipPelvisCupImplant objImplant;
 	std::vector<THA::IMPLANTS::Point> pExternalPoints;
 	objImplant.init(implantTop, implantCup1, implantCup2, implantCup3, pExternalPoints);
 
 	THA::IMPLANTS::HipPelvisCupImplantMatch objMatch;
-	objMatch.init(objPelvis, objImplant, centerOfRotation);
+	objMatch.init(objPelvis, objImplant);
 
 	itk::Rigid3DTransform<>::Pointer transformMatch = objMatch.getTransform(50, 30, 1, 1, 1);
 
@@ -3418,12 +3418,12 @@ void PelvisImplantMatch()
 		THA::IMPLANTS::Point(-7.91941, -8.3649, -10.6989), THA::IMPLANTS::Point(-21.7549, 4.16821, -1.64382), head_sphere);
 	
 	THA::IMPLANTS::HipFemurStemImplantMatch stemMatch;
-	stemMatch.init(objPelvis, pImplantStem, centerOfRotation);
+	stemMatch.init(objPelvis, pImplantStem);
 
 	THA::IMPLANTS::HipFemurStemHeadImplantMatch stemHeadMatch;
 	stemHeadMatch.init(pImplantHead, pImplantStem);
 
-	auto pelvisInfo = THA::IMPLANTS::HipPelvisImplantsMatchInfo(objPelvis, centerOfRotation, objImplant, pImplantStem, pImplantHead,
+	auto pelvisInfo = THA::IMPLANTS::HipPelvisImplantsMatchInfo(objPelvis, objImplant, pImplantStem, pImplantHead,
 																transformMatch, stemMatch.getStemTransform(), 
 																stemHeadMatch.getStemHeadTransform());
 

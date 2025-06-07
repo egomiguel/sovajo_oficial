@@ -21,7 +21,7 @@ HipPelvis::HipPelvis()
 
 
 void HipPelvis::init(const Point& pLeftASIS, const Point& pRightASIS, const Point& pLeftPubicTubercle, const Point& pRightPubicTubercle, const vtkSmartPointer<vtkPolyData>& pPelvis,
-	const HipFemur& pFemur, const HipFemurOppside& pFemurOppside, PelvisSide pSide)
+	const HipFemur& pFemur, const HipFemurOppside& pFemurOppside, PelvisSide pSide, Point pHipCenterOfRotation)
 {
     if (isInit == true)
     {
@@ -59,7 +59,20 @@ void HipPelvis::init(const Point& pLeftASIS, const Point& pRightASIS, const Poin
 	mImplicitPelvisDistance = vtkSmartPointer<vtkImplicitPolyDataDistance>::New();
 	mImplicitPelvisDistance->SetInput(pPelvis);
 
+	coronalTiltAngle = 0;
+	mHipCenterOfRotation = pHipCenterOfRotation;
+
     isInit = true;
+}
+
+void HipPelvis::setHipCenterOfRotation(Point pHipCenterOfRotation)
+{
+	mHipCenterOfRotation = pHipCenterOfRotation;
+}
+
+Point HipPelvis::getHipCenterOfRotation() const
+{
+	return mHipCenterOfRotation;
 }
 
 //Point HipPelvis::getMidASIS() const
@@ -91,12 +104,62 @@ Point HipPelvis::getPelvisVectorASIS() const
 
 Point HipPelvis::getPelvisVectorAP() const
 {
-    return mPlaneAPP.getNormalVector();
+    return getCoronalPlaneAPP().getNormalVector();
 }
 
 Plane HipPelvis::getCoronalPlaneAPP() const
 {
-	return mPlaneAPP;
+	if (coronalTiltAngle == 0)
+	{
+		return mPlaneAPP;
+	}
+
+	cv::Mat rotation = ImplantTools::getRotateMatrix(getPelvisVectorASIS(), -coronalTiltAngle);
+	cv::Mat rotVector = rotation * mPlaneAPP.getNormalVectorMat();
+	Plane tiltPlane;
+	tiltPlane.init(Point(rotVector), mPubicJoin);
+	return tiltPlane;
+}
+
+double HipPelvis::getTiltCoronalAngle(const Plane& pCoronalCT) const
+{
+	Plane coronalCT, sagital;
+	coronalCT.init(pCoronalCT.getNormalVector(), getPubicJoin());
+	Point rightPoint = coronalCT.getProjectionPoint(mRightASIS);
+	Point leftPoint = coronalCT.getProjectionPoint(mLeftASIS);
+
+	Point vector1 = rightPoint - leftPoint;
+	Point vector2 = mPubicJoin - leftPoint;
+	Point normalRef = vector1.cross(vector2);
+
+	coronalCT.reverseByNormal(normalRef);
+	sagital.init(getPelvisVectorASIS(), getPubicJoin());
+	Point coronalApVectorOnSagital = sagital.getProjectionVector(coronalCT.getNormalVector());
+	coronalApVectorOnSagital.normalice();
+	
+	double angle = ImplantTools::getAngleBetweenVectors(mPlaneAPP.getNormalVector(), coronalApVectorOnSagital);
+
+	if (angle == 0)
+	{
+		return angle;
+	}
+
+	Point crossVector = coronalApVectorOnSagital.cross(mPlaneAPP.getNormalVector());
+	crossVector.normalice();
+
+	if (crossVector.dot(getPelvisVectorASIS()) >= 0)
+	{
+		return angle;
+	}
+	else
+	{
+		return -angle;
+	}
+}
+
+void HipPelvis::setCoronalTiltAngle(double pTiltAngle)
+{
+	coronalTiltAngle = pTiltAngle;
 }
 
 Point HipPelvis::getPelvisVectorInfSup() const

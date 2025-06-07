@@ -15,7 +15,9 @@ namespace THA
 		public:
 			HipPelvisCupImplantMatch();
 
-			void init(const HipPelvis& pPelvis, const HipPelvisCupImplant& pImplant, const Point& pHipCenterOfRotation);
+			void init(const HipPelvis& pPelvis, const HipPelvisCupImplant& pImplant);
+
+			void setPelvisTiltAngle(double pTiltAngle);
 
 			itk::Rigid3DTransform<>::Pointer getTransform(double pAbductionAngle = 40, double pAnteversionAngle = 20, double pShifSuperior = 0, double pShifLateral = 0, double pShiftAnterior = 0) const;
 

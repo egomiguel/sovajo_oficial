@@ -15,7 +15,7 @@ namespace THA
 		public:
 			HipFemurStemImplantMatch();
 
-			void init(const HipPelvis& pPelvis, const HipFemurStemImplant& pImplant, const Point& pHipCenterOfRotation);
+			void init(const HipPelvis& pPelvis, const HipFemurStemImplant& pImplant);
 
 			itk::Matrix< double, 3, 3 > GetRotationMatrix() const;
 

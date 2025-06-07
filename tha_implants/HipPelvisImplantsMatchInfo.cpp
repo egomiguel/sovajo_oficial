@@ -9,7 +9,7 @@
 
 using namespace THA::IMPLANTS;
 
-HipPelvisImplantsMatchInfo::HipPelvisImplantsMatchInfo(const HipPelvis& pPelvis, const Point& pHipCenterOfRotation, const HipPelvisCupImplant& pImplantCup,
+HipPelvisImplantsMatchInfo::HipPelvisImplantsMatchInfo(const HipPelvis& pPelvis, const HipPelvisCupImplant& pImplantCup,
 	const HipFemurStemImplant& pImplantStem, const HipFemurStemHeadImplant& pImplantStemHead,
 	const itk::Rigid3DTransform<>::Pointer pImplantToBoneCupTransform,
 	const itk::Rigid3DTransform<>::Pointer pImplantToBoneStemTransform,
@@ -17,7 +17,7 @@ HipPelvisImplantsMatchInfo::HipPelvisImplantsMatchInfo(const HipPelvis& pPelvis,
 {
 	this->mPelvis = pPelvis;
 	this->mImplantCup = pImplantCup;
-	this->mHipCenterOfRotation = pHipCenterOfRotation;
+	this->mHipCenterOfRotation = pPelvis.getHipCenterOfRotation();
 	this->mImplantStem = pImplantStem;
 	this->mImplantStemHead = pImplantStemHead;
 	setStemTransform(pImplantToBoneStemTransform);
@@ -27,6 +27,11 @@ HipPelvisImplantsMatchInfo::HipPelvisImplantsMatchInfo(const HipPelvis& pPelvis,
 
 HipPelvisImplantsMatchInfo::~HipPelvisImplantsMatchInfo()
 {
+}
+
+void HipPelvisImplantsMatchInfo::setPelvisTiltAngle(double pTiltAngle)
+{
+	mPelvis.setCoronalTiltAngle(pTiltAngle);
 }
 
 void HipPelvisImplantsMatchInfo::setCupTransform(const itk::Rigid3DTransform<>::Pointer pImplantToBoneStemTransform)

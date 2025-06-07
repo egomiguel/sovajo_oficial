@@ -10,7 +10,7 @@ HipFemurStemImplantMatch::HipFemurStemImplantMatch()
     isInit = false;
 }
 
-void HipFemurStemImplantMatch::init(const HipPelvis& pPelvis, const HipFemurStemImplant& pImplant, const Point& pHipCenterOfRotation)
+void HipFemurStemImplantMatch::init(const HipPelvis& pPelvis, const HipFemurStemImplant& pImplant)
 {
     if (isInit == true)
     {
@@ -19,7 +19,7 @@ void HipFemurStemImplantMatch::init(const HipPelvis& pPelvis, const HipFemurStem
 
     this->mPelvis = pPelvis;
     this->mImplant = pImplant;
-    this->mHipCenterOfRotation = pHipCenterOfRotation;
+    this->mHipCenterOfRotation = pPelvis.getHipCenterOfRotation();
     getRigidTransform();
     isInit = true;
 }
