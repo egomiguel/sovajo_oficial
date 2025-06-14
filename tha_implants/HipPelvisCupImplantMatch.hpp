@@ -17,9 +17,7 @@ namespace THA
 
 			void init(const HipPelvis& pPelvis, const HipPelvisCupImplant& pImplant);
 
-			void setPelvisTiltAngle(double pTiltAngle);
-
-			itk::Rigid3DTransform<>::Pointer getTransform(double pAbductionAngle = 40, double pAnteversionAngle = 20, double pShifSuperior = 0, double pShifLateral = 0, double pShiftAnterior = 0) const;
+			itk::Rigid3DTransform<>::Pointer getTransform(double pAbductionAngle = 40, double pAnteversionAngle = 20, double pShifSuperior = 0, double pShifLateral = 0, double pShiftAnterior = 0, double pTiltAngle = 0) const;
 
 			void GetRobotTransform(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut) const;
 

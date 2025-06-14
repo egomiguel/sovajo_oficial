@@ -20,14 +20,18 @@ namespace THA
 		public:
 			HipPelvis();
 			void init(const Point& pLeftASIS, const Point& pRightASIS, const Point& pLeftPubicTubercle, const Point& pRightPubicTubercle, const vtkSmartPointer<vtkPolyData>& pPelvis,
-					  const HipFemur& pFemur, const HipFemurOppside& pFemurOppside, PelvisSide pSide, Point pHipCenterOfRotation);
+					  const HipFemur& pFemur, const HipFemurOppside& pFemurOppside, PelvisSide pSide, const Point& pHipCenterOfRotation);
 
 			/*
 				The coronal tilt angle is 0 by default. You can change it.
 			*/
 			void setCoronalTiltAngle(double pTiltAngle);
-			void setHipCenterOfRotation(Point pHipCenterOfRotation);
+			double getCoronalTiltAngle() const;
+			double getCoronalTiltAngle(const Plane& pCoronalCT) const;
+
+			void setHipCenterOfRotation(const Point& pHipCenterOfRotation);
 			Point getHipCenterOfRotation() const;
+			HipPelvis getHipPelvisCopy(double pTiltAngle = 0) const;
 			//Point getMidASIS() const;
 			Point getRightASIS() const;
 			Point getLeftASIS() const;
@@ -38,7 +42,6 @@ namespace THA
 			Point getPelvisVectorInfSup() const;
 
 			Plane getCoronalPlaneAPP() const;
-			double getTiltCoronalAngle(const Plane& pCoronalCT) const;
 			cv::Mat getFemurMechanicalAlignmentRotation() const;
 			cv::Mat getFemurMechanicalAlignmentRotation(const Point& pCupCenter, const Point& pTranslation) const;
 			cv::Mat getFemurMechanicalAlignmentRotationOppsite() const;
