@@ -20,14 +20,13 @@ namespace THA
 		public:
 			HipPelvis();
 			void init(const Point& pLeftASIS, const Point& pRightASIS, const Point& pLeftPubicTubercle, const Point& pRightPubicTubercle, const vtkSmartPointer<vtkPolyData>& pPelvis,
-					  const HipFemur& pFemur, const HipFemurOppside& pFemurOppside, PelvisSide pSide, const Point& pHipCenterOfRotation);
+					  const HipFemur& pFemur, const HipFemurOppside& pFemurOppside, PelvisSide pSide, const Point& pHipCenterOfRotation, const Plane& pCoronalCT);
 
 			/*
 				The coronal tilt angle is 0 by default. You can change it.
 			*/
 			void setCoronalTiltAngle(double pTiltAngle);
 			double getCoronalTiltAngle() const;
-			double getCoronalTiltAngle(const Plane& pCoronalCT) const;
 
 			void setHipCenterOfRotation(const Point& pHipCenterOfRotation);
 			Point getHipCenterOfRotation() const;
@@ -104,6 +103,8 @@ namespace THA
 			bool isInit;
 			double coronalTiltAngle;
 			Point mHipCenterOfRotation;
+
+			double getCoronalTiltAngle(const Plane& pCoronalCT) const;
 		};
 	}
 }

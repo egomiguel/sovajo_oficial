@@ -24,6 +24,8 @@ namespace THA
 			
 			~HipPelvisImplantsMatchInfo();
 
+			void setPelvisTiltAngle(double pTiltAngle);
+
 			void setCupTransform(const itk::Rigid3DTransform<>::Pointer pImplantToBoneCupTransform);
 
 			void setStemTransform(const itk::Rigid3DTransform<>::Pointer pImplantToBoneStemTransform);
@@ -32,7 +34,7 @@ namespace THA
 
 			itk::Rigid3DTransform<>::Pointer setStemVersionAngle(double pStemVersionAngleDegree);
 
-			itk::Rigid3DTransform<>::Pointer setCupAngles(double pAbductionAngle, double pAnteversionAngle, double pTiltAngle = 0);
+			itk::Rigid3DTransform<>::Pointer setCupAngles(double pAbductionAngle, double pAnteversionAngle);
 
 			itk::Vector< double, 3 > setCupTranslation(double pShifSuperior, double pShifLateral, double pShiftAnterior);
 
@@ -46,9 +48,9 @@ namespace THA
 
 			itk::Vector< double, 3 > matchStemToCupRotationCenter();
 
-			double getCupInclination(double pTiltAngle = 0) const;
+			double getCupInclination() const;
 
-			double getCupAntversion(double pTiltAngle = 0) const;
+			double getCupAntversion() const;
 
 			double getCupShiftSuperior() const;
 
@@ -56,9 +58,9 @@ namespace THA
 
 			double getCupShiftAnterior() const;
 
-			double getCupInclination(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform, double pTiltAngle = 0) const;
+			double getCupInclination(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
 
-			double getCupAntversion(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform, double pTiltAngle = 0) const;
+			double getCupAntversion(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
 
 			double getCupShiftSuperior(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
 
@@ -66,9 +68,9 @@ namespace THA
 
 			double getCupShiftAnterior(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
 
-			double getCupInclination(const Point& pVectorToHipCenter, double pTiltAngle = 0) const;
+			double getCupInclination(const Point& pVectorToHipCenter) const;
 
-			double getCupAntversion(const Point& pVectorToHipCenter, double pTiltAngle = 0) const;
+			double getCupAntversion(const Point& pVectorToHipCenter) const;
 
 			double getCupShiftSuperior(const Point& pCenterOfRotation) const;
 

@@ -21,7 +21,7 @@ HipPelvis::HipPelvis()
 
 
 void HipPelvis::init(const Point& pLeftASIS, const Point& pRightASIS, const Point& pLeftPubicTubercle, const Point& pRightPubicTubercle, const vtkSmartPointer<vtkPolyData>& pPelvis,
-	const HipFemur& pFemur, const HipFemurOppside& pFemurOppside, PelvisSide pSide, const Point& pHipCenterOfRotation)
+	const HipFemur& pFemur, const HipFemurOppside& pFemurOppside, PelvisSide pSide, const Point& pHipCenterOfRotation, const Plane& pCoronalCT)
 {
     if (isInit == true)
     {
@@ -59,8 +59,9 @@ void HipPelvis::init(const Point& pLeftASIS, const Point& pRightASIS, const Poin
 	mImplicitPelvisDistance = vtkSmartPointer<vtkImplicitPolyDataDistance>::New();
 	mImplicitPelvisDistance->SetInput(pPelvis);
 
-	coronalTiltAngle = 0;
 	mHipCenterOfRotation = pHipCenterOfRotation;
+
+	coronalTiltAngle = getCoronalTiltAngle(pCoronalCT);
 
     isInit = true;
 }
@@ -130,6 +131,11 @@ Plane HipPelvis::getCoronalPlaneAPP() const
 
 double HipPelvis::getCoronalTiltAngle(const Plane& pCoronalCT) const
 {
+	if (pCoronalCT.getIsInit() == false)
+	{
+		return 0;
+	}
+
 	Plane coronalCT, sagital;
 	coronalCT.init(pCoronalCT.getNormalVector(), getPubicJoin());
 	Point rightPoint = coronalCT.getProjectionPoint(mRightASIS);

@@ -29,6 +29,11 @@ HipPelvisImplantsMatchInfo::~HipPelvisImplantsMatchInfo()
 {
 }
 
+void HipPelvisImplantsMatchInfo::setPelvisTiltAngle(double pTiltAngle)
+{
+	this->mPelvis.setCoronalTiltAngle(pTiltAngle);
+}
+
 void HipPelvisImplantsMatchInfo::setCupTransform(const itk::Rigid3DTransform<>::Pointer pImplantToBoneStemTransform)
 {
 	mRotationCup = Rigid3DTransformToCVRotation(pImplantToBoneStemTransform);
@@ -95,12 +100,12 @@ cv::Mat HipPelvisImplantsMatchInfo::Rigid3DTransformToCVTranslation(const itk::R
 	return result;
 }
 
-double HipPelvisImplantsMatchInfo::getCupInclination(double pTiltAngle) const
+double HipPelvisImplantsMatchInfo::getCupInclination() const
 {
-	auto pelvisTemp = mPelvis.getHipPelvisCopy(pTiltAngle);
+	//auto pelvisTemp = mPelvis.getHipPelvisCopy(pTiltAngle);
 
-	Point rotationAxis = pelvisTemp.getPelvisVectorAP();
-	Point referenceVector = pelvisTemp.getPelvisVectorInfSup();
+	Point rotationAxis = mPelvis.getPelvisVectorAP();
+	Point referenceVector = mPelvis.getPelvisVectorInfSup();
 
 	cv::Mat implantVectorMat = mRotationCup * mImplantCup.getVectorZ().ToMatPoint();
 	Point implantVector = Point(implantVectorMat);
@@ -117,8 +122,8 @@ double HipPelvisImplantsMatchInfo::getCupInclination(double pTiltAngle) const
 	double angle = ImplantTools::getAngleBetweenVectorsDegree(vectorImplantProj, vectorBoneProj);
 
 	Plane sagital;
-	Point ref = pelvisTemp.getPubicJoin();
-	sagital.init(pelvisTemp.getPelvisVectorLateralASIS(), ref);
+	Point ref = mPelvis.getPubicJoin();
+	sagital.init(mPelvis.getPelvisVectorLateralASIS(), ref);
 	sagital.reverseByPoint(mHipCenterOfRotation, false);
 
 	ref = ref + 1000. * vectorImplantProj;
@@ -133,24 +138,24 @@ double HipPelvisImplantsMatchInfo::getCupInclination(double pTiltAngle) const
 	}
 }
 
-double HipPelvisImplantsMatchInfo::getCupAntversion(double pTiltAngle) const
+double HipPelvisImplantsMatchInfo::getCupAntversion() const
 {
-	auto pelvisTemp = mPelvis.getHipPelvisCopy(pTiltAngle);
+	//auto pelvisTemp = mPelvis.getHipPelvisCopy(pTiltAngle);
 
 	cv::Mat implantVectorMat = mRotationCup * mImplantCup.getVectorZ().ToMatPoint();
 	Point implantVector = Point(implantVectorMat);
 	implantVector.normalice();
 
-	Point refPoint = pelvisTemp.getCoronalPlaneAPP().getProjectionPoint(pelvisTemp.getPubicJoin());
+	Point refPoint = mPelvis.getCoronalPlaneAPP().getProjectionPoint(mPelvis.getPubicJoin());
 
-	Point pelvisVectorAP = pelvisTemp.getPelvisVectorAP();
+	Point pelvisVectorAP = mPelvis.getPelvisVectorAP();
 
 	/*
 		The plane formed by the normal of the implant and the AP vector of the pelvis is used.
 		The anteversion rotation occurs in that plane, therefore in that plane the angle is sought
 	*/
 
-	Point interceptionVector = pelvisTemp.getCoronalPlaneAPP().getInterceptionPlaneVector(implantVector, pelvisVectorAP);
+	Point interceptionVector = mPelvis.getCoronalPlaneAPP().getInterceptionPlaneVector(implantVector, pelvisVectorAP);
 	interceptionVector.normalice();
 
 	double angle1 = ImplantTools::getAngleBetweenVectorsDegree(interceptionVector, implantVector);
@@ -159,7 +164,7 @@ double HipPelvisImplantsMatchInfo::getCupAntversion(double pTiltAngle) const
 
 	refPoint = refPoint + 1000. * implantVector;
 
-	if (pelvisTemp.getCoronalPlaneAPP().eval(refPoint) < 0)
+	if (mPelvis.getCoronalPlaneAPP().eval(refPoint) < 0)
 	{
 		return angle;
 	}
@@ -238,12 +243,12 @@ double HipPelvisImplantsMatchInfo::getCupShiftAnterior() const
 	}
 }
 
-double HipPelvisImplantsMatchInfo::getCupInclination(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform, double pTiltAngle) const
+double HipPelvisImplantsMatchInfo::getCupInclination(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const
 {
-	auto pelvisTemp = mPelvis.getHipPelvisCopy(pTiltAngle);
+	//auto pelvisTemp = mPelvis.getHipPelvisCopy(pTiltAngle);
 
-	Point rotationAxis = pelvisTemp.getPelvisVectorAP();
-	Point referenceVector = pelvisTemp.getPelvisVectorInfSup();
+	Point rotationAxis = mPelvis.getPelvisVectorAP();
+	Point referenceVector = mPelvis.getPelvisVectorInfSup();
 
 	/*
 		This vectorX represent the vector perpendicular to the base of the cup, 
@@ -266,8 +271,8 @@ double HipPelvisImplantsMatchInfo::getCupInclination(const itk::Rigid3DTransform
 	double angle = ImplantTools::getAngleBetweenVectorsDegree(vectorImplantProj, vectorBoneProj);
 
 	Plane sagital;
-	Point ref = pelvisTemp.getPubicJoin();
-	sagital.init(pelvisTemp.getPelvisVectorLateralASIS(), ref);
+	Point ref = mPelvis.getPubicJoin();
+	sagital.init(mPelvis.getPelvisVectorLateralASIS(), ref);
 	sagital.reverseByPoint(mHipCenterOfRotation, false);
 
 	ref = ref + 1000. * vectorImplantProj;
@@ -282,7 +287,7 @@ double HipPelvisImplantsMatchInfo::getCupInclination(const itk::Rigid3DTransform
 	}
 }
 
-double HipPelvisImplantsMatchInfo::getCupAntversion(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform, double pTiltAngle) const
+double HipPelvisImplantsMatchInfo::getCupAntversion(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const
 {
 	/*
 		This vectorX represent the vector perpendicular to the base of the cup,
@@ -290,22 +295,22 @@ double HipPelvisImplantsMatchInfo::getCupAntversion(const itk::Rigid3DTransform<
 		hence the change in sign. This transform is that of the robot when it uses the reamer.
 	*/
 
-	auto pelvisTemp = mPelvis.getHipPelvisCopy(pTiltAngle);
+	//auto pelvisTemp = mPelvis.getHipPelvisCopy(pTiltAngle);
 
 	auto vectorX = pImplantToBoneTransform->GetMatrix().GetVnlMatrix().get_column(0);
 	Point implantVectorZ = -Point(vectorX[0], vectorX[1], vectorX[2]);
 	implantVectorZ.normalice();
 
-	Point refPoint = pelvisTemp.getCoronalPlaneAPP().getProjectionPoint(pelvisTemp.getPubicJoin());
+	Point refPoint = mPelvis.getCoronalPlaneAPP().getProjectionPoint(mPelvis.getPubicJoin());
 
-	Point pelvisVectorAP = pelvisTemp.getPelvisVectorAP();
+	Point pelvisVectorAP = mPelvis.getPelvisVectorAP();
 
 	/*
 		The plane formed by the normal of the implant and the AP vector of the pelvis is used.
 		The anteversion rotation occurs in that plane, therefore in that plane the angle is sought
 	*/
 
-	Point interceptionVector = pelvisTemp.getCoronalPlaneAPP().getInterceptionPlaneVector(implantVectorZ, pelvisVectorAP);
+	Point interceptionVector = mPelvis.getCoronalPlaneAPP().getInterceptionPlaneVector(implantVectorZ, pelvisVectorAP);
 	interceptionVector.normalice();
 
 	double angle1 = ImplantTools::getAngleBetweenVectorsDegree(interceptionVector, implantVectorZ);
@@ -314,7 +319,7 @@ double HipPelvisImplantsMatchInfo::getCupAntversion(const itk::Rigid3DTransform<
 
 	refPoint = refPoint + 1000. * implantVectorZ;
 
-	if (pelvisTemp.getCoronalPlaneAPP().eval(refPoint) < 0)
+	if (mPelvis.getCoronalPlaneAPP().eval(refPoint) < 0)
 	{
 		return angle;
 	}
@@ -393,12 +398,12 @@ double HipPelvisImplantsMatchInfo::getCupShiftAnterior(const itk::Rigid3DTransfo
 	}
 }
 
-double HipPelvisImplantsMatchInfo::getCupInclination(const Point& pVectorToHipCenter, double pTiltAngle) const
+double HipPelvisImplantsMatchInfo::getCupInclination(const Point& pVectorToHipCenter) const
 {
-	auto pelvisTemp = mPelvis.getHipPelvisCopy(pTiltAngle);
+	//auto pelvisTemp = mPelvis.getHipPelvisCopy(pTiltAngle);
 
-	Point rotationAxis = pelvisTemp.getPelvisVectorAP();
-	Point referenceVector = pelvisTemp.getPelvisVectorInfSup();
+	Point rotationAxis = mPelvis.getPelvisVectorAP();
+	Point referenceVector = mPelvis.getPelvisVectorInfSup();
 
 	Point implantVector = pVectorToHipCenter;
 	implantVector.normalice();
@@ -414,8 +419,8 @@ double HipPelvisImplantsMatchInfo::getCupInclination(const Point& pVectorToHipCe
 	double angle = ImplantTools::getAngleBetweenVectorsDegree(vectorImplantProj, vectorBoneProj);
 
 	Plane sagital;
-	Point ref = pelvisTemp.getPubicJoin();
-	sagital.init(pelvisTemp.getPelvisVectorLateralASIS(), ref);
+	Point ref = mPelvis.getPubicJoin();
+	sagital.init(mPelvis.getPelvisVectorLateralASIS(), ref);
 	sagital.reverseByPoint(mHipCenterOfRotation, false);
 
 	ref = ref + 1000. * vectorImplantProj;
@@ -430,23 +435,23 @@ double HipPelvisImplantsMatchInfo::getCupInclination(const Point& pVectorToHipCe
 	}
 }
 
-double HipPelvisImplantsMatchInfo::getCupAntversion(const Point& pVectorToHipCenter, double pTiltAngle) const
+double HipPelvisImplantsMatchInfo::getCupAntversion(const Point& pVectorToHipCenter) const
 {
-	auto pelvisTemp = mPelvis.getHipPelvisCopy(pTiltAngle);
+	//auto pelvisTemp = mPelvis.getHipPelvisCopy(pTiltAngle);
 
 	Point implantVector = pVectorToHipCenter;
 	implantVector.normalice();
 
-	Point refPoint = pelvisTemp.getCoronalPlaneAPP().getProjectionPoint(pelvisTemp.getPubicJoin());
+	Point refPoint = mPelvis.getCoronalPlaneAPP().getProjectionPoint(mPelvis.getPubicJoin());
 
-	Point pelvisVectorAP = pelvisTemp.getPelvisVectorAP();
+	Point pelvisVectorAP = mPelvis.getPelvisVectorAP();
 
 	/*
 		The plane formed by the normal of the implant and the AP vector of the pelvis is used.
 		The anteversion rotation occurs in that plane, therefore in that plane the angle is sought
 	*/
 
-	Point interceptionVector = pelvisTemp.getCoronalPlaneAPP().getInterceptionPlaneVector(implantVector, pelvisVectorAP);
+	Point interceptionVector = mPelvis.getCoronalPlaneAPP().getInterceptionPlaneVector(implantVector, pelvisVectorAP);
 	interceptionVector.normalice();
 
 	double angle1 = ImplantTools::getAngleBetweenVectorsDegree(interceptionVector, implantVector);
@@ -455,7 +460,7 @@ double HipPelvisImplantsMatchInfo::getCupAntversion(const Point& pVectorToHipCen
 
 	refPoint = refPoint + 1000. * implantVector;
 
-	if (pelvisTemp.getCoronalPlaneAPP().eval(refPoint) < 0)
+	if (mPelvis.getCoronalPlaneAPP().eval(refPoint) < 0)
 	{
 		return angle;
 	}
@@ -975,9 +980,9 @@ double HipPelvisImplantsMatchInfo::getCoverageFraction() const
 	return 0;
 }
 
-itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::setCupAngles(double pAbductionAngle, double pAnteversionAngle, double pTiltAngle)
+itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::setCupAngles(double pAbductionAngle, double pAnteversionAngle)
 {
-	auto pelvisTemp = mPelvis.getHipPelvisCopy(pTiltAngle);
+	//auto pelvisTemp = mPelvis.getHipPelvisCopy(pTiltAngle);
 
 	std::vector<cv::Point3d> implantVectors;
 	std::vector<cv::Point3d> pelvisVectors;
@@ -991,7 +996,7 @@ itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::setCupAngles(double
 	implantVectors.push_back(implantZ.ToCVPoint());
 	implantVectors.push_back(implantY.ToCVPoint());
 
-	auto abdAnt = pelvisTemp.getAbductionAnteversionVectorsZX(mHipCenterOfRotation, pAbductionAngle, pAnteversionAngle);
+	auto abdAnt = mPelvis.getAbductionAnteversionVectorsZX(mHipCenterOfRotation, pAbductionAngle, pAnteversionAngle);
 
 	Point pelvisX = abdAnt.second;
 	Point pelvisZ = abdAnt.first;

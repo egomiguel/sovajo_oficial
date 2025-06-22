@@ -54,7 +54,7 @@ void HipPelvisCupImplantMatch::init(const HipPelvis& pPelvis, const HipPelvisCup
 //    return translation;
 //}
 
-itk::Rigid3DTransform<>::Pointer HipPelvisCupImplantMatch::getTransform(double pAbductionAngle, double pAnteversionAngle, double pShifSuperior, double pShifLateral, double pShiftAnterior, double pTiltAngle) const
+itk::Rigid3DTransform<>::Pointer HipPelvisCupImplantMatch::getTransform(double pAbductionAngle, double pAnteversionAngle, double pShifSuperior, double pShifLateral, double pShiftAnterior) const
 {
     std::vector<cv::Point3d> implantVectors;
     std::vector<cv::Point3d> pelvisVectors;
@@ -68,9 +68,9 @@ itk::Rigid3DTransform<>::Pointer HipPelvisCupImplantMatch::getTransform(double p
     implantVectors.push_back(implantZ.ToCVPoint());
     implantVectors.push_back(implantY.ToCVPoint());
 
-	auto pelvisTemp = mPelvis.getHipPelvisCopy(pTiltAngle);
+	//auto pelvisTemp = mPelvis.getHipPelvisCopy(pTiltAngle);
 
-    auto abdAnt = pelvisTemp.getAbductionAnteversionVectorsZX(mHipCenterOfRotation, pAbductionAngle, pAnteversionAngle);
+    auto abdAnt = mPelvis.getAbductionAnteversionVectorsZX(mHipCenterOfRotation, pAbductionAngle, pAnteversionAngle);
 
     Point pelvisX = abdAnt.second;
     Point pelvisZ = abdAnt.first;

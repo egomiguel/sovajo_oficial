@@ -3325,8 +3325,8 @@ int readExample()
 void PelvisImplantMatch()
 {
 
-	//std::string pelvisPath = "D:\\3D_DICOM_DATA\\Modo_Pelvis\\pelvis_full.vtk";
-	//std::string pelvisRealPath = "D:\\3D_DICOM_DATA\\Person_2\\Pelvis.vtk";
+	std::string pelvisPath = "D:\\3D_DICOM_DATA\\Modo_Pelvis\\pelvis_full.vtk";
+	std::string pelvisRealPath = "D:\\3D_DICOM_DATA\\Person_2\\Pelvis.vtk";
 	//std::string implantFullPath = "D:\\3D_DICOM_DATA\\Modo_Pelvis\\pelvis_implant.vtk";
 	//std::string implantCupPath = "D:\\3D_DICOM_DATA\\Modo_Pelvis\\acetabular_cup.vtk";
 	//std::string implantStemPath = "D:\\3D_DICOM_DATA\\Modo_Pelvis\\femoral_stem.vtk";
@@ -3336,20 +3336,20 @@ void PelvisImplantMatch()
 	auto implant_stem_3d = TestVTK::ReadPolyDataSTL("D:\\sovajo\\Implants\\THA\\femoral_stem.stl");
 	auto implant_head_3d = TestVTK::ReadPolyDataSTL("D:\\sovajo\\Implants\\THA\\femoral_head.stl");
 
-	//auto pelvis3D = TestVTK::ReadPolyData(pelvisPath);
+	//auto pelvis3D_modo = TestVTK::ReadPolyData(pelvisPath);
 	//auto pelvis3D_Real = TestVTK::ReadPolyData(pelvisRealPath);
 	//auto implant3D = TestVTK::ReadPolyData(implantCupPath);
 	//auto stem3D = TestVTK::ReadPolyData(implantStemPath);
 
 	//////////////////// Modo
 
-	//Point centerOfRotation = Point(-63.83, 3.24, 305.26);
-	//Point pLeftASIS = Point(134.261, -43.3698, 338.323);
-	//Point pRightASIS = Point(-101.607, -51.7796, 338.064);
-	//Point pLeftPubicTubercle = Point(45.966, -30.0529, 279.477);
-	//Point pRightPubicTubercle = Point(-7.69984, -31.1355, 275.443);
-	//Point pLeftLesserTrochanter = Point(56.4254, 55.5531, 275.961); // not a good point (is not on the femur)
-	//Point pRightLesserTrochanter = Point(-30.7444, 53.9456, 272.75);// not a good point (is not on the femur)
+	//THA::IMPLANTS::Point centerOfRotation = Point(-63.83, 3.24, 305.26);
+	//THA::IMPLANTS::Point pLeftASIS = Point(134.261, -43.3698, 338.323);
+	//THA::IMPLANTS::Point pRightASIS = Point(-101.607, -51.7796, 338.064);
+	//THA::IMPLANTS::Point pLeftPubicTubercle = Point(45.966, -30.0529, 279.477);
+	//THA::IMPLANTS::Point pRightPubicTubercle = Point(-7.69984, -31.1355, 275.443);
+	//THA::IMPLANTS::Point pLeftLesserTrochanter = Point(56.4254, 55.5531, 275.961); // not a good point (is not on the femur)
+	//THA::IMPLANTS::Point pRightLesserTrochanter = Point(-30.7444, 53.9456, 272.75);// not a good point (is not on the femur)
 
 
 	//////////////////Person_2
@@ -3361,6 +3361,7 @@ void PelvisImplantMatch()
 	THA::IMPLANTS::Point pLeftLesserTrochanter = THA::IMPLANTS::Point(103.508, 40.6431, 1650.47); // not a good point (is not on the femur)
 	THA::IMPLANTS::Point pRightLesserTrochanter = THA::IMPLANTS::Point(-65.9917, 43.6621, 1643.16);// not a good point (is not on the femur)
 
+	////////////////////////////////////////////////////////
 	THA::IMPLANTS::Point implantTop = THA::IMPLANTS::Point(-32.16, 12.43, -1.95);
 	THA::IMPLANTS::Point implantCup1 = THA::IMPLANTS::Point(-12.7411, -0.943873, -27.6937);
 	THA::IMPLANTS::Point implantCup2 = THA::IMPLANTS::Point(-13.9138, -2.33964, 21.7003);
@@ -3382,7 +3383,7 @@ void PelvisImplantMatch()
 						THA::IMPLANTS::Point(102.612, 40.8368, 1653.34), THA::IMPLANTS::Point(115.105, 42.1657, 1491.97));
 
 	THA::IMPLANTS::HipPelvis objPelvis;
-	objPelvis.init(pLeftASIS, pRightASIS, pLeftPubicTubercle, pRightPubicTubercle, pelvis3D_Real, pFemur, pFemurOppside, THA::IMPLANTS::PelvisSide::RIGHT_SIDE, centerOfRotation);
+	objPelvis.init(pLeftASIS, pRightASIS, pLeftPubicTubercle, pRightPubicTubercle, pelvis3D_Real, pFemur, pFemurOppside, THA::IMPLANTS::PelvisSide::RIGHT_SIDE, centerOfRotation, THA::IMPLANTS::Plane());
 
 	THA::IMPLANTS::HipPelvisCupImplant objImplant;
 	std::vector<THA::IMPLANTS::Point> pExternalPoints;
@@ -3478,20 +3479,20 @@ void PelvisImplantMatch()
 		
 		if (i == 20)
 		{
-			std::cout << " ***************** Matching Stem with Hip Center: " <<std::endl;
+			//std::cout << " ***************** Matching Stem with Hip Center: " <<std::endl;
 			//pelvisInfo.matchStemToHipRotationCenter();
-			pelvisInfo.matchStemToCupRotationCenter();
+			//pelvisInfo.matchStemToCupRotationCenter();
 		}
 		else
 		{
 			//pelvisInfo.setStemHeadTranslation(i, i, i);
-			pelvisInfo.setStemVersionAngle(i);
+			//pelvisInfo.setStemVersionAngle(i);
 		}
 
 		//std::cout << "Setting stem version angle: " << i << ": Getting Current angle: " << pelvisInfo.getStemVersion() <<std::endl;
 
 		//std::cout << "Hip Lenght: " << pelvisInfo.getHipLengthDistance() << ": Hip offset: " << pelvisInfo.getCombinedOffsetDistance()<< std::endl;
-		std::cout << "Set stem version: " << i << ": Current angle: " << pelvisInfo.getStemVersion() << std::endl;
+		//std::cout << "Set stem version: " << i << ": Current angle: " << pelvisInfo.getStemVersion() << std::endl;
 
 		auto stemTransformMatch = pelvisInfo.getITKStemTransform();
 
@@ -3499,7 +3500,7 @@ void PelvisImplantMatch()
 		auto transformImplantStem = TestVTK::TransformPoly(implant_stem_3d, stemTransformMatch->GetMatrix(), stemTransformMatch->GetTranslation());
 		auto transformImplantHead = TestVTK::TransformPoly(transformImplantHeadToStemTemp, stemTransformMatch->GetMatrix(), stemTransformMatch->GetTranslation());
 
-		std::cout << "Stem superior distance: " << pelvisInfo.getStemAxisShiftSuperiorHip() << ", Stem Lateral Distance: " << pelvisInfo.getStemAxisShiftLateralHip() <<", Stem Anterior Distance: " << pelvisInfo.getStemAxisShiftAnteriorHip()<< std::endl;
+		//std::cout << "Stem superior distance: " << pelvisInfo.getStemAxisShiftSuperiorHip() << ", Stem Lateral Distance: " << pelvisInfo.getStemAxisShiftLateralHip() <<", Stem Anterior Distance: " << pelvisInfo.getStemAxisShiftAnteriorHip()<< std::endl;
 		
 		//pelvisInfo.setStemAxisShiftHip(10, 20, 30);
 
@@ -3513,29 +3514,32 @@ void PelvisImplantMatch()
 		double abductionCup = 40 + i / 20;
 		double versionCup = 20 + i / 20;
 		
-		//pelvisInfo.setCupAngles(abductionCup, versionCup);
-
+		pelvisInfo.setPelvisTiltAngle(i / 20 + 1);
+		pelvisInfo.setCupAngles(abductionCup, versionCup);
 		
 		//pelvisInfo.setCupTranslation(0, 0, 10);
 
-		/*
+		
 		std::cout << "Cup new abduction: " << abductionCup << ", Cup new version: " << versionCup << std::endl;
 		std::cout << "Cup abduction: " << pelvisInfo.getCupInclination() << ", Cup version: " << pelvisInfo.getCupAntversion() << std::endl;
-
-		*/
+		std::cout << "Tilt angle: " << i/20 + 1 << std::endl;
+		
 
 		//std::cout << i << " Cup: " << pelvisInfo.getCupShiftAnterior() << ", Cup: " << pelvisInfo.getCupShiftLateral() << ", Cup: " << pelvisInfo.getCupShiftSuperior() <<std::endl;
 		
 		//std::cout << " Hip lenght: " << objPelvis.getHipLengthDistance() << ", new lenght: " << pelvisInfo.getHipLengthDistance() << ", Hip Offset: " << objPelvis.getCombinedOffsetDistance() << ", Hip New Offset: " << pelvisInfo.getCombinedOffsetDistance() << std::endl;
 
 		
-		vtkNew<vtkAppendPolyData> appendFilter;
-		appendFilter->AddInputData(transformImplantCup);
-		appendFilter->AddInputData(transformImplantStem);
+		//vtkNew<vtkAppendPolyData> appendFilter;
+		//appendFilter->AddInputData(transformImplantCup);
+		//appendFilter->AddInputData(transformImplantStem);
 		//appendFilter->AddInputData(transformImplantHead);
-		appendFilter->Update();
+		//appendFilter->AddInputData(pelvis3D_Real);
+		//appendFilter->Update();
+		std::vector<vtkSmartPointer<vtkPolyData>> polyList;
+		polyList.push_back(transformImplantCup);
 
-		TestVTK::show(appendFilter->GetOutput());
+		TestVTK::show(pelvis3D_Real, polyList);
 
 	}
 
@@ -4783,7 +4787,7 @@ int main()
 	//MatchEasyPKA();
 	//RegistrationScale();
 	//Resgistration_General_test();
-	//PelvisImplantMatch();
+	PelvisImplantMatch();
 	//std::cout << "tttttttttttttttttt" << std::endl;
 	//TestHullPoints();
 	//Test30PointsVTK();
@@ -4792,7 +4796,7 @@ int main()
 
 	//PolydataInterception();
 	//TEST_PKA::MatchPKAThreePlanes();
-	TEST_PKA::MatchPKAThreePlanes();
+	//TEST_PKA::MatchPKAThreePlanes();
 
 	//double pnt[3] = { 0, 0, 0 };
 	//Plane planeTemp;
