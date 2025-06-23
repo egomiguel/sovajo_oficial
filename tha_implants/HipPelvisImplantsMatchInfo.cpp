@@ -29,9 +29,9 @@ HipPelvisImplantsMatchInfo::~HipPelvisImplantsMatchInfo()
 {
 }
 
-void HipPelvisImplantsMatchInfo::setPelvisTiltAngle(double pTiltAngle)
+void HipPelvisImplantsMatchInfo::setPelvisTiltAngleDegree(double pTiltAngleDegree)
 {
-	this->mPelvis.setCoronalTiltAngle(pTiltAngle);
+	this->mPelvis.setCoronalTiltAngleDegree(pTiltAngleDegree);
 }
 
 void HipPelvisImplantsMatchInfo::setCupTransform(const itk::Rigid3DTransform<>::Pointer pImplantToBoneStemTransform)

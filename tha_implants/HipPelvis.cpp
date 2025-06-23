@@ -66,10 +66,10 @@ void HipPelvis::init(const Point& pLeftASIS, const Point& pRightASIS, const Poin
     isInit = true;
 }
 
-HipPelvis HipPelvis::getHipPelvisCopy(double pTiltAngle) const
+HipPelvis HipPelvis::getHipPelvisCopyObj(double pTiltAngleDegree) const
 {
 	HipPelvis copyObj = *this;
-	copyObj.setCoronalTiltAngle(pTiltAngle);
+	copyObj.setCoronalTiltAngleDegree(pTiltAngleDegree);
 	return copyObj;
 }
 
@@ -170,14 +170,14 @@ double HipPelvis::getCoronalTiltAngle(const Plane& pCoronalCT) const
 	}
 }
 
-void HipPelvis::setCoronalTiltAngle(double pTiltAngle)
+void HipPelvis::setCoronalTiltAngleDegree(double pTiltAngleDegree)
 {
-	coronalTiltAngle = pTiltAngle;
+	coronalTiltAngle = pTiltAngleDegree * PI / 180;
 }
 
-double HipPelvis::getCoronalTiltAngle() const
+double HipPelvis::getCoronalTiltAngleDegree() const
 {
-	return coronalTiltAngle;
+	return coronalTiltAngle * 180 / PI;
 }
 
 Point HipPelvis::getPelvisVectorInfSup() const

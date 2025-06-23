@@ -3514,7 +3514,7 @@ void PelvisImplantMatch()
 		double abductionCup = 40 + i / 20;
 		double versionCup = 20 + i / 20;
 		
-		pelvisInfo.setPelvisTiltAngle(i / 20 + 1);
+		pelvisInfo.setPelvisTiltAngleDegree(i / 20 + 1);
 		pelvisInfo.setCupAngles(abductionCup, versionCup);
 		
 		//pelvisInfo.setCupTranslation(0, 0, 10);
