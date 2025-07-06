@@ -484,8 +484,8 @@ namespace TEST_PKA
 
 		std::vector<PointTypeITK> hullFemur = femurImplantMatch.GetHullPointsOnePlane(femurTransformIn, femurTransformOut, UKA::IMPLANTS::FemurImplantMatch::KOnePlaneAnteriorAndDistalCurve);
 		
-		std::vector<PointTypeITK> hull = tibiaImplantMatch.GetHullPoints(tibiaTransformIn, tibiaTransformOut);
-
+		UKA::IMPLANTS::TibiaImplantMatch::HullPoints hullTemp = tibiaImplantMatch.GetHullPoints(tibiaTransformIn, tibiaTransformOut);
+		std::vector<PointTypeITK> hull = hullTemp.sidePlanePoints;
 		
 		std::cout << "Hull size: " << hull.size() << std::endl;
 
@@ -498,8 +498,8 @@ namespace TEST_PKA
 			tPoints.push_back(myPoint);
 		}
 
-		//show(myKnee.GetTibiaPoly(), tPoints, true);
-		//show(newImplantTibia, tPoints, true);
+		show(myKnee.GetTibiaPoly(), tPoints, true);
+		show(newImplantTibia, tPoints, true);
 
 		UKA::IMPLANTS::ImplantsMatchFinalInfo matchFinalInfo(&myKnee, femurImplant, tibiaImplant, femurTransformIn, tibiaTransformIn);
 		std::cout << "5555555555555555555555555555555555555555" << std::endl;
@@ -590,7 +590,7 @@ namespace TEST_PKA
 	{
 		//std::string folder = "D:\\sovajo\\Cases_Plan_PKA\\UKA-data_2"; // left
 		std::string folder = "D:\\sovajo\\Cases_Plan_PKA\\UKA-data"; // right
-		UKA::IMPLANTS::Knee myKnee = CreateKneeFromFile_NumbersPKA(folder, UKA::IMPLANTS::KRight, UKA::IMPLANTS::KLateral);
+		UKA::IMPLANTS::Knee myKnee = CreateKneeFromFile_NumbersPKA(folder, UKA::IMPLANTS::KRight, UKA::IMPLANTS::KMedial);
 
 		UKA::IMPLANTS::FemurImplant* femurImplant = new UKA::IMPLANTS::FemurImplantThreePlane();
 		UKA::IMPLANTS::TibiaImplant tibiaImplant;

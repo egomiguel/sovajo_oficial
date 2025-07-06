@@ -3381,9 +3381,14 @@ void PelvisImplantMatch()
 
 	pFemurOppside.init(THA::IMPLANTS::Point(117.477, 23.6717, 1723.36), THA::IMPLANTS::Point(156.129, 51.8456, 1698.98),
 						THA::IMPLANTS::Point(102.612, 40.8368, 1653.34), THA::IMPLANTS::Point(115.105, 42.1657, 1491.97));
+	THA::IMPLANTS::Plane coronalPlaneCT;
+	coronalPlaneCT.init(THA::IMPLANTS::Point(0, 1, 0), THA::IMPLANTS::Point(0, 0, 0));
 
 	THA::IMPLANTS::HipPelvis objPelvis;
-	objPelvis.init(pLeftASIS, pRightASIS, pLeftPubicTubercle, pRightPubicTubercle, pelvis3D_Real, pFemur, pFemurOppside, THA::IMPLANTS::PelvisSide::RIGHT_SIDE, centerOfRotation, THA::IMPLANTS::Plane());
+	objPelvis.init(pLeftASIS, pRightASIS, pLeftPubicTubercle, pRightPubicTubercle, pelvis3D_Real, pFemur, pFemurOppside, THA::IMPLANTS::PelvisSide::RIGHT_SIDE, centerOfRotation, coronalPlaneCT);
+
+	std::cout << "*************** Degree Tilt: " << objPelvis.getCoronalTiltAngleDegree() << std::endl;
+	return;
 
 	THA::IMPLANTS::HipPelvisCupImplant objImplant;
 	std::vector<THA::IMPLANTS::Point> pExternalPoints;
@@ -4743,7 +4748,7 @@ int main()
 
 	
 	SPINE::SEGMENTATION::ImageType::Pointer inputImg;
-
+	/*
 	std::string spine = "C:\\Users\\Miguel\\Desktop\\Algoritmos_Neuvos\\CT\\Spine_CT_17.nrrd";
 	spine = "D:\\sovajo\\Case_Spine\\spine_ct.nrrd";
 	Test::readImage<ImageType>(spine, inputImg);
@@ -4771,7 +4776,7 @@ int main()
 		std::cout << "Center: " << item.center << std::endl;
 	}
 	
-	
+	*/
 	//std::vector<SpineSegmentation::Plane> getIntervertebralPlanes(const std::vector<ImageType::PointType>& physicalPoints)
 
 	std::string videoPathIn = "D:\\sovajo\\Spine_Images\\avi_images\\1_2.avi";
@@ -4787,7 +4792,7 @@ int main()
 	//MatchEasyPKA();
 	//RegistrationScale();
 	//Resgistration_General_test();
-	PelvisImplantMatch();
+	//PelvisImplantMatch();
 	//std::cout << "tttttttttttttttttt" << std::endl;
 	//TestHullPoints();
 	//Test30PointsVTK();
@@ -4795,7 +4800,7 @@ int main()
 	//std::cout << Point(result) << "; " << proj << std::endl;
 
 	//PolydataInterception();
-	//TEST_PKA::MatchPKAThreePlanes();
+	TEST_PKA::MatchPKA();
 	//TEST_PKA::MatchPKAThreePlanes();
 
 	//double pnt[3] = { 0, 0, 0 };

@@ -1492,9 +1492,10 @@ vtkSmartPointer<vtkPolyData> TibiaImplantMatch::getContour(const vtkSmartPointer
 	return contour;
 }
 
-std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, double distance, double distancePcl, double distanceSide, double closeCurveLateral, double closeCurveMedial, int amount) const
+TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, double distance, double distancePcl, double distanceSide, double sidePlaneWidth, double closeCurveLateral, double closeCurveMedial, int amount) const
 {
-	std::vector<PointTypeITK> hull;
+	TibiaImplantMatch::HullPoints HullPointsResult;
+	std::vector<PointTypeITK> hull, hullSidePlane;
 	Plane myPlane = finalTransformPlane(implant.getTibiaPlane(), pTransformIn);
 
 	Point normalTemp = knee.getAnkleCenter();
@@ -1966,7 +1967,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		std::rotate(concaveSpline.begin(), concaveSpline.begin() + initPos, concaveSpline.end());
 	}
 
-	std::vector<Point> finalSplinePointsTKA, finalSplinePointsPKA;
+	std::vector<Point> finalSplinePointsTKA, finalSplinePointsPKA, sidePlanePKA;
 
 	for (int i = 0; i < concaveSpline.size(); i++)
 	{
@@ -2023,6 +2024,10 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	Plane midPlaneImplant = myPlane.getPerpendicularPlane(implantPCL, implantTuber);
 	midPlaneImplant.reverseByPoint(implantSide);
 
+	Point upPointTemp = midPlaneImplant.getProjectionPoint(knee.getHipCenter());
+	Point vectorToUP = upPointTemp - myPlane.getProjectionPoint(upPointTemp);
+	vectorToUP.normalice();
+
 	Point vectorToPlaneSide = -midPlaneImplant.getNormalVector();
 	double sidePlaneThickness = abs(midPlaneImplant.eval(implantPlaneSidePoint)) + distanceSide;
 
@@ -2032,6 +2037,10 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	Point refBoneTuber = tempLine.getProjectPoint(knee.getTibiaTubercle());
 	Point refBonePcl = tempLine.getProjectPoint(knee.getPclCenterPoint());
 
+	Point refBoneTuberOnContour = refBoneTuber;
+	Point refBonePclOnContour = refBonePcl;
+	int tempCont = 0;
+
 	if (midPlane.eval(finalSplinePointsTKA[0]) < 0)
 	{
 		for (float i = 0.1; i < 0.3; i += 0.1)
@@ -2039,6 +2048,8 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 			Point temp = refBoneTuber + i * (refBonePcl - refBoneTuber) + sidePlaneThickness * vectorToPlaneSide;
 			finalSplinePointsPKA.push_back(myPlane.getProjectionPoint(temp));
 		}
+
+		refBoneTuberOnContour = finalSplinePointsPKA[0];
 	}
 
 	for (int i = 0; i < finalSplinePointsTKA.size(); i++)
@@ -2046,24 +2057,42 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		if (midPlaneImplant.eval(finalSplinePointsTKA[i]) > 0)
 		{
 			finalSplinePointsPKA.push_back(finalSplinePointsTKA[i]);
+			tempCont++;
+			if (tempCont == 1 && midPlane.eval(finalSplinePointsTKA[0]) < 0)
+			{
+				refBonePclOnContour = finalSplinePointsPKA[finalSplinePointsPKA.size() - 1];
+			}
 		}
 	}
 
 	if (midPlane.eval(finalSplinePointsTKA[0]) > 0)
 	{
+		if (finalSplinePointsPKA.size() > 0)
+		{
+			refBonePclOnContour = finalSplinePointsPKA[finalSplinePointsPKA.size() - 1];
+		}
+
 		for (float i = 0.8; i < 1.0; i += 0.1)
 		{
 			Point temp = refBonePcl + i * (refBoneTuber - refBonePcl) + sidePlaneThickness * vectorToPlaneSide;
 			finalSplinePointsPKA.push_back(myPlane.getProjectionPoint(temp));
 		}
+
+		refBoneTuberOnContour = finalSplinePointsPKA[finalSplinePointsPKA.size() - 1];
 	}
+	
+	sidePlanePKA.push_back(refBoneTuberOnContour);
+	sidePlanePKA.push_back(refBonePclOnContour);
+	sidePlanePKA.push_back(refBonePclOnContour + sidePlaneWidth * vectorToUP);
+	sidePlanePKA.push_back(refBoneTuberOnContour + sidePlaneWidth * vectorToUP);
 
 	/////////////////////////////////////////////////////////
-	//ImplantTools::show(contourMax, finalSplinePointsPKA);
-	//ImplantTools::show(contourMax, finalSplinePointsPKA, true);
+	//ImplantTools::show(contourMax, sidePlanePKA);
+	//ImplantTools::show(contourMax, sidePlanePKA, true);
 	/////////////////////////////////////////////////////////////
 
 	hull = increaseVectorToAmount(finalSplinePointsPKA, amount);
+	hullSidePlane = increaseVectorToAmount(sidePlanePKA, amount);
 
 	itk::Vector< double, 3 > translate;
 	//ImplantTools::fitEllipse(finalSplinePointsPKA, myPlane.getNormalVector(), hullCenter);
@@ -2104,5 +2133,8 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	pTransformOut->SetMatrix(rotationITK);
 	pTransformOut->SetOffset(translate);
 
-	return hull;
+	HullPointsResult.implantPoints = hull;
+	HullPointsResult.sidePlanePoints = hullSidePlane;
+
+	return HullPointsResult;
 }

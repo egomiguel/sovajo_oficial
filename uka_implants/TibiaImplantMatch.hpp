@@ -15,6 +15,11 @@ namespace UKA
 		class UKA_IMPLANTS_EXPORT TibiaImplantMatch
 		{
 		public:
+			struct HullPoints
+			{
+				std::vector<PointTypeITK> implantPoints, sidePlanePoints;
+			};
+
 			TibiaImplantMatch();
 
 			void init(const TibiaImplant& implant, const Knee& knee);
@@ -23,7 +28,7 @@ namespace UKA
 
 			Point transformImplantPoint(const Point& point) const;
 
-			std::vector<PointTypeITK> GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, double distance = 1., double distancePcl = 1., double distanceSide = 1., double closeCurveLateral = 0.8, double closeCurveMedial = 0.8, int amount = 200) const;
+			HullPoints GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, double distance = 1., double distancePcl = 1., double distanceSide = 1., double sidePlaneWidth = 5., double closeCurveLateral = 0.8, double closeCurveMedial = 0.8, int amount = 200) const;
 
 			itk::Matrix< double, 3, 3 > GetRotationMatrix() const;
 
