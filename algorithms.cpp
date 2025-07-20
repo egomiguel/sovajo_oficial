@@ -31,6 +31,10 @@
 #include "tha_implants/HipFemurOppside.hpp"
 #include "tha_implants/Point.hpp"
 
+#include  "tha_registration/HipFemurRegistrationAnterior.hpp"
+#include  "tha_registration/HipFemurRegistrationPosterior.hpp"
+#include  "tha_registration/TemplatePointsHip.hpp"
+
 #include "uka_implants/Knee.hpp"
 #include "uka_implants/FemurImplantMatch.hpp"
 #include "uka_implants/TibiaImplantMatch.hpp"
@@ -3145,39 +3149,70 @@ void GetHipPoints()
 	TestVTK::show(hipLeft, myPoints);
 }
 
-void HipFemoralRegistration()
+std::vector<cv::Point3d> GetRegistrationPointsFromTemplateVectors(std::vector<std::vector<cv::Point3d>> points)
 {
-	/*
-	vtkSmartPointer<vtkPolyData> hipRight, hipLeft;
-
-	hipLeft = TestVTK::ReadPolyData("D:\\Mega_Trabajo\\Modo\\Left_Modo\\hip_left.vtk");
-	hipRight = TestVTK::ReadPolyData("D:\\Mega_Trabajo\\Modo\\Right_Modo\\hip_right.vtk");
-
-	PointTypeITK anteriorFemoralNeck, anteriorDistalTrochanter, lateralTrochanter;
-
-	////////////////////////////////Left
-	anteriorFemoralNeck = Registration::makeItkPoint(23.72, 47.1258, 127.53);
-	anteriorDistalTrochanter = Registration::makeItkPoint(18.19, 44.49, 92.25);
-	lateralTrochanter = Registration::makeItkPoint(61.9828, 55.54, 112.63);
-
-	///////////////////////////////////Right
-	//anteriorFemoralNeck = Registration::makeItkPoint(30.7806, -60.6593, 1149.39);
-	//anteriorDistalTrochanter = Registration::makeItkPoint(33.015, -53.22, 1108.26);
-	//lateralTrochanter = Registration::makeItkPoint(-7.67188, -42.89, 1137.5);
-
-	HipRegistrationFemur regis(hipLeft, anteriorFemoralNeck, anteriorDistalTrochanter, lateralTrochanter, RegisterSide::LEFT);
-
-	double error;
-	std::vector<PointTypeITK> verificationPointsTemp;
-	std::vector<RegistrationPointsHip> points = regis.getRegistrationPointAnterior(verificationPointsTemp, error);
-
-	std::cout << "Error: " << error << std::endl;
-
-	std::vector < cv::Point3d > pointsList, verificationPoint;
+	std::vector<cv::Point3d> pointsList;
 
 	for (int i = 0; i < points.size(); i++)
 	{
-		RegistrationPointsHip obj = points[i];
+		std::vector<cv::Point3d> temp = points[i];
+
+		for (int j = 0; j < temp.size(); j++)
+		{
+			pointsList.push_back(temp[j]);
+		}
+	}
+
+	return pointsList;
+}
+
+void HipFemoralRegistration()
+{
+	
+	vtkSmartPointer<vtkPolyData> hipRight, hipLeft, realRight;
+
+	hipLeft = TestVTK::ReadPolyData("D:\\Mega_Trabajo\\Modo\\Left_Modo\\hip_left.vtk");
+	hipRight = TestVTK::ReadPolyData("D:\\Mega_Trabajo\\Modo\\Right_Modo\\hip_right.vtk");
+	realRight = TestVTK::ReadPolyData("D:\\sovajo\\Test_Cases\\THA\\right_femur.vtk");
+	
+	PointTypeITK anteriorFemoralNeck, anteriorDistalTrochanter, lateralTrochanter, posteriorFemoralNeck, posteriorDistalTrochanter;
+
+	/*
+	double femurFeaturePoint[3][3] = { {-105.046, 178.731, 173.459},
+		{-96.7694, 179.2, 144.739}, {-126.869, 200.344, 180.873} };
+
+	anteriorFemoralNeck = itk::Point<double>(femurFeaturePoint[0]);
+	anteriorDistalTrochanter = itk::Point<double>(femurFeaturePoint[1]);
+	lateralTrochanter = itk::Point<double>(femurFeaturePoint[2]);
+	*/
+
+	////////////////////////////////Left
+	/*anteriorFemoralNeck = THA::RIGISTRATION::Registration::makeItkPoint(23.72, 47.1258, 127.53);
+	anteriorDistalTrochanter = THA::RIGISTRATION::Registration::makeItkPoint(18.19, 44.49, 92.25);
+	lateralTrochanter = THA::RIGISTRATION::Registration::makeItkPoint(61.9828, 55.54, 112.63);*/
+
+	///////////////////////////////////Right
+	anteriorFemoralNeck = Registration::makeItkPoint(30.7806, -60.6593, 1149.39);
+	anteriorDistalTrochanter = Registration::makeItkPoint(33.015, -53.22, 1108.26);
+
+	posteriorFemoralNeck = Registration::makeItkPoint(37.55, -29.89, 1143.50);
+	posteriorDistalTrochanter = Registration::makeItkPoint(34.55, -18.89, 1098.50);
+
+	lateralTrochanter = Registration::makeItkPoint(-7.67188, -42.89, 1137.5);
+
+	THA::RIGISTRATION::HipRegistrationFemurPosterior regisPosterior(hipRight, posteriorFemoralNeck, posteriorDistalTrochanter, lateralTrochanter, THA::RIGISTRATION::RegisterSide::RIGHT);
+	
+	double error;
+	std::vector<PointTypeITK> verificationPointsTemp;
+	std::vector<THA::RIGISTRATION::RegistrationPointsHip> points = regisPosterior.getRegistrationPointPosteriorlateral(verificationPointsTemp, error);
+
+	std::cout << "Error: " << error << std::endl;
+
+	std::vector <cv::Point3d> pointsList, verificationPoint;
+
+	for (int i = 0; i < points.size(); i++)
+	{
+		THA::RIGISTRATION::RegistrationPointsHip obj = points[i];
 
 		std::vector<Point> temp = ITKVectorToCV(obj.points);
 
@@ -3194,10 +3229,18 @@ void HipFemoralRegistration()
 		verificationPoint.push_back(temp[j]);
 	}
 
-	std::vector < cv::Point3d > pp = {cv::Point3d(23.72, 47.1258, 127.53), cv::Point3d(18.19, 44.49, 92.25) , cv::Point3d(61.9828, 55.54, 112.63) };
-	TestVTK::show(hipLeft, pointsList);
-	TestVTK::show(hipLeft, verificationPoint);
-	*/
+	THA::RIGISTRATION::TemplateHipFemurOfficial objOficialPoints;
+	std::vector<cv::Point3d> mAnteroLateralLeft, mAnteriorLeft;
+	mAnteroLateralLeft = GetRegistrationPointsFromTemplateVectors(objOficialPoints.mAnteroLateralLeft);
+	mAnteriorLeft = GetRegistrationPointsFromTemplateVectors(objOficialPoints.mAnteriorLeft);
+
+	std::vector < cv::Point3d > pp = {cv::Point3d(posteriorFemoralNeck[0], posteriorFemoralNeck[1], posteriorFemoralNeck[2]),
+		cv::Point3d(posteriorDistalTrochanter[0], posteriorDistalTrochanter[1], posteriorDistalTrochanter[2]) ,
+		cv::Point3d(lateralTrochanter[0], lateralTrochanter[1], lateralTrochanter[2]) };
+	TestVTK::show(hipRight, pp);
+	TestVTK::show(hipRight, pointsList);
+	TestVTK::show(hipRight, verificationPoint);
+	
 }
 
 int getPivot(std::vector<int>& data, int initPos, int endPos)
@@ -4800,8 +4843,9 @@ int main()
 	//std::cout << Point(result) << "; " << proj << std::endl;
 
 	//PolydataInterception();
-	TEST_PKA::MatchPKA();
+	//TEST_PKA::MatchPKA();
 	//TEST_PKA::MatchPKAThreePlanes();
+	HipFemoralRegistration();
 
 	//double pnt[3] = { 0, 0, 0 };
 	//Plane planeTemp;

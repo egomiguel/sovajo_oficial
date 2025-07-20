@@ -1,5 +1,5 @@
-#ifndef EXCEPTION_REGISTRATION_H
-#define EXCEPTION_REGISTRATION_H
+#ifndef EXCEPTION_HIP_REGISTRATION_H
+#define EXCEPTION_HIP_REGISTRATION_H
 
 #include <exception>
 #include <string>

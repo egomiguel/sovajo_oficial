@@ -1,3 +1,6 @@
+#ifndef HIP_REGISTRATION_TEMPLATE_POINTS_H
+#define HIP_REGISTRATION_TEMPLATE_POINTS_H
+
 #include <opencv2/calib3d/calib3d.hpp>
 
 namespace THA
@@ -208,13 +211,20 @@ namespace THA
 		public:
 			TemplateHipFemur() {};
 
-			cv::Point3d mAnteriorNeckLeft = cv::Point3d(23.72, 47.1258, 127.53);
-			cv::Point3d mAnteriorDistalLeft = cv::Point3d(18.19, 44.49, 92.25);
-			cv::Point3d mLateralTrochanterLeft = cv::Point3d(61.9828, 55.54, 112.63);
+			cv::Point3d mAnteriorNeckLeft = cv::Point3d(21.72, 43.54, 120.63);
+			cv::Point3d mAnteriorDistalLeft = cv::Point3d(17.72, 45.54, 85.63);
 
 			cv::Point3d mAnteriorNeckRight = cv::Point3d(30.7806, -60.6593, 1149.39);
 			cv::Point3d mAnteriorDistalRight = cv::Point3d(33.015, -53.22, 1108.26);
+
 			cv::Point3d mLateralTrochanterRight = cv::Point3d(-7.67188, -42.89, 1137.5);
+			cv::Point3d mLateralTrochanterLeft = cv::Point3d(61.9828, 55.54, 112.63);
+
+			cv::Point3d mPosteriorNeckLeft = cv::Point3d(22.72, 68.54, 123.63);
+			cv::Point3d mPosteriorDistalLeft = cv::Point3d(14.72, 79.54, 87.63);
+
+			cv::Point3d mPosteriorNeckRight = cv::Point3d(37.55, -29.89, 1143.50);
+			cv::Point3d mPosteriorDistalRight = cv::Point3d(34.55, -18.89, 1098.50);
 
 			std::vector<cv::Point3d> mTemplatePointsLeft = { cv::Point3d(31.2713, 55.4818, 132.131),
 															cv::Point3d(26.272, 55.5638, 132.131),
@@ -757,3 +767,5 @@ namespace THA
 		};
 	}
 }
+
+#endif

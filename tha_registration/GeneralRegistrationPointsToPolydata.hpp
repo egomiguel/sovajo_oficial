@@ -1,5 +1,5 @@
-#ifndef GENERAL_REGISTRATION_H
-#define GENERAL_REGISTRATION_H
+#ifndef GENERAL_HIP_REGISTRATION_H
+#define GENERAL_HIP_REGISTRATION_H
 
 #include "tha_registration_export.h"
 #include "Types.hpp"

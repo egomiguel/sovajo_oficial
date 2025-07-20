@@ -6,7 +6,7 @@
 
 using namespace THA::RIGISTRATION;
 
-HipRegistrationFemur::HipRegistrationFemur(const vtkSmartPointer<vtkPolyData> pImage, const PointTypeITK& pAnteriorFemoralNeckCT, const PointTypeITK& pAnteriorDistalTrochanterCT, const PointTypeITK& pLateralTrochanterCT, RegisterSide pSide)
+HipRegistrationFemur::HipRegistrationFemur(const vtkSmartPointer<vtkPolyData> pImage, const PointTypeITK& pFemoralNeckCT, const PointTypeITK& pDistalTrochanterCT, const PointTypeITK& pLateralTrochanterCT, RegisterSide pSide)
     :Registration(pImage)
 {
     /*vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance = vtkSmartPointer<vtkImplicitPolyDataDistance>::New();
@@ -21,35 +21,35 @@ HipRegistrationFemur::HipRegistrationFemur(const vtkSmartPointer<vtkPolyData> pI
         throw RegistrationException("Check your CT landmarks. Distance from the bone model is too large.");
     }*/
 
-	mAnteriorFemoralNeck = pAnteriorFemoralNeckCT;
-	mAnteriorDistalTrochanter = pAnteriorDistalTrochanterCT;
+	mFemoralNeck = pFemoralNeckCT;
+	mDistalTrochanter = pDistalTrochanterCT;
 	mLateralTrochanter = pLateralTrochanterCT;
 
     mSide = pSide;
 
-    auto minCircle = m_data->getMinCircle(mAnteriorFemoralNeck, mAnteriorDistalTrochanter, mLateralTrochanter);
+    auto minCircle = m_data->getMinCircle(mFemoralNeck, mDistalTrochanter, mLateralTrochanter);
 
     mCenter = minCircle.second;
 }
 
 
-bool HipRegistrationFemur::RegistrationLandmarks(const PointTypeITK& pAnteriorFemoralNeckCamera, const PointTypeITK& pAnteriorDistalTrochanterCamera, const PointTypeITK& pLateralTrochanterCamera, double& error)
+bool HipRegistrationFemur::RegistrationLandmarks(const PointTypeITK& pFemoralNeckCamera, const PointTypeITK& pDistalTrochanterCamera, const PointTypeITK& pLateralTrochanterCamera, double& error)
 {
     vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance = vtkSmartPointer<vtkImplicitPolyDataDistance>::New();
     implicitPolyDataDistance->SetInput(Registration::poly);
 
-    auto source = m_data->getAxisHipFemoral(pAnteriorFemoralNeckCamera, pAnteriorDistalTrochanterCamera, pLateralTrochanterCamera);
+    auto source = m_data->getAxisHipFemoral(pFemoralNeckCamera, pDistalTrochanterCamera, pLateralTrochanterCamera);
 
-    auto target = m_data->getAxisHipFemoral(mAnteriorFemoralNeck, mAnteriorDistalTrochanter, mLateralTrochanter);
+    auto target = m_data->getAxisHipFemoral(mFemoralNeck, mDistalTrochanter, mLateralTrochanter);
     
-    auto minCircleSource = m_data->getMinCircle(pAnteriorFemoralNeckCamera, pAnteriorDistalTrochanterCamera, pLateralTrochanterCamera);
+    auto minCircleSource = m_data->getMinCircle(pFemoralNeckCamera, pDistalTrochanterCamera, pLateralTrochanterCamera);
 
     Eigen::Matrix4d rigidTransform = m_data->getRigidTransform(source, target, minCircleSource.second, mCenter);
     
     PointTypeITK temp;
 
-    double a = m_data->TransformPointDistance(implicitPolyDataDistance, rigidTransform, pAnteriorFemoralNeckCamera, temp);
-    double b = m_data->TransformPointDistance(implicitPolyDataDistance, rigidTransform, pAnteriorDistalTrochanterCamera, temp);
+    double a = m_data->TransformPointDistance(implicitPolyDataDistance, rigidTransform, pFemoralNeckCamera, temp);
+    double b = m_data->TransformPointDistance(implicitPolyDataDistance, rigidTransform, pDistalTrochanterCamera, temp);
     double c = m_data->TransformPointDistance(implicitPolyDataDistance, rigidTransform, pLateralTrochanterCamera, temp);
 
     std::vector<double> distances = { a, b, c };
@@ -67,13 +67,13 @@ bool HipRegistrationFemur::RegistrationLandmarks(const PointTypeITK& pAnteriorFe
     }
 }
 
-bool HipRegistrationFemur::MakeRegistration(const std::vector<itk::Point<double, 3>>& pBonePoints, const PointTypeITK& pAnteriorFemoralNeckCamera, const PointTypeITK& pAnteriorDistalTrochanterCamera, const PointTypeITK& pLateralTrochanterCamera)
+bool HipRegistrationFemur::MakeRegistration(const std::vector<itk::Point<double, 3>>& pBonePoints, const PointTypeITK& pFemoralNeckCamera, const PointTypeITK& pDistalTrochanterCamera, const PointTypeITK& pLateralTrochanterCamera)
 {
-    auto source = m_data->getAxisHipFemoral(pAnteriorFemoralNeckCamera, pAnteriorDistalTrochanterCamera, pLateralTrochanterCamera);
+    auto source = m_data->getAxisHipFemoral(pFemoralNeckCamera, pDistalTrochanterCamera, pLateralTrochanterCamera);
 
-    auto target = m_data->getAxisHipFemoral(mAnteriorFemoralNeck, mAnteriorDistalTrochanter, mLateralTrochanter);
+    auto target = m_data->getAxisHipFemoral(mFemoralNeck, mDistalTrochanter, mLateralTrochanter);
 
-    auto minCircleSource = m_data->getMinCircle(pAnteriorFemoralNeckCamera, pAnteriorDistalTrochanterCamera, pLateralTrochanterCamera);
+    auto minCircleSource = m_data->getMinCircle(pFemoralNeckCamera, pDistalTrochanterCamera, pLateralTrochanterCamera);
 
     Eigen::Matrix4d rigidTransform = m_data->getRigidTransform(source, target, minCircleSource.second, mCenter);
     
@@ -113,6 +113,7 @@ bool HipRegistrationFemur::MakeRegistration(const std::vector<itk::Point<double,
     return true;
 }
 
+/*
 std::vector<RegistrationPointsHip> HipRegistrationFemur::getRegistrationPointPosterolateral(std::vector<PointTypeITK>& pVerificationPoints, double& pError) const
 {
     std::vector<RegistrationPointsHip> result;
@@ -328,58 +329,7 @@ std::vector<RegistrationPointsHip> HipRegistrationFemur::getRegistrationPointAnt
 
     return result;
 }
-
-cv::Mat HipRegistrationFemur::getTemplateAlignment(double& pError) const
-{
-    TemplateHipFemur templateObj;
-
-    cv::Point3d targetCenter;
-    cv::Point3d sourceCenter;
-
-    std::vector<cv::Point3d> vectorSource, vectorTarget, myTemplatePoints;
-
-    targetCenter = mCenter;
-    vectorTarget = m_data->getAxisHipFemoral(mAnteriorFemoralNeck, mAnteriorDistalTrochanter, mLateralTrochanter);
-
-    if (mSide == RegisterSide::LEFT)
-    {
-        auto minCircleSource = m_data->getMinCircle(templateObj.mAnteriorNeckLeft, templateObj.mAnteriorDistalLeft, templateObj.mLateralTrochanterLeft);
-        sourceCenter = minCircleSource.second;
-        vectorSource = m_data->getAxisHipFemoral(templateObj.mAnteriorNeckLeft, templateObj.mAnteriorDistalLeft, templateObj.mLateralTrochanterLeft);
-
-        myTemplatePoints = templateObj.mTemplatePointsLeft;
-    }
-    else
-    {
-        auto minCircleSource = m_data->getMinCircle(templateObj.mAnteriorNeckRight, templateObj.mAnteriorDistalRight, templateObj.mLateralTrochanterRight);
-        sourceCenter = minCircleSource.second;
-        vectorSource = m_data->getAxisHipFemoral(templateObj.mAnteriorNeckRight, templateObj.mAnteriorDistalRight, templateObj.mLateralTrochanterRight);
-
-        myTemplatePoints = templateObj.mTemplatePointsRight;
-    }
-
-    cv::Mat data(7, 1, CV_64F);
-
-    cv::Mat rotation = LeastSquaresICP::GetRotationAnglesXYZ(vectorSource, vectorTarget, data);
-    cv::Mat translation = m_data->cvPointToMat(targetCenter) - (rotation * m_data->cvPointToMat(sourceCenter));
-
-    data.at<double>(3, 0) = data.at<double>(0, 0);
-    data.at<double>(4, 0) = data.at<double>(1, 0);
-    data.at<double>(5, 0) = data.at<double>(2, 0);
-
-    data.at<double>(0, 0) = translation.at<double>(0, 0);
-    data.at<double>(1, 0) = translation.at<double>(1, 0);
-    data.at<double>(2, 0) = translation.at<double>(2, 0);
-
-    data.at<double>(6, 0) = 1.0;
-
-    LeastSquaresICP registerObj(myTemplatePoints);
-
-    pError = registerObj.LeastSquaresScale(Registration::poly, data);
-
-    return data;
-}
-
+*/
 
 /*
 double PelvisRegistration::getAxisReference(cv::Point3d& pVectorOutSideNormal, cv::Point3d& pVectorSuperiorRing, cv::Point3d& pCenter)

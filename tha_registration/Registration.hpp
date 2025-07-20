@@ -1,5 +1,5 @@
-#ifndef REGISTRATION_H
-#define REGISTRATION_H
+#ifndef HIP_REGISTRATION_H
+#define HIP_REGISTRATION_H
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/opencv.hpp>
 #include <itkRigid3DTransform.h>

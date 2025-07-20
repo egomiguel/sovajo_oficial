@@ -1,5 +1,5 @@
-#ifndef REGISTRATION_PLANE_H
-#define REGISTRATION_PLANE_H
+#ifndef HIP_REGISTRATION_PLANE_H
+#define HIP_REGISTRATION_PLANE_H
 
 #include "tha_registration_export.h"
 #include "RLine.hpp"

@@ -11,21 +11,15 @@ namespace THA
 		class THA_REGISTRATION_EXPORT HipRegistrationFemur : public Registration
 		{
 		public:
-			HipRegistrationFemur(const vtkSmartPointer<vtkPolyData> pImage, const PointTypeITK& pAnteriorFemoralNeckCT, const PointTypeITK& pAnteriorDistalTrochanterCT, const PointTypeITK& pLateralTrochanterCT, RegisterSide pSide);
+			HipRegistrationFemur(const vtkSmartPointer<vtkPolyData> pImage, const PointTypeITK& pFemoralNeckCT, const PointTypeITK& pDistalTrochanterCT, const PointTypeITK& pLateralTrochanterCT, RegisterSide pSide);
 
-			std::vector<RegistrationPointsHip> getRegistrationPointPosterolateral(std::vector<PointTypeITK>& pVerificationPoints, double& pError) const;
+			bool RegistrationLandmarks(const PointTypeITK& pFemoralNeckCamera, const PointTypeITK& pDistalTrochanterCamera, const PointTypeITK& pTrochanterCamera, double& error);
 
-			std::vector<RegistrationPointsHip> getRegistrationPointAnterolateral(std::vector<PointTypeITK>& pVerificationPoints, double& pError) const;
+			bool MakeRegistration(const std::vector<itk::Point<double, 3>>& pBonePoints, const PointTypeITK& pFemoralNeckCamera, const PointTypeITK& pDistalTrochanterCamera, const PointTypeITK& pLateralTrochanterCamera);
 
-			std::vector<RegistrationPointsHip> getRegistrationPointAnterior(std::vector<PointTypeITK>& pVerificationPoints, double& pError) const;
-
-			bool RegistrationLandmarks(const PointTypeITK& pAnteriorFemoralNeckCamera, const PointTypeITK& pAnteriorDistalTrochanterCamera, const PointTypeITK& pLateralTrochanterCamera, double& error);
-
-			bool MakeRegistration(const std::vector<itk::Point<double, 3>>& pBonePoints, const PointTypeITK& pAnteriorFemoralNeckCamera, const PointTypeITK& pAnteriorDistalTrochanterCamera, const PointTypeITK& pLateralTrochanterCamera);
-
-		private:
-			PointTypeITK mAnteriorFemoralNeck;
-			PointTypeITK mAnteriorDistalTrochanter;
+		protected:
+			PointTypeITK mFemoralNeck;
+			PointTypeITK mDistalTrochanter;
 			PointTypeITK mLateralTrochanter;
 			RegisterSide mSide;
 			cv::Point3d mCenter;

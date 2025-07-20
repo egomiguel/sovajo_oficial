@@ -1,5 +1,5 @@
-#ifndef REGISTRATION_PRIVATE_H
-#define REGISTRATION_PRIVATE_H
+#ifndef HIP_REGISTRATION_PRIVATE_H
+#define HIP_REGISTRATION_PRIVATE_H
 
 
 //#include <pcl/common/common_headers.h>

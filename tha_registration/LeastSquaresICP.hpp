@@ -1,5 +1,5 @@
-#ifndef REGISTRATION_ICPLS_H
-#define REGISTRATION_ICPLS_H
+#ifndef HIP_REGISTRATION_ICPLS_H
+#define HIP_REGISTRATION_ICPLS_H
 
 #include <opencv2/calib3d/calib3d.hpp>
 #include "vtkSmartPointer.h"
@@ -14,7 +14,6 @@ namespace THA
 {
 	namespace RIGISTRATION
 	{
-
 		class LeastSquaresICP
 		{
 		private:

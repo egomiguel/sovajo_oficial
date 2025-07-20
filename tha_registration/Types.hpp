@@ -1,5 +1,5 @@
-#ifndef REGISTRATION_TYPES_H
-#define REGISTRATION_TYPES_H
+#ifndef HIP_REGISTRATION_TYPES_H
+#define HIP_REGISTRATION_TYPES_H
 
 #include "itkImage.h"
 

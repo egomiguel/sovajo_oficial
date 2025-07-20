@@ -1,5 +1,5 @@
-#ifndef REGISTRATION_POLYLS_H
-#define REGISTRATION_POLYLS_H
+#ifndef HIP_REGISTRATION_POLYLS_H
+#define HIP_REGISTRATION_POLYLS_H
 
 #include <opencv2/calib3d/calib3d.hpp>
 #include "vtkSmartPointer.h"

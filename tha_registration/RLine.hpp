@@ -1,5 +1,5 @@
-#ifndef REGISTRATION_LINE_H
-#define REGISTRATION_LINE_H
+#ifndef HIP_REGISTRATION_LINE_H
+#define HIP_REGISTRATION_LINE_H
 
 #include <opencv2/calib3d/calib3d.hpp>
 #include "tha_registration_export.h"
