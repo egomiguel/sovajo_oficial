@@ -183,6 +183,8 @@ namespace TKA
 			void show(vtkSmartPointer<vtkPolyData> poly, const std::vector<Point>& points, bool makePolyLine = false);
 
 			vtkSmartPointer<vtkPolyData> getPolyLine(const std::vector<Point>& sortPoints);
+
+			void updateTransformByRotation(cv::Mat& currentRotation, cv::Mat& currentTranslation, const Point& pRotationCenterPoint, const cv::Mat& pRotationUpdate);
 		};
 
 	}

@@ -1010,16 +1010,18 @@ itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::setCupAngles(double
 	cv::Mat implantMatrix = cv::Mat(implantVectors.size(), 3, CV_64F, implantVectors.data());
 	cv::Mat pelvisMatrix = cv::Mat(pelvisVectors.size(), 3, CV_64F, pelvisVectors.data());
 
-	cv::Mat CenterBefore = mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint() + mTranslationCup;
+	//cv::Mat CenterBefore = mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint() + mTranslationCup;
 
 	cv::Mat inverse = (implantMatrix.t()).inv();
-	mRotationCup = (pelvisMatrix.t()) * inverse;
+	cv::Mat rotation = (pelvisMatrix.t()) * inverse;
 
-	cv::Mat CenterAfter = mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint() + mTranslationCup;
+	ImplantTools::updateTransformByRotation(mRotationCup, mTranslationCup, mImplantCup.getCenterOfRotationImplant(), rotation);
 
-	cv::Mat diff = CenterAfter - CenterBefore;
+	//cv::Mat CenterAfter = mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint() + mTranslationCup;
+
+	//cv::Mat diff = CenterAfter - CenterBefore;
 	
-	mTranslationCup = mTranslationCup - diff;
+	//mTranslationCup = mTranslationCup - diff;
 
 	return getITKCupTransform();
 }
@@ -1122,7 +1124,8 @@ itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::setStemVersionAngle
 {	
 	double threshold = 1e-10;
 	double refAngle = (pStemVersionAngleDegree * PI) / 180.;
-	cv::Mat stemBaseBefore = mRotationStem * mImplantStem.getBasePoint().ToMatPoint() + mTranslationStem;
+	//cv::Mat stemBaseBefore = mRotationStem * mImplantStem.getBasePoint().ToMatPoint() + mTranslationStem;
+	cv::Mat rotation;
 
 	for (int i = 0; i < 10; i++)
 	{
@@ -1153,13 +1156,15 @@ itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::setStemVersionAngle
 			break;
 		}
 
-		mRotationStem = rotateStemVersionAngle(pStemVersionAngleDegree, 1. / alpha);
+		rotation = rotateStemVersionAngle(pStemVersionAngleDegree, 1. / alpha);
 		//std::cout << i << " angle: " << getStemVersion() << " vector: " << Point(mRotationStem * mImplantStem.getVectorInfSup().ToMatPoint()) << std::endl;
 	}
 
-	cv::Mat stemBaseAfter = mRotationStem * mImplantStem.getBasePoint().ToMatPoint() + mTranslationStem;
-	cv::Mat diff = stemBaseBefore - stemBaseAfter;
-	mTranslationStem += diff;
+	ImplantTools::updateTransformByRotation(mRotationStem, mTranslationStem, mImplantStem.getBasePoint(), rotation);
+
+	//cv::Mat stemBaseAfter = mRotationStem * mImplantStem.getBasePoint().ToMatPoint() + mTranslationStem;
+	//cv::Mat diff = stemBaseBefore - stemBaseAfter;
+	//mTranslationStem += diff;
 
 	return getITKStemTransform();
 }
