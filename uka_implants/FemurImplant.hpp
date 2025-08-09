@@ -48,6 +48,8 @@ namespace UKA
 
 			virtual Point getDirectVectorAP() const = 0;
 
+			virtual Point getRotationPoint() const = 0;
+
 		protected:
 			Plane mPosterior;
 			bool isInit;

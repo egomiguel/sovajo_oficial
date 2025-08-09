@@ -68,6 +68,11 @@ Plane FemurImplantThreePlane::getMidPlane() const
 	return midPlane;
 }
 
+Point FemurImplantThreePlane::getRotationPoint() const
+{
+	return (mRodBasePoint1 + mRodBasePoint2) / 2;
+}
+
 double FemurImplantThreePlane::getWidthSize() const
 {
 	return ImplantTools::getDistanceBetweenPoints(mRodBasePoint1, mRodBasePoint2);

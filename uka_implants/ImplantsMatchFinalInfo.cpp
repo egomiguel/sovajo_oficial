@@ -301,11 +301,14 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaSlopeAngl
 	rotation = ImplantTools::getRotateMatrix(baseVectorFromImplant.cross(newVectorFromImplant), myAngle);
 
 	//////////////////////////////////////////////////////////////////////
-	cv::Mat oldPoint = tibiaRotation * tibiaImplant.getExtremeSidePoint().ToMatPoint() + tibiaTranslation;
-	tibiaRotation = rotation * tibiaRotation;
 
-	cv::Mat newPoint = tibiaRotation * tibiaImplant.getExtremeSidePoint().ToMatPoint() + tibiaTranslation;
-	tibiaTranslation = tibiaTranslation - (newPoint - oldPoint);
+	ImplantTools::updateTransformByRotation(tibiaRotation, tibiaTranslation, tibiaImplant.getPlateauRefPointDown(), rotation);
+
+	//cv::Mat oldPoint = tibiaRotation * tibiaImplant.getExtremeSidePoint().ToMatPoint() + tibiaTranslation;
+	//tibiaRotation = rotation * tibiaRotation;
+
+	//cv::Mat newPoint = tibiaRotation * tibiaImplant.getExtremeSidePoint().ToMatPoint() + tibiaTranslation;
+	//tibiaTranslation = tibiaTranslation - (newPoint - oldPoint);
 
     knee->setTibiaSlope(angle);
 
@@ -400,7 +403,8 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaRotationA
 
 	//////////////////////////////////////////////////////////////////////
 
-    tibiaRotation = rotation * tibiaRotation;
+	ImplantTools::updateTransformByRotation(tibiaRotation, tibiaTranslation, tibiaImplant.getPlateauRefPointDown(), rotation);
+    //tibiaRotation = rotation * tibiaRotation;
 
     return getITKTibiaTransform();
 }
@@ -511,7 +515,8 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurTEAAngle(
 
 	//////////////////////////////////////////////////////////////////////
 
-    femurRotation = rotation * femurRotation;
+	ImplantTools::updateTransformByRotation(femurRotation, femurTranslation, femurImplant->getRotationPoint(), rotation);
+    //femurRotation = rotation * femurRotation;
 
     return getITKFemurTransform();
 }
@@ -599,7 +604,8 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurPCAAngle(
 
 	//////////////////////////////////////////////////////////////////////
 
-	femurRotation = rotation * femurRotation;
+	ImplantTools::updateTransformByRotation(femurRotation, femurTranslation, femurImplant->getRotationPoint(), rotation);
+	//femurRotation = rotation * femurRotation;
 
 	/*auto myAP = femurRotation * femurImplant.getDirectVectorAP().ToMatPoint();
 	auto myTEA = femurRotation * femurImplant.getDirectVectorTEA().ToMatPoint();
@@ -729,7 +735,8 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurVarusAngl
 
 	//////////////////////////////////////////////////////////////////////
 
-    femurRotation = rotation * femurRotation;
+	ImplantTools::updateTransformByRotation(femurRotation, femurTranslation, femurImplant->getRotationPoint(), rotation);
+    //femurRotation = rotation * femurRotation;
 
     return getITKFemurTransform();
 }
@@ -838,7 +845,9 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurFlexionAn
 
 	//////////////////////////////////////////////////////////////////////
 
-    femurRotation = rotation * femurRotation;
+	ImplantTools::updateTransformByRotation(femurRotation, femurTranslation, femurImplant->getRotationPoint(), rotation);
+
+    //femurRotation = rotation * femurRotation;
     return getITKFemurTransform();
 }
 
@@ -891,7 +900,8 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaVarusAngl
 
 	//////////////////////////////////////////////////////////////////////
 
-    tibiaRotation = rotation * tibiaRotation;
+	ImplantTools::updateTransformByRotation(tibiaRotation, tibiaTranslation, tibiaImplant.getPlateauRefPointDown(), rotation);
+    //tibiaRotation = rotation * tibiaRotation;
 
     return getITKTibiaTransform();
 }

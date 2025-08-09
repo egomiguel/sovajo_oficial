@@ -121,10 +121,12 @@ Plane FemurImplantTwoPlane::getMidPlane() const
 	sum1 = sum1 / count1;
 	sum2 = sum2 / count2;
 
-	Plane midPlane;
+	Plane midPlane, tempPlane;
 	midPlane.init(mSizeMidVector, sum1);
+	tempPlane.init(mSizeMidVector, sum2);
 	midPlane.reverseByPoint(sum2);
-	double distance = midPlane.getDistanceFromPoint(sum2) / 2.;
+
+	double distance = midPlane.getDistanceFromPoint(tempPlane.getProjectionPoint(sum1)) / 2.;
 	midPlane.movePlaneOnNormal(distance);
 	return midPlane;
 }
@@ -155,9 +157,10 @@ double FemurImplantTwoPlane::getWidthSize() const
 	sum1 = sum1 / count1;
 	sum2 = sum2 / count2;
 
-	Plane temp;
+	Plane temp, temp2;
 	temp.init(mSizeMidVector, sum1);
-	double distance = temp.getDistanceFromPoint(sum2);
+	temp2.init(mSizeMidVector, sum2);
+	double distance = temp.getDistanceFromPoint(temp2.getProjectionPoint(sum1));
 	return distance;
 }
 
@@ -172,6 +175,11 @@ Point FemurImplantTwoPlane::getRodBasePoint() const
 }
 
 Point FemurImplantTwoPlane::getRodTopPointProjectedOnBase() const
+{
+	return mRodTopPointProjectedOnBase;
+}
+
+Point FemurImplantTwoPlane::getRotationPoint() const
 {
 	return mRodTopPointProjectedOnBase;
 }

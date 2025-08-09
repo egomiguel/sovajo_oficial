@@ -56,6 +56,8 @@ namespace UKA
 
 			Point getDirectVectorAP() const;
 
+			Point getRotationPoint() const;
+
 		private:
 			Plane mDistal;
 			Point mRodBasePoint, mRodTopPoint, mRodTopPointProjectedOnBase;
