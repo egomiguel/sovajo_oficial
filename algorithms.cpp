@@ -3431,7 +3431,6 @@ void PelvisImplantMatch()
 	objPelvis.init(pLeftASIS, pRightASIS, pLeftPubicTubercle, pRightPubicTubercle, pelvis3D_Real, pFemur, pFemurOppside, THA::IMPLANTS::PelvisSide::RIGHT_SIDE, centerOfRotation, coronalPlaneCT);
 
 	std::cout << "*************** Degree Tilt: " << objPelvis.getCoronalTiltAngleDegree() << std::endl;
-	return;
 
 	THA::IMPLANTS::HipPelvisCupImplant objImplant;
 	std::vector<THA::IMPLANTS::Point> pExternalPoints;
@@ -3562,15 +3561,15 @@ void PelvisImplantMatch()
 		double abductionCup = 40 + i / 20;
 		double versionCup = 20 + i / 20;
 		
-		pelvisInfo.setPelvisTiltAngleDegree(i / 20 + 1);
+		//pelvisInfo.setPelvisTiltAngleDegree(i / 20 + 1);
 		pelvisInfo.setCupAngles(abductionCup, versionCup);
 		
 		//pelvisInfo.setCupTranslation(0, 0, 10);
 
 		
-		std::cout << "Cup new abduction: " << abductionCup << ", Cup new version: " << versionCup << std::endl;
+		std::cout << "Cup new abduction set: " << abductionCup << ", Cup new version set: " << versionCup << std::endl;
 		std::cout << "Cup abduction: " << pelvisInfo.getCupInclination() << ", Cup version: " << pelvisInfo.getCupAntversion() << std::endl;
-		std::cout << "Tilt angle: " << i/20 + 1 << std::endl;
+		//std::cout << "Tilt angle: " << i/20 + 1 << std::endl;
 		
 
 		//std::cout << i << " Cup: " << pelvisInfo.getCupShiftAnterior() << ", Cup: " << pelvisInfo.getCupShiftLateral() << ", Cup: " << pelvisInfo.getCupShiftSuperior() <<std::endl;
@@ -3584,9 +3583,9 @@ void PelvisImplantMatch()
 		//appendFilter->AddInputData(transformImplantHead);
 		//appendFilter->AddInputData(pelvis3D_Real);
 		//appendFilter->Update();
+
 		std::vector<vtkSmartPointer<vtkPolyData>> polyList;
 		polyList.push_back(transformImplantCup);
-
 		TestVTK::show(pelvis3D_Real, polyList);
 
 	}
@@ -4843,9 +4842,9 @@ int main()
 	//std::cout << Point(result) << "; " << proj << std::endl;
 
 	//PolydataInterception();
-	//TEST_PKA::MatchPKA();
+	TEST_PKA::MatchPKA();
 	//TEST_PKA::MatchPKAThreePlanes();
-	HipFemoralRegistration();
+	//HipFemoralRegistration();
 
 	//double pnt[3] = { 0, 0, 0 };
 	//Plane planeTemp;

@@ -627,11 +627,6 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurPCAAngle(
 
 	return getITKFemurTransform();
 
-
-
-
-
-
     //Point axisRotation = knee->getDirectVectorFemurAxis();
 
     //if (knee->getIsRight() == true)

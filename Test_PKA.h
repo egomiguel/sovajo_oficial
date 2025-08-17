@@ -508,6 +508,7 @@ namespace TEST_PKA
 		matchFinalInfo.SetTibiaProtrudes(-5);
 		matchFinalInfo.SetFemurProtrudesAxial(-5);
 		matchFinalInfo.SetFemurProtrudesCoronal(-5);
+		matchFinalInfo.setFemurPCAAngle(0);
 
 		std::cout << "777777777777777777777777777777777777777777" << std::endl;
 

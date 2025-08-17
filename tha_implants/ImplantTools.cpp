@@ -2744,6 +2744,15 @@ void ImplantTools::updateTransformByRotation(cv::Mat& currentRotation, cv::Mat& 
 	currentTranslation = currentTranslation - diff.ToMatPoint();
 }
 
+void ImplantTools::updateTranslationByRotation(cv::Mat& currentTranslation, const cv::Mat& newRotation, const Point& pRotationCenterPointBase, const Point& pRotationCenterPointRef)
+{
+	auto fixPointMovedMat = newRotation * pRotationCenterPointBase.ToMatPoint() + currentTranslation;
+	Point fixPointMoved = Point(fixPointMovedMat);
+
+	Point diff = fixPointMoved - pRotationCenterPointRef;
+	currentTranslation = currentTranslation - diff.ToMatPoint();
+}
+
 vtkSmartPointer<vtkPolyData> ImplantTools::getPolyLine(const std::vector<Point>& sortPoints)
 {
 	vtkNew<vtkPoints> points;

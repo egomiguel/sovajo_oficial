@@ -1010,18 +1010,18 @@ itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::setCupAngles(double
 	cv::Mat implantMatrix = cv::Mat(implantVectors.size(), 3, CV_64F, implantVectors.data());
 	cv::Mat pelvisMatrix = cv::Mat(pelvisVectors.size(), 3, CV_64F, pelvisVectors.data());
 
-	//cv::Mat CenterBefore = mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint() + mTranslationCup;
+	cv::Mat CenterBefore = mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint() + mTranslationCup;
 
 	cv::Mat inverse = (implantMatrix.t()).inv();
-	cv::Mat rotation = (pelvisMatrix.t()) * inverse;
+	mRotationCup = (pelvisMatrix.t()) * inverse;
 
-	ImplantTools::updateTransformByRotation(mRotationCup, mTranslationCup, mImplantCup.getCenterOfRotationImplant(), rotation);
+	ImplantTools::updateTranslationByRotation(mTranslationCup, mRotationCup, mImplantCup.getCenterOfRotationImplant(), CenterBefore);
 
-	//cv::Mat CenterAfter = mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint() + mTranslationCup;
+	/*cv::Mat CenterAfter = mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint() + mTranslationCup;
 
-	//cv::Mat diff = CenterAfter - CenterBefore;
+	cv::Mat diff = CenterAfter - CenterBefore;
 	
-	//mTranslationCup = mTranslationCup - diff;
+	mTranslationCup = mTranslationCup - diff;*/
 
 	return getITKCupTransform();
 }

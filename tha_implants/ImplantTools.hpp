@@ -170,6 +170,8 @@ namespace THA
 			vtkSmartPointer<vtkPolyData> getPolyLine(const std::vector<Point>& sortPoints);
 
 			void updateTransformByRotation(cv::Mat& currentRotation, cv::Mat& currentTranslation, const Point& pRotationCenterPoint, const cv::Mat& pRotationUpdate);
+
+			void updateTranslationByRotation(cv::Mat& currentTranslation, const cv::Mat& newRotation, const Point& pRotationCenterPointBase, const Point& pRotationCenterPointRef);
 		};
 	}
 }
