@@ -472,6 +472,7 @@ namespace TEST_PKA
 		*/
 		itk::Rigid3DTransform<double>::Pointer tibiaTransformIn = itk::VersorRigid3DTransform<double>::New();
 		itk::Rigid3DTransform<double>::Pointer tibiaTransformOut = itk::VersorRigid3DTransform<double>::New();
+		itk::Rigid3DTransform<double>::Pointer tibiaSideTransformOut = itk::VersorRigid3DTransform<double>::New();
 
 		itk::Rigid3DTransform<double>::Pointer femurTransformIn = itk::VersorRigid3DTransform<double>::New();
 		itk::Rigid3DTransform<double>::Pointer femurTransformOut = itk::VersorRigid3DTransform<double>::New();
@@ -484,7 +485,7 @@ namespace TEST_PKA
 
 		std::vector<PointTypeITK> hullFemur = femurImplantMatch.GetHullPointsOnePlane(femurTransformIn, femurTransformOut, UKA::IMPLANTS::FemurImplantMatch::KOnePlaneAnteriorAndDistalCurve);
 		
-		UKA::IMPLANTS::TibiaImplantMatch::HullPoints hullTemp = tibiaImplantMatch.GetHullPoints(tibiaTransformIn, tibiaTransformOut);
+		UKA::IMPLANTS::TibiaImplantMatch::HullPoints hullTemp = tibiaImplantMatch.GetHullPoints(tibiaTransformIn, tibiaTransformOut, tibiaSideTransformOut);
 		std::vector<PointTypeITK> hull = hullTemp.sidePlanePoints;
 		
 		std::cout << "Hull size: " << hull.size() << std::endl;

@@ -1492,7 +1492,10 @@ vtkSmartPointer<vtkPolyData> TibiaImplantMatch::getContour(const vtkSmartPointer
 	return contour;
 }
 
-TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, double distance, double distancePcl, double distanceSide, double sidePlaneWidth, double closeCurveLateral, double closeCurveMedial, int amount) const
+TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, 
+	itk::Rigid3DTransform<>::Pointer pPlateauTransformOut, itk::Rigid3DTransform<>::Pointer pSideTransformOut, 
+	double distance, double distancePcl, double distanceSide, double sidePlaneWidth, double closeCurveLateral, 
+	double closeCurveMedial, int amount) const
 {
 	TibiaImplantMatch::HullPoints HullPointsResult;
 	std::vector<PointTypeITK> hull, hullSidePlane;
@@ -2086,6 +2089,10 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 	sidePlanePKA.push_back(refBonePclOnContour + sidePlaneWidth * vectorToUP);
 	sidePlanePKA.push_back(refBoneTuberOnContour + sidePlaneWidth * vectorToUP);
 
+	Plane myPlaneSide = myPlane.getPerpendicularPlane(refBoneTuberOnContour, refBonePclOnContour);
+	auto hullCenterSideTemp = (refBoneTuberOnContour + (refBonePclOnContour + sidePlaneWidth * vectorToUP)) / 2;
+	Point hullCenterSide = Point(hullCenterSideTemp);
+
 	/////////////////////////////////////////////////////////
 	//ImplantTools::show(contourMax, sidePlanePKA);
 	//ImplantTools::show(contourMax, sidePlanePKA, true);
@@ -2097,8 +2104,6 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 	itk::Vector< double, 3 > translate, translateSide;
 	//ImplantTools::fitEllipse(finalSplinePointsPKA, myPlane.getNormalVector(), hullCenter);
 	hullCenter = ImplantTools::getPolygonCenter(finalSplinePointsPKA, myPlane.getNormalVector());
-	Plane myPlaneSide = myPlane.getPerpendicularPlane(refBoneTuberOnContour, refBonePclOnContour);
-	auto hullCenterSide = ImplantTools::getPolygonCenter(sidePlanePKA, myPlaneSide.getNormalVector());
 
 	/*auto vectorTest = finalSplinePointsPKA;
 	vectorTest.push_back(hullCenter);
@@ -2142,8 +2147,11 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 	rotationITK[2][1] = myRotation.at<double>(2, 1);
 	rotationITK[2][2] = myRotation.at<double>(2, 2);
 
-	pTransformOut->SetMatrix(rotationITK);
-	pTransformOut->SetOffset(translate);
+	pPlateauTransformOut->SetMatrix(rotationITK);
+	pPlateauTransformOut->SetOffset(translate);
+
+	pSideTransformOut->SetMatrix(rotationITK);
+	pSideTransformOut->SetOffset(translateSide);
 
 	HullPointsResult.implantPoints = hull;
 	HullPointsResult.sidePlanePoints = hullSidePlane;
