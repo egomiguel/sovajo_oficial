@@ -30,7 +30,7 @@ void FemurImplantThreePlane::init(const Plane& pPosterior, const Plane& pCenter,
 	mCenter.reverseByPoint(mRodTopPoint);
 	mAnterior.reverseByPoint(mRodTopPoint);
 	mVectorAP = mPosterior.getNormalVector();
-	mVectorTEA = mPosterior.getNormalVector().cross(mCenter.getNormalVector());
+	mVectorTEA = mCenter.getNormalVector().cross(mPosterior.getNormalVector());
 	mVectorTEA.normalice();
 	Point crossBase = mVectorAP.cross(mVectorTEA);
 	mDistal.init(crossBase, midPoint);

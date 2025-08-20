@@ -4842,7 +4842,7 @@ int main()
 	//std::cout << Point(result) << "; " << proj << std::endl;
 
 	//PolydataInterception();
-	TEST_PKA::MatchPKA();
+	TEST_PKA::MatchPKAThreePlanes();
 	//TEST_PKA::MatchPKAThreePlanes();
 	//HipFemoralRegistration();
 

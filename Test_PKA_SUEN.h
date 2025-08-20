@@ -282,6 +282,81 @@ namespace TEST_PKA_SUEN_NEW
 		interactor->Start();
 
 	}
+
+	void testMatchAgosto()
+	{
+		QString dir = "D:\\sovajo\\Test_Cases\\octubre_2025\\Test_Implants";
+		auto landmarks = readLandmarks(QString("%1\\landmark.json").arg(dir));
+
+		auto side = UKA::IMPLANTS::KneeSideEnum::KRight;
+		auto surgerySide = UKA::IMPLANTS::SurgerySideEnum::KLateral;
+		UKA::IMPLANTS::Knee knee;
+		auto ankleCenter = landmarks.at(kMedialMalleolus) + (landmarks.at(kLateralMalleolus) - landmarks.at(kMedialMalleolus))*0.45;;
+
+		auto femurData = readVTKData(QString("%1\\femur.vtk").arg(dir));
+		auto tibiaData = readVTKData(QString("%1\\tibia.vtk").arg(dir));
+		auto femurImplantData = readSTLData(QString("%1\\femur_LM_RL_SZ1.stl").arg(dir));
+		auto tibiaImplant = createTibiaImplant(QString("%1\\tibia_LM_RL_A+_A#8mm_data.json").arg(dir));
+		auto femurThreePlaneImplant = createFemurThreeImplant(femurImplantData, QString("%1\\femur_LM_RL_SZ1_data.json").arg(dir));
+		knee.init(toPoint(landmarks[LandmarkType::kHipCenter]), toPoint(landmarks[LandmarkType::kFemurKneeCenter]),
+			toPoint(landmarks[LandmarkType::kLateralEpicondyle]), toPoint(landmarks[LandmarkType::kMedialEpicondyle]),
+			toPoint(landmarks[LandmarkType::kTibiaKneeCenter]), toPoint(landmarks[LandmarkType::kTibiaTuberosity]),
+			toPoint(landmarks[LandmarkType::kPCLInsertionPoint]), toPoint(ankleCenter), femurData, tibiaData, side, surgerySide, false);
+
+		knee.setLateralAndMedialInferiorFemurPoints(toPoint(landmarks[LandmarkType::kFemurDistalLateral]), toPoint(landmarks[LandmarkType::kFemurDistalMedial]));
+		knee.setLateralAndMedialPosteriorFemurPoints(toPoint(landmarks[LandmarkType::kFemurLateralPosteriorCondyle]), toPoint(landmarks[LandmarkType::kFemurMedialPosteriorCondyle]));
+		knee.setLateralAndMedialPlateauPoints(toPoint(landmarks[LandmarkType::kTibiaLateralPlatformPoint]), toPoint(landmarks[LandmarkType::kTibiaMedialPlatformPoint]));
+
+		UKA::IMPLANTS::TibiaImplantMatch tibiaMatch;
+		tibiaMatch.init(*tibiaImplant, knee);
+		auto implantToTibia = toItkTransform(tibiaMatch.GetRotationMatrix(), tibiaMatch.GetTranslationMatrix());
+
+		UKA::IMPLANTS::FemurImplantMatch femurMatch;
+		femurMatch.init(femurThreePlaneImplant.get(), knee);
+		auto implantToFemur = toItkTransform(femurMatch.GetRotationMatrix(), femurMatch.GetTranslationMatrix());
+
+		UKA::IMPLANTS::ImplantsMatchFinalInfo finalMatch(&knee, femurThreePlaneImplant.get(), *tibiaImplant, implantToFemur.GetPointer(), implantToTibia.GetPointer());
+		finalMatch.test();
+		//std::cout << "FemurVarusAngle:" << finalMatch.GetFemurVarusAngle() << std::endl;
+		//std::cout << "FemurFlexionAngle:" << finalMatch.GetFemurFlexionAngle() << std::endl;
+		//ERROR:this two angle is so big!
+		//std::cout << "FemurPCAAngle:" << finalMatch.GetFemurImplantPCAAngle() << std::endl;
+		//std::cout << "FemurTEAAngle:" << finalMatch.GetFemurImplantTEAAngle() << std::endl;
+		//
+		//finalMatch.setFemurVarusAngle(0);
+		//finalMatch.setFemurFlexionAngle(0);
+		//ERROR
+		finalMatch.setFemurPCAAngle(0);
+		auto implantToFemurNew = finalMatch.getITKFemurTransform();
+		vtkNew<vtkActor> femurActor;
+		femurActor->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
+		femurActor->GetMapper()->SetInputDataObject(femurData);
+		femurActor->GetProperty()->SetColor(1, 1, 1);
+		femurActor->GetProperty()->SetOpacity(0.7);
+
+		vtkNew<vtkActor> femurImplantActor;
+		femurImplantActor->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
+		femurImplantActor->GetMapper()->SetInputDataObject(femurImplantData);
+		femurImplantActor->GetProperty()->SetColor(0, 1, 0);
+		femurImplantActor->SetUserTransform(toVtkTransform(implantToFemurNew->GetMatrix(), implantToFemurNew->GetTranslation()));
+
+		vtkNew<vtkRenderer> render;
+		render->AddActor(femurActor);
+		render->AddActor(femurImplantActor);
+
+		vtkNew<vtkRenderWindow> renderWindow;
+		renderWindow->AddRenderer(render);
+		auto camera = render->GetActiveCamera();
+		camera->SetFocalPoint(0, 0, 0);
+		camera->SetPosition(0, -1, 0);
+		camera->SetViewUp(0, 0, 1);
+		render->ResetCamera();
+		renderWindow->Render();
+		vtkNew<vtkRenderWindowInteractor> interactor;
+		renderWindow->SetInteractor(interactor);
+		interactor->Start();
+
+	}
 }
 
 
