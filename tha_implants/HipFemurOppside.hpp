@@ -18,6 +18,9 @@ namespace THA
 			void init(const Point& headCenter, const Point& canalCenter, const Point& lesserTrochanter,
 				 const Point& femurKneeCenter);
 
+			void init(const Point& headCenter, const Point& canalDistalCenter, const Point& canalProximalCenter, 
+				const Point& lesserTrochanter, const Point& femurKneeCenter); 
+
 			Point getHeadCenter() const;
 			Point getLesserTrochanter() const;
 			Point getCanalAxisVectorInfSup() const;

@@ -27,6 +27,24 @@ void HipFemurOppside::init(const Point& headCenter, const Point& canalCenter, co
 	isInit = true;
 }
 
+void HipFemurOppside::init(const Point& headCenter, const Point& canalDistalCenter, const Point& canalProximalCenter, 
+	const Point& lesserTrochanter, const Point& femurKneeCenter)
+{
+	if (isInit == true)
+	{
+		throw ImplantExceptionCode::ALREADY_INITIALIZED_HIP_FEMUR;
+	}
+
+	mHeadCenter = headCenter;
+	mCanalAxisPoint = (canalDistalCenter + canalProximalCenter) / 2;
+	mLesserTrochanter = lesserTrochanter;
+	mCanalAxisVectorInfSup = canalProximalCenter - canalDistalCenter;
+	mCanalAxisVectorInfSup.normalice();
+	mKneeCenter = femurKneeCenter;
+	isInit = true;
+}
+
+
 Point HipFemurOppside::getHeadCenter() const
 {
 	return mHeadCenter;

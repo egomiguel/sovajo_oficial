@@ -5,6 +5,7 @@
 #include "Test_PKA.h"
 #include "Test_PKA_SUEN.h"
 #include "test/segmentationTest.cpp"
+#include "Test_THA.h"
 
 #include "implants/FemurImplantMatch.hpp"
 #include "implants/TibiaImplantMatch.hpp"
@@ -4842,8 +4843,8 @@ int main()
 	//std::cout << Point(result) << "; " << proj << std::endl;
 
 	//PolydataInterception();
-	TEST_PKA::MatchPKAThreePlanes();
 	//TEST_PKA::MatchPKAThreePlanes();
+	TEST_THA_SUEN::testImplant2();
 	//HipFemoralRegistration();
 
 	//double pnt[3] = { 0, 0, 0 };

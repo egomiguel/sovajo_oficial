@@ -25,7 +25,7 @@ void HipFemur::init(const Point& headCenter, const Point& neckCenter, const Poin
 	mMedialEpicondyle = medialEpicondyle;
 	mLateralEpicondyle = lateralEpicondyle;
 	mFemur = femurPoly;
-	mCanalAxisPoint = canalProximalCenter;
+	mCanalAxisPoint = (canalProximalCenter + canalDistalCenter) / 2;
 	mCanalAxisVectorInfSup = canalProximalCenter - canalDistalCenter;
 	mCanalAxisVectorInfSup.normalice();
 	mKneeCenter = femurKneeCenter;

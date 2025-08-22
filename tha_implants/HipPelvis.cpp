@@ -162,11 +162,11 @@ double HipPelvis::getCoronalTiltAngle(const Plane& pCoronalCT) const
 
 	if (crossVector.dot(getPelvisVectorASIS()) >= 0)
 	{
-		return angle;
+		return -angle;
 	}
 	else
 	{
-		return -angle;
+		return angle;
 	}
 }
 
@@ -208,7 +208,7 @@ cv::Mat HipPelvis::getFemurMechanicalAlignmentRotation() const
 	mechanicalAxis.normalice();
 	auto rotation1 = ImplantTools::GetGeneralRotateTransformVectors(mechanicalAxis, axialPlaneNormal);
 
-	Point refAP;
+	/*Point refAP;
 	if (mSide == PelvisSide::RIGHT_SIDE)
 	{
 		refAP = mechanicalAxis.cross(femurObj.getCanalAxisVectorInfSup());
@@ -224,8 +224,8 @@ cv::Mat HipPelvis::getFemurMechanicalAlignmentRotation() const
 	refAP.normalice();
 
 	auto rotation2 = ImplantTools::GetGeneralRotateTransformVectors(refAP, getPelvisVectorAP());
-	auto rotation = rotation2 * rotation1;
-	return rotation;
+	auto rotation = rotation2 * rotation1;*/
+	return rotation1;
 }
 
 cv::Mat HipPelvis::getFemurMechanicalAlignmentRotation(const Point& pCupCenter, const Point& pTranslation) const
@@ -237,7 +237,7 @@ cv::Mat HipPelvis::getFemurMechanicalAlignmentRotation(const Point& pCupCenter, 
 	mechanicalAxis.normalice();
 	auto rotation1 = ImplantTools::GetGeneralRotateTransformVectors(mechanicalAxis, axialPlaneNormal);
 
-	Point refAP;
+	/*Point refAP;
 	if (mSide == PelvisSide::RIGHT_SIDE)
 	{
 		refAP = mechanicalAxis.cross(femurObj.getCanalAxisVectorInfSup());
@@ -253,8 +253,8 @@ cv::Mat HipPelvis::getFemurMechanicalAlignmentRotation(const Point& pCupCenter, 
 	refAP.normalice();
 
 	auto rotation2 = ImplantTools::GetGeneralRotateTransformVectors(refAP, getPelvisVectorAP());
-	auto rotation = rotation2 * rotation1;
-	return rotation;
+	auto rotation = rotation2 * rotation1;*/
+	return rotation1;
 }
 
 cv::Mat HipPelvis::getFemurMechanicalAlignmentRotationOppsite() const
@@ -266,7 +266,7 @@ cv::Mat HipPelvis::getFemurMechanicalAlignmentRotationOppsite() const
 	mechanicalAxis.normalice();
 	auto rotation1 = ImplantTools::GetGeneralRotateTransformVectors(mechanicalAxis, axialPlaneNormal);
 
-	Point refAP;
+	/*Point refAP;
 	if (mSide == PelvisSide::RIGHT_SIDE)
 	{
 		refAP = femurObj.getCanalAxisVectorInfSup().cross(mechanicalAxis);
@@ -282,8 +282,8 @@ cv::Mat HipPelvis::getFemurMechanicalAlignmentRotationOppsite() const
 	refAP.normalice();
 
 	auto rotation2 = ImplantTools::GetGeneralRotateTransformVectors(refAP, getPelvisVectorAP());
-	auto rotation = rotation2 * rotation1;
-	return rotation;
+	auto rotation = rotation2 * rotation1;*/
+	return rotation1;
 }
 
 cv::Mat HipPelvis::getFemurCanalAlignmentRotation() const
@@ -295,7 +295,7 @@ cv::Mat HipPelvis::getFemurCanalAlignmentRotation() const
 	mechanicalAxis.normalice();
 	auto rotation1 = ImplantTools::GetGeneralRotateTransformVectors(femurObj.getCanalAxisVectorInfSup(), axialPlaneNormal);
 
-	Point refAP;
+	/*Point refAP;
 	if (mSide == PelvisSide::RIGHT_SIDE)
 	{
 		refAP = mechanicalAxis.cross(femurObj.getCanalAxisVectorInfSup());
@@ -311,8 +311,8 @@ cv::Mat HipPelvis::getFemurCanalAlignmentRotation() const
 	refAP.normalice();
 
 	auto rotation2 = ImplantTools::GetGeneralRotateTransformVectors(refAP, getPelvisVectorAP());
-	auto rotation = rotation2 * rotation1;
-	return rotation;
+	auto rotation = rotation2 * rotation1;*/
+	return rotation1;
 }
 
 cv::Mat HipPelvis::getFemurCanalAlignmentRotation(const Point& pCupCenter, const Point& pTranslation) const
@@ -324,7 +324,7 @@ cv::Mat HipPelvis::getFemurCanalAlignmentRotation(const Point& pCupCenter, const
 	mechanicalAxis.normalice();
 	auto rotation1 = ImplantTools::GetGeneralRotateTransformVectors(femurObj.getCanalAxisVectorInfSup(), axialPlaneNormal);
 
-	Point refAP;
+	/*Point refAP;
 	if (mSide == PelvisSide::RIGHT_SIDE)
 	{
 		refAP = mechanicalAxis.cross(femurObj.getCanalAxisVectorInfSup());
@@ -340,8 +340,8 @@ cv::Mat HipPelvis::getFemurCanalAlignmentRotation(const Point& pCupCenter, const
 	refAP.normalice();
 
 	auto rotation2 = ImplantTools::GetGeneralRotateTransformVectors(refAP, getPelvisVectorAP());
-	auto rotation = rotation2 * rotation1;
-	return rotation;
+	auto rotation = rotation2 * rotation1;*/
+	return rotation1;
 }
 
 cv::Mat HipPelvis::getFemurCanalAlignmentRotationOppsite() const
@@ -353,7 +353,7 @@ cv::Mat HipPelvis::getFemurCanalAlignmentRotationOppsite() const
 	mechanicalAxis.normalice();
 	auto rotation1 = ImplantTools::GetGeneralRotateTransformVectors(femurObj.getCanalAxisVectorInfSup(), axialPlaneNormal);
 
-	Point refAP;
+	/*Point refAP;
 	if (mSide == PelvisSide::RIGHT_SIDE)
 	{
 		refAP = femurObj.getCanalAxisVectorInfSup().cross(mechanicalAxis);
@@ -369,8 +369,8 @@ cv::Mat HipPelvis::getFemurCanalAlignmentRotationOppsite() const
 	refAP.normalice();
 
 	auto rotation2 = ImplantTools::GetGeneralRotateTransformVectors(refAP, getPelvisVectorAP());
-	auto rotation = rotation2 * rotation1;
-	return rotation;
+	auto rotation = rotation2 * rotation1;*/
+	return rotation1;
 }
 
 double HipPelvis::getHipLengthDistance() const
@@ -379,10 +379,8 @@ double HipPelvis::getHipLengthDistance() const
 	auto rotation = getFemurMechanicalAlignmentRotation();
 
 	Point headCenter = femurObj.getHeadCenter();
-	cv::Mat headCenterRotation = rotation * headCenter.ToMatPoint();
-	Point translation = headCenter - Point(headCenterRotation);
+	cv::Mat refMat = headCenter.ToMatPoint() + rotation * (femurObj.getLesserTrochanter().ToMatPoint() - headCenter.ToMatPoint());
 
-	cv::Mat refMat = rotation * femurObj.getLesserTrochanter().ToMatPoint() + translation.ToMatPoint();
 	Point ref = mPlaneAPP.getProjectionPoint(Point(refMat));
 
 	Line lineASIS = Line::makeLineWithPoints(mRightASIS, mLeftASIS);
@@ -398,7 +396,7 @@ double HipPelvis::getHipLengthDistanceTest(const HipFemur& pFemurObj, const Plan
 	mechanicalAxis.normalice();
 	auto rotation1 = ImplantTools::GetGeneralRotateTransformVectors(mechanicalAxis, axialPlaneNormal);
 
-	Point refAP;
+	/*Point refAP;
 	if (mSide == PelvisSide::RIGHT_SIDE)
 	{
 		refAP = mechanicalAxis.cross(femurObj.getCanalAxisVectorInfSup());
@@ -414,16 +412,11 @@ double HipPelvis::getHipLengthDistanceTest(const HipFemur& pFemurObj, const Plan
 	refAP.normalice();
 
 	auto rotation2 = ImplantTools::GetGeneralRotateTransformVectors(refAP, getPelvisVectorAP());
-	auto rotation = rotation2 * rotation1;
+	auto rotation = rotation2 * rotation1;*/
 
 	Point headCenter = femurObj.getHeadCenter();
-
-	cv::Mat headCenterRotation = rotation * headCenter.ToMatPoint();
-	Point translation = headCenter - Point(headCenterRotation);
-
-	Point ref = femurObj.getLesserTrochanter();
-	cv::Mat refMat = rotation * ref.ToMatPoint() + translation.ToMatPoint();
-	ref = pPlaneAPP.getProjectionPoint(Point(refMat));
+	cv::Mat refMat = headCenter.ToMatPoint() + rotation1 * (femurObj.getLesserTrochanter().ToMatPoint() - headCenter.ToMatPoint());
+	Point ref = pPlaneAPP.getProjectionPoint(Point(refMat));
 
 	Line lineASIS = Line::makeLineWithPoints(pRightASIS, pLeftASIS);
 	return lineASIS.getDistanceFromPoint(ref);
@@ -435,37 +428,25 @@ double HipPelvis::getHipLengthDistanceOppsite() const
 	auto rotation = getFemurMechanicalAlignmentRotationOppsite();
 
 	Point headCenter = femurObj.getHeadCenter();
-	cv::Mat headCenterRotation = rotation * headCenter.ToMatPoint();
-	Point translation = headCenter - Point(headCenterRotation);
 
-	cv::Mat refMat = rotation * femurObj.getLesserTrochanter().ToMatPoint() + translation.ToMatPoint();
+	cv::Mat refMat = headCenter.ToMatPoint() + rotation * (femurObj.getLesserTrochanter().ToMatPoint() - headCenter.ToMatPoint());
 	Point ref = mPlaneAPP.getProjectionPoint(refMat);
 
 	Line lineASIS = Line::makeLineWithPoints(mRightASIS, mLeftASIS);
 	return lineASIS.getDistanceFromPoint(ref);
 }
 
+
 double HipPelvis::getCombinedOffsetDistance() const
 {
 	auto femurObj = mFemurOperationSide;
-	/*Point canalAxisVector = mPlaneAPP.getProjectionVector(femurObj.getCanalAxisVectorInfSup());
-	canalAxisVector.normalice();
-	Point axialPlaneNormal = getPelvisVectorInfSup();
-
-	auto rotation = ImplantTools::GetGeneralRotateTransformVectors(canalAxisVector, axialPlaneNormal);*/
 
 	auto rotation = getFemurCanalAlignmentRotation();
 	Point headCenter = femurObj.getHeadCenter();
 
-	cv::Mat headCenterRotation = rotation * headCenter.ToMatPoint();
-	Point translation = headCenter - Point(headCenterRotation);
-
-	//Point canalPoint = mPlaneAPP.getProjectionPoint(femurObj.getCanalAxisPoint());
-
-	cv::Mat canalPointMat = rotation * femurObj.getCanalAxisPoint().ToMatPoint() + translation.ToMatPoint();
+	cv::Mat canalPointMat = headCenter.ToMatPoint() + rotation * (femurObj.getCanalAxisPoint().ToMatPoint() - headCenter.ToMatPoint());
 	Point canalPoint = mPlaneAPP.getProjectionPoint(Point(canalPointMat));
 
-	//Point centerASIS = (getRightASIS() + getLeftASIS()) / 2.;
 	Line midLine(getPelvisVectorInfSup(), mPubicJoin);
 	
 	return midLine.getDistanceFromPoint(canalPoint);
@@ -474,23 +455,13 @@ double HipPelvis::getCombinedOffsetDistance() const
 double HipPelvis::getCombinedOffsetDistanceOppsite() const
 {
 	auto femurObj = mFemurOppsite;
-	/*Point canalAxisVector = mPlaneAPP.getProjectionVector(femurObj.getCanalAxisVectorInfSup());
-	canalAxisVector.normalice();
-	Point axialPlaneNormal = getPelvisVectorInfSup();
-
-	auto rotation = ImplantTools::GetGeneralRotateTransformVectors(canalAxisVector, axialPlaneNormal);*/
-
 	auto rotation = getFemurCanalAlignmentRotationOppsite();
 
 	Point headCenter =femurObj.getHeadCenter();
 
-	cv::Mat headCenterRotation = rotation * headCenter.ToMatPoint();
-	Point translation = headCenter - Point(headCenterRotation);
-
-	cv::Mat canalPointMat = rotation * femurObj.getCanalAxisPoint().ToMatPoint() + translation.ToMatPoint();
+	cv::Mat canalPointMat = headCenter.ToMatPoint() + rotation * (femurObj.getCanalAxisPoint().ToMatPoint() - headCenter.ToMatPoint());
 	Point canalPoint = mPlaneAPP.getProjectionPoint(Point(canalPointMat));
 
-	//Point centerASIS = (getRightASIS() + getLeftASIS()) / 2.;
 	Line midLine(getPelvisVectorInfSup(), mPubicJoin);
 
 	return midLine.getDistanceFromPoint(canalPoint);
@@ -509,14 +480,8 @@ double HipPelvis::getHipLengthDistance(const Point& pHipHeadCenter, const cv::Ma
 	auto rotation = ImplantTools::GetGeneralRotateTransformVectors(mechanicalAxis, axialPlaneNormal);*/
 
 	auto rotation = getFemurMechanicalAlignmentRotation(pHipHeadCenter, femurMove);
-
-	Point headCenter = pHipHeadCenter;
-	cv::Mat headCenterRotation = rotation * headCenter.ToMatPoint();
-	Point translation = headCenter - Point(headCenterRotation);
-
-	Point ref = femurObj.getLesserTrochanter() + femurMove;
-	cv::Mat refMat = rotation * ref.ToMatPoint() + translation.ToMatPoint();
-	ref = mPlaneAPP.getProjectionPoint(Point(refMat));
+	cv::Mat refMat = pHipHeadCenter.ToMatPoint() + rotation * ((femurObj.getLesserTrochanter().ToMatPoint() + pFemurTranslation) - pHipHeadCenter.ToMatPoint());
+	Point ref = mPlaneAPP.getProjectionPoint(Point(refMat));
 
 	////////////////////////////////////////////////////////////////////////
 	
@@ -554,14 +519,8 @@ double HipPelvis::getCombinedOffsetDistance(const Point& pHipHeadCenter, const c
 
 	auto rotation = getFemurCanalAlignmentRotation(pHipHeadCenter, femurMove);
 
-	Point headCenter = pHipHeadCenter;
-	cv::Mat headCenterRotation = rotation * headCenter.ToMatPoint();
-	Point translation = headCenter - Point(headCenterRotation);
-
-	Point canalPoint = femurObj.getCanalAxisPoint() + femurMove;
-
-	cv::Mat canalPointMat = rotation * canalPoint.ToMatPoint() + translation.ToMatPoint();
-	canalPoint = mPlaneAPP.getProjectionPoint(Point(canalPointMat));
+	cv::Mat canalPointMat = pHipHeadCenter.ToMatPoint() + rotation * ((femurObj.getCanalAxisPoint().ToMatPoint() + pFemurTranslation) - pHipHeadCenter.ToMatPoint());
+	Point canalPoint = mPlaneAPP.getProjectionPoint(Point(canalPointMat));
 
 	//Point centerASIS = (getRightASIS() + getLeftASIS()) / 2.;
 	Line midLine(getPelvisVectorInfSup(), mPubicJoin);
@@ -573,7 +532,7 @@ double HipPelvis::getHipLengthDistance(const Point& pHipHeadCenter) const
 {
 	auto femurObj = mFemurOperationSide;
 
-	Point femurMove = pHipHeadCenter - femurObj.getHeadCenter();
+	Point femurMove = pHipHeadCenter - femurObj.getHeadCenter(); // check this!!!!
 
 	/*Point axialPlaneNormal = getPelvisVectorInfSup();
 	Point mechanicalAxis = pHipHeadCenter - (femurObj.getKneeCenter() + femurMove);
@@ -583,13 +542,8 @@ double HipPelvis::getHipLengthDistance(const Point& pHipHeadCenter) const
 
 	auto rotation = getFemurMechanicalAlignmentRotation(pHipHeadCenter, femurMove);
 
-	Point headCenter = pHipHeadCenter;
-	cv::Mat headCenterRotation = rotation * headCenter.ToMatPoint();
-	Point translation = headCenter - Point(headCenterRotation);
-
-	Point ref = femurObj.getLesserTrochanter() + femurMove;
-	cv::Mat refMat = rotation * ref.ToMatPoint() + translation.ToMatPoint();
-	ref = mPlaneAPP.getProjectionPoint(Point(refMat));
+	cv::Mat refMat = pHipHeadCenter.ToMatPoint() + rotation * ((femurObj.getLesserTrochanter().ToMatPoint() + femurMove.ToMatPoint()) - pHipHeadCenter.ToMatPoint());
+	Point ref = mPlaneAPP.getProjectionPoint(Point(refMat));
 
 	Line lineASIS = Line::makeLineWithPoints(mRightASIS, mLeftASIS);
 	return lineASIS.getDistanceFromPoint(ref);
@@ -608,14 +562,8 @@ double HipPelvis::getCombinedOffsetDistance(const Point& pHipHeadCenter) const
 
 	auto rotation = getFemurCanalAlignmentRotation(pHipHeadCenter, femurMove);
 
-	Point headCenter = pHipHeadCenter;
-	cv::Mat headCenterRotation = rotation * headCenter.ToMatPoint();
-	Point translation = headCenter - Point(headCenterRotation);
-
-	Point canalPoint = femurObj.getCanalAxisPoint() + femurMove;
-
-	cv::Mat canalPointMat = rotation * canalPoint.ToMatPoint() + translation.ToMatPoint();
-	canalPoint = mPlaneAPP.getProjectionPoint(Point(canalPointMat));
+	cv::Mat canalPointMat = pHipHeadCenter.ToMatPoint() + rotation * ((femurObj.getCanalAxisPoint().ToMatPoint() + femurMove.ToMatPoint()) - pHipHeadCenter.ToMatPoint());
+	Point canalPoint = mPlaneAPP.getProjectionPoint(Point(canalPointMat));
 
 	//Point centerASIS = (getRightASIS() + getLeftASIS()) / 2.;
 	Line midLine(getPelvisVectorInfSup(), mPubicJoin);

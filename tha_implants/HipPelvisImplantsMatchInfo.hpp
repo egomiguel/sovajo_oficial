@@ -52,6 +52,10 @@ namespace THA
 
 			double getCupAntversion() const;
 
+			double getCupInclination(const Plane& pSagital, const Plane& pCoronal) const;
+
+			double getCupAntversion(const Plane& pSagital, const Plane& pCoronal) const;
+
 			double getCupShiftSuperior() const;
 
 			double getCupShiftLateral() const;
@@ -62,6 +66,10 @@ namespace THA
 
 			double getCupAntversion(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
 
+			double getCupInclination(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform, const Plane& pSagital, const Plane& pCoronal) const;
+
+			double getCupAntversion(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform, const Plane& pSagital, const Plane& pCoronal) const;
+
 			double getCupShiftSuperior(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
 
 			double getCupShiftLateral(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
@@ -71,6 +79,10 @@ namespace THA
 			double getCupInclination(const Point& pVectorToHipCenter) const;
 
 			double getCupAntversion(const Point& pVectorToHipCenter) const;
+
+			double getCupInclination(const Point& pVectorToHipCenter, const Plane& pSagital, const Plane& pCoronal) const;
+
+			double getCupAntversion(const Point& pVectorToHipCenter, const Plane& pSagital, const Plane& pCoronal) const;
 
 			double getCupShiftSuperior(const Point& pCenterOfRotation) const;
 

@@ -138,6 +138,83 @@ double HipPelvisImplantsMatchInfo::getCupInclination() const
 	}
 }
 
+double HipPelvisImplantsMatchInfo::getCupInclination(const Plane& pSagital, const Plane& pCoronal) const
+{
+	Point referenceVector = pSagital.getNormalVector().cross(pCoronal.getNormalVector());
+	Plane axial;
+	axial.init(referenceVector, mPelvis.getFemurOperationSide().getKneeCenter());
+	axial.reverseByPoint(mPelvis.getPubicJoin());
+	referenceVector = axial.getNormalVector();
+
+	cv::Mat implantVectorMat = mRotationCup * mImplantCup.getVectorZ().ToMatPoint();
+	Point implantVector = Point(implantVectorMat);
+	implantVector.normalice();
+
+	Point vectorImplantProj = pCoronal.getProjectionVector(implantVector);
+	Point vectorBoneProj = pCoronal.getProjectionVector(referenceVector);
+	vectorImplantProj.normalice();
+	vectorBoneProj.normalice();
+
+	double angle = ImplantTools::getAngleBetweenVectorsDegree(vectorImplantProj, vectorBoneProj);
+
+	Plane sagital;
+	Point ref = mPelvis.getPubicJoin();
+	sagital.init(pSagital.getNormalVector(), ref);
+
+	ref = ref + 1000. * vectorImplantProj;
+
+	if (sagital.eval(ref) < 0)
+	{
+		return -angle;
+	}
+	else
+	{
+		return angle;
+	}
+}
+
+double HipPelvisImplantsMatchInfo::getCupInclination(const Point& pVectorToHipCenter, const Plane& pSagital, const Plane& pCoronal) const
+{
+	Point referenceVector = pSagital.getNormalVector().cross(pCoronal.getNormalVector());
+	Plane axial;
+	axial.init(referenceVector, mPelvis.getFemurOperationSide().getKneeCenter());
+	axial.reverseByPoint(mPelvis.getPubicJoin());
+	referenceVector = axial.getNormalVector();
+
+	Point implantVector = pVectorToHipCenter;
+	implantVector.normalice();
+
+	Point vectorImplantProj = pCoronal.getProjectionVector(implantVector);
+	Point vectorBoneProj = pCoronal.getProjectionVector(referenceVector);
+	vectorImplantProj.normalice();
+	vectorBoneProj.normalice();
+
+	double angle = ImplantTools::getAngleBetweenVectorsDegree(vectorImplantProj, vectorBoneProj);
+
+	Plane sagital;
+	Point ref = mPelvis.getPubicJoin();
+	sagital.init(pSagital.getNormalVector(), ref);
+
+	ref = ref + 1000. * vectorImplantProj;
+
+	if (sagital.eval(ref) < 0)
+	{
+		return -angle;
+	}
+	else
+	{
+		return angle;
+	}
+}
+
+double HipPelvisImplantsMatchInfo::getCupInclination(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform, const Plane& pSagital, const Plane& pCoronal) const
+{
+	auto vectorX = pImplantToBoneTransform->GetMatrix().GetVnlMatrix().get_column(0);
+	Point implantVector = -Point(vectorX[0], vectorX[1], vectorX[2]);
+
+	return getCupInclination(implantVector, pSagital, pCoronal);
+}
+
 double HipPelvisImplantsMatchInfo::getCupAntversion() const
 {
 	//auto pelvisTemp = mPelvis.getHipPelvisCopy(pTiltAngle);
@@ -172,6 +249,83 @@ double HipPelvisImplantsMatchInfo::getCupAntversion() const
 	{
 		return -angle;
 	}
+}
+
+double HipPelvisImplantsMatchInfo::getCupAntversion(const Plane& pSagital, const Plane& pCoronal) const
+{
+	Point referenceVector = pSagital.getNormalVector().cross(pCoronal.getNormalVector());
+	Plane axial;
+	axial.init(referenceVector, mPelvis.getFemurOperationSide().getKneeCenter());
+	axial.reverseByPoint(mPelvis.getPubicJoin());
+	referenceVector = axial.getNormalVector();
+
+	cv::Mat implantVectorMat = mRotationCup * mImplantCup.getVectorZ().ToMatPoint();
+	Point implantVector = Point(implantVectorMat);
+	implantVector.normalice();
+
+	Point vectorImplantProj = pSagital.getProjectionVector(implantVector);
+	Point vectorBoneProj = pSagital.getProjectionVector(referenceVector);
+	vectorImplantProj.normalice();
+	vectorBoneProj.normalice();
+
+	double angle = ImplantTools::getAngleBetweenVectorsDegree(vectorImplantProj, vectorBoneProj);
+
+	Plane coronal;
+	Point ref = mPelvis.getPubicJoin();
+	coronal.init(pCoronal.getNormalVector(), ref);
+	
+	ref = ref + 1000. * vectorImplantProj;
+
+	if (coronal.eval(ref) < 0)
+	{
+		return angle;
+	}
+	else
+	{
+		return -angle;
+	}
+}
+
+double HipPelvisImplantsMatchInfo::getCupAntversion(const Point& pVectorToHipCenter, const Plane& pSagital, const Plane& pCoronal) const
+{
+	Point referenceVector = pSagital.getNormalVector().cross(pCoronal.getNormalVector());
+	Plane axial;
+	axial.init(referenceVector, mPelvis.getFemurOperationSide().getKneeCenter());
+	axial.reverseByPoint(mPelvis.getPubicJoin());
+	referenceVector = axial.getNormalVector();
+
+	Point implantVector = pVectorToHipCenter;
+	implantVector.normalice();
+
+	Point vectorImplantProj = pSagital.getProjectionVector(implantVector);
+	Point vectorBoneProj = pSagital.getProjectionVector(referenceVector);
+	vectorImplantProj.normalice();
+	vectorBoneProj.normalice();
+
+	double angle = ImplantTools::getAngleBetweenVectorsDegree(vectorImplantProj, vectorBoneProj);
+
+	Plane coronal;
+	Point ref = mPelvis.getPubicJoin();
+	coronal.init(pCoronal.getNormalVector(), ref);
+
+	ref = ref + 1000. * vectorImplantProj;
+
+	if (coronal.eval(ref) < 0)
+	{
+		return angle;
+	}
+	else
+	{
+		return -angle;
+	}
+}
+
+double HipPelvisImplantsMatchInfo::getCupAntversion(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform, const Plane& pSagital, const Plane& pCoronal) const
+{
+	auto vectorX = pImplantToBoneTransform->GetMatrix().GetVnlMatrix().get_column(0);
+	Point implantVector = -Point(vectorX[0], vectorX[1], vectorX[2]);
+
+	return getCupAntversion(implantVector, pSagital, pCoronal);
 }
 
 double HipPelvisImplantsMatchInfo::getCupShiftSuperior() const
