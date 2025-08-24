@@ -89,6 +89,8 @@ namespace THA
 
 			void deletePlane();
 
+			Plane getCopy() const;
+
 		protected:
 			friend class FemurImplant;
 			friend class TibiaImplant;

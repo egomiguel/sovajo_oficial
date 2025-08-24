@@ -36,6 +36,8 @@ namespace THA
 
 			itk::Rigid3DTransform<>::Pointer setCupAngles(double pAbductionAngle, double pAnteversionAngle);
 
+			itk::Rigid3DTransform<>::Pointer setCupAngles(const Plane& pSagital, const Plane& pCoronal, double pAbductionAngle, double pAnteversionAngle);
+
 			itk::Vector< double, 3 > setCupTranslation(double pShifSuperior, double pShifLateral, double pShiftAnterior);
 
 			itk::Vector< double, 3 > setStemHeadTranslation(double pShifSuperior, double pShifLateral, double pShiftAnterior);

@@ -129,6 +129,13 @@ void Plane::init(const Point& normalVector, const Point& pPoint)
 	isInit = true;
 }
 
+Plane Plane::getCopy() const
+{
+	Plane temp;
+	temp.init(normalVector, mPoint);
+	return temp;
+}
+
 void Plane::deletePlane()
 {
     normalVector = Point(0.0, 0.0, 0.0);

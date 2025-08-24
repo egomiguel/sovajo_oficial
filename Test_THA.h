@@ -217,6 +217,18 @@ namespace TEST_THA_SUEN
 		return matrix;
 	}
 
+	itk::Rigid3DTransform<>::Pointer matchCupToAcetabulumCT(std::shared_ptr<THA::IMPLANTS::HipPelvisCupImplant> cupImplant,
+		std::shared_ptr<THA::IMPLANTS::HipPelvis> hipPelvis, double pAbductionAngle, double pAnteversionAngle)
+	{
+		THA::IMPLANTS::Plane sagital, coronal;
+		sagital.init(THA::IMPLANTS::Point(1, 0, 0), THA::IMPLANTS::Point(0, 0, 0));
+		coronal.init(THA::IMPLANTS::Point(0, 1, 0), THA::IMPLANTS::Point(0, 0, 0));
+		THA::IMPLANTS::HipPelvisCupImplantMatch cupMatch;
+		cupMatch.init(*hipPelvis, *cupImplant);
+		auto matrix = cupMatch.getTransform(sagital, coronal, pAbductionAngle, pAnteversionAngle, 0, 0, 0);
+		return matrix;
+	}
+
 	itk::Rigid3DTransform<>::Pointer matchStemToFemur(std::shared_ptr<THA::IMPLANTS::HipFemurStemImplant> stemImplant,
 		std::shared_ptr<THA::IMPLANTS::HipPelvis> hipPelvis)
 	{
@@ -287,10 +299,12 @@ namespace TEST_THA_SUEN
 		std::cout << hipPelvis->getCoronalTiltAngleDegree() << std::endl;
 
 		//
+		double inclination = 40;
+		double antVersion = -20;
 		auto cupImplant = createCupImplant(QString("%1/DTUCA56mm.json").arg(dataDir));
 		auto stemImplant = createHipFemurStemImplant(QString("%1/DTUCS8#.json").arg(dataDir));
 		auto headImplant = createHipFemurHeadImplant(QString("%1/CEH36mm_S.json").arg(dataDir));
-		auto cupToAcetabulumTransform = matchCupToAcetabulum(cupImplant, hipPelvis, 40, 20);
+		auto cupToAcetabulumTransform = matchCupToAcetabulumCT(cupImplant, hipPelvis, inclination, antVersion);
 		auto stemToFemurTransform = matchStemToFemur(stemImplant, hipPelvis);
 		auto headToStemTransform = matchHeadToStem(stemImplant, headImplant);
 		THA::IMPLANTS::HipPelvisImplantsMatchInfo matchInfo(*hipPelvis,

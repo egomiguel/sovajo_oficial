@@ -19,6 +19,8 @@ namespace THA
 
 			itk::Rigid3DTransform<>::Pointer getTransform(double pAbductionAngle = 40, double pAnteversionAngle = 20, double pShifSuperior = 0, double pShifLateral = 0, double pShiftAnterior = 0) const;
 
+			itk::Rigid3DTransform<>::Pointer getTransform(const Plane& pSagital, const Plane& pCoronal, double pAbductionAngle = 40, double pAnteversionAngle = 20, double pShifSuperior = 0, double pShifLateral = 0, double pShiftAnterior = 0) const;
+
 			void GetRobotTransform(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut) const;
 
 		private:

@@ -647,6 +647,73 @@ std::pair<Point, Point> HipPelvis::getAbductionAnteversionVectorsZX(const Point&
     return std::make_pair(resultAbduction, resultPointAnteversion);
 }
 
+Point HipPelvis::getAbductionAnteversionVectorRotate(const Plane& pSagital, const Plane& pCoronal, const Point& pCenterOfRotation, double pAbductionAngle, double pAnteversionAngle) const
+{
+	/*
+		The vector that goes from the base of the cup to its highest point is the one used as a reference to make the rotations.
+	*/
+
+	////////////////////////////////////////////// Abduction or inclination
+
+	Plane sagital, coronal, axial;
+	sagital = pSagital.getCopy();
+	coronal = pCoronal.getCopy();
+	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mFemurOperationSide.getKneeCenter());
+
+	axial.reverseByPoint(mPubicJoin);
+	sagital.movePlane(mRightASIS);
+	sagital.reverseByPoint(mLeftASIS);
+	coronal.reverseByNormal(axial.getNormalVector().cross(sagital.getNormalVector()));
+	coronal.movePlane(getPubicJoin());
+
+	Point rotateVector = axial.getNormalVector();
+	Point rotationAxis = coronal.getNormalVector(); //RotationAxis is AP
+
+	double angle = (pAbductionAngle * PI) / 180.0;
+	cv::Mat rotMatrix = ImplantTools::getRotateMatrix(rotationAxis, angle);
+
+	cv::Mat resultMat = rotMatrix * rotateVector.ToMatPoint();
+	Point resultAbduction = Point(resultMat);
+	resultAbduction.normalice();
+
+	////////////////////////////////////////////// Anteversion
+	rotateVector = resultAbduction;
+	rotationAxis = coronal.getNormalVector().cross(rotateVector);
+	angle = (pAnteversionAngle * PI) / 180.0;
+	rotMatrix = ImplantTools::getRotateMatrix(rotationAxis, angle);
+	double controlAngle = angle;
+	double epsilon = 1e-9;
+	for (int i = 0; i < 10; i++)
+	{
+		cv::Mat moveVector = rotMatrix * rotateVector.ToMatPoint();
+		auto projVector = sagital.getProjectionVector(Point(moveVector));
+		double tempAngle = ImplantTools::getAngleBetweenVectors(projVector, axial.getNormalVector());
+
+		Point ref = getPubicJoin() + 1000. * projVector;
+
+		if (coronal.eval(ref) < 0)
+		{
+			tempAngle = -tempAngle;
+		}
+
+		double diff = angle - tempAngle;
+		if (std::abs(diff) > epsilon)
+		{
+			controlAngle += controlAngle * diff / tempAngle;
+			rotMatrix = ImplantTools::getRotateMatrix(rotationAxis, controlAngle);
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	resultMat = rotMatrix * resultAbduction.ToMatPoint();
+	resultAbduction = Point(resultMat);
+	resultAbduction.normalice();
+	return resultAbduction;
+}
+
 std::pair<cv::Point3d, double> HipPelvis::getNativeCenterOfRotation(const std::vector<Point>& pPoints)
 {
     std::pair<cv::Point3d, double> result = ImplantTools::fitSphere(pPoints);

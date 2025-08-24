@@ -68,6 +68,7 @@ namespace THA
 			double getNeckShaftAngle() const;
 
 			std::pair<Point, Point> getAbductionAnteversionVectorsZX(const Point& pCenterOfRotation, double pAbductionAngle, double pAnteversionAngle) const;
+			Point getAbductionAnteversionVectorRotate(const Plane& pSagital, const Plane& pCoronal, const Point& pCenterOfRotation, double pAbductionAngle, double pAnteversionAngle) const;
 			Point getPubicJoin() const;
 			PelvisSide getSide() const;
 
