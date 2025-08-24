@@ -603,11 +603,11 @@ double HipPelvis::getCombinedOffsetDistance(const cv::Mat& pRotation, const cv::
 }
 */
 
+/*
 std::pair<Point, Point> HipPelvis::getAbductionAnteversionVectorsZX(const Point& pCenterOfRotation, double pAbductionAngle, double pAnteversionAngle) const
 {
-	/*
-		The vector that goes from the base of the cup to its highest point is the one used as a reference to make the rotations.
-	*/
+	
+	//The vector that goes from the base of the cup to its highest point is the one used as a reference to make the rotations.
 
 	////////////////////////////////////////////// Abduction or incination
 
@@ -646,6 +646,7 @@ std::pair<Point, Point> HipPelvis::getAbductionAnteversionVectorsZX(const Point&
 
     return std::make_pair(resultAbduction, resultPointAnteversion);
 }
+*/
 
 Point HipPelvis::getAbductionAnteversionVectorRotate(const Plane& pSagital, const Plane& pCoronal, const Point& pCenterOfRotation, double pAbductionAngle, double pAnteversionAngle) const
 {
