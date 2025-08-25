@@ -222,7 +222,7 @@ namespace TEST_THA_SUEN
 	{
 		THA::IMPLANTS::Plane sagital, coronal;
 		sagital.init(THA::IMPLANTS::Point(1, 0, 0), THA::IMPLANTS::Point(0, 0, 0));
-		coronal.init(THA::IMPLANTS::Point(0, 1, 0), THA::IMPLANTS::Point(0, 0, 0));
+		coronal.init(THA::IMPLANTS::Point(0, -1, 0), THA::IMPLANTS::Point(0, 0, 0));
 		THA::IMPLANTS::HipPelvisCupImplantMatch cupMatch;
 		cupMatch.init(*hipPelvis, *cupImplant);
 		auto matrix = cupMatch.getTransform(sagital, coronal, pAbductionAngle, pAnteversionAngle, 0, 0, 0);
@@ -266,7 +266,7 @@ namespace TEST_THA_SUEN
 			cupToAcetabulumTransform, stemToFemurTransform, headToStemTransform);
 		auto defaultTiltAngle = hipPelvis->getCoronalTiltAngleDegree();
 		std::cout << "pelvis tilt angle:" << defaultTiltAngle << std::endl;
-		matchInfo.setPelvisTiltAngleDegree(defaultTiltAngle + 1);
+		//matchInfo.setPelvisTiltAngleDegree(defaultTiltAngle + 1);
 		auto newCupToAcetabulumTransform = matchInfo.setCupAngles(40, 20);
 
 	}
@@ -299,7 +299,7 @@ namespace TEST_THA_SUEN
 		std::cout << hipPelvis->getCoronalTiltAngleDegree() << std::endl;
 
 		//
-		double inclination = 40;
+		double inclination = -40;
 		double antVersion = -20;
 		auto cupImplant = createCupImplant(QString("%1/DTUCA56mm.json").arg(dataDir));
 		auto stemImplant = createHipFemurStemImplant(QString("%1/DTUCS8#.json").arg(dataDir));
@@ -318,7 +318,7 @@ namespace TEST_THA_SUEN
 
 		THA::IMPLANTS::Plane sagital, coronal;
 		sagital.init(THA::IMPLANTS::Point(1, 0, 0), THA::IMPLANTS::Point(0, 0, 0));
-		coronal.init(THA::IMPLANTS::Point(0, 1, 0), THA::IMPLANTS::Point(0, 0, 0));
+		coronal.init(THA::IMPLANTS::Point(0, -1, 0), THA::IMPLANTS::Point(0, 0, 0));
 
 		std::cout << "cupVersion CT:" << matchInfo.getCupAntversion(sagital, coronal) << std::endl;//20
 		std::cout << "cupInclination CT:" << matchInfo.getCupInclination(sagital, coronal) << std::endl;//40

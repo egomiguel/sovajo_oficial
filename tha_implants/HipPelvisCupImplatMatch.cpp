@@ -58,7 +58,17 @@ itk::Rigid3DTransform<>::Pointer HipPelvisCupImplantMatch::getTransform(double p
 {
 	Plane sagital;
 	sagital.init(mPelvis.getPelvisVectorASIS(), mPelvis.getPubicJoin());
+	sagital.movePlane(mPelvis.getRightASIS());
+	sagital.reverseByPoint(mPelvis.getLeftASIS());
+
 	Plane coronal = mPelvis.getCoronalPlaneAPP();
+
+	Plane axial;
+	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mPelvis.getFemurOperationSide().getKneeCenter());
+	axial.reverseByPoint(mPelvis.getPubicJoin());
+
+	coronal.reverseByNormal(axial.getNormalVector().cross(sagital.getNormalVector()));
+
 	return getTransform(sagital, coronal, pAbductionAngle, pAnteversionAngle, pShifSuperior, pShifLateral, pShiftAnterior);
 }
 

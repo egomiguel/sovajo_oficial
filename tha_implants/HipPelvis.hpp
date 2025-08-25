@@ -22,7 +22,7 @@ namespace THA
 			void init(const Point& pLeftASIS, const Point& pRightASIS, const Point& pLeftPubicTubercle, const Point& pRightPubicTubercle, const vtkSmartPointer<vtkPolyData>& pPelvis,
 					  const HipFemur& pFemur, const HipFemurOppside& pFemurOppside, PelvisSide pSide, const Point& pHipCenterOfRotation, const Plane& pCoronalCT);
 
-			void setCoronalTiltAngleDegree(double pTiltAngleDegree);
+			//void setCoronalTiltAngleDegree(double pTiltAngleDegree);
 			double getCoronalTiltAngleDegree() const;
 
 			void setHipCenterOfRotation(const Point& pHipCenterOfRotation);

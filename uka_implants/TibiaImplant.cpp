@@ -130,6 +130,14 @@ Point TibiaImplant::getPlaneSidePoint() const
 	return planeSidePoint;
 }
 
+Plane TibiaImplant::getPlaneSide() const
+{
+	Plane side = tibiaPlane.getPerpendicularPlane(pclPoint, tuberPoint);
+	side.movePlane(planeSidePoint);
+	side.reverseByPoint(exteriorPoint);
+	return side;
+}
+
 Point TibiaImplant::getExtremeSidePoint() const
 {
 	/*Line refLine = Line::makeLineWithPoints(pclPoint, tuberPoint);

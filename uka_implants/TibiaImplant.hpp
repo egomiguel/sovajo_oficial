@@ -51,6 +51,8 @@ namespace UKA
 
 			Point getPlaneSidePoint() const;
 
+			Plane getPlaneSide() const;
+
 		private:
 			Plane tibiaPlane;
 			Point centralPoint, centralPointUp, exteriorPoint, pclPoint, tuberPoint, 

@@ -24,7 +24,7 @@ namespace THA
 			
 			~HipPelvisImplantsMatchInfo();
 
-			void setPelvisTiltAngleDegree(double pTiltAngleDegree);
+			//void setPelvisTiltAngleDegree(double pTiltAngleDegree);
 
 			void setCupTransform(const itk::Rigid3DTransform<>::Pointer pImplantToBoneCupTransform);
 

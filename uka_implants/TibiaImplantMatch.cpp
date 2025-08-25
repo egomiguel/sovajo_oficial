@@ -1500,6 +1500,7 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 	TibiaImplantMatch::HullPoints HullPointsResult;
 	std::vector<PointTypeITK> hull, hullSidePlane;
 	Plane myPlane = finalTransformPlane(implant.getTibiaPlane(), pTransformIn);
+	Plane myPlaneSide = finalTransformPlane(implant.getPlaneSide(), pTransformIn);
 
 	Point normalTemp = knee.getAnkleCenter();
 	Point myNormalFinal = myPlane.getProjectionPoint(normalTemp) - normalTemp;
@@ -2083,13 +2084,25 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 
 		refBoneTuberOnContour = finalSplinePointsPKA[finalSplinePointsPKA.size() - 1];
 	}
+
+	if (myPlaneSide.eval(refBoneTuberOnContour) < 0)
+	{
+		myPlaneSide.movePlane(refBoneTuberOnContour);
+	}
+
+	if (myPlaneSide.eval(refBonePclOnContour) < 0)
+	{
+		myPlaneSide.movePlane(refBonePclOnContour);
+	}
+
+	refBoneTuberOnContour = myPlaneSide.getProjectionPoint(refBoneTuberOnContour);
+	refBonePclOnContour = myPlaneSide.getProjectionPoint(refBonePclOnContour);
 	
 	sidePlanePKA.push_back(refBoneTuberOnContour);
 	sidePlanePKA.push_back(refBonePclOnContour);
 	sidePlanePKA.push_back(refBonePclOnContour + sidePlaneWidth * vectorToUP);
 	sidePlanePKA.push_back(refBoneTuberOnContour + sidePlaneWidth * vectorToUP);
 
-	Plane myPlaneSide = myPlane.getPerpendicularPlane(refBoneTuberOnContour, refBonePclOnContour);
 	auto hullCenterSideTemp = (refBoneTuberOnContour + (refBonePclOnContour + sidePlaneWidth * vectorToUP)) / 2;
 	Point hullCenterSide = Point(hullCenterSideTemp);
 

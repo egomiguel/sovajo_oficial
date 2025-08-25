@@ -69,7 +69,7 @@ void HipPelvis::init(const Point& pLeftASIS, const Point& pRightASIS, const Poin
 HipPelvis HipPelvis::getHipPelvisCopyObj(double pTiltAngleDegree) const
 {
 	HipPelvis copyObj = *this;
-	copyObj.setCoronalTiltAngleDegree(pTiltAngleDegree);
+	//copyObj.setCoronalTiltAngleDegree(pTiltAngleDegree);
 	return copyObj;
 }
 
@@ -170,10 +170,10 @@ double HipPelvis::getCoronalTiltAngle(const Plane& pCoronalCT) const
 	}
 }
 
-void HipPelvis::setCoronalTiltAngleDegree(double pTiltAngleDegree)
-{
-	coronalTiltAngle = pTiltAngleDegree * PI / 180;
-}
+//void HipPelvis::setCoronalTiltAngleDegree(double pTiltAngleDegree)
+//{
+//	coronalTiltAngle = pTiltAngleDegree * PI / 180;
+//}
 
 double HipPelvis::getCoronalTiltAngleDegree() const
 {
@@ -663,8 +663,6 @@ Point HipPelvis::getAbductionAnteversionVectorRotate(const Plane& pSagital, cons
 
 	axial.reverseByPoint(mPubicJoin);
 	sagital.movePlane(mRightASIS);
-	sagital.reverseByPoint(mLeftASIS);
-	coronal.reverseByNormal(axial.getNormalVector().cross(sagital.getNormalVector()));
 	coronal.movePlane(getPubicJoin());
 
 	Point rotateVector = axial.getNormalVector();
@@ -672,7 +670,7 @@ Point HipPelvis::getAbductionAnteversionVectorRotate(const Plane& pSagital, cons
 
 	double angle = (pAbductionAngle * PI) / 180.0;
 	cv::Mat rotMatrix = ImplantTools::getRotateMatrix(rotationAxis, angle);
-
+	std::cout << "Angle: " << angle << std::endl;
 	cv::Mat resultMat = rotMatrix * rotateVector.ToMatPoint();
 	Point resultAbduction = Point(resultMat);
 	resultAbduction.normalice();
@@ -684,12 +682,13 @@ Point HipPelvis::getAbductionAnteversionVectorRotate(const Plane& pSagital, cons
 	rotMatrix = ImplantTools::getRotateMatrix(rotationAxis, angle);
 	double controlAngle = angle;
 	double epsilon = 1e-9;
+	
 	for (int i = 0; i < 10; i++)
 	{
 		cv::Mat moveVector = rotMatrix * rotateVector.ToMatPoint();
 		auto projVector = sagital.getProjectionVector(Point(moveVector));
 		double tempAngle = ImplantTools::getAngleBetweenVectors(projVector, axial.getNormalVector());
-
+		std::cout << "tempAngle: " << tempAngle << std::endl;
 		Point ref = getPubicJoin() + 1000. * projVector;
 
 		if (coronal.eval(ref) < 0)
