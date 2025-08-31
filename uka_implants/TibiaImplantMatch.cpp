@@ -1512,11 +1512,15 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 	Point tibiaCenter = myPlane.getProjectionPoint(knee.getTibiaCenterPointOnImplantAP(implant.getImplantInfo()));
 	Point latPlateau = myPlane.getProjectionPoint(knee.getLateralPlateau());
 	Point medPlateau = myPlane.getProjectionPoint(knee.getMedialPlateau());
+	
+	Point implantTubercle = finalTransformPoint(implant.getPointTuber(), pTransformIn);
+	Point implantPcl = finalTransformPoint(implant.getPointPCL(), pTransformIn);
 
 	Point directVector = myPlane.getNormalVector();
 	Point vectorAP = tubercle - pcl;
 	vectorAP.normalice();
-	Point vectorRobotAP = (-1.0) * vectorAP;
+	Point vectorRobotAP = implantPcl - implantTubercle;
+	vectorRobotAP.normalice();
 
 	cv::Mat myRotation = getTransformToRobot(myPlane, vectorRobotAP);
 

@@ -680,7 +680,6 @@ Point HipPelvis::getAbductionAnteversionVectorRotate(const Plane& pSagital, cons
 
 	double angle = (pAbductionAngle * PI) / 180.0;
 	cv::Mat rotMatrix = ImplantTools::getRotateMatrix(rotationAxis, angle);
-	std::cout << "Angle: " << angle << std::endl;
 	cv::Mat resultMat = rotMatrix * rotateVector.ToMatPoint();
 	Point resultAbduction = Point(resultMat);
 	resultAbduction.normalice();
@@ -704,7 +703,7 @@ Point HipPelvis::getAbductionAnteversionVectorRotate(const Plane& pSagital, cons
 		{
 			tempAngle = -tempAngle;
 		}
-		std::cout << "tempAngle: " << tempAngle << std::endl;
+
 		double diff = angle - tempAngle;
 		if (std::abs(diff) > epsilon)
 		{
