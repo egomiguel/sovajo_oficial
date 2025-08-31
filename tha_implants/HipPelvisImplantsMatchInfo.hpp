@@ -78,13 +78,13 @@ namespace THA
 
 			double getCupShiftAnterior(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform) const;
 
-			double getCupInclination(const Point& pVectorToHipCenter) const;
+			double getCupInclination(const Point& pVectorFromHipCenter) const;
 
-			double getCupAntversion(const Point& pVectorToHipCenter) const;
+			double getCupAntversion(const Point& pVectorFromHipCenter) const;
 
-			double getCupInclination(const Point& pVectorToHipCenter, const Plane& pSagital, const Plane& pCoronal) const;
+			double getCupInclination(const Point& pVectorFromHipCenter, const Plane& pSagital, const Plane& pCoronal) const;
 
-			double getCupAntversion(const Point& pVectorToHipCenter, const Plane& pSagital, const Plane& pCoronal) const;
+			double getCupAntversion(const Point& pVectorFromHipCenter, const Plane& pSagital, const Plane& pCoronal) const;
 
 			double getCupShiftSuperior(const Point& pCenterOfRotation) const;
 

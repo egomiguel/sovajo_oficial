@@ -25,6 +25,7 @@
 #include <QFile>
 #include <QJsonArray>
 
+
 namespace TEST_THA_SUEN
 {
 	enum  LandmarkType
@@ -141,6 +142,7 @@ namespace TEST_THA_SUEN
 	}
 	std::map<LandmarkType, THA::IMPLANTS::Point> readLandmarks(const QString & filePath)
 	{
+		std::cout << filePath.toStdString() << std::endl;
 		std::map<LandmarkType, THA::IMPLANTS::Point> items;
 		QFile file(filePath);
 		if (!file.open(QIODevice::ReadOnly))
@@ -172,12 +174,16 @@ namespace TEST_THA_SUEN
 
 	std::shared_ptr<THA::IMPLANTS::HipPelvis> createHipPelvis(const QString &dir)
 	{
-
+		std::cout << "3333333333333333333333333333333333333333333333" << std::endl;
 		auto pelvisSide = THA::IMPLANTS::PelvisSide::LEFT_SIDE;
 		auto landmarks = readLandmarks(QString("%1/landmark.json").arg(dir));
+		std::cout << "4444444444444444444444444444444444444444444444444" << std::endl;
 		auto leftFemurData = readVTK(QString("%1/left_femur.vtk").arg(dir));
+		std::cout << "5555555555555555555555555555555555555555555555555555" << std::endl;
 		auto rightFemurData = readVTK(QString("%1/right_femur.vtk").arg(dir));
+		std::cout << "66666666666666666666666666666666666666666666666666666" << std::endl;
 		auto pevlisData = readVTK(QString("%1/pelvis.vtk").arg(dir));
+		std::cout << "7777777777777777777777777777777777777777777777777777" << std::endl;
 		THA::IMPLANTS::HipFemur  hipFemur;
 
 		hipFemur.init(landmarks[LandmarkType::kFemurSurgicalHeadCenter], landmarks[LandmarkType::kFemurSurgicalNeckCenter],
@@ -251,6 +257,57 @@ namespace TEST_THA_SUEN
 		return headMatch.getStemHeadTransform();
 	}
 
+	itk::Rigid3DTransform<>::Pointer matchCupToAcetabulumWithCTPlane(THA::IMPLANTS::Plane sagittal, THA::IMPLANTS::Plane coronal,
+		std::shared_ptr<THA::IMPLANTS::HipPelvisCupImplant> cupImplant,
+		std::shared_ptr<THA::IMPLANTS::HipPelvis> hipPelvis, double pAbductionAngle, double pAnteversionAngle)
+	{
+		THA::IMPLANTS::HipPelvisCupImplantMatch cupMatch;
+		cupMatch.init(*hipPelvis, *cupImplant);
+
+		auto matrix = cupMatch.getTransform(sagittal, coronal, pAbductionAngle, pAnteversionAngle, 0, 0, 0);
+		return matrix;
+	}
+
+	vtkSmartPointer<vtkPolyData> TransformPoly(vtkSmartPointer<vtkPolyData> poly, itk::Matrix< double, 3, 3 > rotate, itk::Vector< double, 3 > translate)
+	{
+		vtkNew<vtkTransform> vtkTransform;
+
+		vtkNew<vtkMatrix4x4> m;
+
+		m->SetElement(0, 0, rotate[0][0]);
+		m->SetElement(1, 0, rotate[1][0]);
+		m->SetElement(2, 0, rotate[2][0]);
+		m->SetElement(3, 0, 0);
+
+		m->SetElement(0, 1, rotate[0][1]);
+		m->SetElement(1, 1, rotate[1][1]);
+		m->SetElement(2, 1, rotate[2][1]);
+		m->SetElement(3, 1, 0);
+
+		m->SetElement(0, 2, rotate[0][2]);
+		m->SetElement(1, 2, rotate[1][2]);
+		m->SetElement(2, 2, rotate[2][2]);
+		m->SetElement(3, 2, 0);
+
+		m->SetElement(0, 3, translate[0]);
+		m->SetElement(1, 3, translate[1]);
+		m->SetElement(2, 3, translate[2]);
+		m->SetElement(3, 3, 1);
+
+		vtkTransform->SetMatrix(m);
+
+		vtkNew<vtkTransformPolyDataFilter> transformFilter;
+		transformFilter->SetInputData(poly);
+		transformFilter->SetTransform(vtkTransform);
+		transformFilter->Update();
+
+		auto resultTransform = transformFilter->GetOutput();
+
+		//SavePolyData(resultTransform, "transform_poly.vtk");
+
+		return resultTransform;
+	}
+
 	void testImplant()
 	{
 		QString dataDir = "E:/data/tha/implant_test";
@@ -284,14 +341,17 @@ namespace TEST_THA_SUEN
 
 	void testImplant2()
 	{
-		QString dataDir = "D:\\sovajo\\Test_Cases\\octubre_2025\\pelvis_test_2";
+		QString dataDir = "D:\\sovajo\\Test_Cases\\agosto_2025\\pelvis_test_2";
+		std::cout << "111111111111111111111111111111111111111" << std::endl;
 		auto hipPelvis = createHipPelvis(dataDir);
+		std::cout << "2222222222222222222222222222222222222222" << std::endl;
 		auto hipLenth = hipPelvis->getHipLengthDistance();
 		auto oppsiteLength = hipPelvis->getHipLengthDistanceOppsite();
 		auto offset = hipPelvis->getCombinedOffsetDistance();
 		auto oppsiteOffset = hipPelvis->getCombinedOffsetDistanceOppsite();
 		//!!!
 		//hip length and combined offset are wrong
+		
 		std::cout << hipLenth << "," << oppsiteLength << std::endl;
 		std::cout << offset << "," << oppsiteOffset << std::endl;
 		//!!! 
@@ -299,7 +359,7 @@ namespace TEST_THA_SUEN
 		std::cout << hipPelvis->getCoronalTiltAngleDegree() << std::endl;
 
 		//
-		double inclination = -40;
+		double inclination = 40;
 		double antVersion = -20;
 		auto cupImplant = createCupImplant(QString("%1/DTUCA56mm.json").arg(dataDir));
 		auto stemImplant = createHipFemurStemImplant(QString("%1/DTUCS8#.json").arg(dataDir));
@@ -342,6 +402,65 @@ namespace TEST_THA_SUEN
 			std::cout << "cupInclination2:" << cupInclination << std::endl;//10.9
 
 		}
+	}
+
+	void testStem()
+	{
+		QString dataDir = "D:\\sovajo\\Test_Cases\\agosto_2025\\Stem_Test";
+		auto rightFemurData = readVTK(QString("%1/right_femur.vtk").arg(dataDir));
+		auto hipPelvis = createHipPelvis(dataDir);
+		auto stemImplantData = readSTL(QString("%1/DTUCS8.stl").arg(dataDir));
+		auto cupImplant = createCupImplant(QString("%1/DTUCA56mm.json").arg(dataDir));
+		auto stemImplant = createHipFemurStemImplant(QString("%1/DTUCS8.json").arg(dataDir));
+		auto headImplant = createHipFemurHeadImplant(QString("%1/CEH36mm_S.json").arg(dataDir));
+		//auto cupToAcetabulumTransform = matchCupToAcetabulum(cupImplant, hipPelvis, 40, 20);
+		THA::IMPLANTS::Plane sagittalPlane;
+		sagittalPlane.init(THA::IMPLANTS::Point(1, 0, 0), THA::IMPLANTS::Point(0, 0, 0));
+		THA::IMPLANTS::Plane coronalPlane;
+		coronalPlane.init(THA::IMPLANTS::Point(0, -1, 0), THA::IMPLANTS::Point(0, 0, 0));
+		auto cupToAcetabulumTransformByCTPlane = matchCupToAcetabulumWithCTPlane(sagittalPlane, coronalPlane, cupImplant, hipPelvis, 40, 20);
+		auto stemToFemurTransform = matchStemToFemur(stemImplant, hipPelvis);
+		auto headToStemTransform = matchHeadToStem(stemImplant, headImplant);
+		THA::IMPLANTS::HipPelvisImplantsMatchInfo matchInfo(*hipPelvis,
+			*cupImplant, *stemImplant, *headImplant,
+			cupToAcetabulumTransformByCTPlane, stemToFemurTransform, headToStemTransform);
+		auto stemVersion = matchInfo.getStemVersion();
+		auto shiftAnterior = matchInfo.getStemAxisShiftAnteriorHip();
+		auto shiftLateral = matchInfo.getStemAxisShiftLateralHip();
+		auto shiftSuperior = matchInfo.getStemAxisShiftSuperiorCup();
+		std::cout << "stem:" << stemVersion << "," << shiftAnterior << "," << shiftLateral << "," << shiftSuperior << std::endl;
+		//change stem implant
+		auto stemImplant4 = createHipFemurStemImplant(QString("%1/DTUCS4.json").arg(dataDir));
+		auto stemImplantData4 = readSTL(QString("%1/DTUCS4.stl").arg(dataDir));
+		auto stemToFemurTransform4 = matchStemToFemur(stemImplant4, hipPelvis);
+		auto headToStemTransform4 = matchHeadToStem(stemImplant4, headImplant);
+		THA::IMPLANTS::HipPelvisImplantsMatchInfo matchInfo4(*hipPelvis,
+			*cupImplant, *stemImplant4, *headImplant,
+			cupToAcetabulumTransformByCTPlane, stemToFemurTransform4, headToStemTransform4);
+
+		auto newStemToFemurTransformInit = matchInfo4.getITKStemTransform();
+		auto transformImplantStemFemur1 = TransformPoly(stemImplantData, newStemToFemurTransformInit->GetMatrix(), newStemToFemurTransformInit->GetOffset());
+
+		vtkNew<vtkAppendPolyData> appendFilter1;
+		appendFilter1->AddInputData(rightFemurData);
+		appendFilter1->AddInputData(transformImplantStemFemur1);
+		appendFilter1->Update();
+
+		TestVTK::show(transformImplantStemFemur1, stemImplantData);
+		TestVTK::show(appendFilter1->GetOutput(), stemImplantData);
+
+		matchInfo4.setStemVersionAngle(stemVersion);
+		matchInfo4.setStemAxisShiftHip(shiftSuperior, shiftLateral, shiftAnterior);
+		auto newStemToFemurTransform4 = matchInfo4.getITKStemTransform();
+
+		auto transformImplantStemFemur2 = TransformPoly(stemImplantData, newStemToFemurTransform4->GetMatrix(), newStemToFemurTransform4->GetOffset());
+		
+		vtkNew<vtkAppendPolyData> appendFilter2;
+		appendFilter2->AddInputData(rightFemurData);
+		appendFilter2->AddInputData(transformImplantStemFemur2);
+		appendFilter2->Update();
+
+		TestVTK::show(appendFilter2->GetOutput(), appendFilter2->GetOutput());
 	}
 }
 

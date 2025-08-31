@@ -104,16 +104,7 @@ double HipPelvisImplantsMatchInfo::getCupInclination() const
 {
 	Plane sagital;
 	sagital.init(mPelvis.getPelvisVectorASIS(), mPelvis.getPubicJoin());
-	sagital.movePlane(mPelvis.getRightASIS());
-	sagital.reverseByPoint(mPelvis.getLeftASIS());
-
 	Plane coronal = mPelvis.getCoronalPlaneAPP();
-
-	Plane axial;
-	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mPelvis.getFemurOperationSide().getKneeCenter());
-	axial.reverseByPoint(mPelvis.getPubicJoin());
-
-	coronal.reverseByNormal(axial.getNormalVector().cross(sagital.getNormalVector()));
 
 	return getCupInclination(sagital, coronal);
 }
@@ -123,14 +114,27 @@ double HipPelvisImplantsMatchInfo::getCupInclination(const Plane& pSagital, cons
 	Plane sagital, coronal, axial;
 	sagital = pSagital.getCopy();
 	coronal = pCoronal.getCopy();
-	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mPelvis.getFemurOperationSide().getKneeCenter());
-	axial.reverseByPoint(mPelvis.getPubicJoin());
+	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mPelvis.getPubicJoin());
 
-	axial.movePlane(mPelvis.getPubicJoin());
-	sagital.movePlane(mPelvis.getPubicJoin());
 	coronal.movePlane(mPelvis.getPubicJoin());
+	axial.reverseByPoint(mPelvis.getFemurOperationSide().getKneeCenter());
 
-	cv::Mat implantVectorMat = mRotationCup * mImplantCup.getVectorZ().ToMatPoint();
+	if (mPelvis.getSide() == PelvisSide::RIGHT_SIDE)
+	{
+		sagital.movePlane(mPelvis.getLeftASIS());
+		sagital.reverseByPoint(mPelvis.getRightASIS());
+		sagital.movePlane(mPelvis.getPubicJoin());
+		coronal.reverseByNormal(sagital.getNormalVector().cross(axial.getNormalVector()));
+	}
+	else
+	{
+		sagital.movePlane(mPelvis.getRightASIS());
+		sagital.reverseByPoint(mPelvis.getLeftASIS());
+		sagital.movePlane(mPelvis.getPubicJoin());
+		coronal.reverseByNormal(axial.getNormalVector().cross(sagital.getNormalVector()));
+	}
+
+	cv::Mat implantVectorMat = mRotationCup * mImplantCup.getVectorZ(false).ToMatPoint();
 	Point implantVector = Point(implantVectorMat);
 	implantVector.normalice();
 
@@ -142,36 +146,43 @@ double HipPelvisImplantsMatchInfo::getCupInclination(const Plane& pSagital, cons
 	double angle = ImplantTools::getAngleBetweenVectorsDegree(vectorImplantProj, vectorBoneProj);
 	Point ref = mPelvis.getPubicJoin();
 	ref = ref + 1000. * vectorImplantProj;
-	double sign = 1;
-	if ((sagital.getNormalVector().cross(coronal.getNormalVector())).dot(axial.getNormalVector()) < 0)
-	{
-		sign = -1;
-	}
-
+	
 	if (sagital.eval(ref) < 0)
 	{
-		return -sign * angle;
+		return -angle;
 	}
 	else
 	{
-		return sign * angle;
+		return angle;
 	}
 }
 
-double HipPelvisImplantsMatchInfo::getCupInclination(const Point& pVectorToHipCenter, const Plane& pSagital, const Plane& pCoronal) const
+double HipPelvisImplantsMatchInfo::getCupInclination(const Point& pVectorFromHipCenter, const Plane& pSagital, const Plane& pCoronal) const
 {
 	Plane sagital, coronal, axial;
 	sagital = pSagital.getCopy();
 	coronal = pCoronal.getCopy();
-	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mPelvis.getFemurOperationSide().getKneeCenter());
+	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mPelvis.getPubicJoin());
 
-	axial.reverseByPoint(mPelvis.getPubicJoin());
-
-	axial.movePlane(mPelvis.getPubicJoin());
-	sagital.movePlane(mPelvis.getPubicJoin());
 	coronal.movePlane(mPelvis.getPubicJoin());
+	axial.reverseByPoint(mPelvis.getFemurOperationSide().getKneeCenter());
 
-	Point implantVector = pVectorToHipCenter;
+	if (mPelvis.getSide() == PelvisSide::RIGHT_SIDE)
+	{
+		sagital.movePlane(mPelvis.getLeftASIS());
+		sagital.reverseByPoint(mPelvis.getRightASIS());
+		sagital.movePlane(mPelvis.getPubicJoin());
+		coronal.reverseByNormal(sagital.getNormalVector().cross(axial.getNormalVector()));
+	}
+	else
+	{
+		sagital.movePlane(mPelvis.getRightASIS());
+		sagital.reverseByPoint(mPelvis.getLeftASIS());
+		sagital.movePlane(mPelvis.getPubicJoin());
+		coronal.reverseByNormal(axial.getNormalVector().cross(sagital.getNormalVector()));
+	}
+
+	Point implantVector = pVectorFromHipCenter;
 	implantVector.normalice();
 
 	Point vectorImplantProj = coronal.getProjectionVector(implantVector);
@@ -183,26 +194,20 @@ double HipPelvisImplantsMatchInfo::getCupInclination(const Point& pVectorToHipCe
 	Point ref = mPelvis.getPubicJoin();
 	ref = ref + 1000. * vectorImplantProj;
 
-	double sign = 1;
-	if ((sagital.getNormalVector().cross(coronal.getNormalVector())).dot(axial.getNormalVector()) < 0)
-	{
-		sign = -1;
-	}
-
 	if (sagital.eval(ref) < 0)
 	{
-		return -sign * angle;
+		return -angle;
 	}
 	else
 	{
-		return sign * angle;
+		return angle;
 	}
 }
 
 double HipPelvisImplantsMatchInfo::getCupInclination(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform, const Plane& pSagital, const Plane& pCoronal) const
 {
 	auto vectorX = pImplantToBoneTransform->GetMatrix().GetVnlMatrix().get_column(0);
-	Point implantVector = -Point(vectorX[0], vectorX[1], vectorX[2]);
+	Point implantVector = Point(vectorX[0], vectorX[1], vectorX[2]);
 
 	return getCupInclination(implantVector, pSagital, pCoronal);
 }
@@ -211,16 +216,7 @@ double HipPelvisImplantsMatchInfo::getCupAntversion() const
 {
 	Plane sagital;
 	sagital.init(mPelvis.getPelvisVectorASIS(), mPelvis.getPubicJoin());
-	sagital.movePlane(mPelvis.getRightASIS());
-	sagital.reverseByPoint(mPelvis.getLeftASIS());
-
 	Plane coronal = mPelvis.getCoronalPlaneAPP();
-
-	Plane axial;
-	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mPelvis.getFemurOperationSide().getKneeCenter());
-	axial.reverseByPoint(mPelvis.getPubicJoin());
-
-	coronal.reverseByNormal(axial.getNormalVector().cross(sagital.getNormalVector()));
 
 	return getCupAntversion(sagital, coronal);
 }
@@ -230,15 +226,27 @@ double HipPelvisImplantsMatchInfo::getCupAntversion(const Plane& pSagital, const
 	Plane sagital, coronal, axial;
 	sagital = pSagital.getCopy();
 	coronal = pCoronal.getCopy();
-	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mPelvis.getFemurOperationSide().getKneeCenter());
+	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mPelvis.getPubicJoin());
 
-	axial.reverseByPoint(mPelvis.getPubicJoin());
-
-	axial.movePlane(mPelvis.getPubicJoin());
-	sagital.movePlane(mPelvis.getPubicJoin());
 	coronal.movePlane(mPelvis.getPubicJoin());
+	axial.reverseByPoint(mPelvis.getFemurOperationSide().getKneeCenter());
 
-	cv::Mat implantVectorMat = mRotationCup * mImplantCup.getVectorZ().ToMatPoint();
+	if (mPelvis.getSide() == PelvisSide::RIGHT_SIDE)
+	{
+		sagital.movePlane(mPelvis.getLeftASIS());
+		sagital.reverseByPoint(mPelvis.getRightASIS());
+		sagital.movePlane(mPelvis.getPubicJoin());
+		coronal.reverseByNormal(sagital.getNormalVector().cross(axial.getNormalVector()));
+	}
+	else
+	{
+		sagital.movePlane(mPelvis.getRightASIS());
+		sagital.reverseByPoint(mPelvis.getLeftASIS());
+		sagital.movePlane(mPelvis.getPubicJoin());
+		coronal.reverseByNormal(axial.getNormalVector().cross(sagital.getNormalVector()));
+	}
+
+	cv::Mat implantVectorMat = mRotationCup * mImplantCup.getVectorZ(false).ToMatPoint();
 	Point implantVector = Point(implantVectorMat);
 	implantVector.normalice();
 
@@ -262,20 +270,32 @@ double HipPelvisImplantsMatchInfo::getCupAntversion(const Plane& pSagital, const
 	}
 }
 
-double HipPelvisImplantsMatchInfo::getCupAntversion(const Point& pVectorToHipCenter, const Plane& pSagital, const Plane& pCoronal) const
+double HipPelvisImplantsMatchInfo::getCupAntversion(const Point& pVectorFromHipCenter, const Plane& pSagital, const Plane& pCoronal) const
 {
 	Plane sagital, coronal, axial;
 	sagital = pSagital.getCopy();
 	coronal = pCoronal.getCopy();
-	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mPelvis.getFemurOperationSide().getKneeCenter());
+	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mPelvis.getPubicJoin());
 
-	axial.reverseByPoint(mPelvis.getPubicJoin());
-
-	axial.movePlane(mPelvis.getPubicJoin());
-	sagital.movePlane(mPelvis.getPubicJoin());
 	coronal.movePlane(mPelvis.getPubicJoin());
+	axial.reverseByPoint(mPelvis.getFemurOperationSide().getKneeCenter());
 
-	Point implantVector = pVectorToHipCenter;
+	if (mPelvis.getSide() == PelvisSide::RIGHT_SIDE)
+	{
+		sagital.movePlane(mPelvis.getLeftASIS());
+		sagital.reverseByPoint(mPelvis.getRightASIS());
+		sagital.movePlane(mPelvis.getPubicJoin());
+		coronal.reverseByNormal(sagital.getNormalVector().cross(axial.getNormalVector()));
+	}
+	else
+	{
+		sagital.movePlane(mPelvis.getRightASIS());
+		sagital.reverseByPoint(mPelvis.getLeftASIS());
+		sagital.movePlane(mPelvis.getPubicJoin());
+		coronal.reverseByNormal(axial.getNormalVector().cross(sagital.getNormalVector()));
+	}
+
+	Point implantVector = pVectorFromHipCenter;
 	implantVector.normalice();
 
 	Point vectorImplantProj = sagital.getProjectionVector(implantVector);
@@ -301,7 +321,7 @@ double HipPelvisImplantsMatchInfo::getCupAntversion(const Point& pVectorToHipCen
 double HipPelvisImplantsMatchInfo::getCupAntversion(const itk::Rigid3DTransform<>::Pointer pImplantToBoneTransform, const Plane& pSagital, const Plane& pCoronal) const
 {
 	auto vectorX = pImplantToBoneTransform->GetMatrix().GetVnlMatrix().get_column(0);
-	Point implantVector = -Point(vectorX[0], vectorX[1], vectorX[2]);
+	Point implantVector = Point(vectorX[0], vectorX[1], vectorX[2]);
 
 	return getCupAntversion(implantVector, pSagital, pCoronal);
 }
@@ -379,16 +399,7 @@ double HipPelvisImplantsMatchInfo::getCupInclination(const itk::Rigid3DTransform
 {
 	Plane sagital;
 	sagital.init(mPelvis.getPelvisVectorASIS(), mPelvis.getPubicJoin());
-	sagital.movePlane(mPelvis.getRightASIS());
-	sagital.reverseByPoint(mPelvis.getLeftASIS());
-
 	Plane coronal = mPelvis.getCoronalPlaneAPP();
-
-	Plane axial;
-	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mPelvis.getFemurOperationSide().getKneeCenter());
-	axial.reverseByPoint(mPelvis.getPubicJoin());
-
-	coronal.reverseByNormal(axial.getNormalVector().cross(sagital.getNormalVector()));
 
 	return getCupInclination(pImplantToBoneTransform, sagital, coronal);
 }
@@ -397,16 +408,7 @@ double HipPelvisImplantsMatchInfo::getCupAntversion(const itk::Rigid3DTransform<
 {
 	Plane sagital;
 	sagital.init(mPelvis.getPelvisVectorASIS(), mPelvis.getPubicJoin());
-	sagital.movePlane(mPelvis.getRightASIS());
-	sagital.reverseByPoint(mPelvis.getLeftASIS());
-
 	Plane coronal = mPelvis.getCoronalPlaneAPP();
-
-	Plane axial;
-	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mPelvis.getFemurOperationSide().getKneeCenter());
-	axial.reverseByPoint(mPelvis.getPubicJoin());
-
-	coronal.reverseByNormal(axial.getNormalVector().cross(sagital.getNormalVector()));
 
 	return getCupAntversion(pImplantToBoneTransform, sagital, coronal);
 }
@@ -480,40 +482,22 @@ double HipPelvisImplantsMatchInfo::getCupShiftAnterior(const itk::Rigid3DTransfo
 	}
 }
 
-double HipPelvisImplantsMatchInfo::getCupInclination(const Point& pVectorToHipCenter) const
+double HipPelvisImplantsMatchInfo::getCupInclination(const Point& pVectorFromHipCenter) const
 {
 	Plane sagital;
 	sagital.init(mPelvis.getPelvisVectorASIS(), mPelvis.getPubicJoin());
-	sagital.movePlane(mPelvis.getRightASIS());
-	sagital.reverseByPoint(mPelvis.getLeftASIS());
-
 	Plane coronal = mPelvis.getCoronalPlaneAPP();
 
-	Plane axial;
-	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mPelvis.getFemurOperationSide().getKneeCenter());
-	axial.reverseByPoint(mPelvis.getPubicJoin());
-
-	coronal.reverseByNormal(axial.getNormalVector().cross(sagital.getNormalVector()));
-
-	return getCupInclination(pVectorToHipCenter, sagital, coronal);
+	return getCupInclination(pVectorFromHipCenter, sagital, coronal);
 }
 
-double HipPelvisImplantsMatchInfo::getCupAntversion(const Point& pVectorToHipCenter) const
+double HipPelvisImplantsMatchInfo::getCupAntversion(const Point& pVectorFromHipCenter) const
 {
 	Plane sagital;
 	sagital.init(mPelvis.getPelvisVectorASIS(), mPelvis.getPubicJoin());
-	sagital.movePlane(mPelvis.getRightASIS());
-	sagital.reverseByPoint(mPelvis.getLeftASIS());
-
 	Plane coronal = mPelvis.getCoronalPlaneAPP();
 
-	Plane axial;
-	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mPelvis.getFemurOperationSide().getKneeCenter());
-	axial.reverseByPoint(mPelvis.getPubicJoin());
-
-	coronal.reverseByNormal(axial.getNormalVector().cross(sagital.getNormalVector()));
-
-	return getCupAntversion(pVectorToHipCenter, sagital, coronal);
+	return getCupAntversion(pVectorFromHipCenter, sagital, coronal);
 }
 
 double HipPelvisImplantsMatchInfo::getCupShiftSuperior(const Point& pCenterOfRotation) const
@@ -1030,16 +1014,7 @@ itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::setCupAngles(double
 {
 	Plane sagital;
 	sagital.init(mPelvis.getPelvisVectorASIS(), mPelvis.getPubicJoin());
-	sagital.movePlane(mPelvis.getRightASIS());
-	sagital.reverseByPoint(mPelvis.getLeftASIS());
-
 	Plane coronal = mPelvis.getCoronalPlaneAPP();
-
-	Plane axial;
-	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mPelvis.getFemurOperationSide().getKneeCenter());
-	axial.reverseByPoint(mPelvis.getPubicJoin());
-
-	coronal.reverseByNormal(axial.getNormalVector().cross(sagital.getNormalVector()));
 
 	return setCupAngles(sagital, coronal, pAbductionAngle, pAnteversionAngle);
 }
@@ -1047,7 +1022,7 @@ itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::setCupAngles(double
 itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::setCupAngles(const Plane& pSagital, const Plane& pCoronal, double pAbductionAngle, double pAnteversionAngle)
 {
 	//auto pelvisTemp = mPelvis.getHipPelvisCopy(pTiltAngle);
-	Point implantZ = mImplantCup.getVectorZ();
+	Point implantZ = mImplantCup.getVectorZ(false);
 	Point abdAntVector = mPelvis.getAbductionAnteversionVectorRotate(pSagital, pCoronal, mHipCenterOfRotation, pAbductionAngle, pAnteversionAngle);
 
 	cv::Mat CenterBefore = mRotationCup * mImplantCup.getCenterOfRotationImplant().ToMatPoint() + mTranslationCup;
@@ -1162,8 +1137,7 @@ itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::setStemVersionAngle
 {	
 	double threshold = 1e-10;
 	double refAngle = (pStemVersionAngleDegree * PI) / 180.;
-	//cv::Mat stemBaseBefore = mRotationStem * mImplantStem.getBasePoint().ToMatPoint() + mTranslationStem;
-	cv::Mat rotation;
+	cv::Mat stemBaseBefore = mRotationStem * mImplantStem.getBasePoint().ToMatPoint() + mTranslationStem;
 
 	for (int i = 0; i < 10; i++)
 	{
@@ -1194,11 +1168,13 @@ itk::Rigid3DTransform<>::Pointer HipPelvisImplantsMatchInfo::setStemVersionAngle
 			break;
 		}
 
-		rotation = rotateStemVersionAngle(pStemVersionAngleDegree, 1. / alpha);
+		mRotationStem = rotateStemVersionAngle(pStemVersionAngleDegree, 1. / alpha);
 		//std::cout << i << " angle: " << getStemVersion() << " vector: " << Point(mRotationStem * mImplantStem.getVectorInfSup().ToMatPoint()) << std::endl;
 	}
 
-	ImplantTools::updateTransformByRotation(mRotationStem, mTranslationStem, mImplantStem.getBasePoint(), rotation);
+	//cv::Mat stemBaseAfter = mRotationStem * mImplantStem.getBasePoint().ToMatPoint() + mTranslationStem;
+
+	ImplantTools::updateTranslationByRotation(mTranslationStem, mRotationStem, mImplantStem.getBasePoint(), stemBaseBefore);
 
 	//cv::Mat stemBaseAfter = mRotationStem * mImplantStem.getBasePoint().ToMatPoint() + mTranslationStem;
 	//cv::Mat diff = stemBaseBefore - stemBaseAfter;

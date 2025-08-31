@@ -18,7 +18,7 @@ namespace THA
 			void init(const Point& pTopPoint, const Point& pBasePoint1, const Point& pBasePoint2, const Point& pBasePoint3, const std::vector<Point>& pExternalPoints, double pHemiSphereResolution = 0.05, double pThickness = 0);
 			void init(const Point& pTopPoint, const Point& pBasePoint1, const Point& pBasePoint2, const Point& pBasePoint3, const Point& pSphereCenter, double pRadius, double pHemiSphereResolution = 0.05, double pThickness = 0);
 			Point getVectorX() const;
-			Point getVectorZ() const;
+			Point getVectorZ(bool reverse = true) const;
 			Point getTopPoint() const;
 			Point getCenterOfRotationImplant() const;
 			Plane getBasePlane() const;

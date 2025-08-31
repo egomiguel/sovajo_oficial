@@ -289,11 +289,11 @@ Point HipPelvisCupImplant::getVectorX() const
     return vector;
 }
 
-Point HipPelvisCupImplant::getVectorZ() const
+Point HipPelvisCupImplant::getVectorZ(bool reverse) const
 {
     Plane myPlane;
     myPlane.init(mBasePoint1, mBasePoint2, mBasePoint3);
-    myPlane.reverseByPoint(mTopPoint);
+    myPlane.reverseByPoint(mTopPoint, reverse);
     return myPlane.getNormalVector();
 }
 

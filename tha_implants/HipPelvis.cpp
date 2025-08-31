@@ -117,16 +117,18 @@ Point HipPelvis::getPelvisVectorAP() const
 
 Plane HipPelvis::getCoronalPlaneAPP() const
 {
-	if (coronalTiltAngle == 0)
+	/*if (coronalTiltAngle == 0)
 	{
 		return mPlaneAPP;
-	}
+	}*/
 
-	cv::Mat rotation = ImplantTools::getRotateMatrix(getPelvisVectorASIS(), -coronalTiltAngle);
+	/*cv::Mat rotation = ImplantTools::getRotateMatrix(getPelvisVectorASIS(), -coronalTiltAngle);
 	cv::Mat rotVector = rotation * mPlaneAPP.getNormalVectorMat();
 	Plane tiltPlane;
 	tiltPlane.init(Point(rotVector), mPubicJoin);
-	return tiltPlane;
+	return tiltPlane;*/
+
+	return mPlaneAPP;
 }
 
 double HipPelvis::getCoronalTiltAngle(const Plane& pCoronalCT) const
@@ -659,14 +661,22 @@ Point HipPelvis::getAbductionAnteversionVectorRotate(const Plane& pSagital, cons
 	Plane sagital, coronal, axial;
 	sagital = pSagital.getCopy();
 	coronal = pCoronal.getCopy();
-	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mFemurOperationSide.getKneeCenter());
+	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mPubicJoin);
 
-	axial.reverseByPoint(mPubicJoin);
-	sagital.movePlane(mRightASIS);
 	coronal.movePlane(getPubicJoin());
+	axial.reverseByPoint(mFemurOperationSide.getKneeCenter());
+	sagital.movePlane(mLeftASIS);
+	sagital.reverseByPoint(mRightASIS);
+	sagital.movePlane(getPubicJoin());
+	coronal.reverseByNormal(sagital.getNormalVector().cross(axial.getNormalVector()));
 
 	Point rotateVector = axial.getNormalVector();
 	Point rotationAxis = coronal.getNormalVector(); //RotationAxis is AP
+
+	if (mSide == PelvisSide::RIGHT_SIDE)
+	{
+		rotationAxis = -rotationAxis;
+	}
 
 	double angle = (pAbductionAngle * PI) / 180.0;
 	cv::Mat rotMatrix = ImplantTools::getRotateMatrix(rotationAxis, angle);
@@ -681,21 +691,20 @@ Point HipPelvis::getAbductionAnteversionVectorRotate(const Plane& pSagital, cons
 	angle = (pAnteversionAngle * PI) / 180.0;
 	rotMatrix = ImplantTools::getRotateMatrix(rotationAxis, angle);
 	double controlAngle = angle;
-	double epsilon = 1e-9;
+	double epsilon = 1e-10;
 	
 	for (int i = 0; i < 10; i++)
 	{
 		cv::Mat moveVector = rotMatrix * rotateVector.ToMatPoint();
 		auto projVector = sagital.getProjectionVector(Point(moveVector));
 		double tempAngle = ImplantTools::getAngleBetweenVectors(projVector, axial.getNormalVector());
-		std::cout << "tempAngle: " << tempAngle << std::endl;
 		Point ref = getPubicJoin() + 1000. * projVector;
 
 		if (coronal.eval(ref) < 0)
 		{
 			tempAngle = -tempAngle;
 		}
-
+		std::cout << "tempAngle: " << tempAngle << std::endl;
 		double diff = angle - tempAngle;
 		if (std::abs(diff) > epsilon)
 		{

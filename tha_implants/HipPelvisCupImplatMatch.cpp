@@ -58,23 +58,14 @@ itk::Rigid3DTransform<>::Pointer HipPelvisCupImplantMatch::getTransform(double p
 {
 	Plane sagital;
 	sagital.init(mPelvis.getPelvisVectorASIS(), mPelvis.getPubicJoin());
-	sagital.movePlane(mPelvis.getRightASIS());
-	sagital.reverseByPoint(mPelvis.getLeftASIS());
-
 	Plane coronal = mPelvis.getCoronalPlaneAPP();
-
-	Plane axial;
-	axial.init(sagital.getNormalVector().cross(coronal.getNormalVector()), mPelvis.getFemurOperationSide().getKneeCenter());
-	axial.reverseByPoint(mPelvis.getPubicJoin());
-
-	coronal.reverseByNormal(axial.getNormalVector().cross(sagital.getNormalVector()));
 
 	return getTransform(sagital, coronal, pAbductionAngle, pAnteversionAngle, pShifSuperior, pShifLateral, pShiftAnterior);
 }
 
 itk::Rigid3DTransform<>::Pointer HipPelvisCupImplantMatch::getTransform(const Plane& pSagital, const Plane& pCoronal, double pAbductionAngle, double pAnteversionAngle, double pShifSuperior, double pShifLateral, double pShiftAnterior) const
 {
-	Point implantZ = mImplant.getVectorZ();
+	Point implantZ = mImplant.getVectorZ(false);
 	Point abdAntVector = mPelvis.getAbductionAnteversionVectorRotate(pSagital, pCoronal, mHipCenterOfRotation, pAbductionAngle, pAnteversionAngle);
 	cv::Mat rotationMatrix = ImplantTools::GetGeneralRotateTransformVectors(implantZ, abdAntVector);
 
@@ -122,7 +113,7 @@ void HipPelvisCupImplantMatch::GetRobotTransform(const itk::Rigid3DTransform<>::
 	Point cupCenter = mImplant.getCenterOfRotationImplant();
 	cupCenter = ImplantTools::TransformPoint(cupCenter, pTransformIn);
 
-	Point cupBaseVector = -mImplant.getVectorZ();
+	Point cupBaseVector = mImplant.getVectorZ(false);
 	cupBaseVector = ImplantTools::RotateVector(cupBaseVector, pTransformIn);
 	cupBaseVector.normalice();
 
