@@ -12,6 +12,7 @@
 #include "vtkPolyDataWriter.h"
 #include <vtkPolyDataMapper.h>
 #include <vtkActor.h>
+#include "vtkCamera.h"
 #include <vtkProperty.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
@@ -50,6 +51,10 @@
 
 #include <itkRigid3DTransform.h>
 #include <itkVersorRigid3DTransform.h>
+#include "vtkAxesActor.h"
+#include "vtkCaptionActor2D.h"
+#include "vtkTextActor.h"
+#include "vtkTextProperty.h"
 #include "vtkMatrix4x4.h"
 #include "vtkTransform.h"
 
@@ -77,6 +82,33 @@
 
 namespace TEST_PKA
 {
+	enum  LandmarkType
+	{
+		kHipCenter = 0,
+		kMedialEpicondyle,
+		kLateralEpicondyle,
+		kFemurKneeCenter,
+
+		// Tibia
+
+		kTibiaKneeCenter,
+		kTibiaTuberosity,
+		kPCLInsertionPoint,
+		kMedialMalleolus,
+		kLateralMalleolus,
+
+		//cutPoints
+		kFemurDistalLateral,
+		kFemurDistalMedial,
+		kFemurMedialPosteriorCondyle,
+		kFemurLateralPosteriorCondyle,
+		kTibiaMedialPlatformPoint,
+		kTibiaLateralPlatformPoint,
+
+		kNoneLandmark
+
+	};
+
 	vtkSmartPointer<vtkPolyData> ReadPolyData(const std::string& name)
 	{
 		vtkSmartPointer<vtkPolyDataReader> reader = vtkSmartPointer<vtkPolyDataReader>::New();
@@ -486,7 +518,7 @@ namespace TEST_PKA
 		std::vector<PointTypeITK> hullFemur = femurImplantMatch.GetHullPointsOnePlane(femurTransformIn, femurTransformOut, UKA::IMPLANTS::FemurImplantMatch::KOnePlaneAnteriorAndDistalCurve);
 		
 		UKA::IMPLANTS::TibiaImplantMatch::HullPoints hullTemp = tibiaImplantMatch.GetHullPoints(tibiaTransformIn, tibiaTransformOut, tibiaSideTransformOut);
-		std::vector<PointTypeITK> hull = hullTemp.sidePlanePoints;
+		std::vector<PointTypeITK> hull = hullTemp.implantPoints;
 		
 		std::cout << "Hull size: " << hull.size() << std::endl;
 
@@ -587,6 +619,119 @@ namespace TEST_PKA
 			toPlane(obj["anterior_plane"]), toPoint(obj["p1"]), toPoint(obj["p2"]), toPoint(obj["p3"]), femurImplantData, info);
 		return femurImplant;
 	}
+
+	std::map<int, itk::Point<double>> readLandmarks(const QString &filePath)
+	{
+		std::map<int, itk::Point<double>> points;
+		QFile file(filePath);
+		if (!file.open(QIODevice::ReadOnly))
+		{
+			return points;
+		}
+		QJsonParseError err;
+		auto obj = QJsonDocument::fromJson(file.readAll(), &err).object();
+		if (err.error != QJsonParseError::NoError)
+		{
+			return points;
+		}
+		auto keys = obj.keys();
+
+		for (int i = 0; i < keys.size(); ++i)
+		{
+
+			auto value = obj[keys[i]].toArray();
+			itk::Point<double> point;
+			point[0] = value[0].toDouble();
+			point[1] = value[1].toDouble();
+			point[2] = value[2].toDouble();
+
+			points[keys[i].toInt()] = point;
+
+		}
+		return points;
+	}
+
+	vtkSmartPointer<vtkTransform> getImplantToFemur(const QString &jsonPath)
+	{
+		vtkNew<vtkTransform> transform;
+		QFile file(jsonPath);
+		if (file.open(QIODevice::ReadOnly))
+		{
+			auto obj = QJsonDocument::fromJson(file.readAll()).object();
+			if (obj.contains("femur_matrix"))
+			{
+				auto array = obj["femur_matrix"].toArray();
+				vtkNew<vtkMatrix4x4> matrix;
+				for (int i = 0; i < 4; ++i)
+				{
+					for (int j = 0; j < 4; ++j)
+					{
+						matrix->SetElement(i, j, array[i * 4 + j].toDouble());
+					}
+				}
+				vtkNew<vtkTransform> tranform;
+				tranform->SetMatrix(matrix);
+				return tranform;
+			}
+		}
+		return vtkSmartPointer<vtkTransform>::New();
+	}
+
+	itk::Rigid3DTransform<>::Pointer toItkTransform(vtkSmartPointer<vtkTransform> trans)
+	{
+		itk::Vector<double> translation;
+		itk::Matrix<double, 3, 3> rotation;
+		auto matrix = trans->GetMatrix();
+		for (int i = 0; i < 3; ++i)
+		{
+			for (int j = 0; j < 3; ++j)
+			{
+				rotation(i, j) = matrix->GetElement(i, j);
+			}
+			translation[i] = matrix->GetElement(i, 3);
+		}
+		auto transform = itk::VersorRigid3DTransform<>::New();
+		transform->SetMatrix(rotation);
+		transform->SetTranslation(translation);
+		return transform;
+	}
+
+	itk::Rigid3DTransform<>::Pointer toItkTransform(const itk::Matrix<double, 3, 3> &rotate, const itk::Vector<double, 3> &translate)
+	{
+		auto trans = itk::VersorRigid3DTransform<>::New();
+		trans->SetMatrix(rotate);
+		trans->SetTranslation(translate);
+		return trans;
+	}
+
+	vtkSmartPointer<vtkTransform> toVtkTransform(const itk::Matrix<double, 3, 3> &rotate, const itk::Vector<double, 3> &translate)
+	{
+		vtkNew<vtkMatrix4x4> matrix;
+		matrix->Identity();
+
+		for (int row = 0; row < 3; row++) {
+			for (int col = 0; col < 3; col++) {
+				matrix->SetElement(row, col, rotate(row, col));
+			}
+			matrix->SetElement(row, 3, translate[row]);
+		}
+		vtkNew<vtkTransform> transform;
+		transform->SetMatrix(matrix);
+		return transform;
+	}
+
+	vtkSmartPointer<vtkAxesActor> createAxesActor()
+	{
+		vtkNew<vtkAxesActor> axesActor;
+		axesActor->GetXAxisCaptionActor2D()->GetTextActor()->SetTextScaleModeToNone();
+		axesActor->GetYAxisCaptionActor2D()->GetTextActor()->SetTextScaleModeToNone();
+		axesActor->GetZAxisCaptionActor2D()->GetTextActor()->SetTextScaleModeToNone();
+		axesActor->GetXAxisCaptionActor2D()->GetCaptionTextProperty()->SetFontSize(16);
+		axesActor->GetYAxisCaptionActor2D()->GetCaptionTextProperty()->SetFontSize(16);
+		axesActor->GetZAxisCaptionActor2D()->GetCaptionTextProperty()->SetFontSize(16);
+		return axesActor;
+	}
+
 
 	void MatchPKAThreePlanes()
 	{
@@ -749,7 +894,108 @@ namespace TEST_PKA
 		
 	}
 
-	
+	void testFemurAnteriodPlane()
+	{
+		QString dir = "D:\\sovajo\\Test_Cases\\agosto_2025\\UKA_Test";
+		auto side = UKA::IMPLANTS::KneeSideEnum::KRight;
+		auto surgerySide = UKA::IMPLANTS::SurgerySideEnum::KMedial;
+		auto femurData = ReadPolyData(QString("%1\\femur.vtk").arg(dir).toStdString());
+		auto tibiaData = ReadPolyData(QString("%1\\tibia.vtk").arg(dir).toStdString());
+		auto femurImplantData = ReadPolyDataSTL(QString("%1\\femur_LL_RM_SZ4.stl").arg(dir).toStdString());
+		auto femurThreePlaneImplant = createFemurThreeImplant(femurImplantData, QString("%1\\femur_LL_RM_SZ4_data.json").arg(dir));
+
+		auto landmarks = readLandmarks(QString("%1\\landmark.json").arg(dir));
+		auto ankleCenter = landmarks.at(kMedialMalleolus) + (landmarks.at(kLateralMalleolus) - landmarks.at(kMedialMalleolus))*0.45;;
+		UKA::IMPLANTS::Knee knee;
+		knee.init(toPoint(landmarks[LandmarkType::kHipCenter]), toPoint(landmarks[LandmarkType::kFemurKneeCenter]),
+			toPoint(landmarks[LandmarkType::kLateralEpicondyle]), toPoint(landmarks[LandmarkType::kMedialEpicondyle]),
+			toPoint(landmarks[LandmarkType::kTibiaKneeCenter]), toPoint(landmarks[LandmarkType::kTibiaTuberosity]),
+			toPoint(landmarks[LandmarkType::kPCLInsertionPoint]), toPoint(ankleCenter), femurData, tibiaData, side, surgerySide, false);
+		knee.setLateralAndMedialInferiorFemurPoints(toPoint(landmarks[LandmarkType::kFemurDistalLateral]), toPoint(landmarks[LandmarkType::kFemurDistalMedial]));
+		knee.setLateralAndMedialPosteriorFemurPoints(toPoint(landmarks[LandmarkType::kFemurLateralPosteriorCondyle]), toPoint(landmarks[LandmarkType::kFemurMedialPosteriorCondyle]));
+		knee.setLateralAndMedialPlateauPoints(toPoint(landmarks[LandmarkType::kTibiaLateralPlatformPoint]), toPoint(landmarks[LandmarkType::kTibiaMedialPlatformPoint]));
+		UKA::IMPLANTS::FemurImplantMatch femurMatch;
+		femurMatch.init(femurThreePlaneImplant.get(), knee);
+
+
+		vtkNew<vtkRenderer> render1;
+		vtkNew<vtkRenderer> render2;
+		{
+			auto implantToFemur = getImplantToFemur(QString("%1\\plan_1.json").arg(dir));;
+			itk::Rigid3DTransform<>::Pointer boneToPlane = itk::VersorRigid3DTransform<>::New();
+			femurMatch.GetHullPointsThreePlanes(toItkTransform(implantToFemur), boneToPlane, UKA::IMPLANTS::FemurImplantMatch::BoneAreaThreePlanes::KThreePlanePosterior);
+
+			auto planeToBone = toVtkTransform(boneToPlane->GetMatrix(), boneToPlane->GetTranslation());
+			planeToBone->Inverse();
+			auto axesActor = createAxesActor();
+			axesActor->SetTotalLength(30, 30, 30);
+			axesActor->SetUserTransform(planeToBone);
+
+			vtkNew<vtkActor> femurActor;
+			femurActor->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
+			femurActor->GetMapper()->SetInputDataObject(femurData);
+			femurActor->GetProperty()->SetColor(1, 1, 1);
+			femurActor->GetProperty()->SetOpacity(0.6);
+			vtkNew<vtkActor> femurImplantActor;
+			femurImplantActor->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
+			femurImplantActor->GetMapper()->SetInputDataObject(femurImplantData);
+			femurImplantActor->GetProperty()->SetColor(0, 1, 0);
+			femurImplantActor->SetUserTransform(implantToFemur);
+			femurImplantActor->GetProperty()->SetOpacity(0.8);
+
+			render1->AddActor(femurActor);
+			render1->AddActor(axesActor);
+			render1->AddActor(femurImplantActor);
+		}
+		//2
+		{
+			auto implantToFemur = getImplantToFemur(QString("%1\\plan_2.json").arg(dir));
+
+			itk::Rigid3DTransform<>::Pointer boneToPlane = itk::VersorRigid3DTransform<>::New();
+			femurMatch.GetHullPointsThreePlanes(toItkTransform(implantToFemur), boneToPlane, UKA::IMPLANTS::FemurImplantMatch::BoneAreaThreePlanes::KThreePlanePosterior);
+			auto planeToBone = toVtkTransform(boneToPlane->GetMatrix(), boneToPlane->GetTranslation());
+			planeToBone->Inverse();
+
+			auto axesActor = createAxesActor();
+			axesActor->SetTotalLength(30, 30, 30);
+			axesActor->SetUserTransform(planeToBone);
+
+
+			vtkNew<vtkActor> femurActor;
+			femurActor->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
+			femurActor->GetMapper()->SetInputDataObject(femurData);
+			femurActor->GetProperty()->SetColor(1, 1, 1);
+			femurActor->GetProperty()->SetOpacity(0.6);
+			vtkNew<vtkActor> femurImplantActor;
+			femurImplantActor->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
+			femurImplantActor->GetMapper()->SetInputDataObject(femurImplantData);
+			femurImplantActor->GetProperty()->SetColor(0, 1, 0);
+			femurImplantActor->SetUserTransform(implantToFemur);
+			femurImplantActor->GetProperty()->SetOpacity(0.8);
+
+			render2->AddActor(femurActor);
+			render2->AddActor(axesActor);
+			render2->AddActor(femurImplantActor);
+		}
+
+		vtkNew<vtkRenderWindow> renderWindow;
+		render1->SetViewport(0, 0, 0.5, 1);
+		render2->SetViewport(0.5, 0, 1.0, 1);
+		renderWindow->AddRenderer(render1);
+		renderWindow->AddRenderer(render2);
+
+		auto camera = render1->GetActiveCamera();
+		render2->SetActiveCamera(camera);
+		camera->SetFocalPoint(0, 0, 0);
+		camera->SetPosition(0, 0, -1);
+		camera->SetViewUp(0, -1, 0);
+		render1->ResetCamera();
+		render2->ResetCamera();
+		renderWindow->Render();
+		vtkNew<vtkRenderWindowInteractor> interactor;
+		renderWindow->SetInteractor(interactor);
+		interactor->Start();
+	}
 
 }
 
