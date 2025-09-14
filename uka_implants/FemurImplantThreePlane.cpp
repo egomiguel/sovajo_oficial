@@ -55,6 +55,13 @@ FemurImplantThreePlane::FemurImplantThreePlane(const FemurImplantThreePlane& pIm
 	this->mAnterior = pImplant.mAnterior;
 }
 
+Plane FemurImplantThreePlane::getPosterior() const
+{
+	Plane tPosterior = mPosterior;
+	tPosterior.reverseByPoint(mRodTopPoint);
+	return tPosterior;
+}
+
 Plane FemurImplantThreePlane::getDistalPlane() const
 {
 	return mDistal;

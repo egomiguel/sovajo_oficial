@@ -82,6 +82,13 @@ FemurImplantOnePlane::FemurImplantOnePlane(const FemurImplantOnePlane& pImplant)
 	this->mRodTopPointProjectedOnBase = pImplant.mRodTopPointProjectedOnBase;
 }
 
+Plane FemurImplantOnePlane::getPosterior() const
+{
+	Plane tPosterior = mPosterior;
+	tPosterior.reverseByPoint(mRodTopPoint);
+	return tPosterior;
+}
+
 Plane FemurImplantOnePlane::getDistalPlane() const
 {
 	return mDistal;
@@ -263,7 +270,9 @@ Plane FemurImplantOnePlane::getBestPlaneToCurvePoints() const
 {
 	std::vector<Point> points = getAllSidePointsInOrder();
 	bool error;
-	return Plane::getBestPlane(points, error);
+	Plane tPlane = Plane::getBestPlane(points, error);
+	tPlane.reverseByPoint(mRodTopPoint, false);
+	return tPlane;
 }
 
 Point FemurImplantOnePlane::getDirectVectorFemurAxis() const

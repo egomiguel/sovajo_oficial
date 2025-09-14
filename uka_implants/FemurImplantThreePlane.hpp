@@ -26,6 +26,8 @@ namespace UKA
 					  const Point& pRodBaseExtremeSide1, const Point& pRodBaseExtremeSide2,
 					  const vtkSmartPointer<vtkPolyData> implantModel, const FemurImplantInfo& pImplantInfo);
 
+			Plane getPosterior() const override;
+
 			Plane getMidPlane() const;
 
 			Plane getDistalPlane() const;

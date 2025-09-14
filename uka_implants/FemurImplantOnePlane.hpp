@@ -26,6 +26,8 @@ namespace UKA
 					  const std::vector<Point>& pSortPointsSide1, const std::vector<Point>& pSortPointsSide2, 
 					  const vtkSmartPointer<vtkPolyData> implantModel, const FemurImplantInfo& pImplantInfo);
 
+			Plane getPosterior() const override;
+
 			Plane getMidPlane() const;
 
 			Plane getDistalPlane() const;

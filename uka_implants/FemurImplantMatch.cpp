@@ -580,21 +580,14 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPointsOnePlane(const itk::Ri
 	Plane currentPlane, sagitalAnatomicPlane;
 	sagitalAnatomicPlane.init(knee.getFemurVectorTEA(), knee.getFemurKneeCenter());
 	cv::Mat myRotation;
-	Point myNormal, myNormalTemp;
+	//Point myNormal, myNormalTemp;
 	std::vector<Point> pointsLatTemp, pointsMedTemp;
 
 	if (id == KOnePlanePosterior)
 	{
 		currentPlane = finalTransformPlane(implantFemur->getPosterior(), pTransformIn);
 		projectedPoints.clear();
-
-		//midPointPlane = getPointsOnPlane(currentPlane, projectedPoints);
 		midPointPlane = getPointsOnPlane(currentPlane, projectedPoints, pointsLatTemp, pointsMedTemp);
-
-		myNormalTemp = knee.getFemurKneeCenter() - resizeVector * knee.getFemurDirectVectorAP();
-		myNormal = currentPlane.getProjectionPoint(myNormalTemp) - myNormalTemp;
-
-		currentPlane.fixNormalVector(myNormal);
 
 		if (projectedPoints.size() > 15)
 		{
@@ -622,11 +615,6 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPointsOnePlane(const itk::Ri
 		currentPlane = finalTransformPlane(((FemurImplantOnePlane*)implantFemur)->getBestPlaneToCurvePoints(), pTransformIn);
 		projectedPoints.clear();
 		midPointPlane = getPointsOnPlane(currentPlane, projectedPoints);
-
-		myNormalTemp = knee.getAnkleCenter();
-		myNormal = myNormalTemp - currentPlane.getProjectionPoint(myNormalTemp);
-
-		currentPlane.fixNormalVector(myNormal);
 
 		if (projectedPoints.size() > 10)
 		{
@@ -773,23 +761,13 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPointsThreePlanes(const itk:
 	Plane currentPlane, sagitalAnatomicPlane;
 	sagitalAnatomicPlane.init(knee.getFemurVectorTEA(), knee.getFemurKneeCenter());
 	cv::Mat myRotation;
-	//Point myNormal, myNormalTemp;
 	std::vector<Point> pointsLatTemp, pointsMedTemp;
 
 	if (id == KThreePlanePosterior)
 	{
-		Plane posteriorTemp = implantFemur->getPosterior();
-		posteriorTemp.reverseByPoint(implantFemur->getRodTopPoint());
-		currentPlane = finalTransformPlane(posteriorTemp, pTransformIn);
+		currentPlane = finalTransformPlane(implantFemur->getPosterior(), pTransformIn);
 		projectedPoints.clear();
-
-		//midPointPlane = getPointsOnPlane(currentPlane, projectedPoints);
 		midPointPlane = getPointsOnPlane(currentPlane, projectedPoints, pointsLatTemp, pointsMedTemp);
-
-		//myNormalTemp = knee.getFemurKneeCenter() - resizeVector * knee.getFemurDirectVectorAP();
-		//myNormal = currentPlane.getProjectionPoint(myNormalTemp) - myNormalTemp;
-
-		//currentPlane.fixNormalVector(myNormal);
 
 		if (projectedPoints.size() > 15)
 		{
@@ -821,10 +799,6 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPointsThreePlanes(const itk:
 		projectedPoints.clear();
 		midPointPlane = getPointsOnPlane(currentPlane, projectedPoints, pointsLatTemp, pointsMedTemp);
 
-		//myNormalTemp = knee.getAnkleCenter();
-		//myNormal = myNormalTemp - currentPlane.getProjectionPoint(myNormalTemp);
-		//currentPlane.fixNormalVector(myNormal);
-
 		if (projectedPoints.size() > 15)
 		{
 			centerP1 = midPointPlane;
@@ -852,11 +826,6 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPointsThreePlanes(const itk:
 		currentPlane = finalTransformPlane(anteriorTemp, pTransformIn);
 		projectedPoints.clear();
 		midPointPlane = getPointsOnPlane(currentPlane, projectedPoints, pointsLatTemp, pointsMedTemp);
-
-		//myNormalTemp = knee.getFemurKneeCenter() + resizeVector * knee.getFemurDirectVectorAP();
-		//myNormal = currentPlane.getProjectionPoint(myNormalTemp) - myNormalTemp;
-
-		//currentPlane.fixNormalVector(myNormal);
 
 		if (projectedPoints.size() > 15)
 		{

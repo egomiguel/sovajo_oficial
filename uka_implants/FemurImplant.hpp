@@ -22,7 +22,7 @@ namespace UKA
 			void init(const Plane& pPosterior, const vtkSmartPointer<vtkPolyData> implantModel, 
 				const FemurImplantInfo& pImplantInfo);
 
-			Plane getPosterior() const;
+			virtual Plane getPosterior() const;
 
 			vtkSmartPointer<vtkPolyData> GetImplantModel() const;
 
