@@ -981,6 +981,82 @@ void FemurImplantMatch::getCurveLikeU(const std::vector<Point>& points, const Po
 	vertices = ConvexHull::interpolateSpline(hullFeatures.convexHull, amount);
 }
 
+std::vector<Point> FemurImplantMatch::getCurveLikeRectangle(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& currentPlane, const Plane& midPlane, const cv::Mat& pRotation) const
+{
+	Point vectorAP = midPlane.getProjectionPoint(topPoint) - midPlane.getProjectionPoint(downPoint);
+	vectorAP.normalice();
+
+	Line topLine(midPlane.getNormalVector(), topPoint);
+	Line downLine(midPlane.getNormalVector(), downPoint);
+	Line medialLine(vectorAP, medialPoint);
+	Line lateralLine(vectorAP, lateralPoint);
+
+	double topDistance = -1.0;
+	double downDistance = -1.0;
+	double medialDistance = -1.0;
+	double lateralDistance = -1.0;
+
+	double topTemp, downTemp, lateralTemp, medialTemp;
+	Point topPointConv, downPointConv, latPointConv, medPointConv;
+
+	std::vector<Point>::const_iterator it1, it2;
+	it1 = points.begin();
+	it2 = points.end();
+
+	int tSize = points.size();
+
+	for (; it1 != it2; ++it1)
+	{
+		topTemp = topLine.getDistanceFromPoint(*it1);
+		downTemp = downLine.getDistanceFromPoint(*it1);
+		lateralTemp = lateralLine.getDistanceFromPoint(*it1);
+		medialTemp = medialLine.getDistanceFromPoint(*it1);
+
+		if (topTemp < topDistance || topDistance < 0)
+		{
+			topDistance = topTemp;
+			topPointConv = *it1;
+		}
+
+		if (downTemp < downDistance || downDistance < 0)
+		{
+			downDistance = downTemp;
+			downPointConv = *it1;
+		}
+
+		if (lateralTemp < lateralDistance || lateralDistance < 0)
+		{
+			lateralDistance = lateralTemp;
+			latPointConv = *it1;
+		}
+
+		if (medialTemp < medialDistance || medialDistance < 0)
+		{
+			medialDistance = medialTemp;
+			medPointConv = *it1;
+		}
+
+	}
+
+	topLine.setPoint(topPointConv);
+	downLine.setPoint(downPointConv);
+	lateralLine.setPoint(latPointConv);
+	medialLine.setPoint(medPointConv);
+
+	Plane topPlane = currentPlane.getPerpendicularPlane(topLine.getPoint(), topLine.getPointAtDistance(100));
+	Plane downPlane = currentPlane.getPerpendicularPlane(downLine.getPoint(), downLine.getPointAtDistance(100));
+
+	Point cornerTopLat = topPlane.getInterceptionLinePoint(lateralLine);
+	Point cornerTopMed = topPlane.getInterceptionLinePoint(medialLine);
+	Point cornerDownLat = downPlane.getInterceptionLinePoint(lateralLine);
+	Point cornerDownMed = downPlane.getInterceptionLinePoint(medialLine);
+
+	std::vector<Point> mainPoints = { cornerTopLat, cornerTopMed, cornerDownMed, cornerDownLat};
+	
+	ConvexHull hull(mainPoints, pRotation);
+	return hull.GetConvexHull();
+}
+
 FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, double distanceSideLat, double distanceSideMed, double distanceTop, double downLatCornerOut, double downMedCornerOut) const
 {
 	double maxDist = 15.;
@@ -1017,7 +1093,7 @@ FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const
 	Point topPointConv, downPointConv, latPointConv, medPointConv, centerPoint;
 
 	ConvexHull allHull(points, pRotation);
-	std::vector<Point> fullConvex = allHull.GetConvexHull();
+	std::vector<Point> fullConvex = getCurveLikeRectangle(allHull.GetConvexHull(),downPoint, lateralPoint, medialPoint, topPoint, currentPlane, midPlane, pRotation);
 	int tSize = fullConvex.size();
 
 	if (tSize < 3)
@@ -1230,9 +1306,9 @@ FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const
 		}
 	}
 
-	//auto poly = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
-	//std::vector<Point> tempTest = { result.medialTopPoint, finalHull[result.medialDownPos] };
-	//ImplantTools::show(poly, tempTest);
+	/*auto poly = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
+	std::vector<Point> tempTest = { result.medialTopPoint, finalHull[result.medialDownPos] };
+	ImplantTools::show(poly, tempTest);*/
 
 	if (abs(posMed - posLat) == 1)
 	{
@@ -1252,15 +1328,59 @@ FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const
 		}
 	}
 
-	//auto poly1 = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
-	//std::vector<Point> tempTest1 = { result.medialTopPoint, finalHull[result.medialDownPos] };
-	//ImplantTools::show(poly1, tempTest1);
-
-	result.convexHull = finalHull;
+	/*auto poly1 = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
+	std::vector<Point> tempTest1 = { result.medialTopPoint, finalHull[result.medialDownPos] };
+	ImplantTools::show(poly1, tempTest1);*/
+	
+	result.convexHull = increaseVectorToAmountCV(finalHull, 200); // finalHull;
 	result.downLine = new Line(downLine.getDirectVector(), downLine.getPoint());
 	result.topLine = new Line(topLine.getDirectVector(), topLine.getPoint());
 	result.lateralLine = new Line(lateralLine.getDirectVector(), lateralLine.getPoint());
 	result.medialLine = new Line(medialLine.getDirectVector(), medialLine.getPoint());
+
+	//auto poly3 = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
+	//ImplantTools::show(poly3, finalHull);
+
+	return result;
+}
+
+std::vector<Point> FemurImplantMatch::increaseVectorToAmountCV(const std::vector<Point>& points, int amount) const
+{
+	std::vector<Point> result;
+
+	if (points.size() >= amount || points.size() <= 1 || amount < 3)
+		return points;
+
+	int nSegments = static_cast<int>(points.size()) - 1;
+	int totalToAdd = amount - static_cast<int>(points.size());
+
+	int basePerSegment = totalToAdd / nSegments;
+	int remainder = totalToAdd % nSegments;
+
+	result.reserve(amount);
+
+	for (int i = 0; i < nSegments; ++i)
+	{
+		Point a = points[i];
+		Point b = points[i + 1];
+
+		result.push_back(a);
+
+		int pointsToInsert = basePerSegment + (i < remainder ? 1 : 0);
+
+		if (pointsToInsert > 0)
+		{
+			double step = 1.0 / (pointsToInsert + 1);
+			for (int j = 1; j <= pointsToInsert; ++j)
+			{
+				double t = j * step;
+				Point interp = a + (b - a) * static_cast<float>(t);
+				result.push_back(interp);
+			}
+		}
+	}
+
+	result.push_back(points.back());
 
 	return result;
 }

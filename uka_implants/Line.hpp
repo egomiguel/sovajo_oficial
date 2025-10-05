@@ -17,6 +17,8 @@ namespace UKA
 
 			Point getPoint() const;
 
+			Point getPointAtDistance(double distance) const;
+
 			Point getDirectVector() const;
 
 			double getSquareNorm(const Point& pPoint) const;

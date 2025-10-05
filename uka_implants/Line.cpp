@@ -35,6 +35,11 @@ void Line::setDirectVector(const Point& newVector)
 
 Point Line::getPoint() const { return mPoint; }
 
+Point Line::getPointAtDistance(double distance) const
+{
+	return mPoint + distance * directVector;
+}
+
 Point Line::getDirectVector() const { return directVector; }
 
 double Line::getSquareNorm(const Point& pPoint) const
