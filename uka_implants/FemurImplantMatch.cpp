@@ -654,7 +654,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPointsOnePlane(const itk::Ri
 	{
 		cv::Mat rotation = Rigid3DTransformToCVRotation(pTransformIn);
 		cv::Mat translation = Rigid3DTransformToCVTranslation(pTransformIn);
-		vertices = ConvexHull::interpolateSpline(((FemurImplantOnePlane*)implantFemur)->getAllSidePointsInOrder(rotation, translation, distanceSide), amount);
+		vertices = ((FemurImplantOnePlane*)implantFemur)->getAllSidePointsInOrder(rotation, translation, distanceSide);//ConvexHull::interpolateSpline(((FemurImplantOnePlane*)implantFemur)->getAllSidePointsInOrder(rotation, translation, distanceSide), amount);
 	}
 
 	Point initExtreme, endExtreme;
@@ -978,7 +978,7 @@ void FemurImplantMatch::getCurveLikeU(const std::vector<Point>& points, const Po
 {
 	ConvexHullFeatures hullFeatures = getIncreaseBorder(points, downPoint, lateralPoint, medialPoint, topPoint, midPlane, currentPlane, pRotation, distanceSide, distanceSide, distanceTop);
 
-	vertices = ConvexHull::interpolateSpline(hullFeatures.convexHull, amount);
+	vertices = hullFeatures.convexHull; // ConvexHull::interpolateSpline(hullFeatures.convexHull, amount);
 }
 
 std::vector<Point> FemurImplantMatch::getCurveLikeRectangle(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& currentPlane, const Plane& midPlane, const cv::Mat& pRotation) const
@@ -1332,7 +1332,7 @@ FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const
 	std::vector<Point> tempTest1 = { result.medialTopPoint, finalHull[result.medialDownPos] };
 	ImplantTools::show(poly1, tempTest1);*/
 	
-	result.convexHull = increaseVectorToAmountCV(finalHull, 200); // finalHull;
+	result.convexHull = finalHull;// increaseVectorToAmountCV(finalHull, 100); 
 	result.downLine = new Line(downLine.getDirectVector(), downLine.getPoint());
 	result.topLine = new Line(topLine.getDirectVector(), topLine.getPoint());
 	result.lateralLine = new Line(lateralLine.getDirectVector(), lateralLine.getPoint());

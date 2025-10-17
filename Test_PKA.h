@@ -515,10 +515,10 @@ namespace TEST_PKA
 		femurTransformIn->SetMatrix(femurImplantMatch.GetRotationMatrix());
 		femurTransformIn->SetOffset(femurImplantMatch.GetTranslationMatrix());
 
-		std::vector<PointTypeITK> hullFemur = femurImplantMatch.GetHullPointsOnePlane(femurTransformIn, femurTransformOut, UKA::IMPLANTS::FemurImplantMatch::KOnePlaneAnteriorAndDistalCurve);
+		std::vector<PointTypeITK> hullFemur = femurImplantMatch.GetHullPointsOnePlane(femurTransformIn, femurTransformOut, UKA::IMPLANTS::FemurImplantMatch::KOnePlanePosterior, 1, 1, 0);
 		
 		UKA::IMPLANTS::TibiaImplantMatch::HullPoints hullTemp = tibiaImplantMatch.GetHullPoints(tibiaTransformIn, tibiaTransformOut, tibiaSideTransformOut);
-		std::vector<PointTypeITK> hull = hullTemp.implantPoints;
+		std::vector<PointTypeITK> hull = hullFemur;
 		
 		std::cout << "Hull size: " << hull.size() << std::endl;
 
@@ -531,8 +531,8 @@ namespace TEST_PKA
 			tPoints.push_back(myPoint);
 		}
 
-		show(myKnee.GetTibiaPoly(), tPoints, true);
-		show(newImplantTibia, tPoints, true);
+		show(myKnee.GetFemurPoly(), tPoints, true);
+		show(newImplantFemur, tPoints, true);
 
 		UKA::IMPLANTS::ImplantsMatchFinalInfo matchFinalInfo(&myKnee, femurImplant, tibiaImplant, femurTransformIn, tibiaTransformIn);
 		std::cout << "5555555555555555555555555555555555555555" << std::endl;
@@ -813,8 +813,8 @@ namespace TEST_PKA
 		//polyList1.push_back(newImplantTibia);
 		//show(myKnee.GetTibiaPoly(), polyList1);
 
-		polyList2.push_back(newImplantFemur);
-		show(myKnee.GetFemurPoly(), polyList2);
+		polyList2.push_back(newImplantTibia);
+		show(myKnee.GetTibiaPoly(), polyList2);
 
 		///////////////////////////////////////////////////// Second Match
 		/*
@@ -834,6 +834,7 @@ namespace TEST_PKA
 
 		itk::Rigid3DTransform<double>::Pointer tibiaTransformIn = itk::VersorRigid3DTransform<double>::New();
 		itk::Rigid3DTransform<double>::Pointer tibiaTransformOut = itk::VersorRigid3DTransform<double>::New();
+		itk::Rigid3DTransform<double>::Pointer tibiaTransformOutSide = itk::VersorRigid3DTransform<double>::New();
 
 		itk::Rigid3DTransform<double>::Pointer femurTransformIn = itk::VersorRigid3DTransform<double>::New();
 		itk::Rigid3DTransform<double>::Pointer femurTransformOut = itk::VersorRigid3DTransform<double>::New();
@@ -844,12 +845,12 @@ namespace TEST_PKA
 		femurTransformIn->SetMatrix(femurImplantMatch.GetRotationMatrix());
 		femurTransformIn->SetOffset(femurImplantMatch.GetTranslationMatrix());
 		
-		std::vector<PointTypeITK> hullFemur = femurImplantMatch.GetHullPointsThreePlanes(femurTransformIn, femurTransformOut, UKA::IMPLANTS::FemurImplantMatch::KThreePlaneAnterior, 10, 10);
-		std::vector<PointTypeITK> hullTest = femurImplantMatch.GetHullPointsOnePlane(femurTransformIn, femurTransformOut, UKA::IMPLANTS::FemurImplantMatch::KOnePlaneAnteriorAndDistalCurve);
+		std::vector<PointTypeITK> hullFemur = femurImplantMatch.GetHullPointsThreePlanes(femurTransformIn, femurTransformOut, UKA::IMPLANTS::FemurImplantMatch::KThreePlaneCenter, 1, 1, 0);
+		std::vector<PointTypeITK> hullTibia = (tibiaImplantMatch.GetHullPoints(tibiaTransformIn, tibiaTransformOut, tibiaTransformOutSide, 1, 1, 1, 5, 0.8, 0.8, 0)).implantPoints;
 
 		std::vector<PointTypeITK> hull = hullFemur;
-		std::cout << "Hull size: " << hull.size() << std::endl;
-		std::cout << "Hull test size: " << hullTest.size() << std::endl;
+		std::cout << "Hull femur size: " << hullFemur.size() << std::endl;
+		std::cout << "Hull tibia size: " << hullTibia.size() << std::endl;
 
 		std::vector<cv::Point3d> tPoints;
 
@@ -861,7 +862,7 @@ namespace TEST_PKA
 		}
 
 		show(myKnee.GetFemurPoly(), tPoints, true);
-		show(newImplantFemur, tPoints, true);
+		show(newImplantTibia, tPoints, true);
 		
 		
 		UKA::IMPLANTS::ImplantsMatchFinalInfo matchFinalInfo(&myKnee, femurImplant, tibiaImplant, femurTransformIn, tibiaTransformIn);
