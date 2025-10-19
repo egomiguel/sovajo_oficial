@@ -842,10 +842,6 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPointsThreePlanes(const itk:
 		projectedPoints.clear();
 		midPointPlane = getPointsOnPlane(currentPlane, projectedPoints, pointsLatTemp, pointsMedTemp);
 
-		ImplantTools::show(knee.GetFemurPoly(), projectedPoints);
-		ImplantTools::show(knee.GetFemurPoly(), pointsLatTemp);
-		ImplantTools::show(knee.GetFemurPoly(), pointsMedTemp);
-
 		if (projectedPoints.size() > 15)
 		{
 			centerP1 = midPointPlane;
