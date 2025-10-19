@@ -539,6 +539,21 @@ Point FemurImplantMatch::getPointsOnPlane(const Plane& myPlane, std::vector<Poin
 
 	}
 
+	if (separated == false)
+	{
+		for (auto& item: allPoints)
+		{
+			if (midPlane.eval(item) > 5)
+			{
+				pointsLat.push_back(item);
+			}
+			else if (midPlane.eval(item) < -5)
+			{
+				pointsMed.push_back(item);
+			}
+		}
+	}
+
 	if (allPoints.size() > 0)
 	{
 		midPoint = midPoint / double(allPoints.size());
@@ -827,6 +842,10 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPointsThreePlanes(const itk:
 		projectedPoints.clear();
 		midPointPlane = getPointsOnPlane(currentPlane, projectedPoints, pointsLatTemp, pointsMedTemp);
 
+		ImplantTools::show(knee.GetFemurPoly(), projectedPoints);
+		ImplantTools::show(knee.GetFemurPoly(), pointsLatTemp);
+		ImplantTools::show(knee.GetFemurPoly(), pointsMedTemp);
+
 		if (projectedPoints.size() > 15)
 		{
 			centerP1 = midPointPlane;
@@ -1059,6 +1078,9 @@ std::vector<Point> FemurImplantMatch::getCurveLikeRectangle(const std::vector<Po
 
 FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, double distanceSideLat, double distanceSideMed, double distanceTop, double downLatCornerOut, double downMedCornerOut) const
 {
+	/*auto poly0 = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
+	ImplantTools::show(poly0, points);*/
+
 	double maxDist = 15.;
 
 	if (abs(distanceSideLat) > maxDist)
@@ -1338,8 +1360,8 @@ FemurImplantMatch::ConvexHullFeatures FemurImplantMatch::getIncreaseBorder(const
 	result.lateralLine = new Line(lateralLine.getDirectVector(), lateralLine.getPoint());
 	result.medialLine = new Line(medialLine.getDirectVector(), medialLine.getPoint());
 
-	//auto poly3 = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
-	//ImplantTools::show(poly3, finalHull);
+	/*auto poly3 = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
+	ImplantTools::show(poly3, finalHull);*/
 
 	return result;
 }
