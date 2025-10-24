@@ -210,14 +210,47 @@ bool FemurImplantMatch::getTranslationMatrix()
 {
 	Point tCenter;
 
+	Plane cutPlane, refPlane, refTopPlane;
+	refPlane.init(knee.getFemurVectorTEA(), knee.getFemurKneeCenter());
+	refTopPlane.init(knee.getDirectVectorFemurAxis(), (knee.getLateralEpicondyle() + knee.getMedialEpicondylePerp())/2);
+	refTopPlane.reverseByPoint(knee.getHipCenter(), false);
+
 	if (knee.getSurgerySide() == SurgerySideEnum::KMedial)
 	{
-		tCenter = knee.getFemurKneeCenter() + 0.6 * (knee.getMedialEpicondylePerp() - knee.getFemurKneeCenter());
+		//tCenter = knee.getFemurKneeCenter() + 0.6 * (knee.getMedialEpicondylePerp() - knee.getFemurKneeCenter());
+		cutPlane.init(knee.getFemurDirectVectorAP(), (knee.getMedialCondyle() + knee.getFemurKneeCenter())/2);
+		refPlane.reverseByPoint(knee.getMedialEpicondyle());
 	}
 	else
 	{
-		tCenter = knee.getFemurKneeCenter() + 0.5 * (knee.getLateralEpicondyle() - knee.getFemurKneeCenter());
+		//tCenter = knee.getFemurKneeCenter() + 0.5 * (knee.getLateralEpicondyle() - knee.getFemurKneeCenter());
+		cutPlane.init(knee.getFemurDirectVectorAP(), (knee.getLateralCondyle() + knee.getFemurKneeCenter()) / 2);
+		refPlane.reverseByPoint(knee.getLateralEpicondyle());
 	}
+	refPlane.movePlaneOnNormal(5);
+
+	auto allContours = ImplantTools::getAllContours(knee.GetFemurPoly(), cutPlane.getNormalVector(), cutPlane.getPoint());
+	std::vector<Point> refPoints;
+	for (int i = 0; i < allContours.size(); i++)
+	{
+		vtkSmartPointer<vtkPoints> pointsCut = allContours[i].second;
+		int tSize = pointsCut->GetNumberOfPoints();
+
+		for (int j = 0; j < tSize; j++)
+		{
+			double pnt[3];
+			pointsCut->GetPoint(j, pnt);
+			Point myPoint(pnt[0], pnt[1], pnt[2]);
+
+			if (refPlane.eval(myPoint) > 0 && refTopPlane.eval(myPoint) > 0)
+			{
+				refPoints.push_back(myPoint);
+			}
+		}
+	}
+
+	tCenter = ImplantTools::getPolygonCenter(refPoints, cutPlane.getNormalVector());
+
 
 	/*
 	if (knee.getSurgerySide() == SurgerySideEnum::KMedial)

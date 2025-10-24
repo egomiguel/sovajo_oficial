@@ -732,6 +732,54 @@ namespace TEST_PKA
 		return axesActor;
 	}
 
+	std::shared_ptr<UKA::IMPLANTS::TibiaImplant> createTibiaImplant(const QString &tibiaImplantFilePath)
+	{
+		QFile file(tibiaImplantFilePath);
+		if (!file.open(QIODevice::ReadOnly))
+		{
+			return nullptr;
+		}
+		QJsonParseError parseError;
+		auto obj = QJsonDocument::fromJson(file.readAll()).object();
+
+		auto tibiaImplant = std::make_shared<UKA::IMPLANTS::TibiaImplant>();
+		UKA::IMPLANTS::TibiaImplantInfo implantInfo;
+		implantInfo.tibiaThickness = obj["thickness"].toDouble();
+		implantInfo.tibiaSpacer = 0;
+		tibiaImplant->init(toPoint(obj["pcl_point"]),
+			toPoint(obj["tuber_point"]),
+			toPoint(obj["ref_point"]),
+			toPoint(obj["exterior_point"]),
+			toPoint(obj["side_point"]),
+			implantInfo);
+		return tibiaImplant;
+	}
+
+	vtkSmartPointer<vtkTransform> getImplantToTibia(const QString &jsonPath)
+	{
+		vtkNew<vtkTransform> transform;
+		QFile file(jsonPath);
+		if (file.open(QIODevice::ReadOnly))
+		{
+			auto obj = QJsonDocument::fromJson(file.readAll()).object();
+			if (obj.contains("tibia_matrix"))
+			{
+				auto array = obj["tibia_matrix"].toArray();
+				vtkNew<vtkMatrix4x4> matrix;
+				for (int i = 0; i < 4; ++i)
+				{
+					for (int j = 0; j < 4; ++j)
+					{
+						matrix->SetElement(i, j, array[i * 4 + j].toDouble());
+					}
+				}
+				vtkNew<vtkTransform> tranform;
+				tranform->SetMatrix(matrix);
+				return tranform;
+			}
+		}
+		return vtkSmartPointer<vtkTransform>::New();
+	}
 
 	void MatchPKAThreePlanes()
 	{
@@ -862,7 +910,11 @@ namespace TEST_PKA
 		}
 
 		show(myKnee.GetFemurPoly(), tPoints, true);
-		show(newImplantTibia, tPoints, true);
+		show(newImplantFemur, tPoints, true);
+
+		std::vector<vtkSmartPointer<vtkPolyData>> polyList3;
+		polyList3.push_back(newImplantFemur);
+		show(myKnee.GetFemurPoly(), polyList3);
 		
 		
 		UKA::IMPLANTS::ImplantsMatchFinalInfo matchFinalInfo(&myKnee, femurImplant, tibiaImplant, femurTransformIn, tibiaTransformIn);
@@ -873,7 +925,7 @@ namespace TEST_PKA
 		matchFinalInfo.test();*/
 
 		vtkSmartPointer<vtkPolyData> newImplantTibia3 = TransformPoly(tibiaModel, matchFinalInfo.getITKTibiaTransform()->GetMatrix(), matchFinalInfo.getITKTibiaTransform()->GetTranslation());
-		std::vector<vtkSmartPointer<vtkPolyData>> polyList3;
+		//std::vector<vtkSmartPointer<vtkPolyData>> polyList3;
 		//polyList.push_back(newImplantFemur);
 		//polyList3.push_back(newImplantTibia3);
 		//show(myKnee.GetTibiaPoly(), polyList3);
@@ -881,6 +933,110 @@ namespace TEST_PKA
 		//femurImplant = NULL;
 		
 		
+	}
+
+	void testTibiaBounary()
+	{
+		QString dir = "D:\\sovajo\\Test_Cases\\octubre_2025\\utka_test_251015\\data";
+
+		auto side = UKA::IMPLANTS::KneeSideEnum::KLeft;
+		auto surgerySide = UKA::IMPLANTS::SurgerySideEnum::KMedial;
+
+		auto femurData = ReadPolyData(QString("%1\\femur.vtk").arg(dir).toStdString());
+		auto tibiaData = ReadPolyData(QString("%1\\tibia.vtk").arg(dir).toStdString());
+
+		auto landmarks = readLandmarks(QString("%1\\landmark.json").arg(dir));
+		auto ankleCenter = landmarks.at(kMedialMalleolus) + (landmarks.at(kLateralMalleolus) - landmarks.at(kMedialMalleolus))*0.45;;
+		UKA::IMPLANTS::Knee knee;
+		knee.init(toPoint(landmarks[LandmarkType::kHipCenter]), toPoint(landmarks[LandmarkType::kFemurKneeCenter]),
+			toPoint(landmarks[LandmarkType::kLateralEpicondyle]), toPoint(landmarks[LandmarkType::kMedialEpicondyle]),
+			toPoint(landmarks[LandmarkType::kTibiaKneeCenter]), toPoint(landmarks[LandmarkType::kTibiaTuberosity]),
+			toPoint(landmarks[LandmarkType::kPCLInsertionPoint]), toPoint(ankleCenter), femurData, tibiaData, side, surgerySide, false);
+		knee.setLateralAndMedialInferiorFemurPoints(toPoint(landmarks[LandmarkType::kFemurDistalLateral]), toPoint(landmarks[LandmarkType::kFemurDistalMedial]));
+		knee.setLateralAndMedialPosteriorFemurPoints(toPoint(landmarks[LandmarkType::kFemurLateralPosteriorCondyle]), toPoint(landmarks[LandmarkType::kFemurMedialPosteriorCondyle]));
+		knee.setLateralAndMedialPlateauPoints(toPoint(landmarks[LandmarkType::kTibiaLateralPlatformPoint]), toPoint(landmarks[LandmarkType::kTibiaMedialPlatformPoint]));
+
+		auto tibiaImplantData = ReadPolyDataSTL(QString("%1/tibia_LM_RL_A+_A#8mm.stl").arg(dir).toStdString());
+		auto tibiaImplant = createTibiaImplant(QString("%1/tibia_LM_RL_A+_A#8mm_data.json").arg(dir));
+		auto implantToTibiaTrans = getImplantToTibia(QString("%1/plan.json").arg(dir));
+
+		UKA::IMPLANTS::TibiaImplantMatch tibiaImplantMatch;
+		tibiaImplantMatch.init(*tibiaImplant, knee);
+		itk::Rigid3DTransform<>::Pointer boneToPlane = itk::VersorRigid3DTransform<>::New();
+		itk::Rigid3DTransform<>::Pointer sideToPlane = itk::VersorRigid3DTransform<>::New();
+		auto pointsInBone = tibiaImplantMatch.GetHullPoints(toItkTransform(implantToTibiaTrans), boneToPlane, sideToPlane,
+			1, 2, 1,
+			500,
+			10, 15).implantPoints;
+
+		std::vector<cv::Point3d> tPoints;
+
+		for (int i = 0; i < pointsInBone.size(); i++)
+		{
+			cv::Point3d myPoint(pointsInBone[i][0], pointsInBone[i][1], pointsInBone[i][2]);
+
+			tPoints.push_back(myPoint);
+		}
+
+		show(knee.GetTibiaPoly(), tPoints, true);
+
+		vtkSmartPointer<vtkPolyData> newImplantTibia = TransformPoly(tibiaImplantData, tibiaImplantMatch.GetRotationMatrix(), tibiaImplantMatch.GetTranslationMatrix());
+		show(newImplantTibia, tPoints, true);
+
+		/*
+		vtkNew<vtkPoints> points;
+		for (auto& p : pointsInBone)
+		{
+			points->InsertNextPoint(p.GetDataPointer());
+		}
+		vtkNew<vtkCellArray> lines;
+		for (size_t i = 1; i < pointsInBone.size(); i++)
+		{
+			vtkNew<vtkLine> line;
+			line->GetPointIds()->SetId(0, i);
+			line->GetPointIds()->SetId(1, i - 1);
+			lines->InsertNextCell(line);
+
+		}
+		vtkNew<vtkPolyData> borderdata;
+		borderdata->SetPoints(points);
+		borderdata->SetLines(lines);
+
+		vtkNew<vtkActor> borderActor;
+		borderActor->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
+		borderActor->GetMapper()->SetInputDataObject(borderdata);
+		borderActor->GetProperty()->SetColor(1, 0, 0);
+		borderActor->GetProperty()->SetLineWidth(2);
+
+		vtkNew<vtkActor> implantActor;
+		implantActor->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
+		implantActor->GetMapper()->SetInputDataObject(tibiaImplantData);
+		implantActor->GetProperty()->SetColor(0, 1, 0);
+		implantActor->SetUserTransform(implantToTibiaTrans);
+
+		vtkNew<vtkActor> tibiaActor;
+		tibiaActor->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
+		tibiaActor->GetMapper()->SetInputDataObject(tibiaData);
+		tibiaActor->GetProperty()->SetColor(1, 1, 1);
+		tibiaActor->GetProperty()->SetOpacity(0.7);
+
+		vtkNew<vtkRenderer> render;
+		render->AddActor(borderActor);
+		render->AddActor(implantActor);
+		render->AddActor(tibiaActor);
+
+		vtkNew<vtkRenderWindow> renderWindow;
+		renderWindow->AddRenderer(render);
+		auto camera = render->GetActiveCamera();
+		camera->SetFocalPoint(0, 0, 0);
+		camera->SetPosition(0, -1, 0);
+		camera->SetViewUp(0, 0, 1);
+		render->ResetCamera();
+		renderWindow->Render();
+		vtkNew<vtkRenderWindowInteractor> interactor;
+		renderWindow->SetInteractor(interactor);
+		interactor->Start();
+		*/
 	}
 
 	void testFemurAnteriodPlane()

@@ -2023,15 +2023,28 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 		}
 	}
 
-	if (refLatPos > refMedPos)
+	if (abs(refLatPos - refMedPos) + 1 < concaveSpline.size())
 	{
-		std::rotate(concaveSpline.begin(), concaveSpline.begin() + refLatPos, concaveSpline.end());
+		if (refLatPos > refMedPos)
+		{
+			std::rotate(concaveSpline.begin(), concaveSpline.begin() + refLatPos, concaveSpline.end());
+			concaveSpline.insert(concaveSpline.begin(), cornerDownLat);
+			concaveSpline.push_back(cornerDownMed);
+		}
+		else
+		{
+			std::rotate(concaveSpline.begin(), concaveSpline.begin() + refMedPos, concaveSpline.end());
+			concaveSpline.insert(concaveSpline.begin(), cornerDownMed);
+			concaveSpline.push_back(cornerDownLat);
+		}
+	}
+	else if (refLatPos == 0)
+	{
 		concaveSpline.insert(concaveSpline.begin(), cornerDownLat);
 		concaveSpline.push_back(cornerDownMed);
 	}
 	else
 	{
-		std::rotate(concaveSpline.begin(), concaveSpline.begin() + refMedPos, concaveSpline.end());
 		concaveSpline.insert(concaveSpline.begin(), cornerDownMed);
 		concaveSpline.push_back(cornerDownLat);
 	}
@@ -2060,11 +2073,12 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 		}
 	}
 	////////////////////////////////////////////Div PKA section/////////////////////////////////////////////////////////////////////
-	/*std::cout << "4444444444444444444444444444444444444444" << std::endl;
-	ImplantTools::show(contourMax, finalSplinePointsTKA);*/
+	//std::cout << "4444444444444444444444444444444444444444" << std::endl;
+	//ImplantTools::show(contourMax, finalSplinePointsTKA, false);
+	//ImplantTools::show(contourMax, finalSplinePointsTKA, true);
 	///////////////////////////////////////////////////////////////////////
 
-	Plane midPlane = myPlane.getPerpendicularPlane(pcl, tubercle);
+	/*Plane midPlane = myPlane.getPerpendicularPlane(pcl, tubercle);
 
 	if (knee.getSurgerySide() == SurgerySideEnum::KLateral)
 	{
@@ -2077,7 +2091,7 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 		midPlane.movePlane(latPlateau);
 		midPlane.reverseByPoint(medPlateau);
 		midPlane.movePlane(pcl);
-	}
+	}*/
 
 	Point implantPCL = finalTransformPoint(implant.getPointPCL(), pTransformIn);
 	Point implantTuber = finalTransformPoint(implant.getPointTuber(), pTransformIn);
@@ -2104,7 +2118,7 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 	Point refBonePclOnContour = refBonePcl;
 	int tempCont = 0;
 
-	if (midPlane.eval(finalSplinePointsTKA[0]) < 0)
+	if (midPlaneImplant.eval(finalSplinePointsTKA[0]) < 0)
 	{
 		for (float i = 0.1; i < 0.3; i += 0.1)
 		{
@@ -2121,14 +2135,14 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 		{
 			finalSplinePointsPKA.push_back(finalSplinePointsTKA[i]);
 			tempCont++;
-			if (tempCont == 1 && midPlane.eval(finalSplinePointsTKA[0]) < 0)
+			if (tempCont == 1)
 			{
 				refBonePclOnContour = finalSplinePointsPKA[finalSplinePointsPKA.size() - 1];
 			}
 		}
 	}
 
-	if (midPlane.eval(finalSplinePointsTKA[0]) > 0)
+	if (midPlaneImplant.eval(finalSplinePointsTKA[0]) > 0)
 	{
 		if (finalSplinePointsPKA.size() > 0)
 		{
