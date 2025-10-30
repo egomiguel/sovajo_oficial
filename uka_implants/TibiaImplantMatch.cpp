@@ -1494,8 +1494,7 @@ vtkSmartPointer<vtkPolyData> TibiaImplantMatch::getContour(const vtkSmartPointer
 
 TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, 
 	itk::Rigid3DTransform<>::Pointer pPlateauTransformOut, itk::Rigid3DTransform<>::Pointer pSideTransformOut, 
-	double distance, double distancePcl, double distanceSide, double sidePlaneWidth, double closeCurveLateral, 
-	double closeCurveMedial, int amount) const
+	double distance, double distancePcl, double distanceSide, double sidePlaneWidth, int amount) const
 {
 	TibiaImplantMatch::HullPoints HullPointsResult;
 	std::vector<PointTypeITK> hull, hullSidePlane;
@@ -1541,26 +1540,6 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 
 	Plane sagitalPlane, obliqueLatPlaneUp, obliqueMedPlaneUp;
 	sagitalPlane.init(vectorTrans, pcl);
-
-	if (closeCurveLateral > 1)
-	{
-		closeCurveLateral = 1.0;
-	}
-
-	if (closeCurveLateral < 0.05)
-	{
-		closeCurveLateral = 0.05;
-	}
-
-	if (closeCurveMedial > 1)
-	{
-		closeCurveMedial = 1.0;
-	}
-
-	if (closeCurveMedial < 0.05)
-	{
-		closeCurveMedial = 0.05;
-	}
 
 	Line lineTopContour(vectorTrans, newPcl);
 
@@ -1993,7 +1972,6 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 	if (splitPlane.eval(tubercle + increaseVector * vectorAP) > 0)
 	{
 		splitPlane.reverse();
-
 	}
 
 	std::vector<Point> concaveSpline;
@@ -2074,8 +2052,8 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 	}
 	////////////////////////////////////////////Div PKA section/////////////////////////////////////////////////////////////////////
 	//std::cout << "4444444444444444444444444444444444444444" << std::endl;
-	//ImplantTools::show(contourMax, finalSplinePointsTKA, false);
-	//ImplantTools::show(contourMax, finalSplinePointsTKA, true);
+	/*ImplantTools::show(contourMax, finalSplinePointsTKA, false);
+	ImplantTools::show(contourMax, finalSplinePointsTKA, true);*/
 	///////////////////////////////////////////////////////////////////////
 
 	/*Plane midPlane = myPlane.getPerpendicularPlane(pcl, tubercle);
@@ -2117,6 +2095,7 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 	Point refBoneTuberOnContour = refBoneTuber;
 	Point refBonePclOnContour = refBonePcl;
 	int tempCont = 0;
+	int posPclRef = -1;
 
 	if (midPlaneImplant.eval(finalSplinePointsTKA[0]) < 0)
 	{
@@ -2131,13 +2110,14 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 
 	for (int i = 0; i < finalSplinePointsTKA.size(); i++)
 	{
-		if (midPlaneImplant.eval(finalSplinePointsTKA[i]) > 0)
+		if (midPlaneImplant.eval(finalSplinePointsTKA[i]) >= 0)
 		{
 			finalSplinePointsPKA.push_back(finalSplinePointsTKA[i]);
 			tempCont++;
 			if (tempCont == 1)
 			{
 				refBonePclOnContour = finalSplinePointsPKA[finalSplinePointsPKA.size() - 1];
+				posPclRef = finalSplinePointsPKA.size() - 1;
 			}
 		}
 	}
@@ -2147,6 +2127,7 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 		if (finalSplinePointsPKA.size() > 0)
 		{
 			refBonePclOnContour = finalSplinePointsPKA[finalSplinePointsPKA.size() - 1];
+			posPclRef = finalSplinePointsPKA.size() - 1;
 		}
 
 		for (float i = 0.8; i < 1.0; i += 0.1)
@@ -2156,6 +2137,12 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 		}
 
 		refBoneTuberOnContour = finalSplinePointsPKA[finalSplinePointsPKA.size() - 1];
+	}
+
+	if (posPclRef >= 0)
+	{
+		refBonePclOnContour = midPlaneImplant.getProjectionPoint(refBonePclOnContour);
+		finalSplinePointsPKA[posPclRef] = refBonePclOnContour;
 	}
 
 	if (myPlaneSide.eval(refBoneTuberOnContour) < 0)
@@ -2180,10 +2167,10 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 	Point hullCenterSide = Point(hullCenterSideTemp);
 
 	/////////////////////////////////////////////////////////
-	/*std::cout << "555555555555555555555555555555555555555" << std::endl;
-	ImplantTools::show(contourMax, sidePlanePKA);
-	std::cout << "66666666666666666666666666666666666666" << std::endl;
-	ImplantTools::show(contourMax, sidePlanePKA, true);*/
+	//std::cout << "555555555555555555555555555555555555555" << std::endl;
+	//ImplantTools::show(contourMax, sidePlanePKA);
+	//std::cout << "66666666666666666666666666666666666666" << std::endl;
+	//ImplantTools::show(contourMax, sidePlanePKA, true);
 	/////////////////////////////////////////////////////////////
 
 	hull = increaseVectorToAmount(finalSplinePointsPKA, amount);

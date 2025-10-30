@@ -467,7 +467,7 @@ namespace TEST_IMPLANTS
 }
 
 
-namespace TEST_PKA_SUEN
+namespace TEST_TKA_SUEN
 {
 	enum LandmarkType {
 		// Femur
@@ -623,6 +623,9 @@ namespace TEST_PKA_SUEN
 	std::shared_ptr<TKA::IMPLANTS::Knee> createKnee(std::map<LandmarkType, TKA::IMPLANTS::Point> &landmarks,
 		const char *femurVtkPath, const char *tibiaVtkPath, bool left)
 	{
+		
+		/*landmarks[kFemurAnteriorCortex] = TKA::IMPLANTS::Point(86, 46, -1145);
+		std::cout << "Cortex: " << landmarks[kFemurAnteriorCortex] << std::endl;*/
 		auto knee = std::make_shared<TKA::IMPLANTS::Knee>();
 		auto ankleCenter = landmarks.at(kMedialMalleolus).ToITKPoint() +
 			(landmarks.at(kLateralMalleolus).ToITKPoint() - landmarks.at(kMedialMalleolus).ToITKPoint())*0.45;
@@ -722,6 +725,51 @@ namespace TEST_PKA_SUEN
 		trans->SetMatrix(femurMatch->GetRotationMatrix());
 		trans->SetTranslation(femurMatch->GetTranslationMatrix());
 		return trans;
+	}
+
+	vtkSmartPointer<vtkTransform> getImplantToFemur(const QString &jsonPath)
+	{
+		vtkNew<vtkTransform> transform;
+		QFile file(jsonPath);
+		if (file.open(QIODevice::ReadOnly))
+		{
+			auto obj = QJsonDocument::fromJson(file.readAll()).object();
+			if (obj.contains("femur_matrix"))
+			{
+				auto array = obj["femur_matrix"].toArray();
+				vtkNew<vtkMatrix4x4> matrix;
+				for (int i = 0; i < 4; ++i)
+				{
+					for (int j = 0; j < 4; ++j)
+					{
+						matrix->SetElement(i, j, array[i * 4 + j].toDouble());
+					}
+				}
+				vtkNew<vtkTransform> tranform;
+				tranform->SetMatrix(matrix);
+				return tranform;
+			}
+		}
+		return vtkSmartPointer<vtkTransform>::New();
+	}
+
+	itk::Rigid3DTransform<>::Pointer ConvertMatrix(vtkMatrix4x4* matrix)
+	{
+		itk::Matrix<double> m;
+		itk::Vector<double> t;
+
+		for (int row = 0; row < 3; row++) {
+			for (int col = 0; col < 3; col++) {
+				m(row, col) = matrix->GetElement(row, col);
+			}
+			t[row] = matrix->GetElement(row, 3);
+		}
+
+		auto res = itk::VersorRigid3DTransform<>::New();
+		res->SetMatrix(m);
+		res->SetTranslation(t);
+
+		return res.GetPointer();
 	}
 
 	void testImplants()
@@ -881,8 +929,89 @@ namespace TEST_PKA_SUEN
 		std::vector<vtkSmartPointer<vtkPolyData>> polyList2;
 		polyList2.push_back(newImplantTibia2);
 		TEST_IMPLANTS::show(knee->GetTibiaPoly(), polyList2);
-	
-	
+	}
+
+	void TestFemurPosteriorPlane()
+	{
+		const char *dirPath = "D:\\sovajo\\Test_Cases\\octubre_2025\\tka_test_20251028\\data";
+
+		auto femurImplant = createFemurImplant(QString("%1/femur_left_15_data.json").arg(dirPath).toStdString().c_str(),
+			QString("%1/femur_left_15.stl").arg(dirPath).toStdString().c_str());
+
+		auto landmarks = readLandmarks(QString("%1/landmark.json").arg(dirPath).toStdString().c_str());
+		//Right Leg
+		auto knee = createKnee(landmarks, QString("%1/femur.vtk").arg(dirPath).toStdString().c_str(),
+			QString("%1/tibia.vtk").arg(dirPath).toStdString().c_str(), false);
+		auto implantToFemurTrans = getImplantToFemur(QString("%1/plan.json").arg(dirPath));
+		implantToFemurTrans->Inverse();
+		auto femurMatch = std::make_shared<TKA::IMPLANTS::FemurImplantMatch>();
+		femurMatch->init(*femurImplant, *knee);
+		itk::Rigid3DTransform<>::Pointer boneToCutPlane = itk::VersorRigid3DTransform<>::New();
+		auto pointsInBone = femurMatch->GetHullPoints(ConvertMatrix(implantToFemurTrans->GetMatrix()), boneToCutPlane,
+			TKA::IMPLANTS::FemurImplantMatch::kPlaneA, 0, 0, 10, 15, 200, 0);
+
+		vtkNew<vtkPoints> points;
+		for (auto& p : pointsInBone)
+		{
+			points->InsertNextPoint(p.GetDataPointer());
+		}
+		vtkNew<vtkCellArray> lines;
+		for (size_t i = 1; i < pointsInBone.size(); i++)
+		{
+			vtkNew<vtkLine> line;
+			line->GetPointIds()->SetId(0, i);
+			line->GetPointIds()->SetId(1, i - 1);
+			lines->InsertNextCell(line);
+
+		}
+		vtkNew<vtkPolyData> borderdata;
+		borderdata->SetPoints(points);
+		borderdata->SetLines(lines);
+
+		vtkNew<vtkActor> borderActor;
+		borderActor->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
+		borderActor->GetMapper()->SetInputDataObject(borderdata);
+		borderActor->GetProperty()->SetColor(1, 0, 0);
+		borderActor->GetProperty()->SetLineWidth(2);
+
+		vtkNew<vtkActor> femurActor;
+		femurActor->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
+		femurActor->GetMapper()->SetInputDataObject(knee->GetFemurPoly());
+		femurActor->GetProperty()->SetColor(1, 1, 1);
+		femurActor->GetProperty()->SetOpacity(0.7);
+
+		vtkNew<vtkActor> femurImplantActor;
+		femurImplantActor->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
+		femurImplantActor->GetMapper()->SetInputDataObject(femurImplant->GetImplantModel());
+		femurImplantActor->GetProperty()->SetColor(0, 1, 0);
+		femurImplantActor->GetProperty()->SetOpacity(0.6);
+		femurImplantActor->SetUserTransform(implantToFemurTrans);
+
+		vtkNew<vtkRenderer> render;
+		render->UseFXAAOn();
+		//support opacity
+		render->SetUseDepthPeeling(1);
+		render->SetMaximumNumberOfPeels(100);
+		render->SetOcclusionRatio(0.1);
+		render->AddActor(femurActor);
+		render->AddActor(femurImplantActor);
+		render->AddActor(borderActor);
+
+		vtkNew<vtkRenderWindow> renderWindow;
+		renderWindow->AddRenderer(render);
+		auto camera = render->GetActiveCamera();
+		auto center = landmarks[kFemurKneeCenter].ToITKPoint();
+		itk::Vector<double> direction;
+		direction.Fill(0);
+		direction[1] = 1;
+		camera->SetFocalPoint(center.GetDataPointer());
+		camera->SetPosition((center + direction * 10).GetDataPointer());
+		camera->SetViewUp(0, 0, -1);
+		render->ResetCamera();
+		renderWindow->Render();
+		vtkNew<vtkRenderWindowInteractor> interactor;
+		renderWindow->SetInteractor(interactor);
+		interactor->Start();
 	}
 
 }

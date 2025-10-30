@@ -27,11 +27,14 @@ namespace UKA
 			Plane getTibiaPlane() const;
 
 			Point transformImplantPoint(const Point& point) const;
-
+			/*
+				@distance: Margin on lateral or medial side.
+				@distancePcl: Margin on top side.
+				@distanceSide: Margin on middle side.
+			*/
 			HullPoints GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pPlateauTransformOut, 
 				itk::Rigid3DTransform<>::Pointer pSideTransformOut, double distance = 1., double distancePcl = 1., 
-				double distanceSide = 1., double sidePlaneWidth = 5., double closeCurveLateral = 0.8, 
-				double closeCurveMedial = 0.8, int amount = 200) const;
+				double distanceSide = 1., double sidePlaneWidth = 5., int amount = 200) const;
 
 			itk::Matrix< double, 3, 3 > GetRotationMatrix() const;
 
