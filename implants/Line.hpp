@@ -31,6 +31,8 @@ namespace TKA
 
 			Point getPointAtDistance(const Point& pPoint, const Point& nearReferencePoint, float distance, bool closest = true) const;
 
+			Point getPointAtDistance(float distance) const;
+
 			static Point getFixDirectVector(const Point& pLineDirectVector, const Point& pLineFixPoint, const Point& pReferencePoint, bool closest = true);
 
 			static cv::Mat getRotateMatrix(const Point& axis, double angle);

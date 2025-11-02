@@ -161,6 +161,10 @@ double Line::getDistanceBetweenPoints(const Point& a, const Point& b, bool squar
 	}
 }
 
+Point Line::getPointAtDistance(float distance) const
+{
+	return mPoint + distance * directVector;
+}
 
 Point Line::getPointAtDistance(const Point& pPoint, const Point& nearReferencePoint, float distance, bool closest) const
 {

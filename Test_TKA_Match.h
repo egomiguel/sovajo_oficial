@@ -624,8 +624,8 @@ namespace TEST_TKA_SUEN
 		const char *femurVtkPath, const char *tibiaVtkPath, bool left)
 	{
 		
-		/*landmarks[kFemurAnteriorCortex] = TKA::IMPLANTS::Point(86, 46, -1145);
-		std::cout << "Cortex: " << landmarks[kFemurAnteriorCortex] << std::endl;*/
+		landmarks[kFemurAnteriorCortex] = TKA::IMPLANTS::Point(86, 46, -1145);
+		std::cout << "Cortex: " << landmarks[kFemurAnteriorCortex] << std::endl;
 		auto knee = std::make_shared<TKA::IMPLANTS::Knee>();
 		auto ankleCenter = landmarks.at(kMedialMalleolus).ToITKPoint() +
 			(landmarks.at(kLateralMalleolus).ToITKPoint() - landmarks.at(kMedialMalleolus).ToITKPoint())*0.45;
@@ -948,7 +948,7 @@ namespace TEST_TKA_SUEN
 		femurMatch->init(*femurImplant, *knee);
 		itk::Rigid3DTransform<>::Pointer boneToCutPlane = itk::VersorRigid3DTransform<>::New();
 		auto pointsInBone = femurMatch->GetHullPoints(ConvertMatrix(implantToFemurTrans->GetMatrix()), boneToCutPlane,
-			TKA::IMPLANTS::FemurImplantMatch::kPlaneD, 0, 0, 10, 15, 0, 0);
+			TKA::IMPLANTS::FemurImplantMatch::kPlaneA, 5, 3, 10, 10, 0, 0);
 
 		vtkNew<vtkPoints> points;
 		for (auto& p : pointsInBone)
