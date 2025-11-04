@@ -1038,6 +1038,93 @@ namespace TEST_PKA
 		*/
 	}
 
+	void testTibiaBounary2()
+	{
+		QString dir = "D:\\sovajo\\Test_Cases\\octubre_2025\\uka_test_20251103\\data";
+
+		auto side = UKA::IMPLANTS::KneeSideEnum::KLeft;
+		auto surgerySide = UKA::IMPLANTS::SurgerySideEnum::KLateral;
+
+		auto femurData = ReadPolyData(QString("%1\\femur.vtk").arg(dir).toStdString());
+		auto tibiaData = ReadPolyData(QString("%1\\tibia.vtk").arg(dir).toStdString());
+
+		auto landmarks = readLandmarks(QString("%1\\landmark.json").arg(dir));
+		auto ankleCenter = landmarks.at(kMedialMalleolus) + (landmarks.at(kLateralMalleolus) - landmarks.at(kMedialMalleolus))*0.45;;
+		UKA::IMPLANTS::Knee knee;
+		knee.init(toPoint(landmarks[LandmarkType::kHipCenter]), toPoint(landmarks[LandmarkType::kFemurKneeCenter]),
+			toPoint(landmarks[LandmarkType::kLateralEpicondyle]), toPoint(landmarks[LandmarkType::kMedialEpicondyle]),
+			toPoint(landmarks[LandmarkType::kTibiaKneeCenter]), toPoint(landmarks[LandmarkType::kTibiaTuberosity]),
+			toPoint(landmarks[LandmarkType::kPCLInsertionPoint]), toPoint(ankleCenter), femurData, tibiaData, side, surgerySide, false);
+		knee.setLateralAndMedialInferiorFemurPoints(toPoint(landmarks[LandmarkType::kFemurDistalLateral]), toPoint(landmarks[LandmarkType::kFemurDistalMedial]));
+		knee.setLateralAndMedialPosteriorFemurPoints(toPoint(landmarks[LandmarkType::kFemurLateralPosteriorCondyle]), toPoint(landmarks[LandmarkType::kFemurMedialPosteriorCondyle]));
+		knee.setLateralAndMedialPlateauPoints(toPoint(landmarks[LandmarkType::kTibiaLateralPlatformPoint]), toPoint(landmarks[LandmarkType::kTibiaMedialPlatformPoint]));
+
+		auto tibiaImplantData = ReadPolyDataSTL(QString("%1/tibia_LL_RM_CD+_C#8mm.stl").arg(dir).toStdString());
+		auto tibiaImplant = createTibiaImplant(QString("%1/tibia_LL_RM_CD+_C#8mm_data.json").arg(dir));
+		auto implantToTibiaTrans = getImplantToTibia(QString("%1/plan.json").arg(dir));
+
+		UKA::IMPLANTS::TibiaImplantMatch tibiaImplantMatch;
+		tibiaImplantMatch.init(*tibiaImplant, knee);
+		itk::Rigid3DTransform<>::Pointer boneToPlane = itk::VersorRigid3DTransform<>::New();
+		itk::Rigid3DTransform<>::Pointer sideToPlane = itk::VersorRigid3DTransform<>::New();
+		auto pointsInBone = tibiaImplantMatch.GetHullPoints(toItkTransform(implantToTibiaTrans), boneToPlane, sideToPlane,
+			0, 1, 0,
+			500).implantPoints;
+
+		vtkNew<vtkPoints> points;
+		for (auto& p : pointsInBone)
+		{
+			points->InsertNextPoint(p.GetDataPointer());
+		}
+		vtkNew<vtkCellArray> lines;
+		for (size_t i = 1; i < pointsInBone.size(); i++)
+		{
+			vtkNew<vtkLine> line;
+			line->GetPointIds()->SetId(0, i);
+			line->GetPointIds()->SetId(1, i - 1);
+			lines->InsertNextCell(line);
+
+		}
+		vtkNew<vtkPolyData> borderdata;
+		borderdata->SetPoints(points);
+		borderdata->SetLines(lines);
+
+		vtkNew<vtkActor> borderActor;
+		borderActor->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
+		borderActor->GetMapper()->SetInputDataObject(borderdata);
+		borderActor->GetProperty()->SetColor(1, 0, 0);
+		borderActor->GetProperty()->SetLineWidth(2);
+
+		vtkNew<vtkActor> implantActor;
+		implantActor->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
+		implantActor->GetMapper()->SetInputDataObject(tibiaImplantData);
+		implantActor->GetProperty()->SetColor(0, 1, 0);
+		implantActor->SetUserTransform(implantToTibiaTrans);
+
+		vtkNew<vtkActor> tibiaActor;
+		tibiaActor->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
+		tibiaActor->GetMapper()->SetInputDataObject(tibiaData);
+		tibiaActor->GetProperty()->SetColor(1, 1, 1);
+		tibiaActor->GetProperty()->SetOpacity(0.7);
+
+		vtkNew<vtkRenderer> render;
+		render->AddActor(borderActor);
+		render->AddActor(implantActor);
+		render->AddActor(tibiaActor);
+
+		vtkNew<vtkRenderWindow> renderWindow;
+		renderWindow->AddRenderer(render);
+		auto camera = render->GetActiveCamera();
+		camera->SetFocalPoint(0, 0, 0);
+		camera->SetPosition(0, -1, 0);
+		camera->SetViewUp(0, 0, 1);
+		render->ResetCamera();
+		renderWindow->Render();
+		vtkNew<vtkRenderWindowInteractor> interactor;
+		renderWindow->SetInteractor(interactor);
+		interactor->Start();
+	}
+
 	void testFemurAnteriodPlane()
 	{
 		QString dir = "D:\\sovajo\\Test_Cases\\agosto_2025\\UKA_Test";

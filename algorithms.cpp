@@ -4843,8 +4843,8 @@ int main()
 	//std::cout << Point(result) << "; " << proj << std::endl;
 
 	//PolydataInterception();
-	//TEST_PKA::MatchPKAThreePlanes();
-	TEST_TKA_SUEN::TestFemurPosteriorPlane();
+	TEST_PKA::testTibiaBounary2();
+	//TEST_TKA_SUEN::TestFemurPosteriorPlane();
 	//HipFemoralRegistration();
 
 	//double pnt[3] = { 0, 0, 0 };
