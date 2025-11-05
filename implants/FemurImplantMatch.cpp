@@ -1069,8 +1069,9 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	hull = increaseVectorToAmount(vertices, amount);
 
-	//vtkSmartPointer<vtkPolyData> contourMax = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
-	//ImplantTools::show(contourMax, vertices, true);
+	std::cout << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" << std::endl;
+	vtkSmartPointer<vtkPolyData> contourMax = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
+	ImplantTools::show(contourMax, vertices, true);
 
 	itk::Vector< double, 3 > translate;
 	if (projectedPoints.size() > 0)

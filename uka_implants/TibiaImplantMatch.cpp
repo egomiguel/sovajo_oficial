@@ -1941,36 +1941,154 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 		medPosRef = posEndTopArea;
 	}
 
-	if (posBeginTopArea == 0)
+	int tFinalHullSize = finalHull.size();
+
+	// Circular iteration
+	if (medPosRef == posEndTopArea)
 	{
-		if (latPosRef == posBeginTopArea)
-		{
-			farLateralSide = finalHull[finalHull.size() - 1];
-			farMedialSide = finalHull[medPosRef + 1];
-		}
-		else
-		{
-			farMedialSide = finalHull[finalHull.size() - 1];
-			farLateralSide = finalHull[latPosRef + 1];
+		Plane refPlane;
+		int endPos = posEndTopArea + (tFinalHullSize - (posEndTopArea - posBeginTopArea)) / 2;
+		for (int i = posEndTopArea + 1; i <= endPos; i++)
+		{	
+			int pos0 = (i - 1) % tFinalHullSize;
+			int pos1 = i % tFinalHullSize;
+			int pos2 = (i + 1) % tFinalHullSize;
+			Point lineVector = finalHull[pos1] - finalHull[pos2];
+			lineVector.normalice();
+			double tAngle = ImplantTools::getAngleBetweenVectorsDegree(lineVector, -vectorTrans);
+
+			if (tAngle < 90 || i + 1 >= endPos)
+			{
+				Line tempLine = Line(vectorAP, finalHull[pos1]);
+				farMedialSidePrev = finalHull[pos1];
+
+				Point processPoint = tempLine.getProjectPoint(finalHull[pos2]);
+				refPlane = myPlane.getPerpendicularPlane(finalHull[pos1], finalHull[pos0]);
+				refPlane.reverseByPoint(hullCenter, false);
+				if (refPlane.eval(processPoint) > 0)
+				{
+					tempLine.setDirectVector(finalHull[pos1] - finalHull[pos0]);
+					finalHull[pos2] = tempLine.getProjectPoint(finalHull[pos2]);
+				}
+				else
+				{
+					finalHull[pos2] = processPoint;
+				}
+
+				farMedialSide = finalHull[pos2];
+				break;
+			}
 		}
 	}
-		
-	if (posEndTopArea == finalHull.size() - 1)
+	else
 	{
-		if (latPosRef == posEndTopArea)
+		Plane refPlane;
+		int endPos = posBeginTopArea - (tFinalHullSize - (posEndTopArea - posBeginTopArea)) / 2;
+		for (int i = posBeginTopArea - 1; i >= endPos; i--)
 		{
-			farLateralSide = finalHull[0];
-			farMedialSide = finalHull[medPosRef - 1];
-		}
-		else
-		{
-			farMedialSide = finalHull[0];
-			farLateralSide = finalHull[latPosRef - 1];
+			int pos0 = (i + 1 + tFinalHullSize) % tFinalHullSize;
+			int pos1 = (i + tFinalHullSize) % tFinalHullSize;
+			int pos2 = (i - 1 + tFinalHullSize) % tFinalHullSize;
+			Point lineVector = finalHull[pos1] - finalHull[pos2];
+			lineVector.normalice();
+			double tAngle = ImplantTools::getAngleBetweenVectorsDegree(lineVector, -vectorTrans);
+
+			if (tAngle < 90 || i - 1 <= endPos)
+			{
+				Line tempLine = Line(vectorAP, finalHull[pos1]);
+				farMedialSidePrev = finalHull[pos1];
+				
+				Point processPoint = tempLine.getProjectPoint(finalHull[pos2]);
+				refPlane = myPlane.getPerpendicularPlane(finalHull[pos1], finalHull[pos0]);
+				refPlane.reverseByPoint(hullCenter, false);
+				if (refPlane.eval(processPoint) > 0)
+				{
+					tempLine.setDirectVector(finalHull[pos1] - finalHull[pos0]);
+					finalHull[pos2] = tempLine.getProjectPoint(finalHull[pos2]);
+				}
+				else
+				{
+					finalHull[pos2] = processPoint;
+				}
+
+				farMedialSide = finalHull[pos2];
+				break;
+			}
 		}
 	}
 
-	farLateralSidePrev = finalHull[latPosRef];
-	farMedialSidePrev = finalHull[medPosRef];
+	if (latPosRef == posEndTopArea)
+	{
+		Plane refPlane;
+		int endPos = posEndTopArea + (tFinalHullSize - (posEndTopArea - posBeginTopArea)) / 2;
+		for (int i = posEndTopArea + 1; i <= endPos; i++)
+		{
+			int pos0 = (i - 1) % tFinalHullSize;
+			int pos1 = i % tFinalHullSize;
+			int pos2 = (i + 1) % tFinalHullSize;
+			Point lineVector = finalHull[pos1] - finalHull[pos2];
+			lineVector.normalice();
+			double tAngle = ImplantTools::getAngleBetweenVectorsDegree(lineVector, vectorTrans);
+
+			if (tAngle < 90 || i + 1 >= endPos)
+			{
+				Line tempLine = Line(vectorAP, finalHull[pos1]);
+				farLateralSidePrev = finalHull[pos1];
+				
+				Point processPoint = tempLine.getProjectPoint(finalHull[pos2]);
+				refPlane = myPlane.getPerpendicularPlane(finalHull[pos1], finalHull[pos0]);
+				refPlane.reverseByPoint(hullCenter, false);
+				if (refPlane.eval(processPoint) > 0)
+				{
+					tempLine.setDirectVector(finalHull[pos1] - finalHull[pos0]);
+					finalHull[pos2] = tempLine.getProjectPoint(finalHull[pos2]);
+				}
+				else
+				{
+					finalHull[pos2] = processPoint;
+				}
+
+				farLateralSide = finalHull[pos2];
+				break;
+			}
+		}
+	}
+	else
+	{
+		Plane refPlane;
+		int endPos = posBeginTopArea - (tFinalHullSize - (posEndTopArea - posBeginTopArea)) / 2;
+		for (int i = posBeginTopArea - 1; i >= endPos; i--)
+		{
+			int pos0 = (i + 1 + tFinalHullSize) % tFinalHullSize;
+			int pos1 = (i + tFinalHullSize) % tFinalHullSize;
+			int pos2 = (i - 1 + tFinalHullSize) % tFinalHullSize;
+			Point lineVector = finalHull[pos1] - finalHull[pos2];
+			lineVector.normalice();
+			double tAngle = ImplantTools::getAngleBetweenVectorsDegree(lineVector, vectorTrans);
+
+			if (tAngle < 90 || i - 1 <= endPos)
+			{
+				Line tempLine = Line(vectorAP, finalHull[pos1]);
+				farLateralSidePrev = finalHull[pos1];
+				
+				Point processPoint = tempLine.getProjectPoint(finalHull[pos2]);
+				refPlane = myPlane.getPerpendicularPlane(finalHull[pos1], finalHull[pos0]);
+				refPlane.reverseByPoint(hullCenter, false);
+				if (refPlane.eval(processPoint) > 0)
+				{
+					tempLine.setDirectVector(finalHull[pos1] - finalHull[pos0]);
+					finalHull[pos2] = tempLine.getProjectPoint(finalHull[pos2]);
+				}
+				else
+				{
+					finalHull[pos2] = processPoint;
+				}
+
+				farLateralSide = finalHull[pos2];
+				break;
+			}
+		}
+	}
 	
 	downLine.setPoint(farTuber);
 	Line lateralLine = Line::makeLineWithPoints(farLateralSide, farLateralSidePrev);
