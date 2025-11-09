@@ -1068,8 +1068,6 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	}
 
 	hull = increaseVectorToAmount(vertices, amount);
-
-	std::cout << "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" << std::endl;
 	vtkSmartPointer<vtkPolyData> contourMax = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
 	ImplantTools::show(contourMax, vertices, true);
 
@@ -1542,13 +1540,14 @@ void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const
 
 		beginPos = 0;
 		endPos = beginPos + 1;
-		convexLatNew = ImplantTools::increaseVectorPoints(convexLatNew, beginPos, endPos);
 
 		if (middleCurveHight > 0)
 		{
-			int hightPos = ImplantTools::GetFarestPositivePoint(convexLatNew, basePlane);
-			basePlane.movePlaneOnNormal(middleCurveHight);
-			convexLatNew = ImplantTools::removePointByCondition(convexLatNew, 0, hightPos, basePlane);
+			Point vectorTemp = convexLatNew[endPos] - convexLatNew[beginPos];
+			vectorTemp.normalice();
+			double distanceFix = ImplantTools::getDistanceBetweenPoints(convexLatNew[beginPos], convexLatNew[endPos]);
+			distanceFix = (distanceFix > middleCurveHight) ? middleCurveHight : distanceFix;
+			convexLatNew[beginPos] = convexLatNew[beginPos] + distanceFix * vectorTemp;
 		}
 	}
 	else
@@ -1561,17 +1560,18 @@ void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const
 		beginPos = convexLatNew.size() - 1;
 		convexLatNew.push_back(basePointLat);
 		endPos = beginPos + 1;
-		convexLatNew = ImplantTools::increaseVectorPoints(convexLatNew, beginPos, endPos);
 
 		if (middleCurveHight > 0)
 		{
-			int hightPos = ImplantTools::GetFarestPositivePoint(convexLatNew, basePlane);
-			basePlane.movePlaneOnNormal(middleCurveHight);
-			convexLatNew = ImplantTools::removePointByCondition(convexLatNew, hightPos, convexLatNew.size() - 1, basePlane);
+			Point vectorTemp = convexLatNew[beginPos] - convexLatNew[endPos];
+			vectorTemp.normalice();
+			double distanceFix = ImplantTools::getDistanceBetweenPoints(convexLatNew[beginPos], convexLatNew[endPos]);
+			distanceFix = (distanceFix > middleCurveHight) ? middleCurveHight : distanceFix;
+			convexLatNew[endPos] = convexLatNew[endPos] + distanceFix * vectorTemp;
 		}
 	}
 
-	basePlane.movePlane(basePointMid);
+	//basePlane.movePlane(basePointMid);
 
 	if (hullFeaturesMed.lateralDownPos == 0)
 	{
@@ -1583,14 +1583,16 @@ void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const
 
 		beginPos = 0;
 		endPos = beginPos + 1;
-		convexMedNew = ImplantTools::increaseVectorPoints(convexMedNew, beginPos, endPos);
-
+		ImplantTools::show(contourMaxTest, convexMedNew);
 		if (middleCurveHight > 0)
 		{
-			int hightPos = ImplantTools::GetFarestPositivePoint(convexMedNew, basePlane);
-			basePlane.movePlaneOnNormal(middleCurveHight);
-			convexMedNew = ImplantTools::removePointByCondition(convexMedNew, 0, hightPos, basePlane);
+			Point vectorTemp = convexMedNew[endPos] - convexMedNew[beginPos];
+			vectorTemp.normalice();
+			double distanceFix = ImplantTools::getDistanceBetweenPoints(convexMedNew[beginPos], convexMedNew[endPos]);
+			distanceFix = (distanceFix > middleCurveHight) ? middleCurveHight : distanceFix;
+			convexMedNew[beginPos] = convexMedNew[beginPos] + distanceFix * vectorTemp;
 		}
+		ImplantTools::show(contourMaxTest, convexMedNew);
 	}
 	else
 	{
@@ -1602,14 +1604,16 @@ void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const
 		beginPos = convexMedNew.size() - 1;
 		convexMedNew.push_back(basePointMed);
 		endPos = beginPos + 1;
-		convexMedNew = ImplantTools::increaseVectorPoints(convexMedNew, beginPos, endPos);
-
+		ImplantTools::show(contourMaxTest, convexMedNew);
 		if (middleCurveHight > 0)
 		{
-			int hightPos = ImplantTools::GetFarestPositivePoint(convexMedNew, basePlane);
-			basePlane.movePlaneOnNormal(middleCurveHight);
-			convexMedNew = ImplantTools::removePointByCondition(convexMedNew, hightPos, convexMedNew.size() - 1, basePlane);
+			Point vectorTemp = convexMedNew[beginPos] - convexMedNew[endPos];
+			vectorTemp.normalice();
+			double distanceFix = ImplantTools::getDistanceBetweenPoints(convexMedNew[beginPos], convexMedNew[endPos]);
+			distanceFix = (distanceFix > middleCurveHight) ? middleCurveHight : distanceFix;
+			convexMedNew[endPos] = convexMedNew[endPos] + distanceFix * vectorTemp;
 		}
+		ImplantTools::show(contourMaxTest, convexMedNew);
 	}
 
 	/*if ((knee.getIsRight() && planeID == kPlaneA) || (knee.getIsRight() == false && planeID == kPlaneB))

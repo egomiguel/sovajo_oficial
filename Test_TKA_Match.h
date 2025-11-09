@@ -709,9 +709,13 @@ namespace TEST_TKA_SUEN
 		auto tibiaMatch = std::make_shared<TKA::IMPLANTS::TibiaImplantMatch>();
 		tibiaMatch->init(*tibiaImplant, *knee);
 
-		auto trans = itk::VersorRigid3DTransform<>::New();
+		itk::Rigid3DTransform<>::Pointer trans = itk::VersorRigid3DTransform<>::New();
+		itk::Rigid3DTransform<>::Pointer transOut = itk::VersorRigid3DTransform<>::New();
 		trans->SetMatrix(tibiaMatch->GetRotationMatrix());
 		trans->SetTranslation(tibiaMatch->GetTranslationMatrix());
+
+		tibiaMatch->GetHullPoints(trans, transOut, 0, 0, 0);
+
 		return trans;
 	}
 
@@ -892,12 +896,12 @@ namespace TEST_TKA_SUEN
 		auto knee = createKnee(landmarks, QString("%1\\femur.vtk").arg(dirPath).toStdString().c_str(),
 			QString("%1\\tibia.vtk").arg(dirPath).toStdString().c_str(), false);
 		auto implantToFemur = matchFemur(knee, femur4Implants);
-		auto implantToTibia = matchTibia(knee, tibia3_10Implants);
+		auto implantToTibia = matchTibia(knee, tibia3_12Implants);
 
 		//1
 		//implantToTibia->Print(std::cout);
 
-		TKA::IMPLANTS::ImplantsMatchFinalInfo info(knee.get(), *femur4Implants, *tibia3_10Implants,
+		TKA::IMPLANTS::ImplantsMatchFinalInfo info(knee.get(), *femur4Implants, *tibia3_12Implants,
 			implantToFemur, implantToTibia);
 
 		std::cout << "Varus: " << info.GetTibiaVarusAngle() << ". Slope: " << info.GetTibiaImplantSlopeAngle() << ". Rotation: " << info.GetTibiaImplantRotationAngle() << std::endl;
@@ -913,7 +917,7 @@ namespace TEST_TKA_SUEN
 		TEST_IMPLANTS::show(knee->GetTibiaPoly(), polyList);
 
 
-
+		/*
 		//info.setTibiaVarusAngle(3.1562700920978872);
 		info.setTibiaRotationAngle(-30.746164266024422);
 		//info.setTibiaSlopeAngle(-0.40464877902511232);
@@ -928,7 +932,7 @@ namespace TEST_TKA_SUEN
 		info.test();
 		std::vector<vtkSmartPointer<vtkPolyData>> polyList2;
 		polyList2.push_back(newImplantTibia2);
-		TEST_IMPLANTS::show(knee->GetTibiaPoly(), polyList2);
+		TEST_IMPLANTS::show(knee->GetTibiaPoly(), polyList2);*/
 	}
 
 	void TestFemurPosteriorPlane()
@@ -1031,7 +1035,7 @@ namespace TEST_TKA_SUEN
 		femurMatch->init(*femurImplant, *knee);
 		itk::Rigid3DTransform<>::Pointer boneToCutPlane = itk::VersorRigid3DTransform<>::New();
 		auto pointsInBone = femurMatch->GetHullPoints(ConvertMatrix(implantToFemurTrans->GetMatrix()), boneToCutPlane,
-			TKA::IMPLANTS::FemurImplantMatch::kPlaneA, 2, 2, 15, 15, 0, 35);
+			TKA::IMPLANTS::FemurImplantMatch::kPlaneA, 2, 2, 15, 15, 0, 25);
 
 		vtkNew<vtkPoints> points;
 		for (auto& p : pointsInBone)
@@ -1096,4 +1100,5 @@ namespace TEST_TKA_SUEN
 		renderWindow->SetInteractor(interactor);
 		interactor->Start();
 	}
+
 }

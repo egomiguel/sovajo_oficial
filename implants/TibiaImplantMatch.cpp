@@ -402,7 +402,7 @@ vtkSmartPointer<vtkPolyData> TibiaImplantMatch::GetCuttingTibia() const
 	return tibiaClipper->GetOutput();
 }
 
-std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, double distance, double distancePcl, double closeCurveLateral, double closeCurveMedial, int amount) const
+std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, double distance, double distancePcl, int amount) const
 {
 	std::vector<PointTypeITK> hull;
 	Plane myPlane = finalTransformPlane(implant.getTibiaPlane(), pTransformIn);
@@ -440,46 +440,8 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	Point newPcl = pcl - increaseVector * vectorAP;
 
-	Plane sagitalPlane, obliqueLatPlaneUp, obliqueMedPlaneUp, obliqueLatPlaneDown, obliqueMedPlaneDown;
+	Plane sagitalPlane, obliqueLatPlaneUp, obliqueMedPlaneUp;
 	sagitalPlane.init(vectorTrans, pcl);
-
-	if (closeCurveLateral > 1)
-	{
-		closeCurveLateral = 1.0;
-	}
-
-	if (closeCurveLateral < 0.05)
-	{
-		closeCurveLateral = 0.05;
-	}
-
-	if (closeCurveMedial > 1)
-	{
-		closeCurveMedial = 1.0;
-	}
-
-	if (closeCurveMedial < 0.05)
-	{
-		closeCurveMedial = 0.05;
-	}
-
-	Point obliquePointLat = tibiaCenter + vectorAP + 2.0 * closeCurveLateral * vectorTrans;
-	//Point obliquePointMed = tibiaCenter + vectorAP - 3.0 * vectorTrans;
-
-	Point refvectorMed = (tibiaCenter - vectorTrans) - (tibiaCenter + vectorAP);
-	Point obliquePointMed = tibiaCenter + vectorAP + (closeCurveMedial + 0.5) * refvectorMed;
-	obliqueLatPlaneDown = myPlane.getPerpendicularPlane(tibiaCenter, obliquePointLat);
-	obliqueMedPlaneDown = myPlane.getPerpendicularPlane(tibiaCenter, obliquePointMed);
-
-	if (obliqueLatPlaneDown.eval(obliquePointMed) < 0)
-	{
-		obliqueLatPlaneDown.reverse();
-	}
-
-	if (obliqueMedPlaneDown.eval(obliquePointLat) < 0)
-	{
-		obliqueMedPlaneDown.reverse();
-	}
 
 	Line lineTopContour(vectorTrans, newPcl);
 
@@ -488,11 +450,6 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	vtkSmartPointer<vtkPolyData> contourMax = ImplantTools::getContours(knee.GetTibiaPoly(), myPlane.getNormalVector(), myPlane.getPoint());
 	vtkSmartPointer<vtkPoints> vtkMyPoints = contourMax->GetPoints();
 	int tVtkPointSize = vtkMyPoints->GetNumberOfPoints();
-
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//ImplantTools::show(contourMax, knee.GetTibiaPoly());
-	///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::vector<Point> contourPoints;
 
@@ -511,7 +468,6 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	ConvexHull hullObj(contourPoints, myRotation);
 	std::vector<Point> hullPoints = hullObj.GetConvexHull();
-
 	if (hullPoints.size() < 4)
 	{
 		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL_ON_TIBIA_CUT_PLANE;
@@ -591,9 +547,6 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 			pclPoints.push_back(currentPoint);
 		}
 	}
-	//////////////////////////////////////////////////////////////////////////////////////
-	//ImplantTools::show(contourMax, pclPoints);
-	//ImplantTools::show(contourMax, contourMax);
 
 	if (pclPoints.size() < 10)
 	{
@@ -626,10 +579,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	xVector = -xVector;
 	cv::Mat rotationPoly = getTransformToRobot(myPlane, xVector);
 
-	//std::cout << "*********************************************************************" << std::endl;
-	//ImplantTools::Poly tPoly = ImplantTools::polyFit(pclPoints, rotationPoly, 6, constraintObj);
 	ImplantTools::Poly tPoly = ImplantTools::parabolaFitPCL(pclPoints, rotationPoly, beginTop, lastTop);
-	//std::cout << "*********************************************************************" << std::endl;
 	double maxX = tPoly.maxX;
 	double minX = tPoly.minX;
 
@@ -640,7 +590,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	std::vector<Point> hullConcaveTemp;
 	double step = (maxX - minX) / 100;
-	//double average = 20.;
+
 	for (double i = minX; i < maxX + (step / 2.); i += step)
 	{
 		double y = tPoly.eval(i);
@@ -648,16 +598,6 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		cv::Mat tempMat = rotationPoly.inv() * temp.ToMatPoint();
 		hullConcaveTemp.push_back(Point(tempMat));
 	}
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/*std::cout << tPoly.coeff[0] << ";  " << tPoly.coeff[1] << ";  " << tPoly.coeff[2] << std::endl;*/
-	/*
-	auto vectorTemp1 = hullConcaveTemp;
-	vectorTemp1.push_back(beginTop);
-	vectorTemp1.push_back(lastTop);
-	ImplantTools::show(contourMax, pclPoints);
-	ImplantTools::show(contourMax, vectorTemp1);
-	*/
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	double reverseDistance = ImplantTools::getDistanceBetweenPoints(hullConcaveTemp[0], beginTop, true);
 	double normalDistance = ImplantTools::getDistanceBetweenPoints(hullConcaveTemp[hullConcaveTemp.size() - 1], beginTop, true);
@@ -670,8 +610,6 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	//////////////////////////////////////////////////////
 	double slopeAngleLat = 90;
 	double slopeAngleMed = 90;
-	//double thicknessPlaneUp = 1.;
-	//topPlane.movePlaneOnNormal(thicknessPlaneUp);
 	Point oneTop = (lastTop + beginTop) / 2;
 	sagitalPlane.movePlane(oneTop);
 
@@ -759,30 +697,6 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	beginPos = 0;
 	endPos = hullConcaveTemp.size() - 1;
 
-	/*
-	for (int i = 1; i < hullConcaveTemp.size(); i++)
-	{
-		if (topPlane.eval(hullConcaveTemp[i]) < 0)
-		{
-			Point temp = topPlane.getInterceptionLinePoint(Line::makeLineWithPoints(hullConcaveTemp[i], hullConcaveTemp[i - 1]));
-			hullConcaveTemp.insert(hullConcaveTemp.begin() + i, temp);
-			beginPos = i;
-			break;
-		}
-	}
-
-	for (int i = hullConcaveTemp.size() - 2; i >= 0; i--)
-	{
-		if (topPlane.eval(hullConcaveTemp[i]) < 0)
-		{
-			Point temp = topPlane.getInterceptionLinePoint(Line::makeLineWithPoints(hullConcaveTemp[i], hullConcaveTemp[i + 1]));
-			hullConcaveTemp.insert(hullConcaveTemp.begin() + i + 1, temp);
-			endPos = i + 1;
-			break;
-		}
-	}
-	*/
-
 	Point lineVectorBegin = hullConcave[hullConcave.size() - 1];
 	Point lineVectorEnd = hullConcaveTemp[beginPos];
 
@@ -823,17 +737,23 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	Point computePoint;
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//auto poly = ImplantTools::getPolyLine(hullConcave);
-	//std::vector<Point> tExample = { hullConcave[posBeginPCL], hullConcave[posEndPCL], hullConcave[posEndTopArea], hullConcave[posBeginTopArea] };
-	//ImplantTools::show(poly, tExample);
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	for (int i = 0; i < hullConcave.size(); i++)
 	{
 		if (i >= posBeginTopArea && i <= posEndTopArea)
 		{
-			computePoint = hullConcave[i] + distancePcl * topPlane.getNormalVector();
+			Point borderPointMoveVector;
+			if (i == posBeginTopArea)
+			{
+				borderPointMoveVector = hullConcave[i] - hullConcave[i + 1];
+				borderPointMoveVector.normalice();
+			}
+			else if (i == posEndTopArea)
+			{
+				borderPointMoveVector = hullConcave[i] - hullConcave[i - 1];
+				borderPointMoveVector.normalice();
+			}
+
+			computePoint = hullConcave[i] + distance * borderPointMoveVector + distancePcl * topPlane.getNormalVector();
 			finalHull.push_back(computePoint);
 		}
 		else if (distance != 0)
@@ -849,49 +769,266 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 			finalHull.push_back(hullConcave[i]);
 		}
 	}
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//auto poly2 = ImplantTools::getPolyLine(hullConcave);
-	//ImplantTools::show(poly2, finalHull, true);
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::vector<Point> concaveSpline = ConvexHull::interpolateSpline(finalHull, amount);
-	int initPos = -1;
+	Point farTuber = tubercle + increaseVector * vectorAP;
+	Point farLateralSide, farMedialSide;
+	Point farLateralSidePrev, farMedialSidePrev;
+	Line downLine(vectorTrans, farTuber);
 
-	for (int i = 0; i < concaveSpline.size(); i++)
+	double downDistance = -1.0;
+	double downTemp;
+
+	for (int i = 0; i < finalHull.size(); i++)
 	{
-		if (obliqueLatPlaneDown.eval(concaveSpline[i]) >= 0 && obliqueMedPlaneDown.eval(concaveSpline[i]) >= 0)
+		auto it1 = finalHull[i];
+		downTemp = downLine.getDistanceFromPoint(it1);
+
+		if (downTemp < downDistance || downDistance < 0)
 		{
-			initPos = i;
-			break;
+			downDistance = downTemp;
+			farTuber = it1;
 		}
 	}
 
-	if (initPos == -1)
+	int latPosRef, medPosRef;
+	Point refTempVector = finalHull[posEndTopArea] - finalHull[posBeginTopArea];
+	refTempVector.normalice();
+	if (ImplantTools::getAngleBetweenVectorsDegree(vectorTrans, refTempVector) < 90)
 	{
-		initPos = 0;
+		latPosRef = posEndTopArea;
+		medPosRef = posBeginTopArea;
+	}
+	else
+	{
+		latPosRef = posBeginTopArea;
+		medPosRef = posEndTopArea;
 	}
 
-	if (initPos > 0)
-	{
-		std::rotate(concaveSpline.begin(), concaveSpline.begin() + initPos, concaveSpline.end());
-	}
+	int tFinalHullSize = finalHull.size();
 
-	std::vector<Point> finalSplinePoints;
-
-	for (int i = 0; i < concaveSpline.size(); i++)
+	// Circular iteration
+	if (medPosRef == posEndTopArea)
 	{
-		if (!(obliqueLatPlaneDown.eval(concaveSpline[i]) >= 0 && obliqueMedPlaneDown.eval(concaveSpline[i]) >= 0))
+		Plane refPlane;
+		int endPos = posEndTopArea + (tFinalHullSize - (posEndTopArea - posBeginTopArea)) / 2;
+		for (int i = posEndTopArea + 1; i <= endPos; i++)
 		{
-			finalSplinePoints.push_back(concaveSpline[i]);
+			int pos0 = (i - 1) % tFinalHullSize;
+			int pos1 = i % tFinalHullSize;
+			int pos2 = (i + 1) % tFinalHullSize;
+			Point lineVector = finalHull[pos1] - finalHull[pos2];
+			lineVector.normalice();
+			double tAngle = ImplantTools::getAngleBetweenVectorsDegree(lineVector, -vectorTrans);
+
+			if (tAngle < 90 || i + 1 >= endPos)
+			{
+				Line tempLine = Line(vectorAP, finalHull[pos1]);
+				farMedialSidePrev = finalHull[pos1];
+
+				Point processPoint = tempLine.getProjectPoint(finalHull[pos2]);
+				refPlane = myPlane.getPerpendicularPlane(finalHull[pos1], finalHull[pos0]);
+				refPlane.reverseByPoint(hullCenter, false);
+				if (refPlane.eval(processPoint) > 0)
+				{
+					tempLine.setDirectVector(finalHull[pos1] - finalHull[pos0]);
+					finalHull[pos2] = tempLine.getProjectPoint(finalHull[pos2]);
+				}
+				else
+				{
+					finalHull[pos2] = processPoint;
+				}
+
+				farMedialSide = finalHull[pos2];
+				break;
+			}
+		}
+	}
+	else
+	{
+		Plane refPlane;
+		int endPos = posBeginTopArea - (tFinalHullSize - (posEndTopArea - posBeginTopArea)) / 2;
+		for (int i = posBeginTopArea - 1; i >= endPos; i--)
+		{
+			int pos0 = (i + 1 + tFinalHullSize) % tFinalHullSize;
+			int pos1 = (i + tFinalHullSize) % tFinalHullSize;
+			int pos2 = (i - 1 + tFinalHullSize) % tFinalHullSize;
+			Point lineVector = finalHull[pos1] - finalHull[pos2];
+			lineVector.normalice();
+			double tAngle = ImplantTools::getAngleBetweenVectorsDegree(lineVector, -vectorTrans);
+
+			if (tAngle < 90 || i - 1 <= endPos)
+			{
+				Line tempLine = Line(vectorAP, finalHull[pos1]);
+				farMedialSidePrev = finalHull[pos1];
+
+				Point processPoint = tempLine.getProjectPoint(finalHull[pos2]);
+				refPlane = myPlane.getPerpendicularPlane(finalHull[pos1], finalHull[pos0]);
+				refPlane.reverseByPoint(hullCenter, false);
+				if (refPlane.eval(processPoint) > 0)
+				{
+					tempLine.setDirectVector(finalHull[pos1] - finalHull[pos0]);
+					finalHull[pos2] = tempLine.getProjectPoint(finalHull[pos2]);
+				}
+				else
+				{
+					finalHull[pos2] = processPoint;
+				}
+
+				farMedialSide = finalHull[pos2];
+				break;
+			}
 		}
 	}
 
+	if (latPosRef == posEndTopArea)
+	{
+		Plane refPlane;
+		int endPos = posEndTopArea + (tFinalHullSize - (posEndTopArea - posBeginTopArea)) / 2;
+		for (int i = posEndTopArea + 1; i <= endPos; i++)
+		{
+			int pos0 = (i - 1) % tFinalHullSize;
+			int pos1 = i % tFinalHullSize;
+			int pos2 = (i + 1) % tFinalHullSize;
+			Point lineVector = finalHull[pos1] - finalHull[pos2];
+			lineVector.normalice();
+			double tAngle = ImplantTools::getAngleBetweenVectorsDegree(lineVector, vectorTrans);
+
+			if (tAngle < 90 || i + 1 >= endPos)
+			{
+				Line tempLine = Line(vectorAP, finalHull[pos1]);
+				farLateralSidePrev = finalHull[pos1];
+
+				Point processPoint = tempLine.getProjectPoint(finalHull[pos2]);
+				refPlane = myPlane.getPerpendicularPlane(finalHull[pos1], finalHull[pos0]);
+				refPlane.reverseByPoint(hullCenter, false);
+				if (refPlane.eval(processPoint) > 0)
+				{
+					tempLine.setDirectVector(finalHull[pos1] - finalHull[pos0]);
+					finalHull[pos2] = tempLine.getProjectPoint(finalHull[pos2]);
+				}
+				else
+				{
+					finalHull[pos2] = processPoint;
+				}
+
+				farLateralSide = finalHull[pos2];
+				break;
+			}
+		}
+	}
+	else
+	{
+		Plane refPlane;
+		int endPos = posBeginTopArea - (tFinalHullSize - (posEndTopArea - posBeginTopArea)) / 2;
+		for (int i = posBeginTopArea - 1; i >= endPos; i--)
+		{
+			int pos0 = (i + 1 + tFinalHullSize) % tFinalHullSize;
+			int pos1 = (i + tFinalHullSize) % tFinalHullSize;
+			int pos2 = (i - 1 + tFinalHullSize) % tFinalHullSize;
+			Point lineVector = finalHull[pos1] - finalHull[pos2];
+			lineVector.normalice();
+			double tAngle = ImplantTools::getAngleBetweenVectorsDegree(lineVector, vectorTrans);
+
+			if (tAngle < 90 || i - 1 <= endPos)
+			{
+				Line tempLine = Line(vectorAP, finalHull[pos1]);
+				farLateralSidePrev = finalHull[pos1];
+
+				Point processPoint = tempLine.getProjectPoint(finalHull[pos2]);
+				refPlane = myPlane.getPerpendicularPlane(finalHull[pos1], finalHull[pos0]);
+				refPlane.reverseByPoint(hullCenter, false);
+				if (refPlane.eval(processPoint) > 0)
+				{
+					tempLine.setDirectVector(finalHull[pos1] - finalHull[pos0]);
+					finalHull[pos2] = tempLine.getProjectPoint(finalHull[pos2]);
+				}
+				else
+				{
+					finalHull[pos2] = processPoint;
+				}
+
+				farLateralSide = finalHull[pos2];
+				break;
+			}
+		}
+	}
+
+	downLine.setPoint(farTuber);
+	Line lateralLine = Line::makeLineWithPoints(farLateralSide, farLateralSidePrev);
+	Line medialLine = Line::makeLineWithPoints(farMedialSide, farMedialSidePrev);
+
+	Plane downPlane = myPlane.getPerpendicularPlane(downLine.getPoint(), downLine.getPointAtDistance(100));
+	Point cornerDownLat = downPlane.getInterceptionLinePoint(lateralLine);
+	Point cornerDownMed = downPlane.getInterceptionLinePoint(medialLine);
+
+	Plane splitPlane = myPlane.getPerpendicularPlane(farLateralSide, farMedialSide);
+	if (splitPlane.eval(tubercle + increaseVector * vectorAP) > 0)
+	{
+		splitPlane.reverse();
+	}
+
+	std::vector<Point> concaveSpline;
+	double refTempLatDistance = -1;
+	double refTempMedDistance = -1;
+	int refLatPos = 0;
+	int refMedPos = 0;
+	double tempDist = 0;
+	for (auto it = finalHull.begin(); it != finalHull.end(); it++) {
+		if (splitPlane.eval(*it) >= 0)
+		{
+			tempDist = ImplantTools::getDistanceBetweenPoints(*it, farLateralSide);
+			if (refTempLatDistance < 0 || tempDist < refTempLatDistance)
+			{
+				refTempLatDistance = tempDist;
+				refLatPos = concaveSpline.size();
+			}
+
+			tempDist = ImplantTools::getDistanceBetweenPoints(*it, farMedialSide);
+			if (refTempMedDistance < 0 || tempDist < refTempMedDistance)
+			{
+				refTempMedDistance = tempDist;
+				refMedPos = concaveSpline.size();
+			}
+
+			concaveSpline.push_back(*it);
+		}
+	}
+
+	if (abs(refLatPos - refMedPos) + 1 < concaveSpline.size())
+	{
+		if (refLatPos > refMedPos)
+		{
+			std::rotate(concaveSpline.begin(), concaveSpline.begin() + refLatPos, concaveSpline.end());
+			concaveSpline.insert(concaveSpline.begin(), cornerDownLat);
+			concaveSpline.push_back(cornerDownMed);
+		}
+		else
+		{
+			std::rotate(concaveSpline.begin(), concaveSpline.begin() + refMedPos, concaveSpline.end());
+			concaveSpline.insert(concaveSpline.begin(), cornerDownMed);
+			concaveSpline.push_back(cornerDownLat);
+		}
+	}
+	else if (refLatPos == 0)
+	{
+		concaveSpline.insert(concaveSpline.begin(), cornerDownLat);
+		concaveSpline.push_back(cornerDownMed);
+	}
+	else
+	{
+		concaveSpline.insert(concaveSpline.begin(), cornerDownMed);
+		concaveSpline.push_back(cornerDownLat);
+	}
+
+	std::vector<Point> finalSplinePointsTKA;
+
+	finalSplinePointsTKA = concaveSpline;
 	Point initExtreme, endExtreme;
 
-	if (finalSplinePoints.size() > 1)
+	if (finalSplinePointsTKA.size() > 1)
 	{
-		initExtreme = finalSplinePoints[0];
-		endExtreme = finalSplinePoints[finalSplinePoints.size() - 1];
+		initExtreme = finalSplinePointsTKA[0];
+		endExtreme = finalSplinePointsTKA[finalSplinePointsTKA.size() - 1];
 
 		cv::Mat initExtremeMat, endExtremeMat;
 
@@ -903,13 +1040,15 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 		if (endExtreme.y < initExtreme.y)
 		{
-			std::reverse(finalSplinePoints.begin(), finalSplinePoints.end());
+			std::reverse(finalSplinePointsTKA.begin(), finalSplinePointsTKA.end());
 		}
 	}
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//ImplantTools::show(contourMax, finalSplinePoints);
 
-	hull = increaseVectorToAmount(finalSplinePoints, amount);
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//ImplantTools::show(contourMax, finalSplinePointsTKA);
+	//ImplantTools::show(contourMax, finalSplinePointsTKA, true);
+
+	hull = increaseVectorToAmount(finalSplinePointsTKA, amount);
 
 	itk::Vector< double, 3 > translate;
 
