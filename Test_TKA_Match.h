@@ -1035,7 +1035,7 @@ namespace TEST_TKA_SUEN
 		femurMatch->init(*femurImplant, *knee);
 		itk::Rigid3DTransform<>::Pointer boneToCutPlane = itk::VersorRigid3DTransform<>::New();
 		auto pointsInBone = femurMatch->GetHullPoints(ConvertMatrix(implantToFemurTrans->GetMatrix()), boneToCutPlane,
-			TKA::IMPLANTS::FemurImplantMatch::kPlaneA, 2, 2, 15, 15, 0, 25);
+			TKA::IMPLANTS::FemurImplantMatch::kPlaneB, 2, 2, 15, 15, 0, 50);
 
 		vtkNew<vtkPoints> points;
 		for (auto& p : pointsInBone)
