@@ -391,6 +391,11 @@ std::vector<Point> ConvexHull::ReduceConvexHull(const std::vector<Point>& pPoint
 
 std::vector<Point> ConvexHull::interpolateSpline(const std::vector<Point>& pPoints, int amount)
 {
+	if (amount < 3)
+	{
+		return pPoints;
+	}
+
     std::vector<Point> result;
 
     Eigen::MatrixXd points(3, pPoints.size());

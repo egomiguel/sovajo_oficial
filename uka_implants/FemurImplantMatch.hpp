@@ -55,11 +55,11 @@ namespace UKA
 
 			itk::Vector< double, 3 > GetTranslationMatrix() const;
 
-			std::vector<PointTypeITK> GetHullPointsOnePlane(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneAreaOnePlane id, double distanceSide = 0, double distanceTop = 1.0, int amount = 200) const;
+			std::vector<PointTypeITK> GetHullPointsOnePlane(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneAreaOnePlane id, double distanceSide = 0, double distanceTop = 1.0, int amount = 200, double pLateralAngle = 90, double pMedialAngle = 90) const;
 
-			std::vector<PointTypeITK> GetHullPointsThreePlanes(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneAreaThreePlanes id, double distanceSide = 0, double distanceTop = 1.0, int amount = 200) const;
+			std::vector<PointTypeITK> GetHullPointsThreePlanes(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneAreaThreePlanes id, double distanceSide = 0, double distanceTop = 1.0, int amount = 200, double pLateralAngle = 90, double pMedialAngle = 90) const;
 
-			std::vector<PointTypeITK> GetHullPointsTwoPlanes(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneAreaTwoPlanes id, double distanceSide = 0, double distanceTop = 1.0, int amount = 200) const;
+			std::vector<PointTypeITK> GetHullPointsTwoPlanes(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, BoneAreaTwoPlanes id, double distanceSide = 0, double distanceTop = 1.0, int amount = 200, double pLateralAngle = 90, double pMedialAngle = 90) const;
 
 		private:
 
@@ -77,11 +77,11 @@ namespace UKA
 
 			Plane finalTransformPlane(const Plane& plane, const itk::Rigid3DTransform<>::Pointer pTransform) const;
 
-			void getCurveLikeU(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distanceSide, double distanceTop, int amount) const;
+			void getCurveLikeU(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distanceSide, double distanceTop, int amount, double pLateralAngle, double pMedialAngle) const;
 
 			std::vector<Point> getCurveLikeRectangle(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& currentPlane, const Plane& midPlane, const cv::Mat& pRotation) const;
 			
-			ConvexHullFeatures getIncreaseBorder(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, double distanceSideLat, double distanceSideMed, double distanceTop, double downLatCornerOut = 0.75, double downMedCornerOut = 0.75) const;
+			ConvexHullFeatures getIncreaseBorder(const std::vector<Point>& points, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, double distanceSideLat, double distanceSideMed, double distanceTop, double downLatCornerOut = 0.75, double downMedCornerOut = 0.75, double pLateralAngle = 90, double pMedialAngle = 90) const;
 
 			std::vector<PointTypeITK> increaseVectorToAmount(const std::vector<Point>& points, int amount) const;
 

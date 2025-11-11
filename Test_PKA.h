@@ -1256,7 +1256,8 @@ namespace TEST_PKA
 		femurMatch.init(femurThreePlaneImplant.get(), knee);
 		auto implantToFemur = getImplantToFemur(QString("%1\\plan.json").arg(dir));;
 		itk::Rigid3DTransform<>::Pointer boneToPlane = itk::VersorRigid3DTransform<>::New();
-		auto pointsInBone = femurMatch.GetHullPointsThreePlanes(toItkTransform(implantToFemur), boneToPlane, UKA::IMPLANTS::FemurImplantMatch::BoneAreaThreePlanes::KThreePlaneAnterior);
+		auto pointsInBone = femurMatch.GetHullPointsThreePlanes(toItkTransform(implantToFemur), boneToPlane, 
+			UKA::IMPLANTS::FemurImplantMatch::BoneAreaThreePlanes::KThreePlaneAnterior, 0, 0, 0, 180, 180);
 
 		vtkNew<vtkPoints> points;
 		for (auto& p : pointsInBone)
