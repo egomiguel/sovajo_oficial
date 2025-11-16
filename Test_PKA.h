@@ -1068,8 +1068,8 @@ namespace TEST_PKA
 		itk::Rigid3DTransform<>::Pointer boneToPlane = itk::VersorRigid3DTransform<>::New();
 		itk::Rigid3DTransform<>::Pointer sideToPlane = itk::VersorRigid3DTransform<>::New();
 		auto pointsInBone = tibiaImplantMatch.GetHullPoints(toItkTransform(implantToTibiaTrans), boneToPlane, sideToPlane,
-			5, 1, 2,
-			500).implantPoints;
+			2, 2, 2,
+			5).implantPoints;
 
 		vtkNew<vtkPoints> points;
 		for (auto& p : pointsInBone)

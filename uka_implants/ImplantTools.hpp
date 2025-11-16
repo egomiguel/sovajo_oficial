@@ -84,6 +84,8 @@ namespace UKA
 
 			void ExtractSortLines(const vtkSmartPointer<vtkPolyData> polyData, std::list<std::pair<vtkIdType, vtkIdType>>& lines);
 
+			Line GetNearestPoints(const Line& pLine, const std::vector<Point>& pData, int& pDataSidePos);
+
 			vtkIdType GetNearestPoints(const vtkSmartPointer<vtkPolyData> poly, const Point& pPoint);
 
 			vtkIdType GetNearestPoints(const vtkSmartPointer<vtkPolyData> poly, const Line& pLine, const Plane& pPlane1, const Plane& pPlane2);

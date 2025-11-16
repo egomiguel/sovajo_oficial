@@ -1193,6 +1193,31 @@ bool ImplantTools::GetInterceptionWithSegment(const vtkSmartPointer<vtkPolyData>
 	}
 }
 
+Line ImplantTools::GetNearestPoints(const Line& pLine, const std::vector<Point>& pData, int& pDataSidePos)
+{
+	Line myLine = Line::makeLineWithPoints(pLine.getPoint(), pLine.getPointAtDistance(100));
+
+	auto it1 = pData.begin();
+	auto it2 = pData.end();
+	double distance, secondDist = -1;
+	Point newPoint;
+	int cont = 0;
+	for (; it1 != it2; ++it1)
+	{
+		distance = myLine.getDistanceFromPoint(*it1);
+		if (distance < secondDist || secondDist < 0)
+		{
+			secondDist = distance;
+			newPoint = *it1;
+			pDataSidePos = cont;
+		}
+		cont++;
+	}
+
+	myLine.setPoint(newPoint);
+	return myLine;
+}
+
 vtkIdType ImplantTools::GetNearestPoints(const vtkSmartPointer<vtkPolyData> poly, const Point& pPoint)
 {
 	vtkNew<vtkKdTreePointLocator> kDTree;

@@ -1506,20 +1506,21 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 	myPlane.fixNormalVector(myNormalFinal);
 
 	double increaseVector = 100000.0;
-	Point tubercle = myPlane.getProjectionPoint(knee.getTibiaTubercle());
+	/*Point tubercle = myPlane.getProjectionPoint(knee.getTibiaTubercle());
 	Point pcl = myPlane.getProjectionPoint(knee.getPclCenterPoint());
 	Point tibiaCenter = myPlane.getProjectionPoint(knee.getTibiaCenterPointOnImplantAP(implant.getImplantInfo()));
 	Point latPlateau = myPlane.getProjectionPoint(knee.getLateralPlateau());
-	Point medPlateau = myPlane.getProjectionPoint(knee.getMedialPlateau());
+	Point medPlateau = myPlane.getProjectionPoint(knee.getMedialPlateau());*/
 	
 	Point implantTubercle = finalTransformPoint(implant.getPointTuber(), pTransformIn);
 	Point implantPcl = finalTransformPoint(implant.getPointPCL(), pTransformIn);
 
 	Point directVector = myPlane.getNormalVector();
-	Point vectorAP = tubercle - pcl;
-	vectorAP.normalice();
+	/*Point vectorAP = tubercle - pcl;
+	vectorAP.normalice();*/
 	Point vectorRobotAP = implantPcl - implantTubercle;
 	vectorRobotAP.normalice();
+	Point vectorAP = -vectorRobotAP;
 
 	cv::Mat myRotation = getTransformToRobot(myPlane, vectorRobotAP);
 
@@ -1536,10 +1537,10 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 
 	vectorTrans.normalice();
 
-	Point newPcl = pcl - increaseVector * vectorAP;
+	Point newPcl = implantPcl - increaseVector * vectorAP;
 
 	Plane sagitalPlane, obliqueLatPlaneUp, obliqueMedPlaneUp;
-	sagitalPlane.init(vectorTrans, pcl);
+	sagitalPlane.init(vectorTrans, implantPcl);
 
 	Line lineTopContour(vectorTrans, newPcl);
 
@@ -1740,13 +1741,16 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 	Point sideLat = hullCenter + increaseVector * vectorTrans;
 	Point sideMed = hullCenter - increaseVector * vectorTrans;
 
-	Point interceptLat = topPlane.getInterceptionLinePoint(Line(topPlane.getNormalVector(), sideLat));
-	Point interceptMed = topPlane.getInterceptionLinePoint(Line(topPlane.getNormalVector(), sideMed));
+	//Point interceptLat = topPlane.getInterceptionLinePoint(Line(topPlane.getNormalVector(), sideLat));
+	//Point interceptMed = topPlane.getInterceptionLinePoint(Line(topPlane.getNormalVector(), sideMed));
+	Point interceptLat = topPlane.getInterceptionLinePoint(Line(vectorAP, sideLat));
+	Point interceptMed = topPlane.getInterceptionLinePoint(Line(vectorAP, sideMed));
 
 	int pDataSidePos;
-	Line myLineObliqueLat = ImplantTools::GetSquareCornerFeatures(oneTop, interceptLat, sideLat, hullConcave, pDataSidePos, slopeAngleLat);
+	//Line myLineObliqueLat = ImplantTools::GetSquareCornerFeatures(oneTop, interceptLat, sideLat, hullConcave, pDataSidePos, slopeAngleLat);
+	Line myLineObliqueLat = ImplantTools::GetNearestPoints(Line(vectorAP, sideLat), hullConcave, pDataSidePos);
+	
 	interceptLat = topPlane.getInterceptionLinePoint(myLineObliqueLat);
-
 	if (sagitalPlane.eval(beginTop) > 0)
 	{
 		while (pDataSidePos > 0)
@@ -1756,7 +1760,6 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 		}
 
 		Point lineVectorBegin = hullConcave[0];
-
 		for (double i = 0.2; i < 0.9; i += 0.2)
 		{
 			Point temp = lineVectorBegin + i * (interceptLat - lineVectorBegin);
@@ -1771,7 +1774,6 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 		}
 
 		Point lineVectorBegin = hullConcave[pDataSidePos];
-
 		for (double i = 0.2; i < 0.9; i += 0.2)
 		{
 			Point temp = lineVectorBegin + i * (interceptLat - lineVectorBegin);
@@ -1779,9 +1781,9 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 		}
 	}
 
-	Line myLineObliqueMed = ImplantTools::GetSquareCornerFeatures(oneTop, interceptMed, sideMed, hullConcave, pDataSidePos, slopeAngleMed);
+	//Line myLineObliqueMed = ImplantTools::GetSquareCornerFeatures(oneTop, interceptMed, sideMed, hullConcave, pDataSidePos, slopeAngleMed);
+	Line myLineObliqueMed = ImplantTools::GetNearestPoints(Line(vectorAP, sideMed), hullConcave, pDataSidePos);
 	interceptMed = topPlane.getInterceptionLinePoint(myLineObliqueMed);
-
 	if (sagitalPlane.eval(beginTop) < 0)
 	{
 		while (pDataSidePos > 0)
@@ -1791,7 +1793,6 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 		}
 
 		Point lineVectorBegin = hullConcave[0];
-
 		for (double i = 0.2; i < 0.9; i += 0.2)
 		{
 			Point temp = lineVectorBegin + i * (interceptMed - lineVectorBegin);
@@ -1806,7 +1807,6 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 		}
 
 		Point lineVectorBegin = hullConcave[pDataSidePos];
-
 		for (double i = 0.2; i < 0.9; i += 0.2)
 		{
 			Point temp = lineVectorBegin + i * (interceptMed - lineVectorBegin);
@@ -1907,7 +1907,7 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 	//ImplantTools::show(contourMax, finalHull, true);
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Point farTuber = tubercle + increaseVector * vectorAP;
+	Point farTuber = implantTubercle + increaseVector * vectorAP;
 	Point farLateralSide, farMedialSide;
 	Point farLateralSidePrev, farMedialSidePrev;
 	Line downLine(vectorTrans, farTuber);
@@ -2099,7 +2099,7 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 	Point cornerDownMed = downPlane.getInterceptionLinePoint(medialLine);
 
 	Plane splitPlane = myPlane.getPerpendicularPlane(farLateralSide, farMedialSide);
-	if (splitPlane.eval(tubercle + increaseVector * vectorAP) > 0)
+	if (splitPlane.eval(implantTubercle + increaseVector * vectorAP) > 0)
 	{
 		splitPlane.reverse();
 	}
@@ -2183,7 +2183,8 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 	////////////////////////////////////////////Div PKA section/////////////////////////////////////////////////////////////////////
 	//std::cout << "4444444444444444444444444444444444444444" << std::endl;
 	//ImplantTools::show(contourMax, concaveSpline, false);
-	//ImplantTools::show(contourMax, finalSplinePointsTKA, true);
+	/*ImplantTools::show(contourMax, finalSplinePointsTKA);
+	ImplantTools::show(contourMax, finalSplinePointsTKA, true);*/
 	///////////////////////////////////////////////////////////////////////
 
 	/*Plane midPlane = myPlane.getPerpendicularPlane(pcl, tubercle);
