@@ -25,6 +25,7 @@ namespace THA
 			Point getCanalAxisVectorInfSup() const;
 			Point getVectorLatMed() const;
 			Point getCanalAxisPoint() const;
+			Point getProximalCanalAxisPoint() const;
 			Point getNeckAxisVectorToHead() const;
 			Point getKneeCenter() const;
 			double getFemurVersion(const Point& pNeckAxisVectorToHead, const PelvisSide& pOperationSide) const;
@@ -39,7 +40,7 @@ namespace THA
 			Point mLateralEpicondyle;
 			Point mCanalAxisVectorInfSup;
 			Point mNeckAxisVectorToHead;
-			Point mCanalAxisPoint;
+			Point mCanalAxisPoint, mCanalAxisProximalPoint, mCanalAxisDistalPoint;
 			Point mKneeCenter;
 			void getNeckAxisVector();
 			bool isInit;

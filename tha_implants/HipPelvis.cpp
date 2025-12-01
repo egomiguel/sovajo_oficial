@@ -787,10 +787,22 @@ vtkSmartPointer<vtkImplicitPolyDataDistance> HipPelvis::getImplicitPelvisDistanc
 double HipPelvis::getNeckShaftAngle() const
 {
 	Point neckVector = mFemurOperationSide.getNeckAxisVectorToHead();
-	Point canalVector = -mFemurOperationSide.getCanalAxisVectorInfSup();
-	
-	neckVector = mPlaneAPP.getProjectionVector(neckVector);
-	canalVector = mPlaneAPP.getProjectionVector(canalVector);
+	Point canalVector = mFemurOperationSide.getKneeCenter() - mFemurOperationSide.getProximalCanalAxisPoint(); //-mFemurOperationSide.getCanalAxisVectorInfSup();
+	canalVector.normalice();
+
+	Point femurAxis = mFemurOperationSide.getHeadCenter() - mFemurOperationSide.getKneeCenter();
+	Point femurTea = mFemurOperationSide.getLateralEpicondyle() - mFemurOperationSide.getMedialEpicondyle();
+	Plane axial;
+	axial.init(femurAxis, mFemurOperationSide.getKneeCenter());
+	femurTea = axial.getProjectionVector(femurTea);
+	femurTea.normalice();
+	femurAxis.normalice();
+	Point femurAP = femurAxis.cross(femurTea);
+	Plane coronal;
+	coronal.init(femurAP, mFemurOperationSide.getKneeCenter());
+
+	neckVector = coronal.getProjectionVector(neckVector);
+	canalVector = coronal.getProjectionVector(canalVector);
 
 	return ImplantTools::getAngleBetweenVectorsDegree(neckVector, canalVector);
 }

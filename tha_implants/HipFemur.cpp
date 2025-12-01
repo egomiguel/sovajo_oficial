@@ -25,6 +25,8 @@ void HipFemur::init(const Point& headCenter, const Point& neckCenter, const Poin
 	mMedialEpicondyle = medialEpicondyle;
 	mLateralEpicondyle = lateralEpicondyle;
 	mFemur = femurPoly;
+	mCanalAxisProximalPoint = canalProximalCenter;
+	mCanalAxisDistalPoint = canalDistalCenter;
 	mCanalAxisPoint = (canalProximalCenter + canalDistalCenter) / 2;
 	mCanalAxisVectorInfSup = canalProximalCenter - canalDistalCenter;
 	mCanalAxisVectorInfSup.normalice();
@@ -86,6 +88,11 @@ Point HipFemur::getCanalAxisPoint() const
 	return mCanalAxisPoint;
 }
 
+Point HipFemur::getProximalCanalAxisPoint() const
+{
+	return mCanalAxisProximalPoint;
+}
+
 Point HipFemur::getNeckAxisVectorToHead() const
 {
 	return mNeckAxisVectorToHead;
@@ -142,7 +149,9 @@ double HipFemur::getFemurVersion(const Point& pNeckAxisVectorToHead, const Pelvi
 	Point midPoint = (mMedialEpicondyle + mLateralEpicondyle) / 2.;
 
 	Plane axial;
-	axial.init(mCanalAxisVectorInfSup, mCanalAxisPoint);
+	Point versionAxisVector = mCanalAxisProximalPoint - midPoint;
+	versionAxisVector.normalice();
+	axial.init(versionAxisVector, midPoint);
 
 	Point neckAxis = axial.getProjectionVector(neckAxisParameter);
 	lateralMedialAxis = axial.getProjectionVector(lateralMedialAxis);
@@ -156,11 +165,11 @@ double HipFemur::getFemurVersion(const Point& pNeckAxisVectorToHead, const Pelvi
 
 	if (pOperationSide == PelvisSide::RIGHT_SIDE)
 	{
-		anteriorDirectionVector = lateralMedialAxis.cross(mCanalAxisVectorInfSup);
+		anteriorDirectionVector = lateralMedialAxis.cross(versionAxisVector);
 	}
 	else
 	{
-		anteriorDirectionVector = mCanalAxisVectorInfSup.cross(lateralMedialAxis);
+		anteriorDirectionVector = versionAxisVector.cross(lateralMedialAxis);
 	}
 
 	anteriorDirectionVector.normalice();
