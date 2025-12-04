@@ -1637,7 +1637,7 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 			std::rotate(hullPoints.begin(), hullPoints.begin() + minPos, hullPoints.end());
 		}
 	}
-
+	/*
 	std::vector<Point> pclPoints;
 
 	for (int i = 0; i < tVtkPointSize; i++)
@@ -1651,6 +1651,7 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 			pclPoints.push_back(currentPoint);
 		}
 	}
+	*/
 	//////////////////////////////////////////////////////////////////////////////////////
 	//std::cout << "1111111111111111111111111111111" << std::endl;
 	//ImplantTools::show(contourMax, pclPoints);
@@ -1658,11 +1659,12 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 	//ImplantTools::show(contourMax, hullPoints);
 	//////////////////////////////////////////////////////////////////////////////////
 
+	/*
 	if (pclPoints.size() < 10)
 	{
 		throw ImplantExceptionCode::NOT_ENOUGH_POINTS_ON_PCL_BORDER;
 	}
-
+	*/
 	std::vector<Point> hullConcave, finalHull;
 	bool pclArea = false;
 	for (int i = 0; i < tHullSize && pclArea == false; i++)
@@ -1683,7 +1685,9 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 
 	Plane topPlane = myPlane.getPerpendicularPlane(lastTop, beginTop);
 	topPlane.reverseByPoint(hullCenter, false);
-
+	std::vector<Point> hullConcaveTemp = {beginTop, lastTop};
+	/*
+	///////////////////// Parabola
 	Point xVector = myPlane.getNormalVector().cross(vectorRobotAP);
 	xVector.normalice();
 	xVector = -xVector;
@@ -1711,6 +1715,7 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 		cv::Mat tempMat = rotationPoly.inv() * temp.ToMatPoint();
 		hullConcaveTemp.push_back(Point(tempMat));
 	}
+	*/
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/*std::cout << tPoly.coeff[0] << ";  " << tPoly.coeff[1] << ";  " << tPoly.coeff[2] << std::endl;*/
 	/*
@@ -1781,7 +1786,6 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 		}
 	}
 
-	//Line myLineObliqueMed = ImplantTools::GetSquareCornerFeatures(oneTop, interceptMed, sideMed, hullConcave, pDataSidePos, slopeAngleMed);
 	Line myLineObliqueMed = ImplantTools::GetNearestPoints(Line(vectorAP, sideMed), hullConcave, pDataSidePos);
 	interceptMed = topPlane.getInterceptionLinePoint(myLineObliqueMed);
 	if (sagitalPlane.eval(beginTop) < 0)
@@ -2186,21 +2190,6 @@ TibiaImplantMatch::HullPoints TibiaImplantMatch::GetHullPoints(const itk::Rigid3
 	/*ImplantTools::show(contourMax, finalSplinePointsTKA);
 	ImplantTools::show(contourMax, finalSplinePointsTKA, true);*/
 	///////////////////////////////////////////////////////////////////////
-
-	/*Plane midPlane = myPlane.getPerpendicularPlane(pcl, tubercle);
-
-	if (knee.getSurgerySide() == SurgerySideEnum::KLateral)
-	{
-		midPlane.movePlane(medPlateau);
-		midPlane.reverseByPoint(latPlateau);
-		midPlane.movePlane(pcl);
-	}
-	else
-	{
-		midPlane.movePlane(latPlateau);
-		midPlane.reverseByPoint(medPlateau);
-		midPlane.movePlane(pcl);
-	}*/
 
 	Point implantPCL = finalTransformPoint(implant.getPointPCL(), pTransformIn);
 	Point implantTuber = finalTransformPoint(implant.getPointTuber(), pTransformIn);
