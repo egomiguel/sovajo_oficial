@@ -748,6 +748,42 @@ std::vector<cv::Point3d> LeastSquaresICP::GetCorrespondence(const pcl::KdTreeFLA
 }
 */
 
+void LeastSquaresICP::addTransform(cv::Mat& data, const cv::Mat& newTransform)
+{
+	cv::Vec3d dOmega(
+		newTransform.at<double>(3, 0),
+		newTransform.at<double>(4, 0),
+		newTransform.at<double>(5, 0)
+	);
+
+	cv::Mat newRot;
+	cv::Rodrigues(dOmega, newRot);
+
+	cv::Mat Rot = GetRotationMatrix(data.at<double>(3, 0), data.at<double>(4, 0), data.at<double>(5, 0));
+	cv::Mat rotationCV = newRot * Rot;
+
+	Eigen::Matrix3d rotationEIGEN(3, 3);
+
+	rotationEIGEN(0, 0) = rotationCV.at<double>(0, 0);
+	rotationEIGEN(1, 0) = rotationCV.at<double>(1, 0);
+	rotationEIGEN(2, 0) = rotationCV.at<double>(2, 0);
+
+	rotationEIGEN(0, 1) = rotationCV.at<double>(0, 1);
+	rotationEIGEN(1, 1) = rotationCV.at<double>(1, 1);
+	rotationEIGEN(2, 1) = rotationCV.at<double>(2, 1);
+
+	rotationEIGEN(0, 2) = rotationCV.at<double>(0, 2);
+	rotationEIGEN(1, 2) = rotationCV.at<double>(1, 2);
+	rotationEIGEN(2, 2) = rotationCV.at<double>(2, 2);
+
+	Eigen::Vector3d rot = rotationEIGEN.eulerAngles(0, 1, 2);
+
+	data = data + newTransform;
+
+	data.at<double>(3, 0) = rot(0);
+	data.at<double>(4, 0) = rot(1);
+	data.at<double>(5, 0) = rot(2);
+}
 
 double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkImplicitPolyDataDistance>& implicitPolyDataDistance, cv::Mat& data, int iterations)
 {
@@ -767,7 +803,7 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkImplicitPolyDataDi
     cv::Mat dataTemp(6, 1, CV_64F);
     double bestError = -1;
 	double tSize = source.size();
-
+	
     for (int i = 0; i < iterations && finish == false; i++)
     {
         for (int j = 0; j < batch; j++)
