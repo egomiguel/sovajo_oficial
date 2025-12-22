@@ -750,17 +750,9 @@ std::vector<cv::Point3d> LeastSquaresICP::GetCorrespondence(const pcl::KdTreeFLA
 
 void LeastSquaresICP::addTransform(cv::Mat& data, const cv::Mat& newTransform)
 {
-	cv::Vec3d dOmega(
-		newTransform.at<double>(3, 0),
-		newTransform.at<double>(4, 0),
-		newTransform.at<double>(5, 0)
-	);
-
-	cv::Mat newRot;
-	cv::Rodrigues(dOmega, newRot);
-
-	cv::Mat Rot = GetRotationMatrix(data.at<double>(3, 0), data.at<double>(4, 0), data.at<double>(5, 0));
-	cv::Mat rotationCV = newRot * Rot;
+	cv::Mat newRot = GetRotationMatrix(newTransform.at<double>(3, 0), newTransform.at<double>(4, 0), newTransform.at<double>(5, 0));
+	cv::Mat oldRot = GetRotationMatrix(data.at<double>(3, 0), data.at<double>(4, 0), data.at<double>(5, 0));
+	cv::Mat rotationCV = newRot * oldRot;
 
 	Eigen::Matrix3d rotationEIGEN(3, 3);
 
@@ -778,7 +770,9 @@ void LeastSquaresICP::addTransform(cv::Mat& data, const cv::Mat& newTransform)
 
 	Eigen::Vector3d rot = rotationEIGEN.eulerAngles(0, 1, 2);
 
-	data = data + newTransform;
+	data.at<double>(0, 0) = data.at<double>(0, 0) + newTransform.at<double>(0, 0);
+	data.at<double>(1, 0) = data.at<double>(1, 0) + newTransform.at<double>(1, 0);
+	data.at<double>(2, 0) = data.at<double>(2, 0) + newTransform.at<double>(2, 0);
 
 	data.at<double>(3, 0) = rot(0);
 	data.at<double>(4, 0) = rot(1);
@@ -864,15 +858,16 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkImplicitPolyDataDi
 
             bool result = cv::solve(resultInfo.A, resultInfo.B, dx);
 
-            data = data + dx;
+            //data = data + dx;
+			addTransform(data, dx);
 
-            angleX = data.at<double>(3, 0);
+            /*angleX = data.at<double>(3, 0);
             angleY = data.at<double>(4, 0);
             angleZ = data.at<double>(5, 0);
 
             data.at<double>(3, 0) = atan2(sin(angleX), cos(angleX));
             data.at<double>(4, 0) = atan2(sin(angleY), cos(angleY));
-            data.at<double>(5, 0) = atan2(sin(angleZ), cos(angleZ));
+            data.at<double>(5, 0) = atan2(sin(angleZ), cos(angleZ));*/
         }
 
         if (finish == true)
@@ -997,7 +992,8 @@ double LeastSquaresICP::LeastSquaresTest(const vtkSmartPointer<vtkPolyData>& sur
 
             bool result = cv::solve(resultInfo.A, resultInfo.B, dx);
 
-            data = data + dx;
+			addTransform(data, dx);
+            /*data = data + dx;
 
             angleX = data.at<double>(3, 0);
             angleY = data.at<double>(4, 0);
@@ -1005,7 +1001,7 @@ double LeastSquaresICP::LeastSquaresTest(const vtkSmartPointer<vtkPolyData>& sur
 
             data.at<double>(3, 0) = atan2(sin(angleX), cos(angleX));
             data.at<double>(4, 0) = atan2(sin(angleY), cos(angleY));
-            data.at<double>(5, 0) = atan2(sin(angleZ), cos(angleZ));
+            data.at<double>(5, 0) = atan2(sin(angleZ), cos(angleZ));*/
 
             if (resultInfo.totalError < chi2 && resultInfo.localError < maxError)
             {
@@ -1137,7 +1133,8 @@ double LeastSquaresICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData>& su
 
             bool result = cv::solve(resultInfo.A, resultInfo.B, dx);
 
-            data.at<double>(0, 0) = data.at<double>(0, 0) + dx.at<double>(0, 0);
+			addTransform(data, dx);
+            /*data.at<double>(0, 0) = data.at<double>(0, 0) + dx.at<double>(0, 0);
             data.at<double>(1, 0) = data.at<double>(1, 0) + dx.at<double>(1, 0);
             data.at<double>(2, 0) = data.at<double>(2, 0) + dx.at<double>(2, 0);
 
@@ -1151,7 +1148,7 @@ double LeastSquaresICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData>& su
 
             data.at<double>(3, 0) = atan2(sin(angleX), cos(angleX));
             data.at<double>(4, 0) = atan2(sin(angleY), cos(angleY));
-            data.at<double>(5, 0) = atan2(sin(angleZ), cos(angleZ));
+            data.at<double>(5, 0) = atan2(sin(angleZ), cos(angleZ));*/
 
             target.clear();
             target = GetCorrespondenceScale(implicitPolyDataDistance, data);
@@ -1457,7 +1454,8 @@ double LeastSquaresICP::LeastSquaresRandomInit(const vtkSmartPointer<vtkPolyData
         randomValues.at<double>(4, 0) = distr_rotation(gen);
         randomValues.at<double>(5, 0) = distr_rotation(gen);
 
-        dataTemp += randomValues;
+        //dataTemp += randomValues;
+		addTransform(dataTemp, randomValues);
 
 		double errorTemp = LeastSquares(implicitPolyDataDistance, dataTemp, iterations);
 
@@ -1581,7 +1579,8 @@ double LeastSquaresICP::LeastSquaresScaleRandomInit(const vtkSmartPointer<vtkPol
 
         randomValues.at<double>(6, 0) = 0;
 
-        dataTemp += randomValues;
+        //dataTemp += randomValues;
+		addTransform(dataTemp, randomValues);
 
         double errorTemp = LeastSquaresScale(surface, dataTemp, iterations);
 
