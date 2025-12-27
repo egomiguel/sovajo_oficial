@@ -43,6 +43,7 @@
 #include "uka_implants/TibiaSpacerImplant.hpp"
 #include "uka_implants/TibiaSpacerImplantMatch.hpp"
 #include "uka_implants/ImplantsMatchFinalInfo.hpp"
+#include "uka_registration/LeastSquaresICP.hpp"
 
 #include "hip/HipCenter.hpp"
 #include "segmentation/AutomaticSegmentation.hpp"
@@ -2945,22 +2946,23 @@ void RegistrationScale()
 		}
 	}
 
-	/*cv::Mat mData(6, 1, CV_64F);
+	cv::Mat mData(6, 1, CV_64F);
 	mData.at<double>(0, 0) = 5;
 	mData.at<double>(1, 0) = -5;
 	mData.at<double>(2, 0) = 8;
 
-	mData.at<double>(3, 0) = 0;
-	mData.at<double>(4, 0) = 0;
+	mData.at<double>(3, 0) = 0.01;
+	mData.at<double>(4, 0) = -0.01;
 	mData.at<double>(5, 0) = 0;
 
-	LeastSquaresICP leastSquare(pointsList);
+	UKA::REGISTRATION::LeastSquaresICP leastSquare(pointsList);
 
-	error = leastSquare.LeastSquaresTest(myKnee.GetTibiaPoly(), mData);
+	//error = leastSquare.LeastSquaresTest(myKnee.GetTibiaPoly(), mData, 40);
+	error = leastSquare.LeastSquaresRandomInit(myKnee.GetTibiaPoly(), mData, 40);
 
-	std::cout << "Error: " << error << std::endl;*/
+	std::cout << "Error: " << error << std::endl;
 
-	TestVTK::show(myKnee.GetTibiaPoly(), pointsList);
+	//TestVTK::show(myKnee.GetTibiaPoly(), pointsList);
 
 	/*auto surface = TestVTK::MergePolyWithSphere(myKnee.GetFemurPoly(), pointsList);
 
@@ -4843,9 +4845,10 @@ int main()
 	//std::cout << Point(result) << "; " << proj << std::endl;
 
 	//PolydataInterception();
-	TEST_PKA::testTibiaBounary2();
+	//TEST_PKA::testTibiaBounary2();
 	//TEST_TKA_SUEN::TestFemurPosteriorObliquePlane();
 	//HipFemoralRegistration();
+	RegistrationScale();
 
 	//double pnt[3] = { 0, 0, 0 };
 	//Plane planeTemp;

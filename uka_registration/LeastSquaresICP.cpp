@@ -544,12 +544,11 @@ LeastSquaresICP::GaussNewton LeastSquaresICP::GetSystem(const std::vector<cv::Po
 		if (i >= posBegin && i < posEnd)
 		{
 			cv::Mat Jac = Jacobian(data, sourcePoint);
-
 			cv::Mat squareJac = (Jac.t())*Jac;
-			cv::Mat d0 = squareJac.diag(0);
-			cv::Mat diagonal = cv::Mat::diag(d0);
-
-			A = A + (squareJac + lambda * diagonal);
+			//cv::Mat d0 = squareJac.diag(0);
+			//cv::Mat diagonal = cv::Mat::diag(d0);
+			//A = A + (squareJac + lambda * diagonal);
+			A = A + squareJac;
 			B = B + (Jac.t())*error;
 
 			localError += squareError;
@@ -558,6 +557,9 @@ LeastSquaresICP::GaussNewton LeastSquaresICP::GetSystem(const std::vector<cv::Po
         chi = chi + squareError;
     }
 
+	cv::Mat d0 = A.diag(0);
+	cv::Mat diagonal = cv::Mat::diag(d0);
+	A = A + lambda * diagonal;
     return GaussNewton(A, -B, chi, localError);
 }
 
@@ -582,10 +584,10 @@ LeastSquaresICP::GaussNewton LeastSquaresICP::GetSystemScale(const std::vector<c
 			cv::Mat Jac = JacobianScale(data, sourcePoint);
 
 			cv::Mat squareJac = (Jac.t())*Jac;
-			cv::Mat d0 = squareJac.diag(0);
+			/*cv::Mat d0 = squareJac.diag(0);
 			cv::Mat diagonal = cv::Mat::diag(d0);
-
-			A = A + (squareJac + lambda * diagonal);
+			A = A + (squareJac + lambda * diagonal);*/
+			A = A + squareJac;
 			B = B + (Jac.t())*error;
 
 			localError += squareError;
@@ -593,6 +595,10 @@ LeastSquaresICP::GaussNewton LeastSquaresICP::GetSystemScale(const std::vector<c
         
         chi = chi + squareError;
     }
+
+	cv::Mat d0 = A.diag(0);
+	cv::Mat diagonal = cv::Mat::diag(d0);
+	A = A + lambda * diagonal;
 
     return GaussNewton(A, -B, chi, localError);
 }
