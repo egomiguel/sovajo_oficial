@@ -162,6 +162,136 @@ void showProcess(vtkSmartPointer<vtkPolyData> poly, const std::vector<cv::Point3
     interactor->Start();
 }
 
+cv::Mat solveRegistration(const std::vector<cv::Point3d>& source, const std::vector<cv::Point3d>& target)
+{
+	Eigen::Matrix4d transform;
+
+	if (source.size() != target.size() || source.size() == 0)
+	{
+		return cv::Mat();
+	}
+
+	int tSize = source.size();
+
+	////////////////////////////////////////////////////////////// Find Centroid
+	Eigen::Matrix<double, 4, 1> centroid_src, centroid_tgt;
+
+	centroid_src.setZero();
+	centroid_tgt.setZero();
+
+	auto it1 = source.begin();
+	auto it2 = source.end();
+
+	for (; it1 != it2; ++it1)
+	{
+		centroid_src[0] += (*it1).x;
+		centroid_src[1] += (*it1).y;
+		centroid_src[2] += (*it1).z;
+	}
+
+	centroid_src /= static_cast<double>(tSize);
+	centroid_src[3] = 1;
+
+	it1 = target.begin();
+	it2 = target.end();
+
+	for (; it1 != it2; ++it1)
+	{
+		centroid_tgt[0] += (*it1).x;
+		centroid_tgt[1] += (*it1).y;
+		centroid_tgt[2] += (*it1).z;
+	}
+
+	centroid_tgt /= static_cast<double>(tSize);
+	centroid_tgt[3] = 1;
+
+	//////////////////////////////////////////////////////////////////////////
+
+	Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> cloud_src_demean, cloud_tgt_demean;
+	cloud_src_demean = Eigen::Matrix<double, 4, Eigen::Dynamic>::Zero(4, tSize);
+	cloud_tgt_demean = Eigen::Matrix<double, 4, Eigen::Dynamic>::Zero(4, tSize);
+
+	it1 = source.begin();
+	it2 = source.end();
+	int i = 0;
+	while (it1 != it2)
+	{
+		cloud_src_demean(0, i) = (*it1).x - centroid_src[0];
+		cloud_src_demean(1, i) = (*it1).y - centroid_src[1];
+		cloud_src_demean(2, i) = (*it1).z - centroid_src[2];
+		++i;
+		++it1;
+	}
+
+	it1 = target.begin();
+	it2 = target.end();
+	i = 0;
+	while (it1 != it2)
+	{
+		cloud_tgt_demean(0, i) = (*it1).x - centroid_tgt[0];
+		cloud_tgt_demean(1, i) = (*it1).y - centroid_tgt[1];
+		cloud_tgt_demean(2, i) = (*it1).z - centroid_tgt[2];
+		++i;
+		++it1;
+	}
+
+	////////////////////////////////////////////////////////////////////
+
+	transform = Eigen::Matrix4d::Identity();
+
+	// Assemble the correlation matrix H = source * target'
+	Eigen::Matrix<double, 3, 3> H = (cloud_src_demean * cloud_tgt_demean.transpose()).topLeftCorner(3, 3);
+
+	// Compute the Singular Value Decomposition
+	Eigen::JacobiSVD<Eigen::Matrix<double, 3, 3> > svd(H, Eigen::ComputeFullU | Eigen::ComputeFullV);
+	Eigen::Matrix<double, 3, 3> u = svd.matrixU();
+	Eigen::Matrix<double, 3, 3> v = svd.matrixV();
+
+	// Compute R = V * U'
+	if (u.determinant() * v.determinant() < 0)
+	{
+		for (int x = 0; x < 3; ++x)
+			v(x, 2) *= -1;
+	}
+
+	Eigen::Matrix<double, 3, 3> R = v * u.transpose();
+
+	// Return the correct transformation
+	transform.topLeftCorner(3, 3) = R;
+	const Eigen::Matrix<double, 3, 1> Rc(R * centroid_src.head(3));
+	transform.block(0, 3, 3, 1) = centroid_tgt.head(3) - Rc;
+
+	//////////////////////////////////////////////////////////////////////
+
+	Eigen::Matrix3d rotation(3, 3);
+
+	rotation(0, 0) = transform(0, 0);
+	rotation(1, 0) = transform(1, 0);
+	rotation(2, 0) = transform(2, 0);
+
+	rotation(0, 1) = transform(0, 1);
+	rotation(1, 1) = transform(1, 1);
+	rotation(2, 1) = transform(2, 1);
+
+	rotation(0, 2) = transform(0, 2);
+	rotation(1, 2) = transform(1, 2);
+	rotation(2, 2) = transform(2, 2);
+
+	Eigen::Vector3d rot = rotation.eulerAngles(0, 1, 2);
+
+	cv::Mat result(6, 1, CV_64F);
+	result.at<double>(0, 0) = transform(0, 3);
+	result.at<double>(1, 0) = transform(1, 3);
+	result.at<double>(2, 0) = transform(2, 3);
+
+	result.at<double>(3, 0) = rot(0);
+	result.at<double>(4, 0) = rot(1);
+	result.at<double>(5, 0) = rot(2);
+
+	return result;
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -186,7 +316,7 @@ LeastSquaresICP::LeastSquaresICP(const std::vector<PointTypeITK>& sourcePoints)
     }
 
     chi2 = 0.75;
-    maxError = 0.3;
+    maxError = 0.2;
 }
 
 LeastSquaresICP::LeastSquaresICP(const std::vector<cv::Point3d>& sourcePoints)
@@ -210,7 +340,7 @@ LeastSquaresICP::LeastSquaresICP(const std::vector<cv::Point3d>& sourcePoints)
     }
 
     chi2 = 0.75;
-    maxError = 0.3;
+    maxError = 0.2;
 }
 
 void LeastSquaresICP::setChi2(double pChi2)
@@ -582,7 +712,6 @@ LeastSquaresICP::GaussNewton LeastSquaresICP::GetSystemScale(const std::vector<c
 		if (i >= posBegin && i < posEnd)
 		{
 			cv::Mat Jac = JacobianScale(data, sourcePoint);
-
 			cv::Mat squareJac = (Jac.t())*Jac;
 			/*cv::Mat d0 = squareJac.diag(0);
 			cv::Mat diagonal = cv::Mat::diag(d0);
@@ -806,6 +935,11 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkImplicitPolyDataDi
 	
     for (int i = 0; i < iterations && finish == false; i++)
     {
+		if (i > 0.9 * iterations)
+		{
+			batch = 1;
+		}
+
         for (int j = 0; j < batch; j++)
         {
             int posA, posB;
@@ -816,6 +950,12 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkImplicitPolyDataDi
             {
                 posB = source.size();
             }
+
+			if (i > 0.9 * iterations)
+			{
+				posA = 0;
+				posB = source.size();
+			}
 
             GaussNewton resultInfo = GetSystem(target, data, posA, posB, lambda);
             currentError = resultInfo.localError;
@@ -922,6 +1062,111 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkImplicitPolyDataDi
     return bestError;
 }
 
+double LeastSquaresICP::LeastSquaresSVD(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)
+{
+	vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
+	implicitPolyDataDistance->SetInput(surface);
+
+	std::vector<cv::Point3d> target = GetCorrespondence(implicitPolyDataDistance, data);
+	double angleX, angleY, angleZ;
+
+	bool finish = false;
+
+	double lambda = 0.01;
+	double currentError, totalError, beforeError = -1;// , totalError;
+	double maxLambda = 1000.0;
+
+	int batch = 3;
+	int step = source.size() / batch;
+
+	cv::Mat dataTemp(6, 1, CV_64F);
+	double bestError = -1;
+	double bestErrorTemp = 0;
+	double tSize = source.size();
+
+	for (int i = 0; i < iterations && finish == false; i++)
+	{
+		if (i > 0.9 * iterations)
+		{
+			batch = 1;
+		}
+
+		for (int j = 0; j < batch; j++)
+		{
+			int posA, posB;
+			posA = step * j;
+			posB = posA + step;
+
+			if (j == batch - 1)
+			{
+				posB = source.size();
+			}
+
+			if (i > 0.9 * iterations)
+			{
+				posA = 0;
+				posB = source.size();
+			}
+
+			std::vector<cv::Point3d> tempSourceTest;
+			for (int k = 0; k < source.size(); k++)
+			{
+				cv::Mat translation(3, 1, CV_64F);
+				translation.at<double>(0, 0) = data.at<double>(0, 0);
+				translation.at<double>(1, 0) = data.at<double>(1, 0);
+				translation.at<double>(2, 0) = data.at<double>(2, 0);
+
+				cv::Mat transformPoint(3, 1, CV_64F);
+				transformPoint.at<double>(0, 0) = source[k].x;
+				transformPoint.at<double>(1, 0) = source[k].y;
+				transformPoint.at<double>(2, 0) = source[k].z;
+
+				transformPoint = (Rx(data.at<double>(3, 0)) * Ry(data.at<double>(4, 0)) * Rz(data.at<double>(5, 0))) * transformPoint + translation;
+				tempSourceTest.push_back(cv::Point3d(transformPoint));
+			}
+
+			showProcess(surface, tempSourceTest);
+
+			std::vector<cv::Point3d> tempTarget(target.begin() + posA, target.begin() + posB);
+			std::vector<cv::Point3d> tempSource(tempSourceTest.begin() + posA, tempSourceTest.begin() + posB);
+
+			cv::Mat tempTransform = solveRegistration(tempSource, tempTarget);
+			addTransform(data, tempTransform);
+			bestErrorTemp = 0;
+			for (int z = 0; z < source.size(); z++)
+			{
+				cv::Mat sourcePoint = CreatePoint(source[z]);
+				cv::Mat targetPoint = CreatePoint(target[z]);
+				cv::Mat error = SquareErrorScale(data, sourcePoint, targetPoint);
+				bestErrorTemp += error.dot(error);
+			}
+			bestErrorTemp = sqrt(bestErrorTemp / source.size());
+
+			if (bestError < 0 || bestError < bestErrorTemp)
+			{
+				bestError = bestErrorTemp;
+			}
+
+			if (bestError < maxError)
+			{
+				finish = true;
+				break;
+			}
+
+		}
+
+		if (finish == true)
+		{
+			continue;
+		}
+
+		shuffleSource();
+		target.clear();
+		target = GetCorrespondence(implicitPolyDataDistance, data);
+	}
+
+	return bestError;
+}
 
 double LeastSquaresICP::LeastSquaresTest(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)
 {
@@ -942,6 +1187,11 @@ double LeastSquaresICP::LeastSquaresTest(const vtkSmartPointer<vtkPolyData>& sur
 
     for (int i = 0; i < iterations && finish == false; i++)
     {
+		if (i >= 0.8 * iterations)
+		{
+			batch = 1;
+		}
+
         for (int k = 0; k < batch; k++)
         {
 
@@ -969,6 +1219,12 @@ double LeastSquaresICP::LeastSquaresTest(const vtkSmartPointer<vtkPolyData>& sur
             {
                 posB = source.size();
             }
+
+			if (i >= 0.8 * iterations)
+			{
+				posA = 0;
+				posB = source.size();
+			}
 
             GaussNewton resultInfo = GetSystem(target, data, posA, posB, lambda);
             currentError = resultInfo.localError;
@@ -1080,6 +1336,11 @@ double LeastSquaresICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData>& su
 
     for (int i = 0; i < iterations && finish == false; i++)
     {
+		if (i > 0.9 * iterations)
+		{
+			batch = 1;
+		}
+
         for (int j = 0; j < batch; j++)
         {
             int posA, posB;
@@ -1090,6 +1351,12 @@ double LeastSquaresICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData>& su
             {
                 posB = source.size();
             }
+
+			if (i > 0.9 * iterations)
+			{
+				posA = 0;
+				posB = source.size();
+			}
 
             GaussNewton resultInfo = GetSystemScale(target, data, posA, posB, lambda);
             currentError = resultInfo.localError;

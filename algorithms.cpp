@@ -2957,8 +2957,8 @@ void RegistrationScale()
 
 	UKA::REGISTRATION::LeastSquaresICP leastSquare(pointsList);
 
-	//error = leastSquare.LeastSquaresTest(myKnee.GetTibiaPoly(), mData, 40);
-	error = leastSquare.LeastSquaresRandomInit(myKnee.GetTibiaPoly(), mData, 40);
+	//error = leastSquare.LeastSquaresSVD(myKnee.GetTibiaPoly(), mData, 20);
+	error = leastSquare.LeastSquaresRandomInit(myKnee.GetTibiaPoly(), mData, 100);
 
 	std::cout << "Error: " << error << std::endl;
 
