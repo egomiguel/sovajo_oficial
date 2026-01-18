@@ -4846,9 +4846,9 @@ int main()
 
 	//PolydataInterception();
 	//TEST_PKA::testTibiaBounary2();
-	//TEST_TKA_SUEN::TestFemurPosteriorObliquePlane();
+	TEST_TKA_SUEN::TestFemurPosteriorObliquePlane();
 	//HipFemoralRegistration();
-	RegistrationScale();
+	//RegistrationScale();
 
 	//double pnt[3] = { 0, 0, 0 };
 	//Plane planeTemp;

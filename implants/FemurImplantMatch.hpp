@@ -24,6 +24,11 @@ namespace TKA
 				kPlaneMid//Femur mid plane
 			};
 
+			enum CurveType {
+				KCurveW,
+				KCurveU
+			};
+
 			struct ConvexHullFeatures
 			{
 				Line * topLine;
@@ -51,7 +56,7 @@ namespace TKA
 
 			std::vector<Point> GetPointsNearPlane(PlaneID id, bool translateByCondyle = true, double distance = 0) const;
 
-			std::vector<PointTypeITK> GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, PlaneID id, double distanceSide = 0, double distanceTop = 1.0, double angleLateral = 10, double angleMedial = 15, int amount = 200, double middleCurveHight = 0) const;
+			std::vector<PointTypeITK> GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, PlaneID id, double distanceSide = 0, double distanceTop = 1.0, double angleLateral = 10, double angleMedial = 15, int amount = 200, double middleCurveHight = 0, CurveType pCurve = CurveType::KCurveU) const;
 
 			Point TransformImplantPointToBone(const Point& pPoint, bool translateByCondyle = true) const;
 
@@ -75,6 +80,8 @@ namespace TKA
 			bool getTranslationMatrix();
 
 			bool getTranslationMatrixByCortex();
+
+			void getBorderLines(std::vector<Point>& pPoints, const Plane& currentPlane, const Line& pTopLine, const Line& pMedialLine, const Line& pLateralLine, const Line& pDownLine) const;
 
 			vtkSmartPointer<vtkPolyData> getContour(const vtkSmartPointer<vtkPolyData> poly, const Point& pNormal, const Point& pPoint) const;
 
