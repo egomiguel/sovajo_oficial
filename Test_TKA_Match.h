@@ -1020,10 +1020,10 @@ namespace TEST_TKA_SUEN
 
 	void TestFemurPosteriorObliquePlane()
 	{
-		const char *dirPath = "D:\\sovajo\\Test_Cases\\octubre_2025\\tka_posteior_oblique\\data";
-
-		auto femurImplant = createFemurImplant(QString("%1/femur_right_15_data.json").arg(dirPath).toStdString().c_str(),
-			QString("%1/femur_right_15.stl").arg(dirPath).toStdString().c_str());
+		const char *dirPath = "D:\\sovajo\\Test_Cases\\enero_2026\\data\\case1";//"D:\\sovajo\\Test_Cases\\octubre_2025\\tka_posteior_oblique\\data";
+		
+		auto femurImplant = createFemurImplant(QString("%1/femur_right_5_data.json").arg(dirPath).toStdString().c_str(),
+			QString("%1/femur_right_5.stl").arg(dirPath).toStdString().c_str());
 
 		auto landmarks = readLandmarks(QString("%1/landmark.json").arg(dirPath).toStdString().c_str());
 		//Right Leg

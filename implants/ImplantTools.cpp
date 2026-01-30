@@ -932,7 +932,7 @@ vtkSmartPointer<vtkPolyData> ImplantTools::getMaxContour(const vtkSmartPointer<v
 
 	auto contour = cutter->GetOutput();
 
-	if (contour->GetNumberOfPoints() > 0)
+	if (contour && contour->GetNumberOfCells() > 0)
 	{
 		vtkNew<vtkPolyDataConnectivityFilter> connectivityFilter;
 		connectivityFilter->SetInputData(contour);
