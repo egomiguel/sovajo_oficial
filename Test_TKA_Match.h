@@ -370,7 +370,7 @@ namespace TEST_IMPLANTS
 		implantFinalInfo10.setFemurFlexionAngle(5);
 
 		//implantFinalInfo10.setFemurPCAAngle(-9);
-		//implantFinalInfo10.setFemurTEAAngle(5);
+		implantFinalInfo10.setFemurTEAAngle(3);
 
 		//Point cross = (-knee.getFemurVectorLateralTEA()).cross(knee.getDirectVectorFemurAxis());
 		//cross.normalice();
@@ -379,7 +379,7 @@ namespace TEST_IMPLANTS
 		//ImplantTools::show(knee.GetFemurPoly(), lista);
 
 		//implantFinalInfo10.setTibiaSlopeAngle(4);
-		//implantFinalInfo10.setTibiaRotationAngle(6);
+		implantFinalInfo10.setTibiaRotationAngle(5);
 		implantFinalInfo10.setTibiaSlopeAngle(-3);
 
 		implantFinalInfo10.setTibiaVarusAngle(4);
@@ -910,11 +910,11 @@ namespace TEST_TKA_SUEN
 		auto tibiaModel = TEST_IMPLANTS::readSTLFile("D:\\sovajo\\Test_Cases\\TKA_Test\\tibia_right_3_10+.stl");
 
 		info.test();
-		vtkSmartPointer<vtkPolyData> newImplantTibia = TestVTK::TransformPoly(tibiaModel, implantToTibia->GetMatrix(), implantToTibia->GetTranslation());
+		/*vtkSmartPointer<vtkPolyData> newImplantTibia = TestVTK::TransformPoly(tibiaModel, implantToTibia->GetMatrix(), implantToTibia->GetTranslation());
 
 		std::vector<vtkSmartPointer<vtkPolyData>> polyList;
 		polyList.push_back(newImplantTibia);
-		TEST_IMPLANTS::show(knee->GetTibiaPoly(), polyList);
+		TEST_IMPLANTS::show(knee->GetTibiaPoly(), polyList);*/
 
 
 		/*

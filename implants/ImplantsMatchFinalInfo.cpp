@@ -3,6 +3,7 @@
 #include "BoneRotulaPath.hpp"
 #include "ImplantTools.hpp"
 #include <itkVersorRigid3DTransform.h>
+#include <tuple>
 
 using namespace TKA::IMPLANTS;
 
@@ -73,6 +74,7 @@ ImplantsMatchFinalInfo::~ImplantsMatchFinalInfo()
 
 const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurImplant(const FemurImplant& pFemurImplant)
 {
+	updateFemurImplantVectors();
     femurImplant = pFemurImplant;
     this->implantKneeCapPath = pFemurImplant.GetKneeCapPath();
 
@@ -103,6 +105,7 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurImplant(c
 
 const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaImplant(const TibiaImplant& pTibiaImplant)
 {
+	updateTibiaImplantVectors();
     tibiaImplant = pTibiaImplant;
 
     std::vector<cv::Point3d> implantVectors;

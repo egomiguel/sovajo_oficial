@@ -4747,7 +4747,7 @@ int main()
 {
 	testSegSliceBordes();
 	//MatchEasy();
-	//::testTibiaImplant2();
+	TEST_IMPLANTS::testImplant();  //testTibiaImplant2();
 	//segment_balls();
 	//RotulaGroovePath();
 	std::cout << "VTK Version: " << vtkVersion::GetVTKVersion() << std::endl;
