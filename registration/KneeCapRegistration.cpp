@@ -426,7 +426,9 @@ bool KneeCapRegistration::MakeRegistrationLS(const std::vector<PointTypeITK>& pB
         error = myICP.LeastSquares(m_data->PointsCT, data);
     }
 */
-    error = myICP.LeastSquares(Registration::poly, data);
+	vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
+	implicitPolyDataDistance->SetInput(Registration::poly);
+    error = myICP.LeastSquares(implicitPolyDataDistance, data);
 
     Registration::MakeResult(data, error);
 

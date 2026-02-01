@@ -102,7 +102,7 @@ namespace TKA
 
 			LeastSquaresICP(const std::vector<cv::Point3d>& sourcePoints);
 
-			double LeastSquares(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 200);
+			double LeastSquares(const vtkSmartPointer<vtkImplicitPolyDataDistance>& implicitPolyDataDistance, cv::Mat& data, int iterations = 200);
 
 			//double LeastSquares(const pcl::PointCloud<pcl::PointXYZ>::Ptr surface, cv::Mat& data, int iterations = 200);
 

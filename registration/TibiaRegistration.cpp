@@ -64,7 +64,9 @@ bool TibiaRegistration::MakeRegistration(const std::vector<itk::Point<double, 3>
     }
     else
     {
-        error = myICP.LeastSquares(poly, data);
+		vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
+		implicitPolyDataDistance->SetInput(poly);
+        error = myICP.LeastSquares(implicitPolyDataDistance, data);
     }
 
     Registration::MakeResult(data, error);

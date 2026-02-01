@@ -159,6 +159,7 @@ itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::TibiaImplantToFemurImpl
 
 const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurImplant(FemurImplant* pFemurImplant)
 {
+	updateFemurImplantVectors();
     femurImplant = pFemurImplant;
     //this->implantKneeCapPath = pFemurImplant.GetKneeCapPath();
 
@@ -189,6 +190,7 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setFemurImplant(F
 
 const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaImplant(const TibiaImplant& pTibiaImplant)
 {
+	updateTibiaImplantVectors();
     tibiaImplant = pTibiaImplant;
 
     std::vector<cv::Point3d> implantVectors;

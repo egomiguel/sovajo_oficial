@@ -748,10 +748,10 @@ std::vector<cv::Point3d> LeastSquaresICP::GetCorrespondence(const pcl::KdTreeFLA
 }
 */
 
-double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)
+double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkImplicitPolyDataDistance>& implicitPolyDataDistance, cv::Mat& data, int iterations)
 {
-    vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
-    implicitPolyDataDistance->SetInput(surface);
+    /*vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
+    implicitPolyDataDistance->SetInput(surface);*/
 
     std::vector<cv::Point3d> target = GetCorrespondence(implicitPolyDataDistance, data);
     double angleX, angleY, angleZ;
@@ -1429,7 +1429,10 @@ double LeastSquaresICP::LeastSquaresRandomInit(const vtkSmartPointer<vtkPolyData
     dataInit.at<double>(4, 0) = data.at<double>(4, 0);
     dataInit.at<double>(5, 0) = data.at<double>(5, 0);
 
-    double error = LeastSquares(surface, data, iterations);
+	vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
+	implicitPolyDataDistance->SetInput(surface);
+
+    double error = LeastSquares(implicitPolyDataDistance, data, iterations);
 
     for (int i = 0; i < 10; i++)
     {
@@ -1451,7 +1454,7 @@ double LeastSquaresICP::LeastSquaresRandomInit(const vtkSmartPointer<vtkPolyData
 
         dataTemp += randomValues;
 
-        double errorTemp = LeastSquares(surface, dataTemp, iterations);
+        double errorTemp = LeastSquares(implicitPolyDataDistance, dataTemp, iterations);
 
         if (errorTemp < error)
         {

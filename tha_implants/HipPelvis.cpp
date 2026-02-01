@@ -293,8 +293,8 @@ cv::Mat HipPelvis::getFemurCanalAlignmentRotation() const
 	auto femurObj = mFemurOperationSide;
 
 	Point axialPlaneNormal = getPelvisVectorInfSup();
-	Point mechanicalAxis = femurObj.getHeadCenter() - femurObj.getKneeCenter();
-	mechanicalAxis.normalice();
+	/*Point mechanicalAxis = femurObj.getHeadCenter() - femurObj.getKneeCenter();
+	mechanicalAxis.normalice();*/
 	auto rotation1 = ImplantTools::GetGeneralRotateTransformVectors(femurObj.getCanalAxisVectorInfSup(), axialPlaneNormal);
 
 	/*Point refAP;
@@ -351,8 +351,8 @@ cv::Mat HipPelvis::getFemurCanalAlignmentRotationOppsite() const
 	auto femurObj = mFemurOppsite;
 
 	Point axialPlaneNormal = getPelvisVectorInfSup();
-	Point mechanicalAxis = femurObj.getHeadCenter() - femurObj.getKneeCenter();
-	mechanicalAxis.normalice();
+	/*Point mechanicalAxis = femurObj.getHeadCenter() - femurObj.getKneeCenter();
+	mechanicalAxis.normalice();*/
 	auto rotation1 = ImplantTools::GetGeneralRotateTransformVectors(femurObj.getCanalAxisVectorInfSup(), axialPlaneNormal);
 
 	/*Point refAP;
