@@ -4747,7 +4747,7 @@ int main()
 {
 	testSegSliceBordes();
 	//MatchEasy();
-	TEST_IMPLANTS::testImplant();  //testTibiaImplant2();
+	//TEST_IMPLANTS::testImplant();  //testTibiaImplant2();
 	//segment_balls();
 	//RotulaGroovePath();
 	std::cout << "VTK Version: " << vtkVersion::GetVTKVersion() << std::endl;
@@ -4846,7 +4846,7 @@ int main()
 
 	//PolydataInterception();
 	//TEST_PKA::testTibiaBounary2();
-	TEST_TKA_SUEN::TestFemurPosteriorObliquePlane();
+	TEST_TKA_SUEN::TestTibiaPlane();
 	//HipFemoralRegistration();
 	//RegistrationScale();
 

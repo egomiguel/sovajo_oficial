@@ -1101,4 +1101,27 @@ namespace TEST_TKA_SUEN
 		interactor->Start();
 	}
 
+	void TestTibiaPlane()
+	{
+		const char *dirPath = "D:\\sovajo\\Test_Cases\\TKA_Test";
+
+		auto tibiaImplant = createTibiaImplant(QString("%1/tibia_right_3_10+_data.json").arg(dirPath).toStdString().c_str(),
+			QString("%1/tibia_right_3_10+.stl").arg(dirPath).toStdString().c_str());
+
+		auto landmarks = readLandmarks(QString("%1/landmark.json").arg(dirPath).toStdString().c_str());
+		//Right Leg
+		auto knee = createKnee(landmarks, QString("%1/femur.vtk").arg(dirPath).toStdString().c_str(),
+			QString("%1/tibia.vtk").arg(dirPath).toStdString().c_str(), false);
+
+		auto tibiaMatch = std::make_shared<TKA::IMPLANTS::TibiaImplantMatch>();
+		tibiaMatch->init(*tibiaImplant, *knee);
+
+		itk::Rigid3DTransform<>::Pointer trans = itk::VersorRigid3DTransform<>::New();
+		itk::Rigid3DTransform<>::Pointer transOut = itk::VersorRigid3DTransform<>::New();
+		trans->SetMatrix(tibiaMatch->GetRotationMatrix());
+		trans->SetTranslation(tibiaMatch->GetTranslationMatrix());
+
+		auto pointsInBone = tibiaMatch->GetHullPoints(trans, transOut, 10, 1, 1, 0);
+	}
+
 }
