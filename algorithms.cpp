@@ -4751,9 +4751,9 @@ int main()
 	//segment_balls();
 	//RotulaGroovePath();
 	std::cout << "VTK Version: " << vtkVersion::GetVTKVersion() << std::endl;
+	std::cout << "C++ version: "<< __cplusplus << std::endl;
+	std::cout << "Cores: " << std::thread::hardware_concurrency() << std::endl;
 	/*
-	std::string casePlan = "D:\\sovajo\\Cases_Plan_TKA\\case1_left";
-	Knee myKnee;
 	
 	UKA::IMPLANTS::Point apLinePclPoint(10.4801, 9.06646, 0.934849);
 	UKA::IMPLANTS::Point apLineTuberPoint(10.2438, -37.5031, 0.951554);
@@ -4828,11 +4828,12 @@ int main()
 	std::string videoPathOut = "D:\\sovajo\\Spine_Images\\avi_images\\DICOM_Format";
 
 	//videoToImage(videoPathIn, videoPathOut);
-
-	//myKnee = CreateKneeFromFile_Numbers(casePlan, KneeSideEnum::KLeft);
-	//double error = FemurRegistrationFromNumbersTKA(myKnee, casePlan, result);
-
-	//std::cout <<"Result: "  << result << " Error: " << error << std::endl;
+	bool result;
+	std::string casePlan = "D:\\sovajo\\Cases_Plan_TKA\\case1_left";
+	Knee myKnee;
+	myKnee = CreateKneeFromFile_Numbers(casePlan, KneeSideEnum::KLeft);
+	double error = FemurRegistrationFromNumbersTKA(myKnee, casePlan, result);
+	std::cout <<"Result: "  << result << " Error: " << error << std::endl;
 
 	//MatchEasyPKA();
 	//RegistrationScale();
@@ -4846,7 +4847,7 @@ int main()
 
 	//PolydataInterception();
 	//TEST_PKA::testTibiaBounary2();
-	TEST_TKA_SUEN::TestTibiaPlane();
+	//TEST_TKA_SUEN::TestTibiaPlane();
 	//HipFemoralRegistration();
 	//RegistrationScale();
 

@@ -110,6 +110,8 @@ namespace TKA
 
 			double LeastSquaresRandomInit(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 200);
 
+			double LeastSquaresRandomInitThreadSafe(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 200);
+
 			//double LeastSquaresRandomInit(const pcl::PointCloud<pcl::PointXYZ>::Ptr surface, cv::Mat& data, int iterations = 200);
 
 			double LeastSquaresScaleRandomInit(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 200);

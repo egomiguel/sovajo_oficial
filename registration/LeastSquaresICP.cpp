@@ -13,6 +13,9 @@
 #include <vtkPolyDataMapper.h>
 #include <algorithm>
 #include <random>
+#include <thread>
+#include <mutex>
+#include <limits>
 
 using namespace TKA::REGISTRATION;
 
@@ -1410,6 +1413,68 @@ double LeastSquaresICP::LeastSquares(const pcl::PointCloud<pcl::PointXYZ>::Ptr s
     return bestError;
 }
 */
+
+
+double LeastSquaresICP::LeastSquaresRandomInitThreadSafe(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)
+{
+	const int totalTrials = 16;
+	const unsigned int numThreads = std::min((unsigned int)totalTrials, std::thread::hardware_concurrency());
+
+	std::mutex resultMutex;
+
+	double globalBestError = std::numeric_limits<double>::max();
+	cv::Mat globalBestData = data.clone();
+
+	std::vector<std::thread> threads;
+
+	for (unsigned int t = 0; t < numThreads; ++t)
+	{
+		threads.emplace_back([&, t]()
+		{
+			LeastSquaresICP localICP(*this);
+			vtkNew<vtkImplicitPolyDataDistance> localImplicit;
+			localImplicit->SetInput(surface);
+
+			std::random_device rd;
+			std::mt19937 gen(rd() + t);
+
+			std::uniform_real_distribution<> distr_translation(-1, 1);
+			std::uniform_real_distribution<> distr_rotation(-0.06, 0.06);
+			cv::Mat dataTemp = data.clone();
+
+			for (int i = t; i < totalTrials; i += numThreads)
+			{
+				data.copyTo(dataTemp);
+
+				dataTemp.at<double>(0, 0) += distr_translation(gen);
+				dataTemp.at<double>(1, 0) += distr_translation(gen);
+				dataTemp.at<double>(2, 0) += distr_translation(gen);
+
+				dataTemp.at<double>(3, 0) += distr_rotation(gen);
+				dataTemp.at<double>(4, 0) += distr_rotation(gen);
+				dataTemp.at<double>(5, 0) += distr_rotation(gen);
+
+				double errorTemp = localICP.LeastSquares(localImplicit, dataTemp, iterations);
+
+				{
+					std::lock_guard<std::mutex> lock(resultMutex);
+
+					if (errorTemp < globalBestError)
+					{
+						globalBestError = errorTemp;
+						globalBestData = dataTemp.clone();
+					}
+				}
+			}
+		});
+	}
+
+	for (auto& th : threads)
+		th.join();
+
+	data = globalBestData.clone();
+	return globalBestError;
+}
 
 double LeastSquaresICP::LeastSquaresRandomInit(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)
 {
