@@ -583,7 +583,7 @@ ImplantTools::Poly ImplantTools::polyFit(const std::vector<Point>& pPoints, cons
 	Yc = Yc / double(tSize);
 
 	int dependentVarPos = -1;
-	double bias;
+	double bias = 0;
 	std::vector<double> constraintCoeff(order + 1, 0);
 
 	/*
