@@ -60,13 +60,18 @@ bool TibiaRegistration::MakeRegistration(const std::vector<itk::Point<double, 3>
 
     if (useRandomAlignment == true)
     {
-        error = myICP.LeastSquaresRandomInitThreadSafe(poly, data);
+        error = myICP.LeastSquaresRandomInitThreadSafe(Registration::poly, data);
     }
     else
     {
-		vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
-		implicitPolyDataDistance->SetInput(poly);
-        error = myICP.LeastSquares(implicitPolyDataDistance, data);
+		//vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
+		//implicitPolyDataDistance->SetInput(poly);
+
+		vtkSmartPointer<vtkStaticCellLocator> locator = vtkSmartPointer<vtkStaticCellLocator>::New();
+		locator->SetDataSet(Registration::poly);
+		locator->BuildLocator();
+
+        error = myICP.LeastSquares(locator, data);
     }
 
     Registration::MakeResult(data, error);

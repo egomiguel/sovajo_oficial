@@ -156,10 +156,14 @@ itk::Rigid3DTransform<double>::Pointer GeneralRegistrationPointsToPolydata::Make
 {
     LeastSquaresICP myICP(pAlignmentPoints);
 
-	vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
-	implicitPolyDataDistance->SetInput(mPoly);
+	/*vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
+	implicitPolyDataDistance->SetInput(mPoly);*/
 
-    pError = myICP.LeastSquares(implicitPolyDataDistance, mTransform);
+	vtkSmartPointer<vtkStaticCellLocator> locator = vtkSmartPointer<vtkStaticCellLocator>::New();
+	locator->SetDataSet(mPoly);
+	locator->BuildLocator();
+
+    pError = myICP.LeastSquares(locator, mTransform);
 
     Eigen::AngleAxisd init_rotationZ(mTransform.at<double>(5, 0), Eigen::Vector3d::UnitZ());
     Eigen::AngleAxisd init_rotationY(mTransform.at<double>(4, 0), Eigen::Vector3d::UnitY());

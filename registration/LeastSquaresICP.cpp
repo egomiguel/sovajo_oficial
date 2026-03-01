@@ -11,6 +11,7 @@
 #include <vtkAppendPolyData.h>
 #include <vtkNamedColors.h>
 #include <vtkPolyDataMapper.h>
+#include <vtkGenericCell.h>
 #include <algorithm>
 #include <random>
 #include <thread>
@@ -630,7 +631,7 @@ cv::Point3d LeastSquaresICP::ClosestPoint(const pcl::PointCloud<pcl::PointXYZ>::
 }
 */
 
-std::vector<cv::Point3d> LeastSquaresICP::GetCorrespondence(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const cv::Mat& data)
+std::vector<cv::Point3d> LeastSquaresICP::GetCorrespondence(const vtkSmartPointer<vtkStaticCellLocator>& locator, const cv::Mat& data)
 {
     std::vector<cv::Point3d> result;
 
@@ -655,14 +656,27 @@ std::vector<cv::Point3d> LeastSquaresICP::GetCorrespondence(const vtkSmartPointe
         pnt[2] = newPoint.z;
 
         double myClosest[3];
-        implicitPolyDataDistance->EvaluateFunctionAndGetClosestPoint(pnt, myClosest);
+
+		vtkIdType cellId;
+		int subId;
+		double dist2;
+
+		vtkSmartPointer<vtkGenericCell> cell = vtkSmartPointer<vtkGenericCell>::New();
+
+		locator->FindClosestPoint(
+			pnt,
+			myClosest,
+			cell,
+			cellId,
+			subId,
+			dist2);
 
         result.push_back(cv::Point3d(myClosest[0], myClosest[1], myClosest[2]));
     }
     return result;
 }
 
-std::vector<cv::Point3d> LeastSquaresICP::GetCorrespondenceScale(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const cv::Mat& data)
+std::vector<cv::Point3d> LeastSquaresICP::GetCorrespondenceScale(const vtkSmartPointer<vtkImplicitPolyDataDistance>& implicitPolyDataDistance, const cv::Mat& data)
 {
     std::vector<cv::Point3d> result;
 
@@ -751,12 +765,12 @@ std::vector<cv::Point3d> LeastSquaresICP::GetCorrespondence(const pcl::KdTreeFLA
 }
 */
 
-double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkImplicitPolyDataDistance>& implicitPolyDataDistance, cv::Mat& data, int iterations)
+double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkStaticCellLocator>& locator, cv::Mat& data, int iterations)
 {
     /*vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
     implicitPolyDataDistance->SetInput(surface);*/
 
-    std::vector<cv::Point3d> target = GetCorrespondence(implicitPolyDataDistance, data);
+    std::vector<cv::Point3d> target = GetCorrespondence(locator, data);
     double angleX, angleY, angleZ;
 
     bool finish = false;
@@ -879,7 +893,7 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkImplicitPolyDataDi
 
         shuffleSource();
         target.clear();
-        target = GetCorrespondence(implicitPolyDataDistance, data);
+        target = GetCorrespondence(locator, data);
     }
 
     /* cv::Mat translation(3, 1, CV_64F);
@@ -920,10 +934,14 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkImplicitPolyDataDi
 
 double LeastSquaresICP::LeastSquaresTest(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)
 {
-    vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
-    implicitPolyDataDistance->SetInput(surface);
+    /*vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
+    implicitPolyDataDistance->SetInput(surface);*/
 
-    std::vector<cv::Point3d> target = GetCorrespondence(implicitPolyDataDistance, data);
+	vtkSmartPointer<vtkStaticCellLocator> locator = vtkSmartPointer<vtkStaticCellLocator>::New();
+	locator->SetDataSet(surface);
+	locator->BuildLocator();
+
+    std::vector<cv::Point3d> target = GetCorrespondence(locator, data);
     double angleX, angleY, angleZ;
 
     bool finish = false;
@@ -1018,7 +1036,7 @@ double LeastSquaresICP::LeastSquaresTest(const vtkSmartPointer<vtkPolyData>& sur
 
         shuffleSource();
         target.clear();
-        target = GetCorrespondence(implicitPolyDataDistance, data);
+        target = GetCorrespondence(locator, data);
     }
 
     return currentError;
@@ -1427,13 +1445,17 @@ double LeastSquaresICP::LeastSquaresRandomInitThreadSafe(const vtkSmartPointer<v
 
 	std::vector<std::thread> threads;
 
+	vtkSmartPointer<vtkStaticCellLocator> locator = vtkSmartPointer<vtkStaticCellLocator>::New();
+	locator->SetDataSet(surface);
+	locator->BuildLocator();
+
 	for (unsigned int t = 0; t < numThreads; ++t)
 	{
 		threads.emplace_back([&, t]()
 		{
 			LeastSquaresICP localICP(*this);
-			vtkNew<vtkImplicitPolyDataDistance> localImplicit;
-			localImplicit->SetInput(surface);
+			/*vtkNew<vtkImplicitPolyDataDistance> localImplicit;
+			localImplicit->SetInput(surface);*/
 
 			std::random_device rd;
 			std::mt19937 gen(rd() + t);
@@ -1454,7 +1476,7 @@ double LeastSquaresICP::LeastSquaresRandomInitThreadSafe(const vtkSmartPointer<v
 				dataTemp.at<double>(4, 0) += distr_rotation(gen);
 				dataTemp.at<double>(5, 0) += distr_rotation(gen);
 
-				double errorTemp = localICP.LeastSquares(localImplicit, dataTemp, iterations);
+				double errorTemp = localICP.LeastSquares(locator, dataTemp, iterations);
 
 				{
 					std::lock_guard<std::mutex> lock(resultMutex);
@@ -1494,10 +1516,14 @@ double LeastSquaresICP::LeastSquaresRandomInit(const vtkSmartPointer<vtkPolyData
     dataInit.at<double>(4, 0) = data.at<double>(4, 0);
     dataInit.at<double>(5, 0) = data.at<double>(5, 0);
 
-	vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
-	implicitPolyDataDistance->SetInput(surface);
+	//vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
+	//implicitPolyDataDistance->SetInput(surface);
 
-    double error = LeastSquares(implicitPolyDataDistance, data, iterations);
+	vtkSmartPointer<vtkStaticCellLocator> locator = vtkSmartPointer<vtkStaticCellLocator>::New();
+	locator->SetDataSet(surface);
+	locator->BuildLocator();
+
+    double error = LeastSquares(locator, data, iterations);
 
     for (int i = 0; i < 10; i++)
     {
@@ -1519,7 +1545,7 @@ double LeastSquaresICP::LeastSquaresRandomInit(const vtkSmartPointer<vtkPolyData
 
         dataTemp += randomValues;
 
-        double errorTemp = LeastSquares(implicitPolyDataDistance, dataTemp, iterations);
+        double errorTemp = LeastSquares(locator, dataTemp, iterations);
 
         if (errorTemp < error)
         {

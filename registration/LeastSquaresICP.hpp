@@ -5,6 +5,7 @@
 #include "vtkSmartPointer.h"
 #include "vtkImplicitPolyDataDistance.h"
 #include "vtkPolyData.h"
+#include "vtkStaticCellLocator.h"
 //#include <pcl/point_cloud.h>
 //#include <pcl/point_types.h>
 //#include <pcl/kdtree/kdtree_flann.h>
@@ -84,9 +85,9 @@ namespace TKA
 
 			//cv::Point3d ClosestPoint(const pcl::PointCloud<pcl::PointXYZ>::Ptr surface, pcl::PointXYZ point);
 
-			std::vector<cv::Point3d> GetCorrespondence(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const cv::Mat& data);
+			std::vector<cv::Point3d> GetCorrespondence(const vtkSmartPointer<vtkStaticCellLocator>& locator, const cv::Mat& data);
 
-			std::vector<cv::Point3d> GetCorrespondenceScale(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const cv::Mat& data);
+			std::vector<cv::Point3d> GetCorrespondenceScale(const vtkSmartPointer<vtkImplicitPolyDataDistance>& implicitPolyDataDistance, const cv::Mat& data);
 
 			//std::vector<cv::Point3d> GetCorrespondence(const pcl::KdTreeFLANN<pcl::PointXYZ>& kdtree, const pcl::PointCloud<pcl::PointXYZ>::Ptr surface, const cv::Mat& data);
 
@@ -102,7 +103,7 @@ namespace TKA
 
 			LeastSquaresICP(const std::vector<cv::Point3d>& sourcePoints);
 
-			double LeastSquares(const vtkSmartPointer<vtkImplicitPolyDataDistance>& implicitPolyDataDistance, cv::Mat& data, int iterations = 200);
+			double LeastSquares(const vtkSmartPointer<vtkStaticCellLocator>& locator, cv::Mat& data, int iterations = 200);
 
 			//double LeastSquares(const pcl::PointCloud<pcl::PointXYZ>::Ptr surface, cv::Mat& data, int iterations = 200);
 

@@ -426,9 +426,13 @@ bool KneeCapRegistration::MakeRegistrationLS(const std::vector<PointTypeITK>& pB
         error = myICP.LeastSquares(m_data->PointsCT, data);
     }
 */
-	vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
-	implicitPolyDataDistance->SetInput(Registration::poly);
-    error = myICP.LeastSquares(implicitPolyDataDistance, data);
+	//vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
+	//implicitPolyDataDistance->SetInput(Registration::poly);
+
+	vtkSmartPointer<vtkStaticCellLocator> locator = vtkSmartPointer<vtkStaticCellLocator>::New();
+	locator->SetDataSet(Registration::poly);
+	locator->BuildLocator();
+    error = myICP.LeastSquares(locator, data);
 
     Registration::MakeResult(data, error);
 
