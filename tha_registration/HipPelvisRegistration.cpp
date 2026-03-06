@@ -154,8 +154,10 @@ std::vector<RegistrationPointsHip> PelvisRegistration::getRegistrationPointPelvi
 	data.at<double>(6, 0) = tScale;
 
 	LeastSquaresICP registerObj(myTemplatePoints);
-
-	pError = registerObj.LeastSquaresScale(Registration::poly, data);
+	vtkSmartPointer<vtkStaticCellLocator> locator = vtkSmartPointer<vtkStaticCellLocator>::New();
+	locator->SetDataSet(Registration::poly);
+	locator->BuildLocator();
+	pError = registerObj.LeastSquaresScale(locator, data);
 
 	////////////////////////////////////////////////////////////////////
 

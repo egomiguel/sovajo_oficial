@@ -140,8 +140,10 @@ cv::Mat HipRegistrationFemurPosterior::getTemplateAlignment(double& pError) cons
 	data.at<double>(6, 0) = 1.0;
 
 	LeastSquaresICP registerObj(myTemplatePoints);
-
-	pError = registerObj.LeastSquaresScale(Registration::poly, data);
+	vtkSmartPointer<vtkStaticCellLocator> locator = vtkSmartPointer<vtkStaticCellLocator>::New();
+	locator->SetDataSet(Registration::poly);
+	locator->BuildLocator();
+	pError = registerObj.LeastSquaresScale(locator, data);
 
 	return data;
 }

@@ -87,7 +87,7 @@ namespace TKA
 
 			std::vector<cv::Point3d> GetCorrespondence(const vtkSmartPointer<vtkStaticCellLocator>& locator, const cv::Mat& data);
 
-			std::vector<cv::Point3d> GetCorrespondenceScale(const vtkSmartPointer<vtkImplicitPolyDataDistance>& implicitPolyDataDistance, const cv::Mat& data);
+			std::vector<cv::Point3d> GetCorrespondenceScale(const vtkSmartPointer<vtkStaticCellLocator>& locator, const cv::Mat& data);
 
 			//std::vector<cv::Point3d> GetCorrespondence(const pcl::KdTreeFLANN<pcl::PointXYZ>& kdtree, const pcl::PointCloud<pcl::PointXYZ>::Ptr surface, const cv::Mat& data);
 
@@ -107,7 +107,7 @@ namespace TKA
 
 			//double LeastSquares(const pcl::PointCloud<pcl::PointXYZ>::Ptr surface, cv::Mat& data, int iterations = 200);
 
-			double LeastSquaresScale(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 200);
+			double LeastSquaresScale(const vtkSmartPointer<vtkStaticCellLocator>& locator, cv::Mat& data, int iterations = 200);
 
 			double LeastSquaresRandomInit(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 200);
 

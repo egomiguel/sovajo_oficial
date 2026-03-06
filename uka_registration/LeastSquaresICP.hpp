@@ -4,6 +4,7 @@
 #include <opencv2/calib3d/calib3d.hpp>
 #include "vtkSmartPointer.h"
 #include "vtkImplicitPolyDataDistance.h"
+#include "vtkStaticCellLocator.h"
 #include "vtkPolyData.h"
 //#include <pcl/point_cloud.h>
 //#include <pcl/point_types.h>
@@ -77,9 +78,9 @@ namespace UKA
 
 			//cv::Point3d ClosestPoint(const pcl::PointCloud<pcl::PointXYZ>::Ptr surface, pcl::PointXYZ point);
 
-			std::vector<cv::Point3d> GetCorrespondence(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const cv::Mat& data);
+			std::vector<cv::Point3d> GetCorrespondence(const vtkSmartPointer<vtkStaticCellLocator>& locator, const cv::Mat& data);
 
-			std::vector<cv::Point3d> GetCorrespondenceScale(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const cv::Mat& data);
+			std::vector<cv::Point3d> GetCorrespondenceScale(const vtkSmartPointer<vtkStaticCellLocator>& locator, const cv::Mat& data);
 
 			//std::vector<cv::Point3d> GetCorrespondence(const pcl::KdTreeFLANN<pcl::PointXYZ>& kdtree, const pcl::PointCloud<pcl::PointXYZ>::Ptr surface, const cv::Mat& data);
 
@@ -97,12 +98,12 @@ namespace UKA
 
 			void addTransform(cv::Mat& data, const cv::Mat& newTransform);
 
-			double LeastSquares(const vtkSmartPointer<vtkImplicitPolyDataDistance>& implicitPolyDataDistance, cv::Mat& data, int iterations = 200);
+			double LeastSquares(const vtkSmartPointer<vtkStaticCellLocator>& locator, cv::Mat& data, int iterations = 200);
 			double LeastSquaresSVD(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 200);
 
 			//double LeastSquares(const pcl::PointCloud<pcl::PointXYZ>::Ptr surface, cv::Mat& data, int iterations = 200);
 
-			double LeastSquaresScale(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 200);
+			double LeastSquaresScale(const vtkSmartPointer<vtkStaticCellLocator>& locator, cv::Mat& data, int iterations = 200);
 
 			double LeastSquaresRandomInit(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 200);
 

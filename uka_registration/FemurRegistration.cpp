@@ -73,9 +73,11 @@ bool FemurRegistration::MakeRegistration(const std::vector<itk::Point<double, 3>
     }
     else
     {
-		vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
-		implicitPolyDataDistance->SetInput(Registration::poly);
-        error = myICP.LeastSquares(implicitPolyDataDistance, data);
+		vtkSmartPointer<vtkStaticCellLocator> locator = vtkSmartPointer<vtkStaticCellLocator>::New();
+		locator->SetDataSet(Registration::poly);
+		locator->BuildLocator();
+
+        error = myICP.LeastSquares(locator, data);
     }
 
     Registration::MakeResult(data, error);
