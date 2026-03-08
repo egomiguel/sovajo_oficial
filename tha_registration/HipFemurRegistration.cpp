@@ -106,7 +106,7 @@ bool HipRegistrationFemur::MakeRegistration(const std::vector<itk::Point<double,
 
     double error;
 
-    error = myICP.LeastSquaresRandomInit(Registration::poly, data);
+    error = myICP.LeastSquaresRandomInitThreadSafe(Registration::poly, data);
 
     Registration::MakeResult(data, error);
 

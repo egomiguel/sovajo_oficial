@@ -156,7 +156,7 @@ itk::Rigid3DTransform<double>::Pointer SpineRegistrationPointsToPolydata::MakeFi
 {
     LeastSquaresICP myICP(pAlignmentPoints);
 
-    pError = myICP.LeastSquaresRandomInit(mPoly, mTransform);
+    pError = myICP.LeastSquaresRandomInitThreadSafe(mPoly, mTransform);
 
     Eigen::AngleAxisd init_rotationZ(mTransform.at<double>(5, 0), Eigen::Vector3d::UnitZ());
     Eigen::AngleAxisd init_rotationY(mTransform.at<double>(4, 0), Eigen::Vector3d::UnitY());

@@ -1441,7 +1441,6 @@ double LeastSquaresICP::LeastSquares(const pcl::PointCloud<pcl::PointXYZ>::Ptr s
 }
 */
 
-
 double LeastSquaresICP::LeastSquaresRandomInitThreadSafe(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)
 {
 	const int totalTrials = 16;
@@ -1504,7 +1503,7 @@ double LeastSquaresICP::LeastSquaresRandomInitThreadSafe(const vtkSmartPointer<v
 	return globalBestError;
 }
 
-double LeastSquaresICP::LeastSquaresRandomInit(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)
+double LeastSquaresICP::LeastSquaresRandomInitOld(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)
 {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -1631,7 +1630,7 @@ double LeastSquaresICP::LeastSquaresRandomInit(const pcl::PointCloud<pcl::PointX
 
 */
 
-double LeastSquaresICP::LeastSquaresScaleRandomInit(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)
+double LeastSquaresICP::LeastSquaresScaleRandomInitOld(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)
 {
     std::random_device rd;
     std::mt19937 gen(rd());

@@ -6,6 +6,7 @@
 #include "vtkImplicitPolyDataDistance.h"
 #include "vtkPolyData.h"
 #include "Types.hpp"
+#include "vtkStaticCellLocator.h"
 
 namespace SPINE
 {
@@ -74,11 +75,11 @@ namespace SPINE
 
 			//cv::Point3d ClosestPoint(const pcl::PointCloud<pcl::PointXYZ>::Ptr surface, pcl::PointXYZ point);
 
-			std::vector<cv::Point3d> GetCorrespondence(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const cv::Mat& data);
+			std::vector<cv::Point3d> GetCorrespondence(const vtkSmartPointer<vtkStaticCellLocator>& locator, const cv::Mat& data);
 
 			std::vector<cv::Point3d> GetCorrespondence(const cv::Mat& target, const cv::Mat& data);
 
-			std::vector<cv::Point3d> GetCorrespondenceScale(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const cv::Mat& data);
+			std::vector<cv::Point3d> GetCorrespondenceScale(const vtkSmartPointer<vtkStaticCellLocator>& locator, const cv::Mat& data);
 
 			//std::vector<cv::Point3d> GetCorrespondence(const pcl::KdTreeFLANN<pcl::PointXYZ>& kdtree, const pcl::PointCloud<pcl::PointXYZ>::Ptr surface, const cv::Mat& data);
 
@@ -94,9 +95,11 @@ namespace SPINE
 
 			LeastSquaresICP(const std::vector<cv::Point3d>& sourcePoints);
 
-			double LeastSquares(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, vtkNew<vtkImplicitPolyDataDistance>& implicitPolyDataDistance, int iterations = 200);
+			double LeastSquares(const vtkSmartPointer<vtkStaticCellLocator>& locator, cv::Mat& data, int iterations = 200);
 
-			double LeastSquaresRandomInit(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 200);
+			double LeastSquaresRandomInitThreadSafe(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 200);
+
+			double LeastSquaresRandomInitOld(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations = 200);
 
 			double LeastSquares(const cv::Mat& targetOnCT, cv::Mat& data, int iterations = 200);
 

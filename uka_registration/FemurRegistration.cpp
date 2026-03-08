@@ -69,7 +69,7 @@ bool FemurRegistration::MakeRegistration(const std::vector<itk::Point<double, 3>
 
     if (useRandomAlignment == true)
     {
-        error = myICP.LeastSquaresRandomInit(Registration::poly, data);
+        error = myICP.LeastSquaresRandomInitThreadSafe(Registration::poly, data);
     }
     else
     {

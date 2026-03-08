@@ -418,7 +418,7 @@ cv::Point3d LeastSquaresScaleICP::ClosestPoint(const vtkSmartPointer<vtkPolyData
     return closest;
 }
 
-std::vector<cv::Point3d> LeastSquaresScaleICP::GetCorrespondenceScale(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const cv::Mat& data)
+std::vector<cv::Point3d> LeastSquaresScaleICP::GetCorrespondenceScale(const vtkSmartPointer<vtkStaticCellLocator>& locator, const cv::Mat& data)
 {
     std::vector<cv::Point3d> result;
 
@@ -445,7 +445,19 @@ std::vector<cv::Point3d> LeastSquaresScaleICP::GetCorrespondenceScale(const vtkS
         pnt[2] = newPoint.z;
 
         double myClosest[3];
-        implicitPolyDataDistance->EvaluateFunctionAndGetClosestPoint(pnt, myClosest);
+		vtkIdType cellId;
+		int subId;
+		double dist2;
+
+		vtkSmartPointer<vtkGenericCell> cell = vtkSmartPointer<vtkGenericCell>::New();
+
+		locator->FindClosestPoint(
+			pnt,
+			myClosest,
+			cell,
+			cellId,
+			subId,
+			dist2);
 
         result.push_back(cv::Point3d(myClosest[0], myClosest[1], myClosest[2]));
     }
@@ -494,8 +506,9 @@ cv::Mat LeastSquaresScaleICP::GetRotationMatrix(double angleX, double angleY, do
 
 double LeastSquaresScaleICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData>& surface, cv::Mat& data, int iterations)
 {
-    vtkNew<vtkImplicitPolyDataDistance> implicitPolyDataDistance;
-    implicitPolyDataDistance->SetInput(surface);
+	vtkSmartPointer<vtkStaticCellLocator> locator = vtkSmartPointer<vtkStaticCellLocator>::New();
+	locator->SetDataSet(surface);
+	locator->BuildLocator();
 
     cv::Mat myRotation = Rx(data.at<double>(3, 0)) * Ry(data.at<double>(4, 0)) * Rz(data.at<double>(5, 0));
     cv::Mat myRest = (myRotation * CreatePoint(aveSource));
@@ -504,7 +517,7 @@ double LeastSquaresScaleICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData
     data.at<double>(1, 0) = data.at<double>(1, 0) + myRest.at<double>(1, 0);
     data.at<double>(2, 0) = data.at<double>(2, 0) + myRest.at<double>(2, 0);
 
-    std::vector<cv::Point3d> target = GetCorrespondenceScale(implicitPolyDataDistance, data);
+    std::vector<cv::Point3d> target = GetCorrespondenceScale(locator, data);
     double angleX, angleY, angleZ;
 
     bool finish = false;
@@ -618,7 +631,7 @@ double LeastSquaresScaleICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData
             data.at<double>(5, 0) = atan2(sin(angleZ), cos(angleZ));
 
             target.clear();
-            target = GetCorrespondenceScale(implicitPolyDataDistance, data);
+            target = GetCorrespondenceScale(locator, data);
 
             GetScale(target, data);
         }
@@ -630,7 +643,7 @@ double LeastSquaresScaleICP::LeastSquaresScale(const vtkSmartPointer<vtkPolyData
 
         shuffleCenterSource();
         target.clear();
-        target = GetCorrespondenceScale(implicitPolyDataDistance, data);
+        target = GetCorrespondenceScale(locator, data);
     }
 
     data.at<double>(0, 0) = dataTemp.at<double>(0, 0);

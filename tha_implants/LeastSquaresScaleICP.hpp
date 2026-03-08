@@ -5,6 +5,7 @@
 #include "vtkSmartPointer.h"
 #include "vtkImplicitPolyDataDistance.h"
 #include "vtkPolyData.h"
+#include "vtkStaticCellLocator.h"
 
 namespace THA
 {
@@ -63,7 +64,7 @@ namespace THA
 
 			cv::Point3d ClosestPoint(const vtkSmartPointer<vtkPolyData>& surface, double point[3]);
 
-			std::vector<cv::Point3d> GetCorrespondenceScale(const vtkSmartPointer<vtkImplicitPolyDataDistance> implicitPolyDataDistance, const cv::Mat& data);
+			std::vector<cv::Point3d> GetCorrespondenceScale(const vtkSmartPointer<vtkStaticCellLocator>& locator, const cv::Mat& data);
 
 			void shuffleCenterSource();
 
