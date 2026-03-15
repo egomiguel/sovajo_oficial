@@ -4831,9 +4831,9 @@ int main()
 	bool result;
 	std::string casePlan = "D:\\sovajo\\Cases_Plan_TKA\\case1_left";
 	Knee myKnee;
-	myKnee = CreateKneeFromFile_Numbers(casePlan, KneeSideEnum::KLeft);
+	/*myKnee = CreateKneeFromFile_Numbers(casePlan, KneeSideEnum::KLeft);
 	double error = FemurRegistrationFromNumbersTKA(myKnee, casePlan, result);
-	std::cout <<"Result: "  << result << " Error: " << error << std::endl;
+	std::cout <<"Result: "  << result << " Error: " << error << std::endl;*/
 
 	//MatchEasyPKA();
 	//RegistrationScale();
@@ -4846,7 +4846,7 @@ int main()
 	//std::cout << Point(result) << "; " << proj << std::endl;
 
 	//PolydataInterception();
-	//TEST_PKA::testTibiaBounary2();
+	TEST_PKA::testTibiaBounary2();
 	//TEST_TKA_SUEN::TestTibiaPlane();
 	//HipFemoralRegistration();
 	//RegistrationScale();

@@ -699,7 +699,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		}
 	}
 
-	//ImplantTools::show(contourMax, hullConcave, true);
+	/*ImplantTools::show(contourMax, hullConcave, true);*/
 	////////////////////////////////////////////////////
 
 	int beginPos = -1, endPos = -1;
@@ -746,7 +746,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	posEndPCL = posEndPCL - 1;
 
 	Point computePoint;
-	//ImplantTools::show(contourMax, hullConcave, true);
+	/*ImplantTools::show(contourMax, hullConcave, true);*/
 
 	for (int i = 0; i < hullConcave.size(); i++)
 	{
