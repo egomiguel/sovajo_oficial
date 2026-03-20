@@ -894,7 +894,7 @@ namespace TEST_PKA
 		femurTransformIn->SetOffset(femurImplantMatch.GetTranslationMatrix());
 		
 		std::vector<PointTypeITK> hullFemur = femurImplantMatch.GetHullPointsThreePlanes(femurTransformIn, femurTransformOut, UKA::IMPLANTS::FemurImplantMatch::KThreePlaneAnterior, 1, 1, 0);
-		std::vector<PointTypeITK> hullTibia = (tibiaImplantMatch.GetHullPoints(tibiaTransformIn, tibiaTransformOut, tibiaTransformOutSide, 1, 1, 0, 5, 0)).implantPoints;
+		std::vector<PointTypeITK> hullTibia = (tibiaImplantMatch.GetHullPoints(tibiaTransformIn, tibiaTransformOut, tibiaTransformOutSide, 1, 1, 5, 0)).implantPoints;
 
 		std::vector<PointTypeITK> hull = hullTibia;
 		std::cout << "Hull femur size: " << hullFemur.size() << std::endl;
@@ -1068,9 +1068,10 @@ namespace TEST_PKA
 		itk::Rigid3DTransform<>::Pointer boneToPlane = itk::VersorRigid3DTransform<>::New();
 		itk::Rigid3DTransform<>::Pointer sideToPlane = itk::VersorRigid3DTransform<>::New();
 		auto pointsInBone = tibiaImplantMatch.GetHullPoints(toItkTransform(implantToTibiaTrans), boneToPlane, sideToPlane,
-			0, 0, 0,
+			0, 0,
 			5).implantPoints;
 
+		
 		vtkNew<vtkPoints> points;
 		for (auto& p : pointsInBone)
 		{
@@ -1123,6 +1124,7 @@ namespace TEST_PKA
 		vtkNew<vtkRenderWindowInteractor> interactor;
 		renderWindow->SetInteractor(interactor);
 		interactor->Start();
+		
 	}
 
 	void testFemurAnteriodPlane()

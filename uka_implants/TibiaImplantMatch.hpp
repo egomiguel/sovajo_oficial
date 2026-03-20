@@ -33,8 +33,7 @@ namespace UKA
 				@distanceSide: Margin on middle side.
 			*/
 			HullPoints GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pPlateauTransformOut, 
-				itk::Rigid3DTransform<>::Pointer pSideTransformOut, double distance = 1., double distancePcl = 1., 
-				double distanceSide = 1., double sidePlaneWidth = 5., int amount = 200) const;
+				itk::Rigid3DTransform<>::Pointer pSideTransformOut, double distance = 1., double distanceSide = 1., double sidePlaneWidth = 5., int amount = 200) const;
 
 			itk::Matrix< double, 3, 3 > GetRotationMatrix() const;
 
