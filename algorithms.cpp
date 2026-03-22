@@ -1099,9 +1099,9 @@ void executeImplantsMatch()
 		femurImplantMatch.init(femurImplant, knee);
 		tibiaImplantMatch.init(tibiaImplant, knee);
 	}
-	catch (const ImplantsException& e)
+	catch (.../*const ImplantsException& e*/)
 	{
-		std::cout << e.what() << std::endl;
+		std::cout << /*e.what()*/ "Erro check ImplantsException" << std::endl;
 	}
 
 	femurImplantMatch.GetPlane(FemurImplantMatch::kPlaneA).show();
@@ -1139,10 +1139,10 @@ void executeImplantsMatch()
 		femurImplantMatch.GetHullPoints(femurTransformIn, femurTransformOut, FemurImplantMatch::kPlaneE, 0);
 		std::cout << "Hull femur size: " << hull.size() << std::endl;
 	}
-	catch (const ImplantsException& e)
+	catch (.../*const ImplantsException& e*/)
 	{
 		Test::myPrint("Error femur get hull");
-		std::cout << e.what() << std::endl;
+		//std::cout << e.what() << std::endl;
 	}
 
 	tibiaTransformIn->SetMatrix(tibiaImplantMatch.GetRotationMatrix());
@@ -1152,10 +1152,10 @@ void executeImplantsMatch()
 		std::vector<PointTypeITK> hull = tibiaImplantMatch.GetHullPoints(tibiaTransformIn, tibiaTransformOut, 0, 0);
 		std::cout << "Hull tibia size: " << hull.size() << std::endl;
 	}
-	catch (const ImplantsException& e)
+	catch (.../*const ImplantsException& e*/)
 	{
 		Test::myPrint("Error tibia get hull");
-		std::cout << e.what() << std::endl;
+		//std::cout << e.what() << std::endl;
 	}
 
 	std::cout << "*************************-Femur-*****************************************" << std::endl;
@@ -1302,10 +1302,10 @@ void MatchEasy()
 
 		std::cout << " ********* Hull size: " << hull1.size() << std::endl;
 	}
-	catch (const ImplantsException& e)
+	catch (.../*const ImplantsException& e*/)
 	{
 		Test::myPrint("Error get hull");
-		std::cout << e.what() << std::endl;
+		//std::cout << e.what() << std::endl;
 	}
 	//std::cout << std::endl;
 	//std::cout << std::endl;
@@ -1492,10 +1492,10 @@ void MatchEasyPKA()
 		}
 		std::cout << " ********* Hull size: " << hull1.size() << std::endl;
 	}
-	catch (const ImplantsException& e)
+	catch (.../*const ImplantsException& e*/)
 	{
 		Test::myPrint("Error get hull");
-		std::cout << e.what() << std::endl;
+		//std::cout << e.what() << std::endl;
 	}
 
 	vtkSmartPointer<vtkPolyData> newImplantFemur = TestVTK::TransformPoly(femurModel, femurImplantMatch.GetRotationMatrix(), femurImplantMatch.GetTranslationMatrix());
@@ -1743,9 +1743,10 @@ void executeBalance()
 		femurImplantMatch->init(femurImplant, knee);
 		tibiaImplantMatch->init(tibiaImplant, knee);
 	}
-	catch (const ImplantsException& e)
+	catch (.../*const ImplantsException& e*/)
 	{
-		std::cout << e.what() << std::endl;
+		//std::cout << e.what() << std::endl;
+		std::cout << "Erro check ImplantsException" << std::endl;
 	}
 
 	itk::Rigid3DTransform<double>::Pointer femurTransformIn = itk::VersorRigid3DTransform<double>::New();
@@ -3790,10 +3791,10 @@ void TestHullPoints()
 		std::cout << "Hull femur size: " << hullFemur.size() << std::endl;
 		std::cout << femurTransformOut << std::endl;
 	}
-	catch (const ImplantsException& e)
+	catch (... /*const ImplantsException& e*/)
 	{
 		Test::myPrint("Error femur get hull");
-		std::cout << e.what() << std::endl;
+		//std::cout << e.what() << std::endl;
 	}
 
 	itk::Rigid3DTransform<double>::Pointer tibiaTransformOutNew = itk::VersorRigid3DTransform<double>::New();
@@ -3804,10 +3805,10 @@ void TestHullPoints()
 		std::cout << "Hull tibia new size: " << hullTibia.size() << std::endl;
 		std::cout << tibiaTransformOutNew << std::endl;
 	}
-	catch (const ImplantsException& e)
+	catch (.../*const ImplantsException& e*/)
 	{
 		Test::myPrint("Error tibia get hull new");
-		std::cout << e.what() << std::endl;
+		//std::cout << e.what() << std::endl;
 	}
 
 	std::vector<PointTypeITK> tFinalVector = hullFemur;

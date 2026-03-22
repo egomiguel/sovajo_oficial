@@ -517,7 +517,7 @@ namespace TEST_PKA
 
 		std::vector<PointTypeITK> hullFemur = femurImplantMatch.GetHullPointsOnePlane(femurTransformIn, femurTransformOut, UKA::IMPLANTS::FemurImplantMatch::KOnePlanePosterior, 1, 1, 0);
 		
-		UKA::IMPLANTS::TibiaImplantMatch::HullPoints hullTemp = tibiaImplantMatch.GetHullPoints(tibiaTransformIn, tibiaTransformOut, tibiaSideTransformOut);
+		auto hullTemp = tibiaImplantMatch.GetHullPoints(tibiaTransformIn, tibiaTransformOut);
 		std::vector<PointTypeITK> hull = hullFemur;
 		
 		std::cout << "Hull size: " << hull.size() << std::endl;
@@ -894,7 +894,7 @@ namespace TEST_PKA
 		femurTransformIn->SetOffset(femurImplantMatch.GetTranslationMatrix());
 		
 		std::vector<PointTypeITK> hullFemur = femurImplantMatch.GetHullPointsThreePlanes(femurTransformIn, femurTransformOut, UKA::IMPLANTS::FemurImplantMatch::KThreePlaneAnterior, 1, 1, 0);
-		std::vector<PointTypeITK> hullTibia = (tibiaImplantMatch.GetHullPoints(tibiaTransformIn, tibiaTransformOut, tibiaTransformOutSide, 1, 1, 5, 0)).implantPoints;
+		std::vector<PointTypeITK> hullTibia = (tibiaImplantMatch.GetHullPoints(tibiaTransformIn, tibiaTransformOut, 1, 1, 0));
 
 		std::vector<PointTypeITK> hull = hullTibia;
 		std::cout << "Hull femur size: " << hullFemur.size() << std::endl;
@@ -964,9 +964,9 @@ namespace TEST_PKA
 		tibiaImplantMatch.init(*tibiaImplant, knee);
 		itk::Rigid3DTransform<>::Pointer boneToPlane = itk::VersorRigid3DTransform<>::New();
 		itk::Rigid3DTransform<>::Pointer sideToPlane = itk::VersorRigid3DTransform<>::New();
-		auto pointsInBone = tibiaImplantMatch.GetHullPoints(toItkTransform(implantToTibiaTrans), boneToPlane, sideToPlane,
-			1, 2, 1,
-			500).implantPoints;
+		auto pointsInBone = tibiaImplantMatch.GetHullPoints(toItkTransform(implantToTibiaTrans), boneToPlane,
+			1, 2,
+			500);
 
 		std::vector<cv::Point3d> tPoints;
 
@@ -1067,9 +1067,8 @@ namespace TEST_PKA
 		tibiaImplantMatch.init(*tibiaImplant, knee);
 		itk::Rigid3DTransform<>::Pointer boneToPlane = itk::VersorRigid3DTransform<>::New();
 		itk::Rigid3DTransform<>::Pointer sideToPlane = itk::VersorRigid3DTransform<>::New();
-		auto pointsInBone = tibiaImplantMatch.GetHullPoints(toItkTransform(implantToTibiaTrans), boneToPlane, sideToPlane,
-			0, 0,
-			5).implantPoints;
+		auto pointsInBone = tibiaImplantMatch.GetHullPoints(toItkTransform(implantToTibiaTrans), boneToPlane,
+			0, 0);
 
 		
 		vtkNew<vtkPoints> points;

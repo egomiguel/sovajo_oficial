@@ -5,6 +5,7 @@
 #include "TibiaImplant.hpp"
 #include "Knee.hpp"
 #include "Plane.hpp"
+#include "ImplantsException.hpp"
 #include "uka_implants_export.h"
 
 namespace UKA
@@ -15,9 +16,13 @@ namespace UKA
 		class UKA_IMPLANTS_EXPORT TibiaImplantMatch
 		{
 		public:
-			struct HullPoints
+			struct HullInfo
 			{
-				std::vector<PointTypeITK> implantPoints, sidePlanePoints;
+				std::vector<Point> basePoints;
+				Plane basePlane, sidePlane;
+				cv::Mat baseRotation;
+				Point sideTuberPoint, sidePclPoint;
+				ImplantExceptionCode code;
 			};
 
 			TibiaImplantMatch();
@@ -32,8 +37,11 @@ namespace UKA
 				@distancePcl: Margin on top side.
 				@distanceSide: Margin on middle side.
 			*/
-			HullPoints GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pPlateauTransformOut, 
-				itk::Rigid3DTransform<>::Pointer pSideTransformOut, double distance = 1., double distanceSide = 1., double sidePlaneWidth = 5., int amount = 200) const;
+			std::vector<PointTypeITK> GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pPlateauTransformOut,
+				double distance = 1., double distanceSide = 1., int amount = 200) const;
+
+			std::vector<PointTypeITK> GetSidePlanePoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pSideTransformOut, 
+				double distance = 1., double distanceSide = 1., double sidePlaneWidth = 5.) const;
 
 			itk::Matrix< double, 3, 3 > GetRotationMatrix() const;
 
@@ -71,6 +79,8 @@ namespace UKA
 			std::vector<PointTypeITK> increaseVectorToAmount(const std::vector<Point>& points, int amount) const;
 
 			vtkSmartPointer<vtkPolyData> getContour(const vtkSmartPointer<vtkPolyData> poly, const Point& pNormal, const Point& pPoint) const;
+
+			HullInfo GetHullInfo(const itk::Rigid3DTransform<>::Pointer pTransformIn, double distance = 1., double distanceSide = 1.) const;
 		};
 	}
 }
