@@ -11,16 +11,17 @@ namespace UKA
 		class UKA_REGISTRATION_EXPORT FemurRegistration : public Registration
 		{
 		public:
-			FemurRegistration(const vtkSmartPointer<vtkPolyData> img, const PointTypeITK& pHipCenterCT, const PointTypeITK& pKneeCenterCT, const PointTypeITK& pEpicondyleCT);
+			FemurRegistration(const vtkSmartPointer<vtkPolyData> img, const PointTypeITK& pHipCenterCT, const PointTypeITK& pKneeCenterCT, const PointTypeITK& pEpicondyleCT, const PointTypeITK& pDistalCondyleCT);
 
 			~FemurRegistration();
 
-			bool MakeRegistration(const std::vector<itk::Point<double, 3>>& pBonePoints, const PointTypeITK& pHipCamera, const PointTypeITK& pKneeCenterCamera, const PointTypeITK& pEpicondyleCamera, bool useRandomAlignment = false);
+			bool MakeRegistration(const std::vector<itk::Point<double, 3>>& pBonePoints, const PointTypeITK& pHipCamera, const PointTypeITK& pKneeCenterCamera, const PointTypeITK& pEpicondyleCamera, const PointTypeITK& pDistalCondyleCamera, bool useRandomAlignment = false);
 
 		private:
 			PointTypeITK hipCenterCT;
 			PointTypeITK kneeCenterCT;
 			PointTypeITK epicondyleCT;
+			PointTypeITK distalCondyleCT;
 		};
 	}
 }

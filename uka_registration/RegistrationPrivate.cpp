@@ -18,7 +18,7 @@ Eigen::Matrix4d RegistrationPrivate::InitRegistration(const std::vector<PointTyp
 {
     Eigen::Matrix4d transform;
     
-    if (source.size() != target.size() || source.size() == 0)
+    if (source.size() != target.size() || source.size() < 3)
     {
         return Eigen::Matrix4d::Identity();
     }

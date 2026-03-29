@@ -17,12 +17,13 @@
 
 using namespace UKA::REGISTRATION;
 
-FemurRegistration::FemurRegistration(const vtkSmartPointer<vtkPolyData> img, const PointTypeITK& pHipCenterCT, const PointTypeITK& pKneeCenterCT, const PointTypeITK& pEpicondyleCT)
+FemurRegistration::FemurRegistration(const vtkSmartPointer<vtkPolyData> img, const PointTypeITK& pHipCenterCT, const PointTypeITK& pKneeCenterCT, const PointTypeITK& pEpicondyleCT, const PointTypeITK& pDistalCondyleCT)
     :Registration(img)
 {
     hipCenterCT = pHipCenterCT;
     kneeCenterCT = pKneeCenterCT;
     epicondyleCT = pEpicondyleCT;
+	distalCondyleCT = pDistalCondyleCT;
 }
 
 FemurRegistration::~FemurRegistration()
@@ -30,7 +31,7 @@ FemurRegistration::~FemurRegistration()
 
 }
 
-bool FemurRegistration::MakeRegistration(const std::vector<itk::Point<double, 3>>& pBonePoints, const PointTypeITK& pHipCamera, const PointTypeITK& pKneeCenterCamera, const PointTypeITK& pEpicondyleCamera, bool useRandomAlignment)
+bool FemurRegistration::MakeRegistration(const std::vector<itk::Point<double, 3>>& pBonePoints, const PointTypeITK& pHipCamera, const PointTypeITK& pKneeCenterCamera, const PointTypeITK& pEpicondyleCamera, const PointTypeITK& pDistalCondyleCamera, bool useRandomAlignment)
 {
     std::vector<PointTypeITK> source, target;
 
@@ -52,16 +53,19 @@ bool FemurRegistration::MakeRegistration(const std::vector<itk::Point<double, 3>
     source.push_back(pKneeCenterCamera);
     source.push_back(pEpicondyleCamera);
     source.push_back(pHipCamera);
+	source.push_back(pDistalCondyleCamera);
 
     target.push_back(kneeCenterCT);
     target.push_back(epicondyleCT);
     target.push_back(hipCenterCT);
+	target.push_back(distalCondyleCT);
 
     cv::Mat data = Registration::GetTranslationRotation(source, target);
 
     std::vector<itk::Point<double, 3>> myBonePoints = pBonePoints;
     myBonePoints.push_back(pKneeCenterCamera);
     myBonePoints.push_back(pEpicondyleCamera);
+	myBonePoints.push_back(pDistalCondyleCamera);
 
     LeastSquaresICP myICP(myBonePoints);
 

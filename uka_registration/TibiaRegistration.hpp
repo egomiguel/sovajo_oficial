@@ -11,16 +11,17 @@ namespace UKA
 		class UKA_REGISTRATION_EXPORT TibiaRegistration : public Registration
 		{
 		public:
-			TibiaRegistration(const vtkSmartPointer<vtkPolyData> img, const PointTypeITK& pTibiaTubercleCT, const PointTypeITK& pLateralmalleolusCT, const PointTypeITK& pMedialmalleolusCT);
+			TibiaRegistration(const vtkSmartPointer<vtkPolyData> img, const PointTypeITK& pTibiaTubercleCT, const PointTypeITK& pLateralmalleolusCT, const PointTypeITK& pMedialmalleolusCT, const PointTypeITK& pPlateauCT);
 
 			~TibiaRegistration();
 
-			bool MakeRegistration(const std::vector<itk::Point<double, 3>>& pBonePoints, const PointTypeITK& pTibiaTubercleCamera, const PointTypeITK& pLateralmalleolusCamera, const PointTypeITK& pMedialmalleolusCamera, bool useRandomAlignment = false);
+			bool MakeRegistration(const std::vector<itk::Point<double, 3>>& pBonePoints, const PointTypeITK& pTibiaTubercleCamera, const PointTypeITK& pLateralmalleolusCamera, const PointTypeITK& pMedialmalleolusCamera, const PointTypeITK& pPlateauCamera, bool useRandomAlignment = false);
 
 		private:
 			PointTypeITK tibiaTubercleCT;
 			PointTypeITK lateralmalleolusCT;
 			PointTypeITK medialmalleolusCT;
+			PointTypeITK plateauCT;
 		};
 	}
 }

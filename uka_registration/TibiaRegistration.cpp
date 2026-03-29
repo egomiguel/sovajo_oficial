@@ -11,19 +11,20 @@
 
 using namespace UKA::REGISTRATION;
 
-TibiaRegistration::TibiaRegistration(const vtkSmartPointer<vtkPolyData> img, const PointTypeITK& pTibiaTubercleCT, const PointTypeITK& pLateralmalleolusCT, const PointTypeITK& pMedialmalleolusCT)
+TibiaRegistration::TibiaRegistration(const vtkSmartPointer<vtkPolyData> img, const PointTypeITK& pTibiaTubercleCT, const PointTypeITK& pLateralmalleolusCT, const PointTypeITK& pMedialmalleolusCT, const PointTypeITK& pPlateauCT)
     :Registration(img)
 {
     tibiaTubercleCT = pTibiaTubercleCT;
     lateralmalleolusCT = pLateralmalleolusCT;
     medialmalleolusCT = pMedialmalleolusCT;
+	plateauCT = pPlateauCT;
 }
 
 TibiaRegistration::~TibiaRegistration()
 {
 }
 
-bool TibiaRegistration::MakeRegistration(const std::vector<itk::Point<double, 3>>& pBonePoints, const PointTypeITK& pTibiaTubercleCamera, const PointTypeITK& pLateralmalleolusCamera, const PointTypeITK& pMedialmalleolusCamera, bool useRandomAlignment)
+bool TibiaRegistration::MakeRegistration(const std::vector<itk::Point<double, 3>>& pBonePoints, const PointTypeITK& pTibiaTubercleCamera, const PointTypeITK& pLateralmalleolusCamera, const PointTypeITK& pMedialmalleolusCamera, const PointTypeITK& pPlateauCamera, bool useRandomAlignment)
 {
     std::vector<PointTypeITK> source, target;
 
@@ -45,15 +46,18 @@ bool TibiaRegistration::MakeRegistration(const std::vector<itk::Point<double, 3>
     source.push_back(pTibiaTubercleCamera);
     source.push_back(pLateralmalleolusCamera);
     source.push_back(pMedialmalleolusCamera);
+	source.push_back(pPlateauCamera);
 
     target.push_back(tibiaTubercleCT);
     target.push_back(lateralmalleolusCT);
     target.push_back(medialmalleolusCT);
+	target.push_back(plateauCT);
 
     cv::Mat data = Registration::GetTranslationRotation(source, target);
 
     std::vector<itk::Point<double, 3>> myBonePoints = pBonePoints;
     myBonePoints.push_back(pTibiaTubercleCamera);
+	myBonePoints.push_back(pPlateauCamera);
 
     LeastSquaresICP myICP(myBonePoints);
 
