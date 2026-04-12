@@ -2665,39 +2665,36 @@ Point ImplantTools::getOriginalVectorFromProjectionWithPlanes(const Plane& proje
 		Este método busca la versión anterior del vector "projectionVectorX" que era paralela al plano "originalPlaneB".
 	*/
 
+	const double EPS = 1e-10;
+
 	Point normalA = projectionPlaneA.getNormalVector();
 	Point normalB = originalPlaneB.getNormalVector();
+
+	normalA.normalice();
+	normalB.normalice();
+
 	Point vectorX = projectionVectorX;
 	vectorX.normalice();
 
-	if (vectorX.dot(normalB) == 0)
+	if (fabs(vectorX.dot(normalB)) < EPS)
 	{
 		return vectorX;
 	}
 
-	Point originalVectorTemp = normalA + vectorX;
-	originalVectorTemp.normalice();
+	double dotAB = normalA.dot(normalB);
 
-	Point rotationAxis = normalA.cross(originalVectorTemp);
-	rotationAxis.normalice();
-
-	Point interceptionVector = rotationAxis.cross(normalB);
-	interceptionVector.normalice();
-
-	Point vector1 = projectionPlaneA.getProjectionVector(interceptionVector);
-	vector1.normalice();
-
-	if (vector1.dot(vectorX) >= 0)
+	if (fabs(dotAB) < EPS)
 	{
-		return interceptionVector;
+		Point projected = originalPlaneB.getProjectionVector(vectorX);
+		projected.normalice();
+		return projected;
 	}
-	else
-	{
-		return -interceptionVector;
-	}
+	double alpha = -vectorX.dot(normalB) / dotAB;
+	Point result = vectorX + normalA * alpha;
+	result.normalice();
 
+	return result;
 }
-
 
 std::vector<Point> ImplantTools::increaseVectorPoints(const std::vector<Point>& pPoints, int beginPos, int endPos, float distance)
 {

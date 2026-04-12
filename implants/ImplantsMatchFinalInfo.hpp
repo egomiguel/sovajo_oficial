@@ -138,6 +138,17 @@ namespace TKA
 				for the new implant. Return the new transformation.
 			*/
 			const itk::Rigid3DTransform<>::Pointer setTibiaImplant(const TibiaImplant& pTibiaImplant);
+			/*
+				Update the femur implant translation. Updates the transformation internally on the object for
+				the new implant. Return the new transformation.
+			*/
+			const itk::Rigid3DTransform<>::Pointer moveFemurImplant(double x, double y, double z);
+
+			/*
+				Update the tibia implant translation. Updates the transformation internally on the object
+				for the new implant. Return the new transformation.
+			*/
+			const itk::Rigid3DTransform<>::Pointer moveTibiaImplant(double x, double y, double z);
 
 			/*
 				Update the thickness of the femur cartilage.

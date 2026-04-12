@@ -146,6 +146,20 @@ void ImplantsMatchFinalInfo::setGeneralImplantInfo(const ImplantInfo pImplant)
 }
 */
 
+const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::moveFemurImplant(double x, double y, double z)
+{
+	Point move(x, y, z);
+	femurTranslation += move.ToMatPoint();
+	return getITKFemurTransform();
+}
+
+const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::moveTibiaImplant(double x, double y, double z)
+{
+	Point move(x, y, z);
+	tibiaTranslation += move.ToMatPoint();
+	return getITKTibiaTransform();
+}
+
 std::vector<PointTypeITK> ImplantsMatchFinalInfo::getBoneKneeCapPath() const
 {
     std::vector<PointTypeITK> pointsOut;

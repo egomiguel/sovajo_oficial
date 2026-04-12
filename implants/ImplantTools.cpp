@@ -2888,14 +2888,54 @@ cv::Mat ImplantTools::keepCenterWhenChangeRotation(const cv::Mat& newRotation, c
 	return centerRef - centerNew + pastTranslation;
 }
 
-Point ImplantTools::getOriginalVectorFromProjectionWithPlanes(const Plane& projectionPlaneA, const Point& projectionVectorX,
+Point ImplantTools::getOriginalVectorFromProjectionWithPlanes(
+	const Plane& projectionPlaneA,
+	const Point& projectionVectorX,
 	const Plane& originalPlaneB)
 {
+
 	/*
-		El vector "projectionVectorX" está proyectado sobre el plano "projectionPlaneA" pero 
-		puede que anteriormente fuera paralelo al plano "originalPlaneB". 
-		Este método busca la versión anterior del vector "projectionVectorX" que era paralela al plano "originalPlaneB".
+		El vector "projectionVectorX" es paralelo al plano "projectionPlaneA" pero
+		puede que anteriormente fuera paralelo al plano "originalPlaneB".
+		Este método busca la versión anterior del vector "projectionVectorX"
+		llamemosla "projectionVectorX_antes" que era paralela al plano "originalPlaneB" y
+		al proyectarlo sobre "projectionPlaneA" se obtiene "projectionVectorX".
 	*/
+
+	const double EPS = 1e-10;
+
+	Point normalA = projectionPlaneA.getNormalVector();
+	Point normalB = originalPlaneB.getNormalVector();
+
+	normalA.normalice();
+	normalB.normalice();
+
+	Point vectorX = projectionVectorX;
+	vectorX.normalice();
+
+	if (fabs(vectorX.dot(normalB)) < EPS)
+	{
+		return vectorX;
+	}
+
+	double dotAB = normalA.dot(normalB);
+
+	if (fabs(dotAB) < EPS)
+	{
+		Point projected = originalPlaneB.getProjectionVector(vectorX);
+		projected.normalice();
+		return projected;
+	}
+	double alpha = -vectorX.dot(normalB) / dotAB;
+	Point result = vectorX + normalA * alpha;
+	result.normalice();
+
+	return result;
+}
+
+Point ImplantTools::getOriginalVectorFromProjectionWithPlanesOld(const Plane& projectionPlaneA, const Point& projectionVectorX,
+	const Plane& originalPlaneB)
+{
 
 	Point normalA = projectionPlaneA.getNormalVector();
 	Point normalB = originalPlaneB.getNormalVector();

@@ -4744,8 +4744,36 @@ void segment_balls(int upperThreshold=100, int lowerThreshold=0, int minObjectSi
 }
 
 
+void vector_from_plane_to_plane()
+{
+	Plane A, B;
+	Point v = Point(1, 0, 0);
+	A.init(Point(0, 1, 0), Point(0, 0, 0));
+	B.init(Point(1, 1, -2), Point(0, 0, 0));
+
+	Point rotationAxis = A.getNormalVector().cross(v);
+	rotationAxis.normalice();
+
+	Point interceptionVector = rotationAxis.cross(B.getNormalVector());
+	interceptionVector.normalice();
+	Point resultado = A.getProjectionVector(interceptionVector);
+	resultado.normalice();
+	////////////////////////
+
+	double dotAB = A.getNormalVector().dot(B.getNormalVector());
+	double alpha = -v.dot(B.getNormalVector()) / dotAB;
+	Point interceptionVector2 = v + A.getNormalVector() * alpha;
+	interceptionVector2.normalice();
+	Point result = A.getProjectionVector(interceptionVector2);
+	result.normalice();
+
+	std::cout << "Resultado Proj 1: " << resultado << "dot B: " << interceptionVector.dot(B.getNormalVector()) << std::endl;
+	std::cout << "Resultado Proj 2: " << result << "dot B: " << interceptionVector2.dot(B.getNormalVector()) << std::endl;
+}
+
 int main()
 {
+	vector_from_plane_to_plane();
 	testSegSliceBordes();
 	//MatchEasy();
 	//TEST_IMPLANTS::testImplant();  //testTibiaImplant2();

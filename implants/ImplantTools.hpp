@@ -175,7 +175,10 @@ namespace TKA
 				The vector X is the result of projecting vector Y onto plane A. 
 				Who is vector Y?
 			*/
-			Point getOriginalVectorFromProjectionWithPlanes(const Plane& projectionPlaneA, const Point& projectionVectorX, 
+			Point getOriginalVectorFromProjectionWithPlanesOld(const Plane& projectionPlaneA, const Point& projectionVectorX, 
+				const Plane& originalPlaneB);
+
+			Point getOriginalVectorFromProjectionWithPlanes(const Plane& projectionPlaneA, const Point& projectionVectorX,
 				const Plane& originalPlaneB);
 			
 			void show(const vtkSmartPointer<vtkPolyData> poly1, const vtkSmartPointer<vtkPolyData> poly2);
