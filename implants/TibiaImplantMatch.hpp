@@ -50,6 +50,8 @@ namespace TKA
 
 			Plane finalTransformPlane(const Plane& plane, const itk::Rigid3DTransform<>::Pointer pTransform) const;
 
+			Point finalTransformVector(const Point& vector, const itk::Rigid3DTransform<>::Pointer pTransform) const;
+
 			Knee getKnee() const;
 
 			bool deletePointsInsideRadius(std::list<Point>& points, const Point& centerPoint, const Point& diffPoint, Point& nearPoint, double radius = 0.2) const;

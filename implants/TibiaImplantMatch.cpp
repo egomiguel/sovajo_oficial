@@ -191,6 +191,13 @@ Plane TibiaImplantMatch::finalTransformPlane(const Plane& plane, const itk::Rigi
 	return transformPlane;
 }
 
+Point TibiaImplantMatch::finalTransformVector(const Point& vector, const itk::Rigid3DTransform<>::Pointer pTransform) const
+{
+	cv::Mat rotation = Rigid3DTransformToCVRotation(pTransform);
+	cv::Mat transformNormalVector = rotation * vector.ToMatPoint();
+	return Point(transformNormalVector);
+}
+
 Plane TibiaImplantMatch::getTibiaPlane() const
 {
 	return transformPlane(implant.getTibiaPlane());
@@ -419,9 +426,10 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	Point medPlateau = myPlane.getProjectionPoint(knee.getMedialPlateau());
 
 	Point directVector = myPlane.getNormalVector();
-	Point vectorAP = tubercle - pcl;
-	vectorAP.normalice();
-	Point vectorRobotAP = (-1.0) * vectorAP;
+	Point vectorAP = finalTransformVector(implant.getTibiaVectorAP(), pTransformIn);
+	Point vectorBoneAP = tubercle - pcl;
+	vectorBoneAP.normalice();
+	Point vectorRobotAP = (-1.0) * vectorBoneAP;
 
 	cv::Mat myRotation = getTransformToRobot(myPlane, vectorRobotAP);
 
@@ -429,16 +437,19 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	if (knee.getIsRight() == true)
 	{
-		vectorTrans = vectorAP.cross(directVector);
+		//vectorTrans = vectorAP.cross(directVector);
+		vectorTrans = implant.getTibiaVectorAP().cross(implant.getTibiaNormalVector());
 	}
 	else
 	{
-		vectorTrans = directVector.cross(vectorAP);
+		//vectorTrans = directVector.cross(vectorAP);
+		vectorTrans = implant.getTibiaNormalVector().cross(implant.getTibiaVectorAP());
 	}
 
 	vectorTrans.normalice();
+	vectorTrans = finalTransformVector(vectorTrans, pTransformIn);
 
-	Point newPcl = pcl - increaseVector * vectorAP;
+	Point newPcl = pcl - increaseVector * vectorBoneAP;
 
 	Plane sagitalPlane, obliqueLatPlaneUp, obliqueMedPlaneUp;
 	sagitalPlane.init(vectorTrans, pcl);
@@ -632,6 +643,10 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	Line myLineObliqueLat = ImplantTools::GetSquareCornerFeatures(oneTop, interceptLat, sideLat, hullConcave, pDataSidePos, slopeAngleLat);
 	interceptLat = topPlane.getInterceptionLinePoint(myLineObliqueLat);
 
+	//////////////////////////////////////////////////
+	//ImplantTools::show(contourMax, hullConcave, true);
+	////////////////////////////////////////////////////
+
 	if (sagitalPlane.eval(beginTop) > 0)
 	{
 		while (pDataSidePos > 0)
@@ -667,6 +682,10 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	Line myLineObliqueMed = ImplantTools::GetSquareCornerFeatures(oneTop, interceptMed, sideMed, hullConcave, pDataSidePos, slopeAngleMed);
 	interceptMed = topPlane.getInterceptionLinePoint(myLineObliqueMed);
 
+	//////////////////////////////////////////////////
+	//ImplantTools::show(contourMax, hullConcave, true);
+	////////////////////////////////////////////////////
+
 	if (sagitalPlane.eval(beginTop) < 0)
 	{
 		while (pDataSidePos > 0)
@@ -699,7 +718,8 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		}
 	}
 
-	/*ImplantTools::show(contourMax, hullConcave, true);*/
+	//////////////////////////////////////////////////
+	//ImplantTools::show(contourMax, hullConcave, true);
 	////////////////////////////////////////////////////
 
 	int beginPos = -1, endPos = -1;
@@ -746,7 +766,9 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	posEndPCL = posEndPCL - 1;
 
 	Point computePoint;
-	/*ImplantTools::show(contourMax, hullConcave, true);*/
+	//////////////////////////////////////////////////
+	//ImplantTools::show(contourMax, hullConcave, true);
+	///////////////////////////////////////////////////
 
 	for (int i = 0; i < hullConcave.size(); i++)
 	{
@@ -781,7 +803,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		}
 	}
 
-	Point farTuber = tubercle + increaseVector * vectorAP;
+	Point farTuber = tubercle + increaseVector * vectorBoneAP;
 	Point farLateralSide, farMedialSide;
 	Point farLateralSidePrev, farMedialSidePrev;
 	Line downLine(vectorTrans, farTuber);
@@ -817,6 +839,10 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	int tFinalHullSize = finalHull.size();
 	std::vector<Point> concaveSpline(finalHull.begin() + posBeginTopArea + 1, finalHull.begin() + posEndTopArea);
+
+	//////////////////////////////////////////////////
+	//ImplantTools::show(contourMax, finalHull, true);
+	///////////////////////////////////////////////////
 
 	// Circular iteration
 	if (medPosRef == posEndTopArea)
@@ -993,6 +1019,10 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		}
 	}
 
+	//////////////////////////////////////////////////
+	//ImplantTools::show(contourMax, concaveSpline, true);
+	///////////////////////////////////////////////////
+
 	downLine.setPoint(farTuber);
 	Line lateralLine = Line::makeLineWithPoints(farLateralSide, farLateralSidePrev);
 	Line medialLine = Line::makeLineWithPoints(farMedialSide, farMedialSidePrev);
@@ -1013,6 +1043,10 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		concaveSpline.insert(concaveSpline.begin(), cornerDownMed);
 		concaveSpline.push_back(cornerDownLat);
 	}
+
+	//////////////////////////////////////////////////
+	//ImplantTools::show(contourMax, concaveSpline, true);
+	///////////////////////////////////////////////////
 
 
 	/*Plane splitPlane = myPlane.getPerpendicularPlane(farLateralSide, farMedialSide);
@@ -1108,7 +1142,8 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	if (tHullSize > 0)
 	{
-		hullCenter = sagitalPlane.getProjectionPoint(hullCenter);
+		Line lineAP = Line::makeLineWithPoints(tubercle, pcl);
+		hullCenter = lineAP.getProjectPoint(hullCenter);
 		hullCenter = myPlane.getProjectionPoint(hullCenter);
 		Point tTemp = myRotation * (hullCenter.ToMatPoint());
 		translate[0] = -tTemp.x;
