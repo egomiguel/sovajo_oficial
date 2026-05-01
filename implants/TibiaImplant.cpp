@@ -20,7 +20,8 @@ TibiaImplant::TibiaImplant()
 //	tibiaPlane.fixNormalVector(normalVector);
 //}
 
-void TibiaImplant::init(const Point& pclPoint1, const Point& pclPoint2, const Point& frontPoint, const Point& exteriorPoint, const TibiaImplantInfo& pImplantInfo)
+void TibiaImplant::init(const Point& pclPoint1, const Point& pclPoint2, const Point& frontPoint, const Point& exteriorPoint, 
+	const TibiaImplantInfo& pImplantInfo, const std::vector<Point>& pCurvePCLPoints)
 {
     if (isInit == true)
     {
@@ -36,6 +37,7 @@ void TibiaImplant::init(const Point& pclPoint1, const Point& pclPoint2, const Po
     tibiaPlane.setPoint(centralPoint);
     Point newNormal = exteriorPoint - tibiaPlane.getProjectionPoint(exteriorPoint);
     tibiaPlane.fixNormalVector(newNormal);
+	curvePCLPoints = pCurvePCLPoints;
     isInit = true;
 }
 
@@ -97,5 +99,15 @@ cv::Mat TibiaImplant::getTibiaKneeCenter() const
 TibiaImplantInfo TibiaImplant::getImplantInfo() const
 {
     return mImplantInfo;
+}
+
+std::vector<Point> TibiaImplant::getCurvePCLPoints() const
+{
+	return curvePCLPoints;
+}
+
+void TibiaImplant::setCurvePCLPoints(const std::vector<Point>& pCurvePCLPoints)
+{
+	curvePCLPoints = pCurvePCLPoints;
 }
 

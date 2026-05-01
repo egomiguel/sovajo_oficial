@@ -19,7 +19,8 @@ namespace TKA
 
 			TibiaImplant(const TibiaImplant& pImplant);
 
-			void init(const Point& pclPoint1, const Point& pclPoint2, const Point& frontPoint, const Point& exteriorPoint, const TibiaImplantInfo& pImplantInfo);
+			void init(const Point& pclPoint1, const Point& pclPoint2, const Point& frontPoint, const Point& exteriorPoint, 
+				const TibiaImplantInfo& pImplantInfo, const std::vector<Point>& pCurvePCLPoints = {});
 
 			Plane getTibiaPlane() const;
 
@@ -37,11 +38,16 @@ namespace TKA
 
 			TibiaImplantInfo getImplantInfo() const;
 
+			std::vector<Point> getCurvePCLPoints() const;
+
+			void setCurvePCLPoints(const std::vector<Point>& pCurvePCLPoints);
+
 		private:
 			Plane tibiaPlane;
 			Point centralPoint, midPoint, exteriorPoint;
 			TibiaImplantInfo mImplantInfo;
 			bool isInit;
+			std::vector<Point> curvePCLPoints;
 			//void fixNormalVectorTibia(const Point& fixPoint, const Point& referencePoint);
 		};
 	}

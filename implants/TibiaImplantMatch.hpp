@@ -25,7 +25,8 @@ namespace TKA
 
 			std::vector<Point> getPointsNearImplant(double distance = 0) const;
 
-			std::vector<PointTypeITK> GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, double lateralCloseAngle = 60, double distance = 1., double distancePcl = 1., int amount = 200) const;
+			std::vector<PointTypeITK> GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, 
+				double lateralCloseAngle = 60, double distance = 1., double distancePcl = 1., int amount = 200, bool useImplantPCLCurve = true) const;
 
 			itk::Matrix< double, 3, 3 > GetRotationMatrix() const;
 
@@ -51,6 +52,8 @@ namespace TKA
 			Plane finalTransformPlane(const Plane& plane, const itk::Rigid3DTransform<>::Pointer pTransform) const;
 
 			Point finalTransformVector(const Point& vector, const itk::Rigid3DTransform<>::Pointer pTransform) const;
+
+			Point finalTransformPoint(const Point& vector, const itk::Rigid3DTransform<>::Pointer pTransform) const;
 
 			Knee getKnee() const;
 

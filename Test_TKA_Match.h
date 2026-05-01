@@ -1108,6 +1108,9 @@ namespace TEST_TKA_SUEN
 		auto tibiaImplant = createTibiaImplant(QString("%1/tibia_right_3_10+_data.json").arg(dirPath).toStdString().c_str(),
 			QString("%1/tibia_right_3_10+.stl").arg(dirPath).toStdString().c_str());
 
+		std::vector<Point> curvePCL = { Point(-91.4186, -3.91004, -2.40068), Point(-98.9168, -8.0887, -1.69834), Point(-107.066, -4.31846, -2.40046) };
+		tibiaImplant->setCurvePCLPoints(curvePCL);
+
 		auto landmarks = readLandmarks(QString("%1/landmark.json").arg(dirPath).toStdString().c_str());
 		//Right Leg
 		auto knee = createKnee(landmarks, QString("%1/femur.vtk").arg(dirPath).toStdString().c_str(),
