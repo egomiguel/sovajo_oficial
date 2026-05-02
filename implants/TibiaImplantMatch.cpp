@@ -581,129 +581,9 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		}
 	}
 
+	///////////////////////////////////////////////////////////////////
 	Plane topPlane = myPlane.getPerpendicularPlane(lastTop, beginTop);
 	topPlane.reverseByPoint(hullCenter, false);
-
-	Point xVector = myPlane.getNormalVector().cross(vectorRobotAP);
-	xVector.normalice();
-	xVector = -xVector;
-	cv::Mat rotationPoly = getTransformToRobot(myPlane, xVector);
-
-	std::vector<Point> hullConcaveTemp;
-
-	if (useImplantPCLCurve == false || implant.getCurvePCLPoints().size() < 3)
-	{
-		std::vector<Point> pclPoints;
-		for (int i = 0; i < tVtkPointSize; i++)
-		{
-			double pnt[3];
-			vtkMyPoints->GetPoint(i, pnt);
-			Point currentPoint(pnt[0], pnt[1], pnt[2]);
-
-			if (obliqueLatPlaneUp.eval(currentPoint) >= 0 && obliqueMedPlaneUp.eval(currentPoint) >= 0)
-			{
-				pclPoints.push_back(currentPoint);
-			}
-		}
-
-		if (pclPoints.size() < 10)
-		{
-			throw ImplantExceptionCode::NOT_ENOUGH_POINTS_ON_PCL_BORDER;
-		}
-
-		ImplantTools::Poly tPoly = ImplantTools::parabolaFitPCL(pclPoints, rotationPoly, beginTop, lastTop);
-		double maxX = tPoly.maxX;
-		double minX = tPoly.minX;
-
-		if (tPoly.isFine == false || maxX == minX)
-		{
-			throw ImplantExceptionCode::CAN_NOT_FIT_POLY_ON_PCL_BORDER;
-		}
-
-		double step = (maxX - minX) / 100;
-
-		for (double i = minX; i < maxX + (step / 2.); i += step)
-		{
-			double y = tPoly.eval(i);
-			Point temp(i, y, tPoly.Z);
-			cv::Mat tempMat = rotationPoly.inv() * temp.ToMatPoint();
-			hullConcaveTemp.push_back(Point(tempMat));
-		}
-	}
-	else
-	{
-		Plane tempTop, tempTopBegin, tempTopEnd;
-		tempTop = myPlane.getPerpendicularPlane(beginTop, lastTop);
-		tempTop.reverseByPoint(hullCenter);
-
-		tempTopBegin.init(vectorTrans, beginTop);
-		tempTopBegin.reverseByPoint(lastTop);
-
-		tempTopEnd.init(vectorTrans, lastTop);
-		tempTopEnd.reverseByPoint(beginTop);
-
-		std::list<Point> pclPoints;
-		for (auto& item: implant.getCurvePCLPoints())
-		{
-			pclPoints.push_back(myPlane.getProjectionPoint(finalTransformPoint(item, pTransformIn)));
-		}
-
-		ImplantTools::Poly tPoly = ImplantTools::polyFit(pclPoints, rotationPoly, 2);
-		double maxX = tPoly.maxX;
-		double minX = tPoly.minX;
-
-		if (tPoly.isFine == false || maxX == minX)
-		{
-			throw ImplantExceptionCode::CAN_NOT_FIT_POLY_ON_PCL_BORDER;
-		}
-
-		double step = (maxX - minX) / 50;
-		double maxStep = maxX - minX;
-
-		for (double i = minX - maxStep; i < maxX + maxStep; i += step)
-		{
-			double y = tPoly.eval(i);
-			Point temp(i, y, tPoly.Z);
-			cv::Mat tempMat = rotationPoly.inv() * temp.ToMatPoint();
-			if (hullObj.isPointWithinConvexHull(Point(tempMat))
-				/*tempTop.eval(Point(tempMat)) >= 0 && 
-				tempTopBegin.eval(Point(tempMat)) >= 0 &&
-				tempTopEnd.eval(Point(tempMat)) >= 0*/)
-			{
-				hullConcaveTemp.push_back(Point(tempMat));
-			}
-		}
-
-		if (hullConcaveTemp.size() < 2)
-		{
-			hullConcaveTemp.clear();
-			hullConcaveTemp.push_back(beginTop);
-			hullConcaveTemp.push_back(lastTop);
-		}
-		else
-		{
-			if (tempTop.eval(hullConcaveTemp[0]) > 0)
-			{
-				//hullConcaveTemp.insert(hullConcaveTemp.begin(), tempTop.getProjectionPoint(hullConcaveTemp[0]));
-			}
-
-			if (tempTop.eval(hullConcaveTemp[hullConcaveTemp.size() - 1]) > 0)
-			{
-				//hullConcaveTemp.push_back(tempTop.getProjectionPoint(hullConcaveTemp[hullConcaveTemp.size() - 1]));
-			}
-		}
-	}
-	
-	ImplantTools::show(contourMax, hullConcaveTemp);
-	double reverseDistance = ImplantTools::getDistanceBetweenPoints(hullConcaveTemp[0], beginTop, true);
-	double normalDistance = ImplantTools::getDistanceBetweenPoints(hullConcaveTemp[hullConcaveTemp.size() - 1], beginTop, true);
-
-	if (reverseDistance < normalDistance)
-	{
-		std::reverse(hullConcaveTemp.begin(), hullConcaveTemp.end());
-	}
-
-	/////////////////////////////////////////////////////////////////////////
 	double slopeAngleLat = 90;
 	double slopeAngleMed = 90;
 	Point oneTop = (lastTop + beginTop) / 2;
@@ -720,7 +600,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	interceptLat = topPlane.getInterceptionLinePoint(myLineObliqueLat);
 
 	//////////////////////////////////////////////////
-	ImplantTools::show(contourMax, hullConcave, true);
+	//ImplantTools::show(contourMax, hullConcave, true);
 	////////////////////////////////////////////////////
 
 	if (sagitalPlane.eval(beginTop) > 0)
@@ -759,7 +639,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	interceptMed = topPlane.getInterceptionLinePoint(myLineObliqueMed);
 
 	//////////////////////////////////////////////////
-	ImplantTools::show(contourMax, hullConcave, true);
+	//ImplantTools::show(contourMax, hullConcave, true);
 	////////////////////////////////////////////////////
 
 	if (sagitalPlane.eval(beginTop) < 0)
@@ -795,9 +675,152 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	}
 
 	//////////////////////////////////////////////////
-	ImplantTools::show(contourMax, hullConcave, true);
+	//ImplantTools::show(contourMax, hullConcave, true);
 	////////////////////////////////////////////////////
 
+	////////////////////////////////////////////////////////////////
+
+	Point xVector = myPlane.getNormalVector().cross(vectorRobotAP);
+	xVector.normalice();
+	xVector = -xVector;
+	cv::Mat rotationPoly = getTransformToRobot(myPlane, xVector);
+
+	std::vector<Point> hullConcaveTemp;
+	bool useImplantPCLCurveError = false;
+
+	if(useImplantPCLCurve == true)
+	{
+		Plane tempInterLat, tempInterMed;
+		tempInterLat = myPlane.getPerpendicularPlane(interceptLat, hullCenter);
+		tempInterMed = myPlane.getPerpendicularPlane(interceptMed, hullCenter);
+		tempInterLat.reverseByPoint(interceptMed);
+		tempInterMed.reverseByPoint(interceptLat);
+
+		std::list<Point> pclPoints;
+		for (auto& item : implant.getCurvePCLPoints())
+		{
+			pclPoints.push_back(myPlane.getProjectionPoint(finalTransformPoint(item, pTransformIn)));
+		}
+
+		ImplantTools::Poly tPoly = ImplantTools::polyFit(pclPoints, rotationPoly, 2);
+		double maxX = tPoly.maxX;
+		double minX = tPoly.minX;
+
+		if (tPoly.isFine == false || maxX == minX)
+		{
+			throw ImplantExceptionCode::CAN_NOT_FIT_POLY_ON_PCL_BORDER;
+		}
+
+		double step = (maxX - minX) / 80;
+		double maxStep = maxX - minX;
+
+		for (double i = minX - maxStep; i < maxX + maxStep; i += step)
+		{
+			double y = tPoly.eval(i);
+			Point temp(i, y, tPoly.Z);
+			cv::Mat tempMat = rotationPoly.inv() * temp.ToMatPoint();
+			if (hullObj.isPointWithinConvexHull(Point(tempMat)))
+			{
+				hullConcaveTemp.push_back(Point(tempMat));
+			}
+		}
+
+		if (hullConcaveTemp.size() < 20)
+		{
+			hullConcaveTemp.clear();
+			useImplantPCLCurveError = true;
+		}
+		else
+		{
+			if (!(tempInterLat.eval(hullConcaveTemp[0]) >= 0 && tempInterMed.eval(hullConcaveTemp[0]) >= 0))
+			{
+				hullConcaveTemp.clear();
+				useImplantPCLCurveError = true;
+			}
+
+			if (!(tempInterLat.eval(hullConcaveTemp[hullConcaveTemp.size() - 1]) >= 0 && tempInterMed.eval(hullConcaveTemp[hullConcaveTemp.size() - 1]) >= 0))
+			{
+				hullConcaveTemp.clear();
+				useImplantPCLCurveError = true;
+			}
+		}
+
+		Point refBeginTop;
+		if (useImplantPCLCurveError == false)
+		{
+			double distLat = ImplantTools::getDistanceBetweenPoints(interceptLat, beginTop, true);
+			double distMed = ImplantTools::getDistanceBetweenPoints(interceptMed, beginTop, true);
+
+			if (distLat < distMed)
+			{
+				refBeginTop = interceptLat;
+			}
+			else
+			{
+				refBeginTop = interceptMed;
+			}
+
+			double reverseDistance = ImplantTools::getDistanceBetweenPoints(hullConcaveTemp[0], refBeginTop, true);
+			double normalDistance = ImplantTools::getDistanceBetweenPoints(hullConcaveTemp[hullConcaveTemp.size() - 1], refBeginTop, true);
+
+			if (reverseDistance < normalDistance)
+			{
+				std::reverse(hullConcaveTemp.begin(), hullConcaveTemp.end());
+			}
+		}
+	}
+
+	if (useImplantPCLCurve == false || useImplantPCLCurveError == true)
+	{
+		std::vector<Point> pclPoints;
+		for (int i = 0; i < tVtkPointSize; i++)
+		{
+			double pnt[3];
+			vtkMyPoints->GetPoint(i, pnt);
+			Point currentPoint(pnt[0], pnt[1], pnt[2]);
+
+			if (obliqueLatPlaneUp.eval(currentPoint) >= 0 && obliqueMedPlaneUp.eval(currentPoint) >= 0)
+			{
+				pclPoints.push_back(currentPoint);
+			}
+		}
+
+		if (pclPoints.size() < 10)
+		{
+			throw ImplantExceptionCode::NOT_ENOUGH_POINTS_ON_PCL_BORDER;
+		}
+
+		ImplantTools::Poly tPoly = ImplantTools::parabolaFitPCL(pclPoints, rotationPoly, beginTop, lastTop);
+		double maxX = tPoly.maxX;
+		double minX = tPoly.minX;
+
+		if (tPoly.isFine == false || maxX == minX)
+		{
+			throw ImplantExceptionCode::CAN_NOT_FIT_POLY_ON_PCL_BORDER;
+		}
+
+		double step = (maxX - minX) / 100;
+
+		for (double i = minX; i < maxX + (step / 2.); i += step)
+		{
+			double y = tPoly.eval(i);
+			Point temp(i, y, tPoly.Z);
+			cv::Mat tempMat = rotationPoly.inv() * temp.ToMatPoint();
+			hullConcaveTemp.push_back(Point(tempMat));
+		}
+
+		double reverseDistance = ImplantTools::getDistanceBetweenPoints(hullConcaveTemp[0], beginTop, true);
+		double normalDistance = ImplantTools::getDistanceBetweenPoints(hullConcaveTemp[hullConcaveTemp.size() - 1], beginTop, true);
+
+		if (reverseDistance < normalDistance)
+		{
+			std::reverse(hullConcaveTemp.begin(), hullConcaveTemp.end());
+		}
+	}
+	///////////////////////////////////////////////////////////
+	//ImplantTools::show(contourMax, hullConcaveTemp);
+	/////////////////////////////////////////////////////////
+	
 	int beginPos = -1, endPos = -1;
 
 	beginPos = 0;
@@ -843,7 +866,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	Point computePoint;
 	//////////////////////////////////////////////////
-	ImplantTools::show(contourMax, hullConcave, true);
+	//ImplantTools::show(contourMax, hullConcave, true);
 	///////////////////////////////////////////////////
 
 	for (int i = 0; i < hullConcave.size(); i++)
@@ -1209,8 +1232,8 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	ImplantTools::show(contourMax, finalSplinePointsTKA);
-	ImplantTools::show(contourMax, finalSplinePointsTKA, true);
+	//ImplantTools::show(contourMax, finalSplinePointsTKA);
+	//ImplantTools::show(contourMax, finalSplinePointsTKA, true);
 	///////////////////////////////////////////////////////////////////////
 
 	hull = increaseVectorToAmount(finalSplinePointsTKA, amount);
