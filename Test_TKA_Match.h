@@ -554,6 +554,7 @@ namespace TEST_TKA_SUEN
 		auto tibiaImplant = std::make_shared<TKA::IMPLANTS::TibiaImplant>();
 		tibiaImplant->init(readPoint(obj["point_pcl1"]), readPoint(obj["point_pcl2"]),
 			readPoint(obj["point_front"]), readPoint(obj["point_external"]), tibiaInfo);
+		
 		return tibiaImplant;
 	}
 
@@ -1103,12 +1104,54 @@ namespace TEST_TKA_SUEN
 
 	void TestTibiaPlane()
 	{
-		const char *dirPath = "D:\\sovajo\\Test_Cases\\TKA_Test";
-
+		/*const char *dirPath = "D:\\sovajo\\Test_Cases\\TKA_Test";
 		auto tibiaImplant = createTibiaImplant(QString("%1/tibia_right_3_10+_data.json").arg(dirPath).toStdString().c_str(),
-			QString("%1/tibia_right_3_10+.stl").arg(dirPath).toStdString().c_str());
+			QString("%1/tibia_right_3_10+.stl").arg(dirPath).toStdString().c_str());*/
 
-		std::vector<Point> curvePCL = { Point(-91.4186, -3.91004, -2.40068), Point(-98.9168, -8.0887, -1.69834), Point(-107.066, -4.31846, -2.40046) };
+		const char *dirPath = "D:\\sovajo\\Errores\\Implant_Tibia";
+
+		auto tibiaImplant = createTibiaImplant(QString("%1/tibia_4#_4#_9mm_data.json").arg(dirPath).toStdString().c_str(),
+			QString("%1/tibia_4#_4#_9mm.stl").arg(dirPath).toStdString().c_str());
+
+		dirPath = "D:\\sovajo\\Test_Cases\\TKA_Test";
+
+		//std::vector<Point> curvePCL = { Point(-91.4186, -3.91004, -2.40068), Point(-98.9168, -8.0887, -1.69834), Point(-107.066, -4.31846, -2.40046) };
+		std::vector<Point> curvePCL = { Point(
+											12.8027734229,
+											-238.487999688,
+											-6.29918166947
+										),
+										Point(
+											8.92120569652,
+											-243.783841547,
+											-6.29916695524
+										),
+										Point(
+											5.90082686362,
+											-248.802770644,
+											-6.29917471699
+										),
+										Point(
+											-0.0828262309816,
+											-251.001648012,
+											-6.29916097667
+										),
+										Point(
+											-6.5715379409,
+											-248.2511815,
+											-6.29917566676
+										),
+										Point(
+											-9.22315796892,
+											-243.07887244,
+											-6.29916560162
+										),
+										Point(
+											-14.3093912624,
+											-237.718138825,
+											-6.29916853747
+										) };
+
 		tibiaImplant->setCurvePCLPoints(curvePCL);
 
 		auto landmarks = readLandmarks(QString("%1/landmark.json").arg(dirPath).toStdString().c_str());

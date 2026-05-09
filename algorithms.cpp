@@ -4874,6 +4874,9 @@ int main()
 
 	//std::cout << Point(result) << "; " << proj << std::endl;
 
+	//ImageType::Pointer mySpine = Test::ReadSeries<ImageType>("D:\\sovajo\\Spine_Images\\Spine_Series\\series");
+	//Test::SaveImage<ImageType>(mySpine, "MySpine");
+
 	//PolydataInterception();
 	//TEST_PKA::testTibiaBounary2();***********************************************************************
 	TEST_TKA_SUEN::TestTibiaPlane();

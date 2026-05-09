@@ -497,6 +497,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	ConvexHull hullObj(contourPoints, myRotation);
 	std::vector<Point> hullPoints = hullObj.GetConvexHull();
+
 	if (hullPoints.size() < 4)
 	{
 		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL_ON_TIBIA_CUT_PLANE;
@@ -688,7 +689,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	std::vector<Point> hullConcaveTemp;
 	bool useImplantPCLCurveError = false;
 
-	if(useImplantPCLCurve == true)
+	if(useImplantPCLCurve == true && implant.getCurvePCLPoints().size() > 2)
 	{
 		Plane tempInterLat, tempInterMed;
 		tempInterLat = myPlane.getPerpendicularPlane(interceptLat, hullCenter);
@@ -770,7 +771,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		}
 	}
 
-	if (useImplantPCLCurve == false || useImplantPCLCurveError == true)
+	if (useImplantPCLCurve == false || useImplantPCLCurveError == true || implant.getCurvePCLPoints().size() < 3)
 	{
 		std::vector<Point> pclPoints;
 		for (int i = 0; i < tVtkPointSize; i++)
@@ -784,7 +785,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 				pclPoints.push_back(currentPoint);
 			}
 		}
-
+		
 		if (pclPoints.size() < 10)
 		{
 			throw ImplantExceptionCode::NOT_ENOUGH_POINTS_ON_PCL_BORDER;
@@ -793,7 +794,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		ImplantTools::Poly tPoly = ImplantTools::parabolaFitPCL(pclPoints, rotationPoly, beginTop, lastTop);
 		double maxX = tPoly.maxX;
 		double minX = tPoly.minX;
-
+		
 		if (tPoly.isFine == false || maxX == minX)
 		{
 			throw ImplantExceptionCode::CAN_NOT_FIT_POLY_ON_PCL_BORDER;
@@ -816,6 +817,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		{
 			std::reverse(hullConcaveTemp.begin(), hullConcaveTemp.end());
 		}
+		
 	}
 	///////////////////////////////////////////////////////////
 	//ImplantTools::show(contourMax, hullConcaveTemp);
