@@ -8,6 +8,23 @@ from totalsegmentator.python_api import totalsegmentator
 # A Nifti file or a folder (or zip file) with all DICOM slices of one patient is allowed as input.
 # Output folder All vertebrae will be segmented with the prefix vertebrae_x in the output folder.
 
+"""
+The model download can take quite a long time and the files are fairly large, so instead of sending them directly, 
+it would be better if you download them locally on your machine.
+Before running TotalSegmentator, please set the directory where the models should be downloaded and stored.
+
+Bash
+set TOTALSEG_HOME_DIR=D:\AI\Models\TotalSegmentator
+
+Then run:
+
+Bash
+TotalSegmentator -i ct.nii.gz -o output
+
+The first execution will automatically download all required model weights into the specified folder. After that, the model can be used completely offline.
+
+"""
+
 class SpineSegmentator:
 
     def __init__(self,
