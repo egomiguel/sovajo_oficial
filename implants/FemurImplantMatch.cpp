@@ -818,6 +818,8 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	Point myNormal, myNormalTemp;
 
 	std::vector<Point> pointsLatTemp, pointsMedTemp;
+	itk::Vector< double, 3 > translate;
+	itk::Matrix< double, 3, 3 > rotationITK;
 
 	if (id == kPlaneA)
 	{
@@ -834,13 +836,35 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 		currentPlane.fixNormalVector(myNormal);
 
+		centerP1 = midPointPlane;
+		centerP2 = currentPlane.getProjectionPoint(knee.getHipCenter());
+
+		myRotation = getTransformToRobot(currentPlane, sagitalAnatomicPlane, centerP1, centerP2);
+
+		midPointPlane = sagitalAnatomicPlane.getProjectionPoint(midPointPlane);
+		midPointPlane = currentPlane.getProjectionPoint(midPointPlane);
+		Point tTemp = myRotation * (midPointPlane.ToMatPoint());
+		translate[0] = -tTemp.x;
+		translate[1] = -tTemp.y;
+		translate[2] = -tTemp.z;
+
+		rotationITK[0][0] = myRotation.at<double>(0, 0);
+		rotationITK[0][1] = myRotation.at<double>(0, 1);
+		rotationITK[0][2] = myRotation.at<double>(0, 2);
+
+		rotationITK[1][0] = myRotation.at<double>(1, 0);
+		rotationITK[1][1] = myRotation.at<double>(1, 1);
+		rotationITK[1][2] = myRotation.at<double>(1, 2);
+
+		rotationITK[2][0] = myRotation.at<double>(2, 0);
+		rotationITK[2][1] = myRotation.at<double>(2, 1);
+		rotationITK[2][2] = myRotation.at<double>(2, 2);
+
+		pTransformOut->SetMatrix(rotationITK);
+		pTransformOut->SetOffset(translate);
+
 		if (projectedPoints.size() > 15)
 		{
-			centerP1 = midPointPlane;
-			centerP2 = currentPlane.getProjectionPoint(knee.getHipCenter());
-
-			myRotation = getTransformToRobot(currentPlane, sagitalAnatomicPlane, centerP1, centerP2);
-
 			centerP1 = midPlane.getProjectionPoint(centerP1);
 			centerP2 = midPlane.getProjectionPoint(centerP2);
 
@@ -878,13 +902,35 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 		currentPlane.fixNormalVector(myNormal);
 
+		centerP1 = midPointPlane;
+		centerP2 = currentPlane.getProjectionPoint(knee.getHipCenter());
+
+		myRotation = getTransformToRobot(currentPlane, sagitalAnatomicPlane, centerP1, centerP2);
+
+		midPointPlane = sagitalAnatomicPlane.getProjectionPoint(midPointPlane);
+		midPointPlane = currentPlane.getProjectionPoint(midPointPlane);
+		Point tTemp = myRotation * (midPointPlane.ToMatPoint());
+		translate[0] = -tTemp.x;
+		translate[1] = -tTemp.y;
+		translate[2] = -tTemp.z;
+
+		rotationITK[0][0] = myRotation.at<double>(0, 0);
+		rotationITK[0][1] = myRotation.at<double>(0, 1);
+		rotationITK[0][2] = myRotation.at<double>(0, 2);
+
+		rotationITK[1][0] = myRotation.at<double>(1, 0);
+		rotationITK[1][1] = myRotation.at<double>(1, 1);
+		rotationITK[1][2] = myRotation.at<double>(1, 2);
+
+		rotationITK[2][0] = myRotation.at<double>(2, 0);
+		rotationITK[2][1] = myRotation.at<double>(2, 1);
+		rotationITK[2][2] = myRotation.at<double>(2, 2);
+
+		pTransformOut->SetMatrix(rotationITK);
+		pTransformOut->SetOffset(translate);
+
 		if (projectedPoints.size() > 15)
 		{
-			centerP1 = midPointPlane;
-			centerP2 = currentPlane.getProjectionPoint(knee.getHipCenter());
-
-			myRotation = getTransformToRobot(currentPlane, sagitalAnatomicPlane, centerP1, centerP2);
-
 			centerP1 = midPlane.getProjectionPoint(centerP1);
 			centerP2 = midPlane.getProjectionPoint(centerP2);
 
@@ -918,14 +964,36 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 		currentPlane.fixNormalVector(myNormal);
 
+		centerP1 = midPointPlane;
+		centerP2 = knee.getFemurKneeCenter() - resizeVector * knee.getFemurDirectVectorAP();
+		centerP2 = currentPlane.getProjectionPoint(centerP2);
+
+		myRotation = getTransformToRobot(currentPlane, sagitalAnatomicPlane, centerP1, centerP2);
+
+		midPointPlane = sagitalAnatomicPlane.getProjectionPoint(midPointPlane);
+		midPointPlane = currentPlane.getProjectionPoint(midPointPlane);
+		Point tTemp = myRotation * (midPointPlane.ToMatPoint());
+		translate[0] = -tTemp.x;
+		translate[1] = -tTemp.y;
+		translate[2] = -tTemp.z;
+
+		rotationITK[0][0] = myRotation.at<double>(0, 0);
+		rotationITK[0][1] = myRotation.at<double>(0, 1);
+		rotationITK[0][2] = myRotation.at<double>(0, 2);
+
+		rotationITK[1][0] = myRotation.at<double>(1, 0);
+		rotationITK[1][1] = myRotation.at<double>(1, 1);
+		rotationITK[1][2] = myRotation.at<double>(1, 2);
+
+		rotationITK[2][0] = myRotation.at<double>(2, 0);
+		rotationITK[2][1] = myRotation.at<double>(2, 1);
+		rotationITK[2][2] = myRotation.at<double>(2, 2);
+
+		pTransformOut->SetMatrix(rotationITK);
+		pTransformOut->SetOffset(translate);
+
 		if (projectedPoints.size() > 15)
 		{
-			centerP1 = midPointPlane;
-			centerP2 = knee.getFemurKneeCenter() - resizeVector * knee.getFemurDirectVectorAP();
-			centerP2 = currentPlane.getProjectionPoint(centerP2);
-
-			myRotation = getTransformToRobot(currentPlane, sagitalAnatomicPlane, centerP1, centerP2);
-
 			centerP1 = midPlane.getProjectionPoint(centerP1);
 			centerP2 = midPlane.getProjectionPoint(centerP2);
 
@@ -951,13 +1019,35 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 		currentPlane.fixNormalVector(myNormal);
 
+		centerP1 = midPointPlane;
+		centerP2 = currentPlane.getProjectionPoint(knee.getHipCenter());
+
+		myRotation = getTransformToRobot(currentPlane, sagitalAnatomicPlane, centerP1, centerP2);
+
+		midPointPlane = sagitalAnatomicPlane.getProjectionPoint(midPointPlane);
+		midPointPlane = currentPlane.getProjectionPoint(midPointPlane);
+		Point tTemp = myRotation * (midPointPlane.ToMatPoint());
+		translate[0] = -tTemp.x;
+		translate[1] = -tTemp.y;
+		translate[2] = -tTemp.z;
+
+		rotationITK[0][0] = myRotation.at<double>(0, 0);
+		rotationITK[0][1] = myRotation.at<double>(0, 1);
+		rotationITK[0][2] = myRotation.at<double>(0, 2);
+
+		rotationITK[1][0] = myRotation.at<double>(1, 0);
+		rotationITK[1][1] = myRotation.at<double>(1, 1);
+		rotationITK[1][2] = myRotation.at<double>(1, 2);
+
+		rotationITK[2][0] = myRotation.at<double>(2, 0);
+		rotationITK[2][1] = myRotation.at<double>(2, 1);
+		rotationITK[2][2] = myRotation.at<double>(2, 2);
+
+		pTransformOut->SetMatrix(rotationITK);
+		pTransformOut->SetOffset(translate);
+
 		if (projectedPoints.size() > 15)
 		{
-			centerP1 = midPointPlane;
-			centerP2 = currentPlane.getProjectionPoint(knee.getHipCenter());
-
-			myRotation = getTransformToRobot(currentPlane, sagitalAnatomicPlane, centerP1, centerP2);
-
 			centerP1 = midPlane.getProjectionPoint(centerP1);
 			centerP2 = midPlane.getProjectionPoint(centerP2);
 
@@ -984,13 +1074,35 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 		currentPlane.fixNormalVector(myNormal);
 
+		centerP1 = midPointPlane;
+		centerP2 = currentPlane.getProjectionPoint(knee.getHipCenter());
+
+		myRotation = getTransformToRobot(currentPlane, sagitalAnatomicPlane, centerP1, centerP2);
+
+		midPointPlane = sagitalAnatomicPlane.getProjectionPoint(midPointPlane);
+		midPointPlane = currentPlane.getProjectionPoint(midPointPlane);
+		Point tTemp = myRotation * (midPointPlane.ToMatPoint());
+		translate[0] = -tTemp.x;
+		translate[1] = -tTemp.y;
+		translate[2] = -tTemp.z;
+
+		rotationITK[0][0] = myRotation.at<double>(0, 0);
+		rotationITK[0][1] = myRotation.at<double>(0, 1);
+		rotationITK[0][2] = myRotation.at<double>(0, 2);
+
+		rotationITK[1][0] = myRotation.at<double>(1, 0);
+		rotationITK[1][1] = myRotation.at<double>(1, 1);
+		rotationITK[1][2] = myRotation.at<double>(1, 2);
+
+		rotationITK[2][0] = myRotation.at<double>(2, 0);
+		rotationITK[2][1] = myRotation.at<double>(2, 1);
+		rotationITK[2][2] = myRotation.at<double>(2, 2);
+
+		pTransformOut->SetMatrix(rotationITK);
+		pTransformOut->SetOffset(translate);
+
 		if (projectedPoints.size() > 15)
 		{
-			centerP1 = midPointPlane;
-			centerP2 = currentPlane.getProjectionPoint(knee.getHipCenter());
-
-			myRotation = getTransformToRobot(currentPlane, sagitalAnatomicPlane, centerP1, centerP2);
-
 			centerP1 = midPlane.getProjectionPoint(centerP1);
 			centerP2 = midPlane.getProjectionPoint(centerP2);
 
@@ -1082,39 +1194,6 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	hull = increaseVectorToAmount(vertices, amount);
 	//vtkSmartPointer<vtkPolyData> contourMax = ImplantTools::getMaxContour(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
 	//ImplantTools::show(contourMax, vertices, true);
-
-	itk::Vector< double, 3 > translate;
-	if (projectedPoints.size() > 0)
-	{
-		midPointPlane = sagitalAnatomicPlane.getProjectionPoint(midPointPlane);
-		midPointPlane = currentPlane.getProjectionPoint(midPointPlane);
-		Point tTemp = myRotation * (midPointPlane.ToMatPoint());
-		translate[0] = -tTemp.x;
-		translate[1] = -tTemp.y;
-		translate[2] = -tTemp.z;
-	}
-	else
-	{
-		translate[0] = 0;
-		translate[1] = 0;
-		translate[2] = 0;
-	}
-
-	itk::Matrix< double, 3, 3 > rotationITK;
-	rotationITK[0][0] = myRotation.at<double>(0, 0);
-	rotationITK[0][1] = myRotation.at<double>(0, 1);
-	rotationITK[0][2] = myRotation.at<double>(0, 2);
-
-	rotationITK[1][0] = myRotation.at<double>(1, 0);
-	rotationITK[1][1] = myRotation.at<double>(1, 1);
-	rotationITK[1][2] = myRotation.at<double>(1, 2);
-
-	rotationITK[2][0] = myRotation.at<double>(2, 0);
-	rotationITK[2][1] = myRotation.at<double>(2, 1);
-	rotationITK[2][2] = myRotation.at<double>(2, 2);
-
-	pTransformOut->SetMatrix(rotationITK);
-	pTransformOut->SetOffset(translate);
 
 
 	//////////////////////////////////////////////////////////////////////////

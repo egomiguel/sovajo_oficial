@@ -439,9 +439,35 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	Point vectorBoneAP = tubercle - pcl;
 	vectorBoneAP.normalice();
 
+	/////////////////////////////////////////////////////////////////////////////////////////
 	Point vectorRobotAP = (-1.0) * finalTransformVector(implant.getTibiaVectorAP(), pTransformIn);
 	cv::Mat myRotation = getTransformToRobot(myPlane, vectorRobotAP);
 
+	itk::Vector< double, 3 > translate;
+	Point implantCenter = finalTransformPoint(implant.getCentralPoint(), pTransformIn);
+	implantCenter = myPlane.getProjectionPoint(implantCenter);
+
+	Point tTemp = myRotation * (implantCenter.ToMatPoint());
+	translate[0] = -tTemp.x;
+	translate[1] = -tTemp.y;
+	translate[2] = -tTemp.z;
+
+	itk::Matrix< double, 3, 3 > rotationITK;
+	rotationITK[0][0] = myRotation.at<double>(0, 0);
+	rotationITK[0][1] = myRotation.at<double>(0, 1);
+	rotationITK[0][2] = myRotation.at<double>(0, 2);
+
+	rotationITK[1][0] = myRotation.at<double>(1, 0);
+	rotationITK[1][1] = myRotation.at<double>(1, 1);
+	rotationITK[1][2] = myRotation.at<double>(1, 2);
+
+	rotationITK[2][0] = myRotation.at<double>(2, 0);
+	rotationITK[2][1] = myRotation.at<double>(2, 1);
+	rotationITK[2][2] = myRotation.at<double>(2, 2);
+
+	pTransformOut->SetMatrix(rotationITK);
+	pTransformOut->SetOffset(translate);
+	////////////////////////////////////////////////////////////////////
 	Point vectorTrans;
 
 	if (knee.getIsRight() == true)
@@ -492,7 +518,8 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	if (contourPoints.size() < 20)
 	{
-		throw ImplantExceptionCode::NOT_ENOUGH_POINTS_ON_CUT_PLANE;
+		//throw ImplantExceptionCode::NOT_ENOUGH_POINTS_ON_CUT_PLANE;
+		return hull;
 	}
 
 	ConvexHull hullObj(contourPoints, myRotation);
@@ -500,7 +527,8 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	if (hullPoints.size() < 4)
 	{
-		throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL_ON_TIBIA_CUT_PLANE;
+		//throw ImplantExceptionCode::CAN_NOT_DETERMINE_CONVEX_HULL_ON_TIBIA_CUT_PLANE;
+		return hull;
 	}
 
 	int posLat, posMed;
@@ -511,7 +539,8 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	if (posLat == -1 || posMed == -1)
 	{
-		throw ImplantExceptionCode::CAN_NOT_DETERMINE_HIGHEST_POINTS_ON_BOTH_SIDE_OF_PCL;
+		//throw ImplantExceptionCode::CAN_NOT_DETERMINE_HIGHEST_POINTS_ON_BOTH_SIDE_OF_PCL;
+		return hull;
 	}
 
 	int minPos, maxPos;
@@ -709,7 +738,8 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 		if (tPoly.isFine == false || maxX == minX)
 		{
-			throw ImplantExceptionCode::CAN_NOT_FIT_POLY_ON_PCL_BORDER;
+			//throw ImplantExceptionCode::CAN_NOT_FIT_POLY_ON_PCL_BORDER;
+			return hull;
 		}
 
 		double step = (maxX - minX) / 80;
@@ -788,7 +818,8 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		
 		if (pclPoints.size() < 10)
 		{
-			throw ImplantExceptionCode::NOT_ENOUGH_POINTS_ON_PCL_BORDER;
+			//throw ImplantExceptionCode::NOT_ENOUGH_POINTS_ON_PCL_BORDER;
+			return hull;
 		}
 
 		ImplantTools::Poly tPoly = ImplantTools::parabolaFitPCL(pclPoints, rotationPoly, beginTop, lastTop);
@@ -797,7 +828,8 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 		
 		if (tPoly.isFine == false || maxX == minX)
 		{
-			throw ImplantExceptionCode::CAN_NOT_FIT_POLY_ON_PCL_BORDER;
+			//throw ImplantExceptionCode::CAN_NOT_FIT_POLY_ON_PCL_BORDER;
+			return hull;
 		}
 
 		double step = (maxX - minX) / 100;
@@ -1239,40 +1271,6 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	///////////////////////////////////////////////////////////////////////
 
 	hull = increaseVectorToAmount(finalSplinePointsTKA, amount);
-
-	itk::Vector< double, 3 > translate;
-	Point implantCenter = finalTransformPoint(implant.getCentralPoint(), pTransformIn);
-	implantCenter = myPlane.getProjectionPoint(implantCenter);
-
-	if (tHullSize > 0)
-	{
-		Point tTemp = myRotation * (implantCenter.ToMatPoint());
-		translate[0] = -tTemp.x;
-		translate[1] = -tTemp.y;
-		translate[2] = -tTemp.z;
-	}
-	else
-	{
-		translate[0] = 0;
-		translate[1] = 0;
-		translate[2] = 0;
-	}
-
-	itk::Matrix< double, 3, 3 > rotationITK;
-	rotationITK[0][0] = myRotation.at<double>(0, 0);
-	rotationITK[0][1] = myRotation.at<double>(0, 1);
-	rotationITK[0][2] = myRotation.at<double>(0, 2);
-
-	rotationITK[1][0] = myRotation.at<double>(1, 0);
-	rotationITK[1][1] = myRotation.at<double>(1, 1);
-	rotationITK[1][2] = myRotation.at<double>(1, 2);
-
-	rotationITK[2][0] = myRotation.at<double>(2, 0);
-	rotationITK[2][1] = myRotation.at<double>(2, 1);
-	rotationITK[2][2] = myRotation.at<double>(2, 2);
-
-	pTransformOut->SetMatrix(rotationITK);
-	pTransformOut->SetOffset(translate);
 
 	return hull;
 }
