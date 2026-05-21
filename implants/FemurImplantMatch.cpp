@@ -630,6 +630,10 @@ Point FemurImplantMatch::getNearPointUnderCortex(const Plane& myPlane, std::vect
 	{
 		midPoint = midPoint / double(allPoints.size());
 	}
+	else
+	{
+		midPoint = myPlane.getProjectionPoint(knee.getFemurKneeCenter());
+	}
 
 	return midPoint;
 }
@@ -675,6 +679,10 @@ Point FemurImplantMatch::getNearPointUnderCortex(const Plane& myPlane, std::vect
 	if (points.size() > 0)
 	{
 		midPoint = midPoint / double(points.size());
+	}
+	else
+	{
+		midPoint = myPlane.getProjectionPoint(knee.getFemurKneeCenter());
 	}
 
 	/*else
