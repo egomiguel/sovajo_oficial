@@ -1200,7 +1200,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	}
 
 	hull = increaseVectorToAmount(vertices, amount);
-	//vtkSmartPointer<vtkPolyData> contourMax = ImplantTools::getMaxContour(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
+	//vtkSmartPointer<vtkPolyData> contourMax = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
 	//ImplantTools::show(contourMax, vertices, true);
 
 
@@ -1723,7 +1723,8 @@ void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const
 		}
 	}
 
-	vertices = ConvexHull::interpolateSpline(allPoints, amount);
+	//vertices = ConvexHull::interpolateSpline(allPoints, amount);
+	vertices = allPoints;
 	//ImplantTools::show(contourMaxTest, vertices, true);
 }
 
@@ -2234,7 +2235,8 @@ void FemurImplantMatch::getCurveLikeU(const std::vector<Point>& points, const Po
 
 	ConvexHullFeatures hullFeatures = getIncreaseBorder(points, downPoint, lateralPoint, medialPoint, topPoint, midPlane, currentPlane, pRotation, distanceSide, distanceSide, distanceTop);
 	
-	vertices = ConvexHull::interpolateSpline(hullFeatures.convexHull, amount);
+	//vertices = ConvexHull::interpolateSpline(hullFeatures.convexHull, amount);
+	vertices = hullFeatures.convexHull;
 
 	//auto poly = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
 	//ImplantTools::show(poly, vertices, true);
