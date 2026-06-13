@@ -794,7 +794,7 @@ void savePoints(std::vector<Point> points, cv::Mat myRotation, std::string name)
 	outfilePoint.close();
 }
 
-std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, PlaneID id, double distanceSide, double distanceTop, double angleLateral, double angleMedial, int amount, double middleCurveHight, CurveType pCurve, double moveWCurveCenter) const
+std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTransform<>::Pointer pTransformIn, itk::Rigid3DTransform<>::Pointer pTransformOut, PlaneID id, double distanceSide, double distanceTop, double angleLateral, double angleMedial, int amount, double middleCurveHight, CurveType pCurve, double moveWCurveCenterAngle) const
 {
 	std::vector<Point> projectedPoints, projectedPointsIncreased;
 	Point midPointPlane;
@@ -1169,7 +1169,7 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 			bool areSeparated = ImplantTools::areBothSetOfPointsSeparated(pointsLatTemp, pointsMedTemp, myRotation, 3);
 			if (areSeparated == true)
 			{
-				getCurveLikeW(pointsLatTemp, pointsMedTemp, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount, id, middleCurveHight, moveWCurveCenter);
+				getCurveLikeW(pointsLatTemp, pointsMedTemp, downPoint, lateralSide, medialSide, topPoint, midPlane, currentPlane, myRotation, vertices, distanceSide, distanceTop, amount, id, middleCurveHight, moveWCurveCenterAngle);
 			}
 			else
 			{
@@ -1200,8 +1200,8 @@ std::vector<PointTypeITK> FemurImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	}
 
 	hull = increaseVectorToAmount(vertices, amount);
-	//vtkSmartPointer<vtkPolyData> contourMax = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
-	//ImplantTools::show(contourMax, vertices, true);
+	/*vtkSmartPointer<vtkPolyData> contourMax = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
+	ImplantTools::show(contourMax, vertices, true);*/
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -1528,7 +1528,7 @@ void FemurImplantMatch::getVerticesA(const std::vector<Point>& points, const std
 	vertices = ConvexHull::interpolateSpline(vertices, amount);
 }
 
-void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const std::vector<Point>& pointsMed, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distanceSide, double distanceTop, int amount, PlaneID planeID, double middleCurveHight, double moveCenter) const
+void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const std::vector<Point>& pointsMed, const Point& downPoint, const Point& lateralPoint, const Point& medialPoint, const Point& topPoint, const Plane& midPlane, const Plane& currentPlane, const cv::Mat& pRotation, std::vector<Point>& vertices, double distanceSide, double distanceTop, int amount, PlaneID planeID, double middleCurveHight, double moveCenterAngle) const
 {
 	vtkSmartPointer<vtkPolyData> contourMaxTest = ImplantTools::getContours(knee.GetFemurPoly(), currentPlane.getNormalVector(), currentPlane.getPoint());
 	ConvexHullFeatures hullFeaturesLat = getIncreaseBorder(pointsLat, downPoint, lateralPoint, medialPoint, topPoint, midPlane, currentPlane, pRotation, distanceSide, 0.5, distanceTop, 0.75, -1);
@@ -1629,10 +1629,14 @@ void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const
 	moveVectorMed.normalice();
 
 	double maxDistanceCenter = ImplantTools::getDistanceBetweenPoints(basePointLat, basePointMed);
-
-	if (moveCenter > 0.99 * (maxDistanceCenter / 2))
+	double moveCenter = 0.99 * (maxDistanceCenter / 2);
+	if (moveCenterAngle > 90)
 	{
-		moveCenter = 0.99 * (maxDistanceCenter / 2);
+		moveCenterAngle = 90;
+	}
+	else if (moveCenterAngle < 30)
+	{
+		moveCenterAngle = 30;
 	}
 	
 	//basePointLat = basePointLat + 0.1 * (basePointMed - basePointLat);
@@ -1659,7 +1663,13 @@ void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const
 		beginPosLat = 0;
 		endPosLat = beginPosLat + 1;
 
-		convexLatNew[0] = convexLatNew[0] + moveCenter * moveVectorLat;
+		double h = ImplantTools::getDistanceBetweenPoints(convexLatNew[beginPosLat], convexLatNew[endPosLat]);
+		double moveDist = (h / moveCenterAngle) * (90 - moveCenterAngle);
+		if (moveDist > moveCenter)
+		{
+			moveDist = moveCenter;
+		}
+		convexLatNew[0] = convexLatNew[0] + moveDist * moveVectorLat;
 	}
 	else
 	{
@@ -1681,7 +1691,14 @@ void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const
 			beginPosLat -= 1;
 		}
 
-		convexLatNew[beginPosLat] = convexLatNew[beginPosLat] + moveCenter * moveVectorLat;
+		double h = ImplantTools::getDistanceBetweenPoints(convexLatNew[beginPosLat], convexLatNew[endPosLat]);
+		double moveDist = (h / moveCenterAngle) * (90 - moveCenterAngle);
+		if (moveDist > moveCenter)
+		{
+			moveDist = moveCenter;
+		}
+
+		convexLatNew[beginPosLat] = convexLatNew[beginPosLat] + moveDist * moveVectorLat;
 	}
 
 	//basePlane.movePlane(basePointMid);
@@ -1704,7 +1721,14 @@ void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const
 		beginPosMed = 0;
 		endPosMed = beginPosMed + 1;
 
-		convexMedNew[0] = convexMedNew[0] + moveCenter * moveVectorMed;
+		double h = ImplantTools::getDistanceBetweenPoints(convexMedNew[beginPosMed], convexMedNew[endPosMed]);
+		double moveDist = (h / moveCenterAngle) * (90 - moveCenterAngle);
+		if (moveDist > moveCenter)
+		{
+			moveDist = moveCenter;
+		}
+
+		convexMedNew[0] = convexMedNew[0] + moveDist * moveVectorMed;
 	}
 	else
 	{
@@ -1726,7 +1750,14 @@ void FemurImplantMatch::getCurveLikeW(const std::vector<Point>& pointsLat, const
 			beginPosMed -= 1;
 		}
 
-		convexMedNew[beginPosMed] = convexMedNew[beginPosMed] + moveCenter * moveVectorMed;
+		double h = ImplantTools::getDistanceBetweenPoints(convexMedNew[beginPosMed], convexMedNew[endPosMed]);
+		double moveDist = (h / moveCenterAngle) * (90 - moveCenterAngle);
+		if (moveDist > moveCenter)
+		{
+			moveDist = moveCenter;
+		}
+
+		convexMedNew[beginPosMed] = convexMedNew[beginPosMed] + moveDist * moveVectorMed;
 	}
 
 	double distanceLat = ImplantTools::getDistanceBetweenPoints(convexLatNew[beginPosLat], convexLatNew[endPosLat]);
