@@ -38,14 +38,15 @@ namespace THA
 				double radius,
 				double zThreshold = 3.0,
 				double maxRemovalFraction = 0.05);
+			static Sphere RefineSphere(const cv::Point3d& initialCenter, double initialRadius, const std::vector<cv::Point3d>& points, int maxIterations);
 
 		private:
 			std::vector<std::vector<cv::Point3d> > ellipse_list_;
 			std::vector<cv::Point3d> point_list_;
 			bool is_ellipse_;
 			cv::Mat LeastSquareSolve(const cv::Mat& A, const cv::Mat& B) const;
-			Sphere GetSphereCenter(const std::vector<cv::Point3d>& sphere_points, bool error = false) const;
-			Sphere EstimateSphereUncertainty(const std::vector<cv::Point3d>& points, int num_blocks = 10);
+			Sphere GetSphereCenter(const std::vector<cv::Point3d>& sphere_points) const;
+			
 		};
 
 	}

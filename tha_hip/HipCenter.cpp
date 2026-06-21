@@ -92,12 +92,16 @@ HipCenter::Sphere HipCenter::GetHipCenterBySphere() const
 	}
 
 	HipCenter::Sphere sphere1 = GetSphereCenter(point_list_);
-	auto filteredPoints = removeOutliersMAD(point_list_, sphere1.center, sphere1.radius, 3.0);
-	HipCenter::Sphere sphere2 = GetSphereCenter(filteredPoints);
+	//auto filteredPoints = removeOutliersMAD(point_list_, sphere1.center, sphere1.radius, 3.0);
+	HipCenter::Sphere sphere2 = RefineSphere(
+		sphere1.center,
+		sphere1.radius,
+		point_list_,
+		100);
 	return sphere2;
 }
 
-HipCenter::Sphere HipCenter::GetSphereCenter(const std::vector<cv::Point3d>& sphere_points, bool error) const
+HipCenter::Sphere HipCenter::GetSphereCenter(const std::vector<cv::Point3d>& sphere_points) const
 {
 	std::vector<cv::Point3d>::const_iterator it1, it2;
 	it1 = sphere_points.begin();
@@ -131,16 +135,8 @@ HipCenter::Sphere HipCenter::GetSphereCenter(const std::vector<cv::Point3d>& sph
 	HipCenter::Sphere mySphere;
 	mySphere.center = center;
 	mySphere.radius = radius;
-
-	if (error == false)
-	{
-		mySphere.error = -1;
-	}
-	else
-	{
-
-	}
-
+	mySphere.error = -1;
+	
 	return mySphere;
 }
 
@@ -292,75 +288,124 @@ std::vector<cv::Point3d> HipCenter::removeOutliersMAD(
 	return filtered;
 }
 
-HipCenter::Sphere HipCenter::EstimateSphereUncertainty(const std::vector<cv::Point3d>& points, int num_blocks)
+HipCenter::Sphere HipCenter::RefineSphere(
+	const cv::Point3d& initialCenter,
+	double initialRadius,
+	const std::vector<cv::Point3d>& points,
+	int maxIterations)
 {
-	std::vector<double> cx, cy, cz, cr;
+	Sphere result;
 
-	size_t N = points.size();
-	size_t block_size = N / num_blocks;
+	double cx = initialCenter.x;
+	double cy = initialCenter.y;
+	double cz = initialCenter.z;
+	double radius = initialRadius;
 
-	if (block_size < 1)
-		block_size = 1;
+	cv::Mat J;
+	cv::Mat residuals;
 
-	for (int b = 0; b < num_blocks; ++b)
+	for (int iter = 0; iter < maxIterations; ++iter)
 	{
-		std::vector<cv::Point3d> subset;
-		subset.reserve(N - block_size);
+		J = cv::Mat(points.size(), 4, CV_64F);
+		residuals = cv::Mat(points.size(), 1, CV_64F);
 
-		size_t start = b * block_size;
-		size_t end = std::min(start + block_size, N);
-
-		for (size_t i = 0; i < N; ++i)
+		for (size_t i = 0; i < points.size(); ++i)
 		{
-			if (i < start || i >= end)
-				subset.push_back(points[i]);
+			const auto& p = points[i];
+
+			double dx = p.x - cx;
+			double dy = p.y - cy;
+			double dz = p.z - cz;
+
+			double d = std::sqrt(
+				dx * dx +
+				dy * dy +
+				dz * dz);
+
+			if (d < 1e-12)
+			{
+				d = 1e-12;
+			}
+
+			double r = d - radius;
+
+			residuals.at<double>(i, 0) = r;
+
+			J.at<double>(i, 0) = -dx / d;
+			J.at<double>(i, 1) = -dy / d;
+			J.at<double>(i, 2) = -dz / d;
+			J.at<double>(i, 3) = -1.0;
 		}
 
-		Sphere s = FitSphere(subset);
+		cv::Mat JTJ = J.t() * J;
+		cv::Mat JTr = J.t() * residuals;
 
-		cx.push_back(s.center.x);
-		cy.push_back(s.center.y);
-		cz.push_back(s.center.z);
-		cr.push_back(s.radius);
+		cv::Mat delta;
+
+		cv::solve(
+			JTJ,
+			-JTr,
+			delta,
+			cv::DECOMP_SVD);
+
+		cx += delta.at<double>(0, 0);
+		cy += delta.at<double>(1, 0);
+		cz += delta.at<double>(2, 0);
+		radius += delta.at<double>(3, 0);
+
+		if (cv::norm(delta) < 1e-10)
+			break;
 	}
 
-	// -----------------------------
-	// std dev helper
-	// -----------------------------
-	auto stddev = [](const std::vector<double>& v)
+	result.center = cv::Point3d(cx, cy, cz);
+	result.radius = radius;
+
+	// ---------------------------------
+	// Error estimation
+	// ---------------------------------
+
+	const int numParameters = 4;
+	const int dof = static_cast<int>(points.size()) - numParameters;
+
+	if (dof > 0)
 	{
-		double mean = 0.0;
+		double rss =
+			residuals.dot(residuals);
 
-		for (double x : v)
-			mean += x;
+		double sigma2 =
+			rss / dof;
 
-		mean /= v.size();
+		cv::Mat JTJ = J.t() * J;
 
-		double var = 0.0;
+		cv::Mat covariance =
+			sigma2 *
+			JTJ.inv(cv::DECOMP_SVD);
 
-		for (double x : v)
-			var += (x - mean) * (x - mean);
+		double sigmaCx =
+			std::sqrt(std::max(
+				0.0,
+				covariance.at<double>(0, 0)));
 
-		var /= (v.size() - 1);
+		double sigmaCy =
+			std::sqrt(std::max(
+				0.0,
+				covariance.at<double>(1, 1)));
 
-		return std::sqrt(var);
-	};
+		double sigmaCz =
+			std::sqrt(std::max(
+				0.0,
+				covariance.at<double>(2, 2)));
 
-	// -----------------------------
-	// resultados
-	// -----------------------------
-	result.center_std = cv::Point3d(
-		stddev(cx),
-		stddev(cy),
-		stddev(cz));
+		double sigmaR =
+			std::sqrt(std::max(
+				0.0,
+				covariance.at<double>(3, 3)));
 
-	result.radius_std = stddev(cr);
-
-	result.center_global_error =
-		std::sqrt(
-			result.center_std.x * result.center_std.x +
-			result.center_std.y * result.center_std.y +
-			result.center_std.z * result.center_std.z);
+		result.error = std::sqrt(
+				sigmaCx * sigmaCx +
+				sigmaCy * sigmaCy +
+				sigmaCz * sigmaCz);
+	}
 
 	return result;
 }
