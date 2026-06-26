@@ -1,5 +1,5 @@
-#ifndef DATA_FIT_H
-#define DATA_FIT_H
+#ifndef THA_DATA_FIT_H
+#define THA_DATA_FIT_H
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/opencv.hpp>

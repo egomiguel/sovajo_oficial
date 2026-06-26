@@ -46,6 +46,7 @@
 #include "uka_registration/LeastSquaresICP.hpp"
 
 #include "hip/HipCenter.hpp"
+#include "tha_hip/HipCenter.hpp"
 #include "segmentation/AutomaticSegmentation.hpp"
 #include "segmentation/ManualSegmentation.hpp"
 #include "segmentation/SliceBorder.hpp"
@@ -4879,10 +4880,10 @@ int main()
 
 	//PolydataInterception();
 	//TEST_PKA::testTibiaBounary2();***********************************************************************
-	TEST_TKA_SUEN::TestFemurPosteriorObliquePlane();
+	//TEST_TKA_SUEN::TestFemurPosteriorObliquePlane();
 	//HipFemoralRegistration();
 	//RegistrationScale();
-
+	THA::HIP::HipCenter::Sphere sphereResult = THA::HIP::HipCenter::TestHipCenterBySphere(cv::Point3d(1, 2, 3), 30, true);
 	//double pnt[3] = { 0, 0, 0 };
 	//Plane planeTemp;
 	//planeTemp.init(Point(1, 0, 0), Point(1, 0, 0));

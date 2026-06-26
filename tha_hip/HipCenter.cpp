@@ -44,7 +44,7 @@ HipCenter::HipCenter(const std::vector<HipPoint>& point_list)
 	}
 }
 
-cv::Mat HipCenter::LeastSquareSolve(const cv::Mat& A, const cv::Mat& B) const
+cv::Mat HipCenter::LeastSquareSolve(const cv::Mat& A, const cv::Mat& B)
 {
 	cv::SVD svd(A);
 	cv::Mat pinvA = svd.vt.t()* cv::Mat::diag(1. / svd.w)*svd.u.t();
@@ -101,7 +101,7 @@ HipCenter::Sphere HipCenter::GetHipCenterBySphere() const
 	return sphere2;
 }
 
-HipCenter::Sphere HipCenter::GetSphereCenter(const std::vector<cv::Point3d>& sphere_points) const
+HipCenter::Sphere HipCenter::GetSphereCenter(const std::vector<cv::Point3d>& sphere_points)
 {
 	std::vector<cv::Point3d>::const_iterator it1, it2;
 	it1 = sphere_points.begin();
@@ -408,4 +408,85 @@ HipCenter::Sphere HipCenter::RefineSphere(
 	}
 
 	return result;
+}
+
+HipCenter::Sphere HipCenter::TestHipCenterBySphere(const cv::Point3d& center, double radius, bool addNoise)
+{
+	std::pair<std::vector<cv::Point3d>, double> data = GenerateHemisphere(
+		center,
+		radius,
+		100,
+		addNoise);
+
+	HipCenter::Sphere sphere1 = GetSphereCenter(data.first);
+	
+	HipCenter::Sphere sphere2 = RefineSphere(
+		sphere1.center,
+		sphere1.radius,
+		data.first,
+		100);
+
+	cv::Point3d diff = sphere2.center - center;
+	double centerError = std::sqrt(diff.dot(diff));
+	std::cout << "First initiation result. Center: " << sphere1.center << " Radius: " << sphere1.radius << std::endl;
+	std::cout << "Final result." 
+		<< "\n Center: " << sphere2.center << " Original Center: " << center
+		<< "\n Radius: " << sphere2.radius << " Original Radius: " << radius
+		<< "\n LS Error: " << sphere2.error << " Original Points Error: "<< data.second << " Center Error: " << centerError
+		<< std::endl;
+	return sphere2;
+}
+
+
+std::pair<std::vector<cv::Point3d>, double> HipCenter::GenerateHemisphere(
+	const cv::Point3d& center,
+	double radius,
+	int numPoints,
+	bool addNoise)
+{
+	std::vector<cv::Point3d> points;
+	points.reserve(numPoints);
+	const double PI = std::acos(-1.0);
+	std::mt19937 rng(42);
+
+	std::uniform_real_distribution<double> distZ(0.0, radius);
+	std::uniform_real_distribution<double> distPhi(0.0, 2.0 * PI);
+	std::uniform_real_distribution<double> noise(-1.0, 1.0);
+	double sum2 = 0.0;
+
+	for (int i = 0; i < numPoints; ++i)
+	{
+		double z = distZ(rng);
+		double phi = distPhi(rng);
+
+		double r = std::sqrt(radius * radius - z * z);
+
+		double x = r * std::cos(phi);
+		double y = r * std::sin(phi);
+
+		if (addNoise == false)
+		{
+			points.emplace_back(
+				center.x + x,
+				center.y + y,
+				center.z + z);
+		}
+		else
+		{
+			cv::Point3d p(
+				center.x + x + noise(rng),
+				center.y + y + noise(rng),
+				center.z + z + noise(rng));
+
+			points.push_back(p);
+
+			double d = cv::norm(p - center);
+			double e = d - radius;
+			sum2 += e * e;
+		}
+	}
+
+	double rms = std::sqrt(sum2 / points.size());
+
+	return std::make_pair(points, rms);
 }
