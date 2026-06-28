@@ -44,7 +44,7 @@ namespace THA
 				const std::vector<cv::Point3d>& points,
 				const cv::Point3d& center,
 				double radius,
-				double zThreshold = 3.0,
+				double zThreshold = 1.0,
 				double maxRemovalFraction = 0.05);
 			static Sphere RefineSphere(const cv::Point3d& initialCenter, double initialRadius, const std::vector<cv::Point3d>& points, int maxIterations);
 			static std::pair<std::vector<cv::Point3d>, double> GenerateHemisphere(const cv::Point3d& center, double radius, int numPoints, bool addNoise);

@@ -282,7 +282,9 @@ std::vector<cv::Point3d> HipCenter::removeOutliersMAD(
 	for (size_t i = 0; i < points.size(); ++i)
 	{
 		if (!removeMask[i])
+		{
 			filtered.push_back(points[i]);
+		}
 	}
 
 	return filtered;
@@ -415,7 +417,7 @@ HipCenter::Sphere HipCenter::TestHipCenterBySphere(const cv::Point3d& center, do
 	std::pair<std::vector<cv::Point3d>, double> data = GenerateHemisphere(
 		center,
 		radius,
-		100,
+		200,
 		addNoise);
 
 	HipCenter::Sphere sphere1 = GetSphereCenter(data.first);
@@ -426,14 +428,24 @@ HipCenter::Sphere HipCenter::TestHipCenterBySphere(const cv::Point3d& center, do
 		data.first,
 		100);
 
-	cv::Point3d diff = sphere2.center - center;
-	double centerError = std::sqrt(diff.dot(diff));
-	std::cout << "First initiation result. Center: " << sphere1.center << " Radius: " << sphere1.radius << std::endl;
-	std::cout << "Final result." 
-		<< "\n Center: " << sphere2.center << " Original Center: " << center
-		<< "\n Radius: " << sphere2.radius << " Original Radius: " << radius
-		<< "\n LS Error: " << sphere2.error << " Original Points Error: "<< data.second << " Center Error: " << centerError
+	cv::Point3d diff1 = sphere1.center - center;
+	cv::Point3d diff2 = sphere2.center - center;
+
+	double centerError2 = std::sqrt(diff2.dot(diff2));
+	double centerError1 = std::sqrt(diff1.dot(diff1));
+
+	std::cout << " Original Points Error: " << data.second << std::endl;
+	std::cout << "First initiation result." 
+		<< "\n Center Found: " << sphere1.center << " Original Center: " << center << " Error: " << centerError1
+		<< "\n Radius Found: " << sphere1.radius << " Original Radius: " << radius << " Error: " << abs(sphere1.radius - radius)
 		<< std::endl;
+
+	std::cout << "Final result" 
+		<< "\n Center Found: " << sphere2.center << " Original Center: " << center << " Error: "<< centerError2
+		<< "\n Radius Found: " << sphere2.radius << " Original Radius: " << radius << " Error: "<< abs(sphere2.radius - radius)
+		<< "\n LS Center Error: " << sphere2.error 
+		<< std::endl;
+
 	return sphere2;
 }
 
@@ -448,6 +460,9 @@ std::pair<std::vector<cv::Point3d>, double> HipCenter::GenerateHemisphere(
 	points.reserve(numPoints);
 	const double PI = std::acos(-1.0);
 	std::mt19937 rng(42);
+
+	std::random_device rd;
+	std::mt19937 rng_dist(rd());
 
 	std::uniform_real_distribution<double> distZ(0.0, radius);
 	std::uniform_real_distribution<double> distPhi(0.0, 2.0 * PI);
@@ -474,9 +489,9 @@ std::pair<std::vector<cv::Point3d>, double> HipCenter::GenerateHemisphere(
 		else
 		{
 			cv::Point3d p(
-				center.x + x + noise(rng),
-				center.y + y + noise(rng),
-				center.z + z + noise(rng));
+				center.x + x + noise(rng_dist),
+				center.y + y + noise(rng_dist),
+				center.z + z + noise(rng_dist));
 
 			points.push_back(p);
 

@@ -810,8 +810,7 @@ void executeHip()
 	}
 
 	HipCenter hip(points);
-	hip.GetHipCenterBySphere(hipCenter_1);
-	hip.GetHipCenterByThreeSphere(hipCenter_2);
+	hip.GetHipCenterBySphere();
 	std::cout << "Hip Center By Method 1: " << hipCenter_1[0] << " " << hipCenter_1[1] << " " << hipCenter_1[2] << std::endl;
 	std::cout << "Hip Center By Method 2: " << hipCenter_2[0] << " " << hipCenter_2[1] << " " << hipCenter_2[2] << std::endl;
 }
