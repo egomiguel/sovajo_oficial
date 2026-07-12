@@ -791,7 +791,7 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkStaticCellLocator>
     double currentError, beforeError = -1, totalError;
     double maxLambda = 1000.0;
 
-    int batch = 3;
+    int batch = 2;
     int step = source.size() / batch;
 
     cv::Mat dataTemp(6, 1, CV_64F);
@@ -800,6 +800,10 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkStaticCellLocator>
 
     for (int i = 0; i < iterations && finish == false; i++)
     {
+		if (i > 0.9 * iterations)
+		{
+			batch = 1;
+		}
 
         for (int j = 0; j < batch; j++)
         {
@@ -1092,7 +1096,7 @@ double LeastSquaresICP::LeastSquaresScale(const vtkSmartPointer<vtkStaticCellLoc
 
     ///////////////////////////////////////
 
-    int batch = 3;
+    int batch = 2;
     int step = source.size() / batch;
 
     cv::Mat dataTemp(7, 1, CV_64F);
@@ -1102,6 +1106,11 @@ double LeastSquaresICP::LeastSquaresScale(const vtkSmartPointer<vtkStaticCellLoc
 
     for (int i = 0; i < iterations && finish == false; i++)
     {
+		if (i > 0.9 * iterations)
+		{
+			batch = 1;
+		}
+
         for (int j = 0; j < batch; j++)
         {
             int posA, posB;

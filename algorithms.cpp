@@ -386,6 +386,51 @@ Knee CreateKneeFromFile_Numbers(const std::string& sourcePath, KneeSideEnum pSid
 	return knee;
 }
 
+double readHipPoints(const std::string& sourcePath, std::vector<cv::Point3d>& points)
+{
+	double error = 0.0;
+
+	QFile file(QString::fromStdString(sourcePath));
+
+	if (file.open(QIODevice::ReadOnly))
+	{
+		QByteArray data = file.readAll();
+		file.close();
+
+		QJsonParseError parseError;
+		QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
+
+		if (parseError.error == QJsonParseError::NoError &&
+			doc.isObject())
+		{
+			QJsonObject root = doc.object();
+
+			// Leer error
+			error = root["error"].toDouble();
+
+			// Leer puntos
+			QJsonArray jsonPoints = root["points"].toArray();
+
+			points.reserve(jsonPoints.size());
+
+			for (const QJsonValue& value : jsonPoints)
+			{
+				QJsonArray p = value.toArray();
+
+				if (p.size() == 3)
+				{
+					points.emplace_back(
+						p[0].toDouble(),
+						p[1].toDouble(),
+						p[2].toDouble());
+				}
+			}
+		}
+	}
+
+	return error;
+}
+
 UKA::IMPLANTS::Knee CreateKneeFromFile_NumbersPKA(const std::string& sourcePath, UKA::IMPLANTS::KneeSideEnum pSide = UKA::IMPLANTS::KneeSideEnum::KRight, UKA::IMPLANTS::SurgerySideEnum pSurgery = UKA::IMPLANTS::SurgerySideEnum::KLateral)
 {
 	QDir directory(QString::fromStdString(sourcePath));
@@ -4882,7 +4927,18 @@ int main()
 	//TEST_TKA_SUEN::TestFemurPosteriorObliquePlane();
 	//HipFemoralRegistration();
 	//RegistrationScale();
-	THA::HIP::HipCenter::Sphere sphereResult = THA::HIP::HipCenter::TestHipCenterBySphere(cv::Point3d(1, 2, 3), 30, true);
+
+	std::string sourcePath = "D:\\sovajo\\Hip_Center\\hip_center2.json";
+	std::vector<cv::Point3d> hipPoints;
+
+	double error_hip = readHipPoints(sourcePath, hipPoints);
+	TestVTK::show_points(hipPoints);
+
+	THA::HIP::HipCenter obj(hipPoints);
+	THA::HIP::HipCenter::Sphere sphereResult = obj.GetHipCenterBySphere();
+	std::cout << "center: " << sphereResult.center << ", Radius: " << sphereResult.radius << ", error: " << sphereResult.error << std::endl;
+
+	//THA::HIP::HipCenter::Sphere sphereResult = THA::HIP::HipCenter::TestHipCenterBySphere(cv::Point3d(1, 2, 3), 30, true);
 	//double pnt[3] = { 0, 0, 0 };
 	//Plane planeTemp;
 	//planeTemp.init(Point(1, 0, 0), Point(1, 0, 0));

@@ -26,6 +26,7 @@ namespace THA
 
 			HipCenter(const std::vector<std::vector<HipPoint> >& ellipse_list);
 			HipCenter(const std::vector<HipPoint>& point_list);
+			HipCenter(const std::vector<cv::Point3d>& point_list);
 			void GetHipCenterByEllipses(double point_out[3]) const;
 			Sphere GetHipCenterBySphere() const;
 			Sphere GetHipCenterFromFile(std::string path);

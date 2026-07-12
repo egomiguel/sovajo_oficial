@@ -44,6 +44,18 @@ HipCenter::HipCenter(const std::vector<HipPoint>& point_list)
 	}
 }
 
+HipCenter::HipCenter(const std::vector<cv::Point3d>& point_list)
+{
+	is_ellipse_ = false;
+	int tSize = point_list.size();
+	if (tSize < 20)
+	{
+		throw HipExceptionCode::YOU_HAVE_NOT_GENERATED_ENOUGH_DATA;
+	}
+
+	point_list_ = point_list;
+}
+
 cv::Mat HipCenter::LeastSquareSolve(const cv::Mat& A, const cv::Mat& B)
 {
 	cv::SVD svd(A);

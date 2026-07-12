@@ -346,6 +346,60 @@ namespace TestVTK
     }
 
 
+	void show_points(const std::vector<cv::Point3d>& points)
+	{
+		vtkNew<vtkNamedColors> colors;
+
+		std::vector<vtkSmartPointer<vtkActor>> pointsActor;
+
+		for (int i = 0; i < points.size(); i++)
+		{
+			double pnt[3];
+			pnt[0] = points[i].x;
+			pnt[1] = points[i].y;
+			pnt[2] = points[i].z;
+
+			vtkNew<vtkSphereSource> sphere;
+			sphere->SetCenter(pnt);
+			sphere->SetRadius(1);
+			sphere->Update();
+
+			vtkNew<vtkPolyDataMapper> sphereMapper;
+			sphereMapper->SetInputData(sphere->GetOutput());
+			sphereMapper->ScalarVisibilityOff();
+
+			vtkNew<vtkActor> sphereActor;
+			sphereActor->SetMapper(sphereMapper);
+			sphereActor->GetProperty()->SetRepresentationToWireframe();
+			sphereActor->GetProperty()->ShadingOff();
+			sphereActor->GetProperty()->SetColor(colors->GetColor3d("blue").GetData());
+
+			pointsActor.push_back(sphereActor);
+		}
+
+		vtkNew<vtkRenderer> renderer;
+		//renderer->SetViewport(0., 0., 0.5, 1.);
+		renderer->SetBackground(colors->GetColor3d("CadetBlue").GetData());
+
+		vtkNew<vtkRenderWindow> renderWindow;
+		renderWindow->SetSize(800, 400);
+		renderWindow->SetWindowName("Surface");
+
+		renderWindow->AddRenderer(renderer);
+
+		vtkNew<vtkRenderWindowInteractor> interactor;
+		interactor->SetRenderWindow(renderWindow);
+
+		for (int i = 0; i < pointsActor.size(); i++)
+		{
+			renderer->AddActor(pointsActor[i]);
+		}
+
+		renderWindow->Render();
+
+		interactor->Start();
+	}
+
 	void show(const std::vector<std::vector<cv::Point3d>>& pointsVector)
 	{
 		if (pointsVector.size() == 0)
