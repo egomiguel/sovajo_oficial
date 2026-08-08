@@ -1167,7 +1167,7 @@ namespace TEST_TKA_SUEN
 		trans->SetMatrix(tibiaMatch->GetRotationMatrix());
 		trans->SetTranslation(tibiaMatch->GetTranslationMatrix());
 
-		auto pointsInBone = tibiaMatch->GetHullPoints(trans, transOut, 10, 1, 1, 0);
+		auto pointsInBone = tibiaMatch->GetHullPoints(trans, transOut, 0, 1, 1, 0);
 	}
 
 }

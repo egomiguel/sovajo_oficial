@@ -4924,20 +4924,20 @@ int main()
 
 	//PolydataInterception();
 	//TEST_PKA::testTibiaBounary2();***********************************************************************
-	//TEST_TKA_SUEN::TestFemurPosteriorObliquePlane();
+	TEST_TKA_SUEN::TestTibiaPlane();
 	//HipFemoralRegistration();
 	//RegistrationScale();
 
 	std::string sourcePath = "D:\\sovajo\\Hip_Center\\hip_center2.json";
 	std::vector<cv::Point3d> hipPoints;
-
+	/*
 	double error_hip = readHipPoints(sourcePath, hipPoints);
 	TestVTK::show_points(hipPoints);
 
 	THA::HIP::HipCenter obj(hipPoints);
 	THA::HIP::HipCenter::Sphere sphereResult = obj.GetHipCenterBySphere();
 	std::cout << "center: " << sphereResult.center << ", Radius: " << sphereResult.radius << ", error: " << sphereResult.error << std::endl;
-
+	*/
 	//THA::HIP::HipCenter::Sphere sphereResult = THA::HIP::HipCenter::TestHipCenterBySphere(cv::Point3d(1, 2, 3), 30, true);
 	//double pnt[3] = { 0, 0, 0 };
 	//Plane planeTemp;

@@ -495,9 +495,9 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	{
 		lateralCloseAngle = 90;
 	}
-	if (lateralCloseAngle < 30)
+	if (lateralCloseAngle < 0)
 	{
-		lateralCloseAngle = 30;
+		lateralCloseAngle = 0;
 	}
 
 	///////////////////////////////////////////////////////////////////
@@ -1067,6 +1067,8 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 
 	if (latPosRef == posEndTopArea)
 	{
+		double angleRefSign = 200;
+		double sign = 1.0;
 		Plane refPlane;
 		int endPos = posEndTopArea + (tFinalHullSize - (posEndTopArea - posBeginTopArea)) / 2;
 		for (int i = posEndTopArea; i <= endPos; i++)
@@ -1077,6 +1079,13 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 			Point lineVector = finalHull[pos1] - finalHull[pos2];
 			lineVector.normalice();
 			double tAngle = ImplantTools::getAngleBetweenVectorsDegree(lineVector, vectorTrans);
+
+			if (tAngle - angleRefSign > 0.1 && sign > 0)
+			{
+				sign = -1.0;
+			}
+			tAngle = sign * tAngle;
+			angleRefSign = tAngle;
 
 			if (tAngle <= lateralCloseAngle || i == endPos)
 			{
@@ -1110,6 +1119,8 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	}
 	else
 	{
+		double angleRefSign = 200;
+		double sign = 1.0;
 		Plane refPlane;
 		int endPos = posBeginTopArea - (tFinalHullSize - (posEndTopArea - posBeginTopArea)) / 2;
 		for (int i = posBeginTopArea; i >= endPos; i--)
@@ -1120,6 +1131,13 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 			Point lineVector = finalHull[pos1] - finalHull[pos2];
 			lineVector.normalice();
 			double tAngle = ImplantTools::getAngleBetweenVectorsDegree(lineVector, vectorTrans);
+
+			if (tAngle - angleRefSign > 0.1 && sign > 0)
+			{
+				sign = -1.0;
+			}
+			tAngle = sign * tAngle;
+			angleRefSign = tAngle;
 
 			if (tAngle <= lateralCloseAngle || i == endPos)
 			{
@@ -1156,7 +1174,7 @@ std::vector<PointTypeITK> TibiaImplantMatch::GetHullPoints(const itk::Rigid3DTra
 	//ImplantTools::show(contourMax, concaveSpline, true);
 	///////////////////////////////////////////////////
 
-	downLine.setPoint(farTuber);
+	downLine.setPoint(farTuber + 10 * vectorBoneAP);
 	Line lateralLine = Line::makeLineWithPoints(farLateralSide, farLateralSidePrev);
 	Line medialLine = Line::makeLineWithPoints(farMedialSide, farMedialSidePrev);
 
