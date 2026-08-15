@@ -1,0 +1,11 @@
+@PACKAGE_INIT@
+include("${CMAKE_CURRENT_LIST_DIR}/TKA_Registration_NavTargets.cmake")
+
+
+find_package(ITK REQUIRED)
+include(${ITK_USE_FILE})
+
+find_package(VTK REQUIRED)
+include(${VTK_USE_FILE})
+
+check_required_components(TKA_Registration_Nav)

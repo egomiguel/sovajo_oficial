@@ -1,0 +1,3 @@
+@PACKAGE_INIT@
+include("${CMAKE_CURRENT_LIST_DIR}/TKA_Hip_NavTargets.cmake")
+check_required_components(TKA_Hip_Nav)
