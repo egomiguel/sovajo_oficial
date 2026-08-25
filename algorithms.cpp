@@ -4923,8 +4923,8 @@ int main()
 	//Test::SaveImage<ImageType>(mySpine, "MySpine");
 
 	//PolydataInterception();
-	//TEST_PKA::testTibiaBounary2();***********************************************************************
-	TEST_TKA_SUEN::TestTibiaPlane();
+	TEST_PKA::testTibiaImplantMatch();
+	//TEST_TKA_SUEN::TestTibiaPlane();
 	//HipFemoralRegistration();
 	//RegistrationScale();
 

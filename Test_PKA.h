@@ -1318,6 +1318,109 @@ namespace TEST_PKA
 	}
 
 
+	void testTibiaImplantMatch()
+	{
+		QString dir = "D:\\sovajo\\Test_Cases\\Agosto_2026";
+
+		auto side = UKA::IMPLANTS::KneeSideEnum::KLeft;
+		auto surgerySide = UKA::IMPLANTS::SurgerySideEnum::KMedial;
+
+
+		auto femurData = ReadPolyData(QString("%1\\femur.vtk").arg(dir).toStdString());
+		auto tibiaData = ReadPolyData(QString("%1\\tibia.vtk").arg(dir).toStdString());
+
+		auto landmarks = readLandmarks(QString("%1\\landmark.json").arg(dir));
+		auto ankleCenter = landmarks.at(kMedialMalleolus) + (landmarks.at(kLateralMalleolus) - landmarks.at(kMedialMalleolus))*0.45;;
+		UKA::IMPLANTS::Knee knee;
+		knee.init(toPoint(landmarks[LandmarkType::kHipCenter]), toPoint(landmarks[LandmarkType::kFemurKneeCenter]),
+			toPoint(landmarks[LandmarkType::kLateralEpicondyle]), toPoint(landmarks[LandmarkType::kMedialEpicondyle]),
+			toPoint(landmarks[LandmarkType::kTibiaKneeCenter]), toPoint(landmarks[LandmarkType::kTibiaTuberosity]),
+			toPoint(landmarks[LandmarkType::kPCLInsertionPoint]), toPoint(ankleCenter), femurData, tibiaData, side, surgerySide, false);
+		knee.setLateralAndMedialInferiorFemurPoints(toPoint(landmarks[LandmarkType::kFemurDistalLateral]), toPoint(landmarks[LandmarkType::kFemurDistalMedial]));
+		knee.setLateralAndMedialPosteriorFemurPoints(toPoint(landmarks[LandmarkType::kFemurLateralPosteriorCondyle]), toPoint(landmarks[LandmarkType::kFemurMedialPosteriorCondyle]));
+		knee.setLateralAndMedialPlateauPoints(toPoint(landmarks[LandmarkType::kTibiaLateralPlatformPoint]), toPoint(landmarks[LandmarkType::kTibiaMedialPlatformPoint]));
+
+		auto tibiaImplantData = ReadPolyDataSTL(QString("%1/tibia_LM_RL_A+_A#8mm.stl").arg(dir).toStdString());
+		auto tibiaImplant = createTibiaImplant(QString("%1/tibia_LM_RL_A+_A#8mm_data.json").arg(dir));
+		UKA::IMPLANTS::TibiaImplantMatch tibiaImplantMatch;
+		tibiaImplantMatch.init(*tibiaImplant, knee);
+		auto implantToTibiaItk = toItkTransform(tibiaImplantMatch.GetRotationMatrix(), tibiaImplantMatch.GetTranslationMatrix());
+		auto implantToTibia = toVtkTransform(tibiaImplantMatch.GetRotationMatrix(), tibiaImplantMatch.GetTranslationMatrix());
+
+		auto femursImplantData = ReadPolyDataSTL(QString("%1/femur_LM_RL_SZ4.stl").arg(dir).toStdString());
+		auto femurThreePlaneImplant = createFemurThreeImplant(femursImplantData, QString("%1\\femur_LM_RL_SZ4_data.json").arg(dir));
+
+		UKA::IMPLANTS::FemurImplantMatch femurImplantMatch;
+		femurImplantMatch.init(femurThreePlaneImplant.get(), knee);
+		auto implantToFemurItk = toItkTransform(femurImplantMatch.GetRotationMatrix(), femurImplantMatch.GetTranslationMatrix());
+		auto implantToFemur = toVtkTransform(femurImplantMatch.GetRotationMatrix(), femurImplantMatch.GetTranslationMatrix());
+
+		//New ImplantToTIbia
+		vtkSmartPointer<vtkTransform> newImplantToTibia;
+		{
+			UKA::IMPLANTS::ImplantsMatchFinalInfo matchInfo(&knee, femurThreePlaneImplant.get(),
+				*tibiaImplant, implantToFemurItk.GetPointer(),
+				implantToTibiaItk.GetPointer());
+			matchInfo.setTibiaRotationAngle(30);
+			/*matchInfo.setTibiaRotationAngle(-32.57323670499285);
+			matchInfo.setTibiaSlopeAngle(5.922357935803737);
+			matchInfo.setTibiaVarusAngle(-2.6913572848924066);*/
+			auto tmp = matchInfo.getITKTibiaTransform();
+			newImplantToTibia = toVtkTransform(tmp->GetMatrix(), tmp->GetTranslation());
+		}
+		vtkNew<vtkRenderer> leftRender, rightRender;
+		//leftRender
+		{
+
+			vtkNew<vtkActor> tibiaImplantActor;
+			tibiaImplantActor->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
+			tibiaImplantActor->GetMapper()->SetInputDataObject(tibiaImplantData);
+			tibiaImplantActor->GetProperty()->SetColor(0, 1, 0);
+			tibiaImplantActor->SetUserTransform(implantToTibia);
+			leftRender->AddActor(tibiaImplantActor);
+
+			vtkNew<vtkActor> tibiaActor;
+			tibiaActor->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
+			tibiaActor->GetMapper()->SetInputDataObject(tibiaData);
+			tibiaActor->GetProperty()->SetColor(1, 1, 1);
+			leftRender->AddActor(tibiaActor);
+		}
+
+		//rightRender
+		{
+
+			vtkNew<vtkActor> tibiaImplantActor;
+			tibiaImplantActor->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
+			tibiaImplantActor->GetMapper()->SetInputDataObject(tibiaImplantData);
+			tibiaImplantActor->GetProperty()->SetColor(0, 1, 0);
+			tibiaImplantActor->SetUserTransform(newImplantToTibia);
+			rightRender->AddActor(tibiaImplantActor);
+
+			vtkNew<vtkActor> tibiaActor;
+			tibiaActor->SetMapper(vtkSmartPointer<vtkPolyDataMapper>::New());
+			tibiaActor->GetMapper()->SetInputDataObject(tibiaData);
+			tibiaActor->GetProperty()->SetColor(1, 1, 1);
+			rightRender->AddActor(tibiaActor);
+		}
+
+
+		leftRender->SetViewport(0.0, 0.0, 0.5, 1.0);
+		rightRender->SetViewport(0.5, 0.0, 1.0, 1.0);
+		vtkNew<vtkRenderWindow> renderWindow;
+		renderWindow->AddRenderer(leftRender);
+		renderWindow->AddRenderer(rightRender);
+		auto camera = leftRender->GetActiveCamera();
+		rightRender->SetActiveCamera(camera);
+		camera->SetFocalPoint(0, 0, 0);
+		camera->SetPosition(0, 0, 1);
+		camera->SetViewUp(0, -1, 0);
+		leftRender->ResetCamera(tibiaData->GetBounds());
+		renderWindow->Render();
+		vtkNew<vtkRenderWindowInteractor> interactor;
+		renderWindow->SetInteractor(interactor);
+		interactor->Start();
+	}
+
 }
 
 

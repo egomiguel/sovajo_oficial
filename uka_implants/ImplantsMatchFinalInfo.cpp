@@ -404,7 +404,6 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaRotationA
 	rotation = ImplantTools::getRotateMatrix(baseVectorFromImplant.cross(newVectorFromImplant), myAngle);
 
 	//////////////////////////////////////////////////////////////////////
-
 	ImplantTools::updateTransformByRotation(tibiaRotation, tibiaTranslation, tibiaImplant.getPlateauRefPointDown(), rotation);
     //tibiaRotation = rotation * tibiaRotation;
 

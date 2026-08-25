@@ -950,7 +950,7 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkStaticCellLocator>
     double maxLambda = 1000.0;
 
     int batch = 3;
-    int step = source.size() / batch;
+    int step;
 
     cv::Mat dataTemp(6, 1, CV_64F);
     double bestError = -1;
@@ -958,9 +958,20 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkStaticCellLocator>
 	
     for (int i = 0; i < iterations && finish == false; i++)
     {
-		if (i > 0.9 * iterations)
+		if (i < 0.4 * iterations)
+		{
+			batch = 3;
+			step = source.size() / batch;
+		}
+		else if (i >= 0.4 * iterations && i <= 0.9 * iterations)
+		{
+			batch = 2;
+			step = source.size() / batch;
+		}
+		else
 		{
 			batch = 1;
+			step = source.size();
 		}
 
         for (int j = 0; j < batch; j++)
@@ -973,12 +984,6 @@ double LeastSquaresICP::LeastSquares(const vtkSmartPointer<vtkStaticCellLocator>
             {
                 posB = source.size();
             }
-
-			if (i > 0.9 * iterations)
-			{
-				posA = 0;
-				posB = source.size();
-			}
 
             GaussNewton resultInfo = GetSystem(target, data, posA, posB, lambda);
             currentError = resultInfo.localError;
@@ -1092,12 +1097,10 @@ double LeastSquaresICP::LeastSquaresSVD(const vtkSmartPointer<vtkPolyData>& surf
 	locator->BuildLocator();
 
 	std::vector<cv::Point3d> target = GetCorrespondence(locator, data);
-	double angleX, angleY, angleZ;
 
 	bool finish = false;
 
 	double lambda = 0.01;
-	double currentError, totalError, beforeError = -1;// , totalError;
 	double maxLambda = 1000.0;
 
 	int batch = 3;

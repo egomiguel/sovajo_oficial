@@ -2817,15 +2817,15 @@ std::vector<Point> ImplantTools::increaseVectorPoints(const std::vector<Point>& 
 
 void ImplantTools::updateTransformByRotation(cv::Mat& currentRotation, cv::Mat& currentTranslation, const Point& pRotationCenterPoint, const cv::Mat& pRotationUpdate)
 {
-	auto fixPointMat = currentRotation * pRotationCenterPoint.ToMatPoint() + currentTranslation;
-	Point fixPoint = Point(fixPointMat);
-	currentRotation = pRotationUpdate * currentRotation;
+		auto fixPointMat = currentRotation * pRotationCenterPoint.ToMatPoint() + currentTranslation;
+		Point fixPoint = Point(fixPointMat);
+		currentRotation = pRotationUpdate * currentRotation;
 
-	auto fixPointMovedMat = currentRotation * pRotationCenterPoint.ToMatPoint() + currentTranslation;
-	Point fixPointMoved = Point(fixPointMovedMat);
+		auto fixPointMovedMat = currentRotation * pRotationCenterPoint.ToMatPoint() + currentTranslation;
+		Point fixPointMoved = Point(fixPointMovedMat);
 
-	Point diff = fixPointMoved - fixPoint;
-	currentTranslation = currentTranslation - diff.ToMatPoint();
+		Point diff = fixPointMoved - fixPoint;
+		currentTranslation = currentTranslation - diff.ToMatPoint();
 }
 
 vtkSmartPointer<vtkPolyData> ImplantTools::getPolyLine(const std::vector<Point>& sortPoints)

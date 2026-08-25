@@ -250,15 +250,22 @@ double HipPelvisImplantsMatchInfo::getCupAntversion(const Plane& pSagital, const
 	Point implantVector = Point(implantVectorMat);
 	implantVector.normalice();
 
-	Point vectorImplantProj = sagital.getProjectionVector(implantVector);
-	Point vectorBoneProj = sagital.getProjectionVector(axial.getNormalVector());
-	vectorImplantProj.normalice();
-	vectorBoneProj.normalice();
+	Point crossVector = implantVector.cross(coronal.getNormalVector());
 
-	double angle = ImplantTools::getAngleBetweenVectorsDegree(vectorImplantProj, vectorBoneProj);
-
+	//Point vectorImplantProj = sagital.getProjectionVector(implantVector);
+	//Point vectorBoneProj = sagital.getProjectionVector(axial.getNormalVector());
+	//vectorImplantProj.normalice();
+	//vectorBoneProj.normalice();
+	double angle = 90;
+	if (crossVector.dot(crossVector) > 1e-10)
+	{
+		Point implantVectorOnCoronal = coronal.getProjectionVector(implantVector);
+		implantVectorOnCoronal.normalice();
+		angle = ImplantTools::getAngleBetweenVectorsDegree(implantVector, implantVectorOnCoronal);
+	}
+	
 	Point ref = mPelvis.getPubicJoin();
-	ref = ref + 1000. * vectorImplantProj;
+	ref = ref + 1000. * implantVector;
 
 	if (coronal.eval(ref) < 0)
 	{
@@ -297,16 +304,23 @@ double HipPelvisImplantsMatchInfo::getCupAntversion(const Point& pVectorFromHipC
 
 	Point implantVector = pVectorFromHipCenter;
 	implantVector.normalice();
+	Point crossVector = implantVector.cross(coronal.getNormalVector());
 
-	Point vectorImplantProj = sagital.getProjectionVector(implantVector);
+	/*Point vectorImplantProj = sagital.getProjectionVector(implantVector);
 	Point vectorBoneProj = sagital.getProjectionVector(axial.getNormalVector());
 	vectorImplantProj.normalice();
-	vectorBoneProj.normalice();
+	vectorBoneProj.normalice();*/
 
-	double angle = ImplantTools::getAngleBetweenVectorsDegree(vectorImplantProj, vectorBoneProj);
+	double angle = 90;
+	if (crossVector.dot(crossVector) > 1e-10)
+	{
+		Point implantVectorOnCoronal = coronal.getProjectionVector(implantVector);
+		implantVectorOnCoronal.normalice();
+		angle = ImplantTools::getAngleBetweenVectorsDegree(implantVector, implantVectorOnCoronal);
+	}
 
 	Point ref = mPelvis.getPubicJoin();
-	ref = ref + 1000. * vectorImplantProj;
+	ref = ref + 1000. * implantVector;
 
 	if (coronal.eval(ref) < 0)
 	{
