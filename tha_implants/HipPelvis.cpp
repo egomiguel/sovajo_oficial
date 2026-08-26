@@ -686,9 +686,11 @@ Point HipPelvis::getAbductionAnteversionVectorRotate(const Plane& pSagital, cons
 
 	////////////////////////////////////////////// Anteversion
 	rotateVector = resultAbduction;
-	rotationAxis = coronal.getNormalVector().cross(rotateVector);
+	//rotationAxis = coronal.getNormalVector().cross(rotateVector);
+	rotationAxis = rotateVector.cross(coronal.getNormalVector());
 	angle = (pAnteversionAngle * PI) / 180.0;
 	rotMatrix = ImplantTools::getRotateMatrix(rotationAxis, angle);
+	/*
 	double controlAngle = angle;
 	double epsilon = 1e-10;
 	
@@ -715,7 +717,7 @@ Point HipPelvis::getAbductionAnteversionVectorRotate(const Plane& pSagital, cons
 			break;
 		}
 	}
-
+	*/
 	resultMat = rotMatrix * resultAbduction.ToMatPoint();
 	resultAbduction = Point(resultMat);
 	resultAbduction.normalice();
