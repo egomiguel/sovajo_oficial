@@ -30,6 +30,9 @@ namespace UKA
 			~FindRegistrationPoints();
 			std::vector<RegistrationPoints> GetRegistrationPointsFemur(std::vector<Point>& pCheckPoints, double& pError);
 			std::vector<RegistrationPoints> GetRegistrationPointsTibia(std::vector<Point>& pCheckPoints, double& pError);
+
+			std::vector<RegistrationPoints> GetRegistrationPointsFullFemur(std::vector<Point>& pCheckPoints, double& pError);
+			std::vector<RegistrationPoints> GetRegistrationPointsFullTibia(std::vector<Point>& pCheckPoints, double& pError);
 		};
 	}
 }

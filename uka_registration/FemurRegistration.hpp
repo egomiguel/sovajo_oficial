@@ -12,16 +12,18 @@ namespace UKA
 		{
 		public:
 			FemurRegistration(const vtkSmartPointer<vtkPolyData> img, const PointTypeITK& pHipCenterCT, const PointTypeITK& pKneeCenterCT, const PointTypeITK& pEpicondyleCT, const PointTypeITK& pDistalCondyleCT);
+			FemurRegistration(const vtkSmartPointer<vtkPolyData> img, const PointTypeITK& pHipCenterCT, const PointTypeITK& pKneeCenterCT, const PointTypeITK& pMedialEpicondyleCT);
 
 			~FemurRegistration();
 
-			bool MakeRegistration(const std::vector<itk::Point<double, 3>>& pBonePoints, const PointTypeITK& pHipCamera, const PointTypeITK& pKneeCenterCamera, const PointTypeITK& pEpicondyleCamera, const PointTypeITK& pDistalCondyleCamera, bool useRandomAlignment = false);
+			bool MakeRegistration(const std::vector<itk::Point<double, 3>>& pBonePoints, const PointTypeITK& pHipCamera, const PointTypeITK& pKneeCenterCamera, const PointTypeITK& pEpicondyleCamera, const PointTypeITK& pDistalCondyleCamera = {}, bool useRandomAlignment = false);
 
 		private:
 			PointTypeITK hipCenterCT;
 			PointTypeITK kneeCenterCT;
 			PointTypeITK epicondyleCT;
 			PointTypeITK distalCondyleCT;
+			bool useDistalCondyleCT;
 		};
 	}
 }
