@@ -39,7 +39,7 @@ void TibiaImplant::init(const Point& apLinePclPoint, const Point& apLineTuberPoi
     
     isInit = true;
 }
-
+/*
 TibiaImplant::TibiaImplant(const TibiaImplant& pImplant)
 {
     this->tibiaPlane = pImplant.tibiaPlane;
@@ -51,7 +51,7 @@ TibiaImplant::TibiaImplant(const TibiaImplant& pImplant)
 	this->pclPoint = pImplant.pclPoint;
 	this->tuberPoint = pImplant.tuberPoint;
 }
-
+*/
 Point TibiaImplant::getExteriorPoint() const
 {
     return exteriorPoint;

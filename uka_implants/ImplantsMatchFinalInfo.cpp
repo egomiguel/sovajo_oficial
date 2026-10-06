@@ -358,7 +358,7 @@ double ImplantsMatchFinalInfo::GetTibiaImplantSlopeAngle() const
 
 const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaRotationAngle(double angle)
 {
-    double myAngle = angle * PI / 180.0;
+	double myAngle = angle * PI / 180.0;
 
 	Point tibiaAxis = knee->getTibiaKneeCenter() - knee->getAnkleCenter();
 	Plane tibiaHelp;
@@ -367,12 +367,12 @@ const itk::Rigid3DTransform<>::Pointer ImplantsMatchFinalInfo::setTibiaRotationA
 	Point boneAP = knee->getTibiaTubercle() - knee->getPclCenterPoint();;
 	boneAP = tibiaHelp.getProjectionVector(boneAP);
 
-    Point axisRotation = tibiaHelp.getNormalVector();
+	Point axisRotation = tibiaHelp.getNormalVector();
 
-    if (knee->getIsRight() == true)
-    {
-        axisRotation = -axisRotation;
-    }
+	if (knee->getIsRight() == true)
+	{
+		axisRotation = -axisRotation;
+	}
 
 	////////////////////////////////////////////////////////// Rotation
 

@@ -1358,10 +1358,11 @@ namespace TEST_PKA
 		//New ImplantToTIbia
 		vtkSmartPointer<vtkTransform> newImplantToTibia;
 		{
+
 			UKA::IMPLANTS::ImplantsMatchFinalInfo matchInfo(&knee, femurThreePlaneImplant.get(),
 				*tibiaImplant, implantToFemurItk.GetPointer(),
 				implantToTibiaItk.GetPointer());
-			matchInfo.setTibiaRotationAngle(30);
+			matchInfo.setTibiaRotationAngle(45);
 			/*matchInfo.setTibiaRotationAngle(-32.57323670499285);
 			matchInfo.setTibiaSlopeAngle(5.922357935803737);
 			matchInfo.setTibiaVarusAngle(-2.6913572848924066);*/

@@ -17,7 +17,7 @@ namespace UKA
 		public:
 			TibiaImplant();
 
-			TibiaImplant(const TibiaImplant& pImplant);
+			//TibiaImplant(const TibiaImplant& pImplant);
 
 			void init(const Point& apLinePclPoint, const Point& apLineTuberPoint, const Point& mostFarPointUp, const Point& exteriorPointDown, const Point& planeSidePoint, const TibiaImplantInfo& pImplantInfo);
 
