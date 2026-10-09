@@ -20,7 +20,7 @@ namespace UKA
 
 			virtual ~FemurImplantThreePlane() {};
 
-			FemurImplantThreePlane(const FemurImplantThreePlane& pImplant);
+			//FemurImplantThreePlane(const FemurImplantThreePlane& pImplant);
 
 			void init(const Plane& pPosterior, const Plane& pCenter, const Plane& pAnterior, const Point& pRodTopPoint, 
 					  const Point& pRodBaseExtremeSide1, const Point& pRodBaseExtremeSide2,

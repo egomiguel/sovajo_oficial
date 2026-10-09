@@ -63,7 +63,7 @@ void FemurImplantOnePlane::init(const Plane& pPosterior, const Point& pRodBasePo
 
 	mRodTopPointProjectedOnBase = mDistal.getProjectionPoint(pRodTopPoint);
 }
-
+/*
 FemurImplantOnePlane::FemurImplantOnePlane(const FemurImplantOnePlane& pImplant)
 {
 	this->mPosterior = pImplant.mPosterior;
@@ -81,7 +81,7 @@ FemurImplantOnePlane::FemurImplantOnePlane(const FemurImplantOnePlane& pImplant)
 	this->mDistal = pImplant.mDistal;
 	this->mRodTopPointProjectedOnBase = pImplant.mRodTopPointProjectedOnBase;
 }
-
+*/
 Plane FemurImplantOnePlane::getPosterior() const
 {
 	Plane tPosterior = mPosterior;

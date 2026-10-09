@@ -30,7 +30,7 @@ void PatellaImplant::init(const Point& basePoint1, const Point& basePoint2, cons
 
     isInit = true;
 }
-
+/*
 PatellaImplant::PatellaImplant(const PatellaImplant& pImplant)
 {
     this->mBasePlane = pImplant.mBasePlane;
@@ -40,7 +40,7 @@ PatellaImplant::PatellaImplant(const PatellaImplant& pImplant)
     this->mBasePoint3 = pImplant.mBasePoint3;
     this->mTopCentralPoint = pImplant.mTopCentralPoint;
 }
-
+*/
 Plane PatellaImplant::getBasePlane() const
 {
     return mBasePlane;

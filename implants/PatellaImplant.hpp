@@ -17,7 +17,7 @@ namespace TKA
 		public:
 			PatellaImplant();
 
-			PatellaImplant(const PatellaImplant& pImplant);
+			//PatellaImplant(const PatellaImplant& pImplant);
 
 			void init(const Point& basePoint1, const Point& basePoint2, const Point& basePoint3, const Point& topCentralPoint);
 

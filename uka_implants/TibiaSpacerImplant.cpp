@@ -31,6 +31,7 @@ void TibiaSpacerImplant::init(const Point& apLinePclPoint, const Point& apLineTu
     isInit = true;
 }
 
+/*
 TibiaSpacerImplant::TibiaSpacerImplant(const TibiaSpacerImplant& pImplant)
 {
     this->spacerPlane = pImplant.spacerPlane;
@@ -41,7 +42,7 @@ TibiaSpacerImplant::TibiaSpacerImplant(const TibiaSpacerImplant& pImplant)
 	this->plateauRefPointDown = pImplant.plateauRefPointDown;
 	this->plateauRefPointUp = pImplant.plateauRefPointUp;
 }
-
+*/
 
 Point TibiaSpacerImplant::getSpacerKneeCenter() const
 {

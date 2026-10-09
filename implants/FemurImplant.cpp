@@ -60,7 +60,7 @@ void FemurImplant::init(const Plane& A, const Plane& B, const Plane& C, const Pl
 
     isInit = true;
 }
-
+/*
 FemurImplant::FemurImplant(const FemurImplant& pImplant)
 {
     this->planeA = pImplant.planeA;
@@ -77,7 +77,7 @@ FemurImplant::FemurImplant(const FemurImplant& pImplant)
     this->mKneeCapPath = pImplant.mKneeCapPath;
     this->mImplantInfo = pImplant.mImplantInfo;
 }
-
+*/
 Point FemurImplant::getMidPlaneInterceptionPoint() const
 {
     Line temp = Line::makeLineWithPoints(P3, P4);

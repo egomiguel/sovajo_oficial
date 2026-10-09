@@ -37,7 +37,7 @@ void FemurImplantThreePlane::init(const Plane& pPosterior, const Plane& pCenter,
 	mDistal.reverseByPoint(mRodTopPoint);
 	mVectorForceLine = mDistal.getNormalVector();
 }
-
+/*
 FemurImplantThreePlane::FemurImplantThreePlane(const FemurImplantThreePlane& pImplant)
 {
 	this->mPosterior = pImplant.mPosterior;
@@ -54,7 +54,7 @@ FemurImplantThreePlane::FemurImplantThreePlane(const FemurImplantThreePlane& pIm
 	this->mCenter = pImplant.mCenter;
 	this->mAnterior = pImplant.mAnterior;
 }
-
+*/
 Plane FemurImplantThreePlane::getPosterior() const
 {
 	Plane tPosterior = mPosterior;

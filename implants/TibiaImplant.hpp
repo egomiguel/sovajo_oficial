@@ -17,7 +17,7 @@ namespace TKA
 		public:
 			TibiaImplant();
 
-			TibiaImplant(const TibiaImplant& pImplant);
+			//TibiaImplant(const TibiaImplant& pImplant);
 
 			void init(const Point& pclPoint1, const Point& pclPoint2, const Point& frontPoint, const Point& exteriorPoint, 
 				const TibiaImplantInfo& pImplantInfo, const std::vector<Point>& pCurvePCLPoints = {});

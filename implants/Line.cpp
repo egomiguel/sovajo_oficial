@@ -16,13 +16,13 @@ Line::Line(const Point& directVector, const Point& pPoint)
 	this->directVector = directVector;
     normaliceDirectVector();
 }
-
+/*
 Line::Line(const Line& pLine)
 {
     this->directVector = pLine.getDirectVector();
     this->mPoint = pLine.getPoint();
 }
-
+*/
 void Line::setDirectVector(const Point& newVector)
 {
     if (newVector.dot(newVector) == 0)

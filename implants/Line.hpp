@@ -13,7 +13,7 @@ namespace TKA
 		public:
 			Line(const Point& directVector, const Point& pPoint);
 
-			Line(const Line& pLine);
+			//Line(const Line& pLine);
 
 			Point getPoint() const;
 

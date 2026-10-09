@@ -17,7 +17,7 @@ namespace TKA
 		public:
 			FemurImplant();
 
-			FemurImplant(const FemurImplant& pImplant);
+			//FemurImplant(const FemurImplant& pImplant);
 
 			void init(const Plane& A, const Plane& B, const Plane& C, const Plane& D, const Plane& E,
 				const Point& P3, const Point& P4, const Point& cortexPoint, const vtkSmartPointer<vtkPolyData> implantModel,

@@ -20,7 +20,7 @@ namespace UKA
 
 			virtual ~FemurImplantTwoPlane() {};
 
-			FemurImplantTwoPlane(const FemurImplantTwoPlane& pImplant);
+			//FemurImplantTwoPlane(const FemurImplantTwoPlane& pImplant);
 
 			void init(const Plane& pPosterior, const Plane& pObliquePosterior, const Point& pRodBasePoint, 
 				      const Point& pRodTopPoint,
